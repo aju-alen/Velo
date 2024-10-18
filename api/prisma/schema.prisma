@@ -1,0 +1,73 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+}
+
+model Agent{
+  id String @id @default(cuid())
+  name String
+  email String @unique
+  password String
+  role Role 
+  mobileCode String
+  mobileCountry String
+  mobileNumber String 
+  firstTimeLogin Boolean @default(true)
+  registerVerificationStatus String @default("PARTIAL")
+  
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+   // Define the one-to-many relationship
+}
+model User{
+  id String @id @default(cuid())
+  name String
+  email String @unique
+  password String
+  role Role 
+  mobileCode String
+  mobileCountry String
+  mobileNumber String 
+  firstTimeLogin Boolean @default(true)
+  registerVerificationStatus String @default("PARTIAL")
+  
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+   // Define the one-to-many relationship
+
+
+}
+
+model Country {
+  id             Int    @id @default(autoincrement())
+  name           String
+  isoCode        String @unique
+  iso3Code       String @unique
+  callingCode    String
+  region         String?
+  subRegion      String?
+  currencyCode   String
+  currencyName   String
+  currencySymbol String
+  flag           String
+}
+
+enum Role{
+  AGENT
+  USER
+  SUPERADMIN
+}
+
