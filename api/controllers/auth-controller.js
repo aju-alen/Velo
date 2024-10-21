@@ -55,7 +55,7 @@ let userDetails;
                     password: hashedPassword,
                     name,
                     role,
-                    mobile,
+                    mobileNumber: mobile,
                     mobileCode: code,
                     mobileCountry: country,
                 }
