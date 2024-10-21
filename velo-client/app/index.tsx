@@ -39,10 +39,19 @@ const RootIndex = () => {
         return
       }
       const userData = JSON.parse(user)
-      if(userData.registerVerificationStatus === 'PARTIAL'){
+      console.log(userData, 'userData------');
+      
+      if(userData.registerVerificationStatus === 'PARTIAL' && userData.role === 'AGENT'){
+        console.log('111');
+        
+        router.replace('/(auth)/verifyAgent')
+      }
+      else if(userData.registerVerificationStatus === 'PARTIAL' && userData.role === 'USER'){
+        console.log(`222`);
+        
         router.replace('/(auth)/finalRegisterForm')
       }
-
+     
 
       
     }
@@ -55,7 +64,13 @@ const RootIndex = () => {
   return (
     
       <ThemedView  style={styles.container}   >
+        <ThemedView style={styles.logoContainer}>
 <ThemedText type='logoText' style={styles.logoText}>Velo</ThemedText>
+<Image
+            source={require('@/assets/images/logo.png')}
+            style={styles.logoImgContainer}
+          />
+</ThemedView>
         <ThemedView>
           <Image
             source={require('@/assets/images/heroImage.jpg')}
@@ -96,6 +111,20 @@ const styles = StyleSheet.create({
   },
   logoText: {
     marginTop: verticalScale(60),
+  },
+  logoContainer:{
+    display:"flex",
+    flexDirection:'row-reverse',
+    justifyContent:"center",
+    alignItems:"center",
+    paddingBottom:verticalScale(20)
+    
+  },
+  logoImgContainer:{
+    width:horizontalScale(30),
+    height:verticalScale(30),
+    marginTop: verticalScale(60),
+
   },
   heroImgContainer: {
     width: horizontalScale(300),

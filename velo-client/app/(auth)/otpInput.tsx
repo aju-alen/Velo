@@ -73,7 +73,13 @@ const [userDetails, setUserDetails] = useState({
         await SecureStore.deleteItemAsync('tempRegister');
         await SecureStore.deleteItemAsync('tempMobile');
         await SecureStore.setItemAsync('registerDetail', JSON.stringify(saveUserToDB.data.userDetails))
-        router.replace('/verifyAgent')
+
+        if(saveUserToDB.data.userDetails.role === 'AGENT'){
+          router.replace('/(auth)/verifyAgent')
+        }
+        else if(saveUserToDB.data.userDetails.role === 'USER'){
+          router.replace('/(auth)/finalRegisterForm')
+        }
 
        }
         catch(e){

@@ -85,6 +85,7 @@ const VerifyAgent = () => {
   };
 
   const pickDocument = async () => {
+    const data = await SecureStore.deleteItemAsync('registerDetail');
     let result = await DocumentPicker.getDocumentAsync({
         type: "application/pdf", 
         copyToCacheDirectory: false,
