@@ -15,7 +15,7 @@ const chooseRole = () => {
 
   const handleContinueRegister = () => {
     // role === 'user' ? router.push('/userRegister') : router.push('/agentRegister');
-    router.push({ pathname: "/register", params: { role } });
+    router.replace({ pathname: "/register", params: { role } });
   }
 
     const handlePress = (selectedRole) => {

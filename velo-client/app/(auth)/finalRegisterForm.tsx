@@ -6,6 +6,8 @@ import { verticalScale, horizontalScale, moderateScale } from '@/constants/metri
 import CustomButton from '@/components/CustomButton';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
+import { Chip } from 'react-native-paper';
+
 
 
 const FinalRegisterForm = () => {
@@ -27,6 +29,8 @@ const FinalRegisterForm = () => {
     // } else {
     //   alert('Passwords do not match')
     // }
+
+    const data = await SecureStore.deleteItemAsync('registerDetail')
   }
 
 
@@ -106,10 +110,14 @@ const FinalRegisterForm = () => {
             <ThemedView style={{ marginBottom: verticalScale(6) }}>
              
               <ThemedView style={styles.buttonContainer}>
-              <CustomButton disableButton={
-                !name || !email || !password || !reEnterPassword
-              } buttonText='Register'  handlePress={handleFinalRegisterForm} />
+              <CustomButton  buttonText='Register'  handlePress={handleFinalRegisterForm} />
               </ThemedView>
+              <Chip mode='outlined' compact onPress={() => console.log('Pressed')}>Example Chip</Chip>
+              <Chip mode='outlined' compact onPress={() => console.log('Pressed')}>Example Chip</Chip>
+              <Chip mode='outlined' compact onPress={() => console.log('Pressed')} style={{
+                borderRadius:100,
+                width:horizontalScale(200)
+              }}>Example Chip</Chip>
             </ThemedView>
 
           </ScrollView>

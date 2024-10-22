@@ -25,7 +25,7 @@ const Register = () => {
         password,
         role
       }))
-      router.push('/mobileInput')
+      router.replace('/mobileInput')
     } else {
       alert('Passwords do not match')
     }

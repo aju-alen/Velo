@@ -20,6 +20,7 @@ const VerifyAgent = () => {
 
   useEffect(() => {
     const getAccountDetail = async () => {
+      let data = await SecureStore.deleteItemAsync('registerDetail');
       let result = await SecureStore.getItemAsync('registerDetail');
       console.log(result, 'result--');
       setUserId(JSON.parse(result).id);
@@ -159,7 +160,7 @@ const VerifyAgent = () => {
      {docUrl && <>
      
       <Animated.View style={[{ opacity: fadeAnim  },styles.submitButtonAnimateContainer]}>
-     <TouchableOpacity onPress={()=>router.push('/finalRegisterForm')} style={styles.submitButtonContainer}>
+     <TouchableOpacity onPress={()=>router.replace('/finalRegisterForm')} style={styles.submitButtonContainer}>
         <Entypo name="chevron-right" size={moderateScale(24)} color="black" />
       </TouchableOpacity>
       </Animated.View>

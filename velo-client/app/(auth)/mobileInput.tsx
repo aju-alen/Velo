@@ -1,4 +1,4 @@
-import { StyleSheet, Text, TextInput, TouchableOpacity, View, Modal, Image, TouchableWithoutFeedback, FlatList,Keyboard } from 'react-native'
+import { StyleSheet, Text, TextInput, TouchableOpacity, View, Modal, Image, TouchableWithoutFeedback, FlatList, Keyboard } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { ThemedView } from '@/components/ThemedView'
 import { ThemedText } from '@/components/ThemedText'
@@ -24,14 +24,20 @@ const mobileInput = () => {
   const [mobile, setMobile] = useState('')
   const [selectedArea, setSelectedArea] = useState<selectedArea | null>(null)
   const [modalVisible, setModalVisible] = useState(false)
+  const [finalModalVisible, setFinalModalVisible] = useState(false)
+  const [tempRegister, setTempRegister] = useState({})
 
   useEffect(() => {
     const fetchTempRegister = async () => {
       let result = await SecureStore.getItemAsync('tempRegister');
-      console.log(result, 'result--');
+      setTempRegister(JSON.parse(result))
     }
     fetchTempRegister()
   }, [])
+
+  const handleConfirm = async () => {
+    setFinalModalVisible(true)
+  }
 
   const handleSubmit = async () => {
 
@@ -40,7 +46,7 @@ const mobileInput = () => {
       console.log(checkIfAlreadyRegistered.data.accountExists, 'checkIfAlreadyRegistered.data--');
       if (checkIfAlreadyRegistered.data.accountExists) {
         await SecureStore.setItemAsync('registerDetail', JSON.stringify(checkIfAlreadyRegistered.data.accountExists))
-        router.push('/verifyAgent')
+        router.replace('/verifyAgent')
       }
       else {
 
@@ -69,11 +75,16 @@ const mobileInput = () => {
         }))
 
       }
-
+      setFinalModalVisible(false)
     }
     catch (e) {
       console.log(e);
     }
+  }
+
+  const handleGoToChooseRole = () => {
+    setFinalModalVisible(false)
+    router.push('/(auth)/chooseRole')
   }
 
   useEffect(() => {
@@ -131,8 +142,10 @@ const mobileInput = () => {
       )
     }
 
+
+
     return (
-      
+
       <Modal
         animationType="slide"
         transparent={true}
@@ -169,52 +182,98 @@ const mobileInput = () => {
     )
   }
 
+  const confirmDetails = (tempRegister) => {
+    console.log(tempRegister, 'tempRegister--');
 
+    return (
+      <Modal
+        animationType="slide"
+        transparent={false}
+        visible={finalModalVisible}
+      >
+        <ThemedView style={styles.container}>
+          <ThemedText type='subtitle'>
+            Confirm Details
+          </ThemedText>
+          <ThemedText type='default'>
+            Please confirm your details
+          </ThemedText>
+          <ThemedText type='subtitle'>
+            {selectedArea?.callingCode} {mobile}
+          </ThemedText>
+          <ThemedText type='subtitle'>
+            {tempRegister?.name}
+          </ThemedText>
+          <ThemedText type='subtitle'>
+            {tempRegister?.email}
+          </ThemedText>
+          <ThemedText type='subtitle'>
+            {tempRegister?.role}
+          </ThemedText>
+
+          <CustomButton
+            buttonText='Confirm'
+            handlePress={handleSubmit} />
+
+          <ThemedText type='default' style={{
+            marginTop: verticalScale(20)
+          }}> Made a mistake? <ThemedText type='link' onPress={handleGoToChooseRole}>
+            Edit</ThemedText>
+          </ThemedText>
+        </ThemedView>
+
+      </Modal>
+    )
+
+
+  }
 
 
 
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-    <ThemedView style={styles.container}>
-      <ThemedText type='subtitle'>
-        Enter Your Mobile Number
-      </ThemedText>
-      <ThemedText type='default'>
-        We will send you a verification code
-      </ThemedText>
+      <ThemedView style={styles.container}>
+        <ThemedText type='subtitle'>
+          Enter Your Mobile Number
+        </ThemedText>
+        <ThemedText type='default'>
+          We will send you a verification code
+        </ThemedText>
 
-      <ThemedView style={styles.inputContainer}>
-        <TouchableOpacity style={styles.countryCodeTextButton} onPress={() => setModalVisible(true)}>
-          <ThemedView style={{ justifyContent: "center", marginLeft: 5 }}>
-            <Image
-              source={{ uri: selectedArea?.flag }}
-              style={{
-                width: horizontalScale(30),
-                height: verticalScale(30),
-              }}
-            />
-          </ThemedView>
+        <ThemedView style={styles.inputContainer}>
+          <TouchableOpacity style={styles.countryCodeTextButton} onPress={() => setModalVisible(true)}>
+            <ThemedView style={{ justifyContent: "center", marginLeft: 5 }}>
+              <Image
+                source={{ uri: selectedArea?.flag }}
+                style={{
+                  width: horizontalScale(30),
+                  height: verticalScale(30),
+                }}
+              />
+            </ThemedView>
 
-          <View style={{ justifyContent: "center", marginLeft: horizontalScale(5) }}>
-            <Text style={{ color: colorScheme === 'dark' ? '#fff' : '#000', fontSize: moderateScale(12) }}>{selectedArea?.callingCode}</Text>
-          </View>
-        </TouchableOpacity>
-        <TextInput
-          style={styles.input}
-          value={mobile}
-          onChangeText={setMobile}
-          placeholder='Mobile Number'
-          placeholderTextColor='grey'
-          keyboardType='numeric'
+            <View style={{ justifyContent: "center", marginLeft: horizontalScale(5) }}>
+              <Text style={{ color: colorScheme === 'dark' ? '#fff' : '#000', fontSize: moderateScale(12) }}>{selectedArea?.callingCode}</Text>
+            </View>
+          </TouchableOpacity>
+          <TextInput
+            style={styles.input}
+            value={mobile}
+            onChangeText={setMobile}
+            placeholder='Mobile Number'
+            placeholderTextColor='grey'
+            keyboardType='numeric'
 
-        ></TextInput>
+          ></TextInput>
+        </ThemedView>
+        <CustomButton
+          buttonText='Continue'
+          handlePress={handleConfirm} />
+
+        {renderAreasCodesModal()}
+        {confirmDetails(tempRegister)}
       </ThemedView>
-      <CustomButton
-        buttonText='Continue'
-        handlePress={handleSubmit} />
-      {renderAreasCodesModal()}
-    </ThemedView>
     </TouchableWithoutFeedback>
   )
 }

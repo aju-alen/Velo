@@ -93,7 +93,7 @@ const RootIndex = () => {
           />
           </Animated.View>
           <ThemedText type='default'>
-            Already have an account? <ThemedText type='link' style={{ color: '#FFAC1C' }} onPress={() => router.push('/(auth)/login')}>Sign In</ThemedText>
+            Already have an account? <ThemedText type='link' style={{ color: '#FFAC1C' }} onPress={() => router.replace('/(auth)/login')}>Sign In</ThemedText>
           </ThemedText>
         </ThemedView>
       </ThemedView>
