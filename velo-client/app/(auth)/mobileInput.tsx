@@ -44,9 +44,13 @@ const mobileInput = () => {
     try {
       const checkIfAlreadyRegistered = await axios.get(`${ipURL}/api/auth/check-registered-account/${selectedArea?.callingCode}/${mobile}`)
       console.log(checkIfAlreadyRegistered.data.accountExists, 'checkIfAlreadyRegistered.data--');
-      if (checkIfAlreadyRegistered.data.accountExists) {
+      if (checkIfAlreadyRegistered.data.accountExists && checkIfAlreadyRegistered.data.accountExists.role === "AGENT" ) {
         await SecureStore.setItemAsync('registerDetail', JSON.stringify(checkIfAlreadyRegistered.data.accountExists))
         router.replace('/verifyAgent')
+      }
+     else if (checkIfAlreadyRegistered.data.accountExists && checkIfAlreadyRegistered.data.accountExists.role === "USER" ) {
+        await SecureStore.setItemAsync('registerDetail', JSON.stringify(checkIfAlreadyRegistered.data.accountExists))
+        router.replace('/(auth)/finalRegisterForm')
       }
       else {
 
