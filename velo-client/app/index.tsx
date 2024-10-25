@@ -42,15 +42,18 @@ const RootIndex = () => {
       console.log(userData, 'userData------');
       
       if(userData.registerVerificationStatus === 'PARTIAL' && userData.role === 'AGENT'){
-        console.log('111');
-        
-        router.replace('/(auth)/verifyAgent')
+        router.push('/(auth)/finalRegisterForm')
       }
       else if(userData.registerVerificationStatus === 'PARTIAL' && userData.role === 'USER'){
-        console.log(`222`);
-        
         router.replace('/(auth)/finalRegisterForm')
       }
+      else if(userData.registerVerificationStatus === 'APPOINTMENT_BOOKED' && userData.role === 'AGENT'){
+        router.replace('/(tabs)/home')
+      }
+      else if(userData.registerVerificationStatus === 'LOGGED_IN' && userData.role === 'USER'){
+        router.replace('/(tabs)/home')
+      }
+      
      
 
       

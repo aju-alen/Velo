@@ -72,7 +72,9 @@ const [userDetails, setUserDetails] = useState({
        try{
         await SecureStore.deleteItemAsync('tempRegister');
         await SecureStore.deleteItemAsync('tempMobile');
-        await SecureStore.setItemAsync('registerDetail', JSON.stringify(saveUserToDB.data.userDetails))
+        const finalSavedData = await SecureStore.setItemAsync('registerDetail', JSON.stringify(saveUserToDB.data.userDetails))
+        console.log(finalSavedData, 'finalSavedData--');
+        
 
         if(saveUserToDB.data.userDetails.role === 'AGENT'){
           router.replace('/(auth)/verifyAgent')

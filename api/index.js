@@ -5,6 +5,8 @@ import { errorHandler } from './middlewares/errorHandler.js';
 import authRoutes from './routes/auth-route.js';
 import s3Routes from './routes/s3-route.js';
 import superAdminPrivilageRoutes from './routes/superAdmin-route.js';
+import countryRoutes from './routes/country-route.js';
+import addressRoutes from './routes/address-route.js';
 
 const app = express();
 app.use(cors({
@@ -22,6 +24,8 @@ app.use('/api/test-routes',superAdminPrivilageRoutes);
 
 app.use('/api/auth',authRoutes);
 app.use('/api/s3',s3Routes);
+app.use('/api/country',countryRoutes);
+app.use('/api/address',addressRoutes);
 
 app.use(errorHandler);
 

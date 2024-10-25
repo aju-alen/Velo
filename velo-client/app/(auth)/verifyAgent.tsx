@@ -20,7 +20,6 @@ const VerifyAgent = () => {
 
   useEffect(() => {
     const getAccountDetail = async () => {
-      let data = await SecureStore.deleteItemAsync('registerDetail');
       let result = await SecureStore.getItemAsync('registerDetail');
       console.log(result, 'result--');
       setUserId(JSON.parse(result).id);
@@ -52,6 +51,7 @@ const VerifyAgent = () => {
   }, [docUrl]); // Run effect when docUrl changes
 
   const postDocuments = async (document) => {
+    
     const url = `${ipURL}/api/s3/upload-to-aws`;
     const formData = new FormData();
 
@@ -79,6 +79,8 @@ const VerifyAgent = () => {
     try {
       const response = await fetch(url, options);
       const responseData = await response.json();
+      console.log(responseData, 'responseData--');
+      
       return responseData.data; // Return the data received from the server
     } catch (error) {
       console.error('Error:', error);
@@ -86,6 +88,7 @@ const VerifyAgent = () => {
   };
 
   const pickDocument = async () => {
+
     let result = await DocumentPicker.getDocumentAsync({
         type: "application/pdf", 
         copyToCacheDirectory: false,
@@ -118,6 +121,8 @@ const VerifyAgent = () => {
         setDocUrl(null);
     }
 };
+
+console.log(docUrl, 'docUrl--');
 
 
 

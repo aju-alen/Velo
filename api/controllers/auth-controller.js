@@ -2,8 +2,6 @@ import crypto from "crypto";
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import nodemailer from "nodemailer";
-import jwt from "jsonwebtoken";
-import { backendUrl } from "../utils/backendUrl.js";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -105,5 +103,72 @@ export const verifyAccountExist = async (req, res) => {
     } catch (error) {
         console.log(error);
         next(error);
+    }
+}
+
+export const bookAgentAppointment = async (req, res,next) => {
+    console.log(req.body);
+    const {appointmentDate,agentId} = req.body;
+    
+    try{
+        const agentInfo = await prisma.agent.update({
+            where: {
+                id: agentId
+            },
+            data: {
+                appointmentDate,
+                registerVerificationStatus: "APPOINTMENT_BOOKED"
+            }
+        })
+        
+        await prisma.$disconnect();
+        sendAppoitmentEmail(agentInfo.name, agentInfo.email,appointmentDate,agentId);
+        res.status(200).json({message: "Appointment booked successfully",agentInfo});
+    }
+    catch(error){
+        console.log(error);
+        next(error);
+    }
+}
+
+const sendAppoitmentEmail = async (name, email,date,agentId) => {
+
+    const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: process.env.EMAIL,
+            pass: process.env.GMAIL_PASSWORD
+        }
+    })
+    const mailOptions = {
+        from: process.env.EMAIL,
+        to: email,
+        subject: 'Your appointment has been booked',
+        text: `
+        Hi ${name},
+
+        Your appointment has been booked successfully for ${date}.
+        `}
+    const mailOptionsOne = {
+        from: process.env.EMAIL,
+        to: process.env.EMAIL,
+        subject: 'Agent appointment booked',
+        text: `
+        Hello,
+
+        An appointment has been booked for 
+        Name - ${name} 
+        Appointment Date - ${date}
+        AgentId - ${agentId}
+        `}
+    
+
+    //send the mail
+    try {
+        const sendEmailToAdmin = await transporter.sendMail(mailOptions);
+        const sendEmailToAgent = await transporter.sendMail(mailOptionsOne);
+    }
+    catch (err) {
+        console.log("Err sending verification email", err);
     }
 }

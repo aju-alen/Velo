@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { StyleSheet, TextInput, ScrollView, Platform, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { ThemedView } from '@/components/ThemedView'
 import { ThemedText } from '@/components/ThemedText'
@@ -7,30 +7,104 @@ import CustomButton from '@/components/CustomButton';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import { Chip } from 'react-native-paper';
+import { Picker } from '@react-native-picker/picker';
+import axios from 'axios';
+import { ipURL } from '@/constants/backendUrl';
 
 
 
 const FinalRegisterForm = () => {
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [reEnterPassword, setreEnterPassword] = useState('')
 
-  
-  
-  const handleFinalRegisterForm =async () => {
-    // if (password === reEnterPassword) {
-    //   await SecureStore.setItemAsync('tempRegister', JSON.stringify({
-    //     name,
-    //     email,
-    //     password,
-    //   }))
-    //   router.push('/mobileInput')
-    // } else {
-    //   alert('Passwords do not match')
-    // }
+  const [countryList, setCountryList] = useState([])
+  const [accountId, setAccountId] = useState('')
+  const [accountRole, setAccountRole] = useState('')
 
-    const data = await SecureStore.deleteItemAsync('registerDetail')
+  const [addressOne, setAddressOne] = useState('')
+  const [addressTwo, setAddressTwo] = useState('')
+  const [state, setState] = useState('')
+  const [city, setCity] = useState('')
+  const [zipCode, setZipCode] = useState('')
+  const [country, setCountry] = useState('')
+
+  const [selectedCountries, setSelectedCountries] = useState([]);
+
+  const handleChipPress = (countryName, countryId) => {
+
+    setSelectedCountries((prev) => {
+      if (prev.includes(countryId)) {
+        // If already selected, remove it
+        return prev.filter((item) => item !== countryId);
+      } else {
+        // If not selected, add it
+        return [...prev, countryId];
+      }
+    });
+  };
+
+  console.log(selectedCountries, 'selectedCountries--');
+
+
+
+
+
+
+  useEffect(() => {
+    const getCountryFromDB = async () => {
+      const getAccInfo = await SecureStore.getItemAsync('registerDetail')
+      setAccountId(JSON.parse(getAccInfo).id);
+      setAccountRole(JSON.parse(getAccInfo).role);
+
+      const response = await axios.get(`${ipURL}/api/country/get-all-countries`)
+      setCountryList(response.data)
+    }
+    getCountryFromDB()
+  }, [])
+
+
+
+  const handleFinalRegisterForm = async () => {
+
+    try {
+      if (accountRole === "USER") {
+        try {
+          const formData = {
+            userId: accountId,
+            addressOne,
+            addressTwo,
+            state,
+            city,
+            zipCode,
+            country
+          }
+          console.log(formData, 'formData--');
+          const response = await axios.post(`${ipURL}/api/address/create-user-address`, formData)
+          router.replace('/(tabs)/home')
+        }
+        catch (e) {
+          console.log(e, 'error--');
+        }
+
+      }
+      else if (accountRole === "AGENT") {
+        try {
+          const formData = {
+            userId: accountId,
+            selectedCountries
+          }
+          const response = await axios.post(`${ipURL}/api/address/create-agent-address`, formData)
+          router.push({pathname:'/(auth)/setAppointment',params:{accountId}})
+        }
+        catch (e) {
+          console.log(e, 'error--');
+        }
+
+      }
+    }
+    catch (e) {
+      console.log(e, 'error--');
+    }
+
+
   }
 
 
@@ -51,73 +125,138 @@ const FinalRegisterForm = () => {
             <ThemedText type='logoText' style={styles.logoText}>Velo</ThemedText>
             <ThemedText type='subtitle' style={styles.subheading}>Final Steps</ThemedText>
 
-            {/* Name Input */}
-            <ThemedView style={{ marginBottom: verticalScale(6) }}>
-              <ThemedText type='default' style={styles.textInputHeading}>Address 1</ThemedText>
-              <ThemedView style={styles.textInputBox}>
-                <TextInput
-                  placeholder="Enter Your Name"
-                  placeholderTextColor="gray"
-                  value={name}
-                  onChangeText={setName}
-                  keyboardType='default'
-                  autoComplete='name'
-                  keyboardAppearance='dark'
-                  returnKeyType='next'
-                  style={styles.textInputText}
-                />
+            {/* USER FINAL STEPS */}
+            {accountRole === 'USER' && <>
+              <ThemedView style={{ marginBottom: verticalScale(6) }}>
+                <ThemedText type='default' style={styles.textInputHeading}>Address 1</ThemedText>
+                <ThemedView style={styles.textInputBox}>
+                  <TextInput
+                    placeholder="Enter Your Name"
+                    placeholderTextColor="gray"
+                    value={addressOne}
+                    onChangeText={setAddressOne}
+                    keyboardType='default'
+                    autoComplete='name'
+                    keyboardAppearance='dark'
+                    returnKeyType='next'
+                    style={styles.textInputText}
+                  />
+                </ThemedView>
               </ThemedView>
-            </ThemedView>
 
-           
-
-            {/* Email Input */}
-            <ThemedView style={{ marginBottom: verticalScale(6) }}>
-              <ThemedText type='default' style={styles.textInputHeading}>Address 2</ThemedText>
-              <ThemedView style={styles.textInputBox}>
-                <TextInput
-                  placeholder="Enter Your Email"
-                  placeholderTextColor="gray"
-                  value={email}
-                  autoCapitalize='none'
-                  onChangeText={setEmail}
-                  keyboardType='email-address'
-                  autoComplete='email'
-                  keyboardAppearance='dark'
-                  returnKeyType='next'
-                  style={styles.textInputText}
-                />
+              <ThemedView style={{ marginBottom: verticalScale(6) }}>
+                <ThemedText type='default' style={styles.textInputHeading}>Address 2</ThemedText>
+                <ThemedView style={styles.textInputBox}>
+                  <TextInput
+                    placeholder="Enter Your Email"
+                    placeholderTextColor="gray"
+                    value={addressTwo}
+                    autoCapitalize='none'
+                    onChangeText={setAddressTwo}
+                    keyboardType='email-address'
+                    autoComplete='email'
+                    keyboardAppearance='dark'
+                    returnKeyType='next'
+                    style={styles.textInputText}
+                  />
+                </ThemedView>
               </ThemedView>
-            </ThemedView>
 
-            {/* Password Input */}
-            <ThemedView style={{ marginBottom: verticalScale(6) }}>
-              <ThemedText type='default' style={styles.textInputHeading}>Address 3</ThemedText>
-              <ThemedView style={styles.textInputBox}>
-                <TextInput
-                  placeholder="Enter Your Password"
-                  placeholderTextColor="gray"
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry
-                  keyboardAppearance='dark'
-                  returnKeyType='next'
-                  style={styles.textInputText}
-                />
+              <ThemedView style={{ marginBottom: verticalScale(6) }}>
+                <ThemedText type='default' style={styles.textInputHeading}>State</ThemedText>
+                <ThemedView style={styles.textInputBox}>
+                  <TextInput
+                    placeholder="Enter Your Email"
+                    placeholderTextColor="gray"
+                    value={state}
+                    autoCapitalize='none'
+                    onChangeText={setState}
+                    keyboardType='email-address'
+                    autoComplete='email'
+                    keyboardAppearance='dark'
+                    returnKeyType='next'
+                    style={styles.textInputText}
+                  />
+                </ThemedView>
               </ThemedView>
-            </ThemedView>
+
+              <ThemedView style={{ marginBottom: verticalScale(6) }}>
+                <ThemedText type='default' style={styles.textInputHeading}>City</ThemedText>
+                <ThemedView style={styles.textInputBox}>
+                  <TextInput
+                    placeholder="Enter Your Email"
+                    placeholderTextColor="gray"
+                    value={city}
+                    autoCapitalize='none'
+                    onChangeText={setCity}
+                    keyboardType='email-address'
+                    autoComplete='email'
+                    keyboardAppearance='dark'
+                    returnKeyType='next'
+                    style={styles.textInputText}
+                  />
+                </ThemedView>
+              </ThemedView>
+
+              <ThemedView style={{ marginBottom: verticalScale(6) }}>
+                <ThemedText type='default' style={styles.textInputHeading}>Pin Code</ThemedText>
+                <ThemedView style={styles.textInputBox}>
+                  <TextInput
+                    placeholder="Enter Your Email"
+                    placeholderTextColor="gray"
+                    value={zipCode}
+                    autoCapitalize='none'
+                    onChangeText={setZipCode}
+                    keyboardType='email-address'
+                    autoComplete='email'
+                    keyboardAppearance='dark'
+                    returnKeyType='next'
+                    style={styles.textInputText}
+                  />
+                </ThemedView>
+              </ThemedView>
+
+              {/* Password Input */}
+              <ThemedView style={styles.chooseCountry}>
+                <ThemedText type='default' style={styles.textInputHeading}>Country</ThemedText>
+                <Picker
+                  selectedValue={country}
+                  onValueChange={(itemValue, itemIndex) => {
+                    console.log(itemValue, '--itemValue');
+
+                    setCountry(itemValue)
+                  }
+                  }>
+                  <Picker.Item color='white' label="--Select--" />
+                  {
+                    countryList.map((item, index) => {
+                      return (
+                        <Picker.Item color="white" key={index} label={item.name} value={item.id} />
+                      )
+                    })}
+                </Picker>
+              </ThemedView>
+            </>}
+
+            {/* AGENT FINAL STEPS */}
+            {accountRole === 'AGENT' && <>
+              <ThemedView style={{ marginBottom: verticalScale(6) }}>
+                <ThemedText type='default' style={styles.textInputHeading}>Countries You Operate</ThemedText>
+                {countryList.map((item, index) => (
+                  <ThemedView key={index} style={styles.chipContainer}>
+                    <Chip icon={selectedCountries.includes(item.id) ? "plus" : "minus"} style={{ backgroundColor: selectedCountries.includes(item.id) ? '#4CAF50' : 'red' }} onPress={() => handleChipPress(item.name, item.id)} key={item.id} compact>{item.name}</Chip>
+                  </ThemedView>
+                ))}
+              </ThemedView>
+            </>}
+
 
             <ThemedView style={{ marginBottom: verticalScale(6) }}>
-             
+
               <ThemedView style={styles.buttonContainer}>
-              <CustomButton  buttonText='Register'  handlePress={handleFinalRegisterForm} />
+                <CustomButton buttonText='Register' handlePress={handleFinalRegisterForm} />
               </ThemedView>
-              <Chip mode='outlined' compact onPress={() => console.log('Pressed')}>Example Chip</Chip>
-              <Chip mode='outlined' compact onPress={() => console.log('Pressed')}>Example Chip</Chip>
-              <Chip mode='outlined' compact onPress={() => console.log('Pressed')} style={{
-                borderRadius:100,
-                width:horizontalScale(200)
-              }}>Example Chip</Chip>
+
             </ThemedView>
 
           </ScrollView>
@@ -152,13 +291,24 @@ const styles = StyleSheet.create({
     marginBottom: verticalScale(12),
     height: verticalScale(40),
   },
+
+  chooseCountry: {
+    borderColor: 'gray',
+    borderRadius: moderateScale(5),
+  },
+
   textInputText: {
     fontSize: moderateScale(14),
     color: 'gray',
   },
-  buttonContainer:{
-    justifyContent:'center',
-    alignItems:'center',
+  buttonContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  chipContainer: {
+    margin: moderateScale(4),
+    flexDirection: 'row',
+    flexWrap: 'wrap',
   }
-  
+
 })
