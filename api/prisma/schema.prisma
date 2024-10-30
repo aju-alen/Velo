@@ -52,6 +52,8 @@ model Agent {
 
   // Define the many-to-many relationship via the junction table
   agentCountries            AgentCountry[]
+  agentCategories           AccountCtegory[]
+  listings                  Listing[]
 }
 
 model Country {
@@ -107,6 +109,48 @@ model AgentCountry {
 
   @@unique([agentId, countryId])           // Ensures each agent-country pair is unique
 }
+
+model Category{
+  id String @id @default(cuid())
+  name String
+  categoryImgUrl String
+  description String
+  
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())  
+
+  // Define the one-to-many relationship via the junction table
+   listings      Listing[]       
+  // Define the many-to-many relationship via the junction table
+  agentCategories AccountCtegory[]
+}
+model Listing {
+  id            String           @id @default(cuid())
+  title         String
+  description   String
+  price         Float
+  categoryId    String
+  agentId       String
+  updatedAt     DateTime        @updatedAt
+  createdAt     DateTime        @default(now())
+
+  // Define the relationship with Category
+  category      Category         @relation(fields: [categoryId], references: [id])
+  agent         Agent            @relation(fields: [agentId], references: [id])
+}
+
+model AccountCtegory{
+  id String @id @default(cuid())
+  agentId   String
+  categoryId String
+  agent     Agent    @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  category   Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  // Add extra fields for the relationship
+  assignedAt DateTime @default(now())      // Example: date when agent was assigned to country
+  @@unique([agentId, categoryId]) 
+  }
+  
 
 enum Role{
   AGENT

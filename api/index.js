@@ -7,6 +7,8 @@ import s3Routes from './routes/s3-route.js';
 import superAdminPrivilageRoutes from './routes/superAdmin-route.js';
 import countryRoutes from './routes/country-route.js';
 import addressRoutes from './routes/address-route.js';
+import categoryRoutes from './routes/category-route.js';
+import listingRoutes from './routes/listing-route.js';
 
 const app = express();
 app.use(cors({
@@ -26,6 +28,8 @@ app.use('/api/auth',authRoutes);
 app.use('/api/s3',s3Routes);
 app.use('/api/country',countryRoutes);
 app.use('/api/address',addressRoutes);
+app.use('/api/category',categoryRoutes);
+app.use('/api/listing',listingRoutes);
 
 app.use(errorHandler);
 

@@ -9,7 +9,8 @@ export default function MarketLayout() {
 
     return (
         <Stack>
-            <Stack.Screen name='marketMainPage' options={{ headerShown: false }} />
+            <Stack.Screen name='marketHome' options={{ headerShown: false }} />
+            <Stack.Screen name='[singleListing]' options={{ headerShown: false }} />
         </Stack>
     );
 }

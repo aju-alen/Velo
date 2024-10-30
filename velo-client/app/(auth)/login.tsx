@@ -5,12 +5,54 @@ import { ThemedText } from '@/components/ThemedText'
 import { verticalScale, horizontalScale, moderateScale } from '@/constants/metrics'
 import CustomButton from '@/components/CustomButton';
 import { router } from 'expo-router';
+import axios from 'axios';
+import { ipURL } from '@/constants/backendUrl';
+import * as SecureStore from 'expo-secure-store';
 
 
 const Login = () => {
+  console.log('This is Login Page');
+  
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   // const [mobile, setMobile] = useState('')
+
+  const handleLogin = async() => {
+    try{
+      const formData = {
+        email: email,
+        password: password
+      }
+      const checkIfAlreadyRegistered = await axios.post(`${ipURL}/api/auth/login`,formData)
+      console.log( checkIfAlreadyRegistered.data,'checkIfAlreadyRegistered.data--');
+      
+      if (checkIfAlreadyRegistered.data.accountExists.registerVerificationStatus === "PARTIAL" && checkIfAlreadyRegistered.data.accountExists.role === "AGENT"  ) {
+        await SecureStore.setItemAsync('registerDetail', JSON.stringify(checkIfAlreadyRegistered.data.accountExists))
+        router.push('/verifyAgent')
+      }
+      else if(checkIfAlreadyRegistered.data.accountExists.registerVerificationStatus === "APPOINTMENT_BOOKED" && checkIfAlreadyRegistered.data.accountExists.role === "AGENT" ){
+        await SecureStore.setItemAsync('registerDetail', JSON.stringify(checkIfAlreadyRegistered.data.accountExists))
+        router.push('/(tabs)/home')
+      }
+      else if(checkIfAlreadyRegistered.data.accountExists.registerVerificationStatus === "LOGGED_IN" && checkIfAlreadyRegistered.data.accountExists.role === "AGENT" ){
+        await SecureStore.setItemAsync('registerDetail', JSON.stringify(checkIfAlreadyRegistered.data.accountExists))
+        router.push('/(tabs)/home')
+      }
+
+     else if (checkIfAlreadyRegistered.data.accountExists.registerVerificationStatus === "PARTIAL" && checkIfAlreadyRegistered.data.accountExists.role === "USER" ) {
+        await SecureStore.setItemAsync('registerDetail', JSON.stringify(checkIfAlreadyRegistered.data.accountExists))
+        router.push('/(auth)/finalRegisterForm')
+      }
+      else if (checkIfAlreadyRegistered.data.accountExists.registerVerificationStatus === "LOGGED_IN" && checkIfAlreadyRegistered.data.accountExists.role === "USER" ) {
+        await SecureStore.setItemAsync('registerDetail', JSON.stringify(checkIfAlreadyRegistered.data.accountExists))
+        router.push('/(tabs)/home')
+      }
+    }
+    catch(err){
+      console.log(err, 'error--');
+    }
+  }
+
 
 
 
@@ -35,17 +77,18 @@ const Login = () => {
               <ThemedView style={{ marginBottom: verticalScale(6) }}>
                 <ThemedText type='default' style={styles.textInputHeading}>Email</ThemedText>
                 <ThemedView style={styles.textInputBox}>
-                  <TextInput
-                    placeholder="Enter Your Email"
-                    placeholderTextColor="gray"
-                    value={email}
-                    onChangeText={setEmail}
-                    keyboardType='email-address'
-                    autoComplete='email'
-                    keyboardAppearance='dark'
-                    returnKeyType='next'
-                    style={styles.textInputText}
-                  />
+                <TextInput
+                  placeholder="Enter Your Email"
+                  placeholderTextColor="gray"
+                  value={email}
+                  autoCapitalize='none'
+                  onChangeText={setEmail}
+                  keyboardType='email-address'
+                  autoComplete='email'
+                  keyboardAppearance='dark'
+                  returnKeyType='next'
+                  style={styles.textInputText}
+                />
                 </ThemedView>
               </ThemedView>
 
@@ -66,7 +109,7 @@ const Login = () => {
                 </ThemedView>
               </ThemedView>
               <ThemedView style={styles.submitButtonContainer}>
-              <CustomButton buttonText='Login' buttonWidth={300} handlePress={() => router.push('/(auth)/register')}   />
+              <CustomButton buttonText='Login' buttonWidth={300} handlePress={handleLogin}   />
               </ThemedView>
             </ThemedView>
           </ScrollView>

@@ -19,6 +19,8 @@ const VerifyAgent = () => {
 
 
   useEffect(() => {
+    console.log('This is VerifyAgent Page');
+    
     const getAccountDetail = async () => {
       let result = await SecureStore.getItemAsync('registerDetail');
       console.log(result, 'result--');

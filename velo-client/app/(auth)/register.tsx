@@ -9,6 +9,8 @@ import * as SecureStore from 'expo-secure-store';
 
 
 const Register = () => {
+  console.log('This is Register Page');
+  
   const params = useLocalSearchParams();
   const { role } = params;
   console.log(role, 'params--');

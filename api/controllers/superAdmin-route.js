@@ -42,4 +42,25 @@ export const createNewCountry = async (req, res,next) => {
         next(err);
     }
 }
+export const createNewCategory = async (req, res,next) => {
+    console.log(req.body);
+    
+    try{    
+        const createCategory = await prisma.category.create({
+            data: {
+                name: req.body.categoryName,
+                description: req.body.categoryDescription,
+                categoryImgUrl: req.body.categoryImgUrl,
+            }
+        });
+        await prisma.$disconnect();
+        return res.status(200).json({ message: "Category created successfully" });
+
+    }
+    catch(err){
+        console.log(err);
+        next(err);
+
+    }
+}
 

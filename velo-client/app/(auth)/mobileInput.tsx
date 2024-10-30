@@ -19,6 +19,8 @@ export type selectedArea = {
 
 
 const mobileInput = () => {
+  console.log('This is mobileInput Page');
+  
   const colorScheme = useColorScheme();
   const [areas, setAreas] = useState([])
   const [mobile, setMobile] = useState('')
@@ -44,15 +46,9 @@ const mobileInput = () => {
     try {
       const checkIfAlreadyRegistered = await axios.get(`${ipURL}/api/auth/check-registered-account/${selectedArea?.callingCode}/${mobile}`)
       console.log(checkIfAlreadyRegistered.data.accountExists, 'checkIfAlreadyRegistered.data--');
-      if (checkIfAlreadyRegistered.data.accountExists && checkIfAlreadyRegistered.data.accountExists.role === "AGENT" ) {
-        await SecureStore.setItemAsync('registerDetail', JSON.stringify(checkIfAlreadyRegistered.data.accountExists))
-       
-        
-        router.replace('/verifyAgent')
-      }
-     else if (checkIfAlreadyRegistered.data.accountExists && checkIfAlreadyRegistered.data.accountExists.role === "USER" ) {
-        await SecureStore.setItemAsync('registerDetail', JSON.stringify(checkIfAlreadyRegistered.data.accountExists))
-        router.replace('/(auth)/finalRegisterForm')
+      if (checkIfAlreadyRegistered.data.accountExists) {
+        alert('An account with this number already exists. Please Login')
+        router.push('/(auth)/login')
       }
       else {
 

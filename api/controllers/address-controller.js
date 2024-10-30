@@ -32,8 +32,15 @@ export const addUserAddress = async (req, res, next) => {
                 registerVerificationStatus:"LOGGED_IN"
             }
         });
+
+        const newUserData = await prisma.user.findUnique({
+            where: {
+                id: userId
+            },
+        });
+
         await prisma.$disconnect();
-        res.status(200).json({message: "Address added successfully and updated user", data: createUserAddress});
+        res.status(200).json({message: "Address added successfully and updated user", data: newUserData});
 
     }
     catch (err) {
@@ -43,7 +50,7 @@ export const addUserAddress = async (req, res, next) => {
 }
 
 export const addAgentAddress = async (req, res, next) => {
-    const {userId,selectedCountries} = req.body;    
+    const {userId,selectedCountries,selectedCategories} = req.body;    
     console.log(userId,selectedCountries);
     
     try{
@@ -55,7 +62,19 @@ export const addAgentAddress = async (req, res, next) => {
             data: agentCountryRecords,
             skipDuplicates: true, // Optional: Skip duplicates if they already exist
           });
-        // await prisma.$disconnect();
+        
+        const agentCategoryRecord = selectedCategories.map(categoryId => ({
+            agentId: userId,
+            categoryId,
+          }));
+        
+        const createAgentCategory = await prisma.accountCtegory.createMany({
+            data: agentCategoryRecord,
+            skipDuplicates: true, // Optional: Skip duplicates if they already exist
+          });
+
+
+        await prisma.$disconnect();
         res.status(200).json({message: "Address added successfully"});
     }
     catch (err) {

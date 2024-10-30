@@ -35,6 +35,7 @@ const RootIndex = () => {
   useEffect(() => {
     const checkUser = async () => {
       let user = await SecureStore.getItemAsync('registerDetail')
+      
       if(!user){
         return
       }

@@ -14,8 +14,11 @@ import { ipURL } from '@/constants/backendUrl';
 
 
 const FinalRegisterForm = () => {
+  console.log('This is final register Page');
+
 
   const [countryList, setCountryList] = useState([])
+  const [categoryList, setCategoryList] = useState([])
   const [accountId, setAccountId] = useState('')
   const [accountRole, setAccountRole] = useState('')
 
@@ -27,21 +30,37 @@ const FinalRegisterForm = () => {
   const [country, setCountry] = useState('')
 
   const [selectedCountries, setSelectedCountries] = useState([]);
+  const [selectedCategories, setSelectedCategories] = useState([]);
 
-  const handleChipPress = (countryName, countryId) => {
+  const handleChipPress = (countryName, countryId, type) => {
 
-    setSelectedCountries((prev) => {
-      if (prev.includes(countryId)) {
-        // If already selected, remove it
-        return prev.filter((item) => item !== countryId);
-      } else {
-        // If not selected, add it
-        return [...prev, countryId];
-      }
-    });
+    if (type === 'country') {
+      setSelectedCountries((prev) => {
+        if (prev.includes(countryId)) {
+          // If already selected, remove it
+          return prev.filter((item) => item !== countryId);
+        } else {
+          // If not selected, add it
+          return [...prev, countryId];
+        }
+      });
+    }
+    else if (type === 'category') {
+      setSelectedCategories((prev) => {
+        if (prev.includes(countryId)) {
+          // If already selected, remove it
+          return prev.filter((item) => item !== countryId);
+        } else {
+          // If not selected, add it
+          return [...prev, countryId];
+        }
+      });
+    }
   };
 
   console.log(selectedCountries, 'selectedCountries--');
+  console.log(selectedCategories, 'selectedCategories--');
+
 
 
 
@@ -55,6 +74,10 @@ const FinalRegisterForm = () => {
       setAccountRole(JSON.parse(getAccInfo).role);
 
       const response = await axios.get(`${ipURL}/api/country/get-all-countries`)
+      const getCategory = await axios.get(`${ipURL}/api/category/get-all-categories`)
+      console.log(getCategory.data, 'getCategory--');
+
+      setCategoryList(getCategory.data)
       setCountryList(response.data)
     }
     getCountryFromDB()
@@ -63,6 +86,8 @@ const FinalRegisterForm = () => {
 
 
   const handleFinalRegisterForm = async () => {
+  
+
 
     try {
       if (accountRole === "USER") {
@@ -78,6 +103,9 @@ const FinalRegisterForm = () => {
           }
           console.log(formData, 'formData--');
           const response = await axios.post(`${ipURL}/api/address/create-user-address`, formData)
+          console.log(response.data);
+          await SecureStore.setItemAsync('registerDetail', JSON.stringify(response.data.data))
+
           router.replace('/(tabs)/home')
         }
         catch (e) {
@@ -89,10 +117,12 @@ const FinalRegisterForm = () => {
         try {
           const formData = {
             userId: accountId,
-            selectedCountries
+            selectedCountries,
+            selectedCategories
           }
+          //This is the final step for agent registration. It not only adds address but also categories and countries
           const response = await axios.post(`${ipURL}/api/address/create-agent-address`, formData)
-          router.push({pathname:'/(auth)/setAppointment',params:{accountId}})
+          router.push({ pathname: '/(auth)/setAppointment', params: { accountId } })
         }
         catch (e) {
           console.log(e, 'error--');
@@ -240,13 +270,23 @@ const FinalRegisterForm = () => {
 
             {/* AGENT FINAL STEPS */}
             {accountRole === 'AGENT' && <>
-              <ThemedView style={{ marginBottom: verticalScale(6) }}>
-                <ThemedText type='default' style={styles.textInputHeading}>Countries You Operate</ThemedText>
-                {countryList.map((item, index) => (
-                  <ThemedView key={index} style={styles.chipContainer}>
-                    <Chip icon={selectedCountries.includes(item.id) ? "plus" : "minus"} style={{ backgroundColor: selectedCountries.includes(item.id) ? '#4CAF50' : 'red' }} onPress={() => handleChipPress(item.name, item.id)} key={item.id} compact>{item.name}</Chip>
-                  </ThemedView>
-                ))}
+              <ThemedView style={styles.operationContainer}>
+                <ThemedView >
+                  <ThemedText type='default' style={styles.textInputHeading}>Countries You Operate</ThemedText>
+                  {countryList.map((item, index) => (
+                    <ThemedView key={index} style={styles.chipContainer}>
+                      <Chip icon={selectedCountries.includes(item.id) ? "plus" : "minus"} style={{ backgroundColor: selectedCountries.includes(item.id) ? '#4CAF50' : 'red' }} onPress={() => handleChipPress(item.name, item.id, 'country')} key={item.id} compact>{item.name}</Chip>
+                    </ThemedView>
+                  ))}
+                </ThemedView>
+                <ThemedView style={styles.operationContainer}>
+                  <ThemedText type='default'>Select the categories you like to operate</ThemedText>
+                  {categoryList.map((item, index) => (
+                    <ThemedView key={index} style={styles.chipContainer}>
+                      <Chip icon={selectedCategories.includes(item.id) ? "plus" : "minus"} style={{ backgroundColor: selectedCategories.includes(item.id) ? '#4CAF50' : 'red' }} onPress={() => handleChipPress(item.name, item.id, 'category')} key={item.id} compact>{item.name}</Chip>
+                    </ThemedView>
+                  ))}
+                </ThemedView>
               </ThemedView>
             </>}
 
@@ -309,6 +349,9 @@ const styles = StyleSheet.create({
     margin: moderateScale(4),
     flexDirection: 'row',
     flexWrap: 'wrap',
+  },
+  operationContainer: {
+    marginTop: verticalScale(20),
   }
 
 })

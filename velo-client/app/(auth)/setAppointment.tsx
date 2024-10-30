@@ -11,6 +11,8 @@ import { router, useLocalSearchParams } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 
 const setAppointment = () => {
+    console.log('This is setAppointment Page');
+    
     const params = useLocalSearchParams();
     console.log(params, 'params--');
     const {accountId} = params;

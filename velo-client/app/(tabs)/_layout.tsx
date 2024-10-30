@@ -1,12 +1,25 @@
 import { Tabs } from 'expo-router';
-import React from 'react';
-
+import React, {useState,useEffect} from 'react';
+import * as SecureStore from 'expo-secure-store';
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
+
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+
+  const [accountDetail,setAccountDetail] = useState(null)
+
+  useEffect(() => {
+    const getSecureStoreData = async () => {
+      const user = await SecureStore.getItemAsync('registerDetail');
+      if (user) {
+        setAccountDetail(JSON.parse(user));
+      }
+    }
+    getSecureStoreData();
+  }, []);
 
   return (
     <Tabs
@@ -14,8 +27,10 @@ export default function TabLayout() {
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
       }}>
-      <Tabs.Screen
+
+       <Tabs.Screen
         name="home"
+
         options={{
           title: 'Home',
           tabBarIcon: ({ color, focused }) => (
@@ -28,7 +43,7 @@ export default function TabLayout() {
         options={{
           title: 'Market',
           tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'home' : 'home-outline'} color={color} />
+            <TabBarIcon name={focused ? 'storefront' : 'storefront-outline'} color={color} />
           ),
         }}
       />

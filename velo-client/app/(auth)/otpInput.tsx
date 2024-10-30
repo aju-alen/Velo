@@ -20,6 +20,8 @@ export type selectedArea ={
 
 
 const OtpInputs = () => {
+  console.log('This is OtpInputs Page');
+  
   const params = useLocalSearchParams();
   const { verfication_id } = params;
   const [phoneNumber, setPhoneNumber] =useState({

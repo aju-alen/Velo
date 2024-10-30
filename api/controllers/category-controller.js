@@ -4,16 +4,17 @@ dotenv.config();
 
 const prisma = new PrismaClient();
 
-export const getAllCountry = async (req, res, next) => {
+export const getAllCategory = async (req, res, next) => {
     try {
-        const countries = await prisma.country.findMany({
+        const categories = await prisma.category.findMany({
             select: {
                 id: true,
                 name: true,
+                categoryImgUrl: true,
             },
         });
         await prisma.$disconnect();
-        return res.status(200).json( countries );
+        return res.status(200).json( categories );
     }
     catch (err) {
         console.log(err);

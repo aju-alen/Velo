@@ -6,7 +6,7 @@ import { useThemeColor } from '@/hooks/useThemeColor';
 export type ThemedTextProps = TextProps & {
   lightColor?: string;
   darkColor?: string;
-  type?: 'default' | 'title' | 'defaultSemiBold' | 'subtitle' | 'link' |'custom' | 'logoText' | 'mini';
+  type?: 'default' | 'title' | 'defaultSemiBold' | 'subtitle' | 'link' |'custom' | 'logoText' | 'mini' | 'catText';
 };
 
 export function ThemedText({
@@ -30,6 +30,7 @@ export function ThemedText({
         type === 'custom' ? styles.custom : undefined,
         type === 'logoText' ? styles.logoText : undefined,
         type === 'mini' ? styles.mini : undefined,
+        type === 'catText' ? styles.catText : undefined,
         style,
       ]}
       {...rest}
@@ -75,6 +76,10 @@ const styles = StyleSheet.create({
   },
   mini:{
     fontSize: moderateScale(12),
+    lineHeight: moderateScale(16),
+  },
+  catText:{
+    fontSize: moderateScale(13),
     lineHeight: moderateScale(16),
   }
 });
