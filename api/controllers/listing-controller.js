@@ -5,15 +5,17 @@ dotenv.config();
 const prisma = new PrismaClient();
 
 export const postListing = async (req, res, next) => {
+  console.log(req.body, 'req.body');
+  
     try {
-        const {listingTitle, listingDescription, listingPrice, listingCategoryId,agentId} = req.body;
+        const {listingTitle, listingDescription, listingPrice, listingCategoryId,accountId} = req.body;
         const listing = await prisma.listing.create({
             data: {
                 title: listingTitle,
                 description: listingDescription,
                 price: listingPrice,
                 categoryId: listingCategoryId,
-                agentId: agentId
+                agentId: accountId
             }
         });
         await prisma.$disconnect();
@@ -45,6 +47,8 @@ export const getListingByCategory = async (req, res, next) => {
       const listings = await prisma.listing.findMany({
         where: whereClause,
       });
+      console.log(listings);
+      
   
       res.status(200).json({
         message: 'Listings fetched successfully',
@@ -55,5 +59,38 @@ export const getListingByCategory = async (req, res, next) => {
       next(err); // Pass the error to the next middleware (error handler)
     }
   };
+
+  export const getSingleListing = async (req, res, next) => {
+    try{
+        const listingId = req.params.listingId;
+        const listing = await prisma.listing.findUnique({
+            where: {
+                id: listingId
+            },
+        });
+        const similarListings = await prisma.listing.findMany({
+            where: {
+              categoryId: listing.categoryId,
+              id: {
+                not: listing.id, // Exclude the current listing
+              },
+            },
+          });
+
+        await prisma.$disconnect();
+        res.status(200).json({
+            message: 'Listing fetched successfully',
+            listingData: listing,
+            similarListings,
+        });
+        console.log(listing,'listing');
+        
+
+    }
+    catch(err){
+        console.log(err);
+        next(err);
+    }
+  }
 
 

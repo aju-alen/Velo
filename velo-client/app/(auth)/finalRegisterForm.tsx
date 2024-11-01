@@ -1,161 +1,123 @@
-import React, { useEffect, useState, useRef } from 'react'
-import { StyleSheet, TextInput, ScrollView, Platform, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import React, { useEffect, useState } from 'react'
+import { StyleSheet, TextInput, ScrollView, Platform, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, View,ActivityIndicator } from 'react-native';
 import { ThemedView } from '@/components/ThemedView'
 import { ThemedText } from '@/components/ThemedText'
 import { verticalScale, horizontalScale, moderateScale } from '@/constants/metrics'
 import CustomButton from '@/components/CustomButton';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
-import { Chip } from 'react-native-paper';
+import { Chip, Divider } from 'react-native-paper';
 import { Picker } from '@react-native-picker/picker';
 import axios from 'axios';
 import { ipURL } from '@/constants/backendUrl';
 
-
-
 const FinalRegisterForm = () => {
-  console.log('This is final register Page');
-
-
+  // ... keeping all the existing state and handlers ...
   const [countryList, setCountryList] = useState([])
   const [categoryList, setCategoryList] = useState([])
   const [accountId, setAccountId] = useState('')
   const [accountRole, setAccountRole] = useState('')
-
   const [addressOne, setAddressOne] = useState('')
   const [addressTwo, setAddressTwo] = useState('')
   const [state, setState] = useState('')
   const [city, setCity] = useState('')
   const [zipCode, setZipCode] = useState('')
   const [country, setCountry] = useState('')
-
   const [selectedCountries, setSelectedCountries] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState([]);
+  const [loading,setLoading] = useState(true)
 
+  // ... keeping all the existing useEffect and handlers ...
+  
   const handleChipPress = (countryName, countryId, type) => {
-
     if (type === 'country') {
-      setSelectedCountries((prev) => {
-        if (prev.includes(countryId)) {
-          // If already selected, remove it
-          return prev.filter((item) => item !== countryId);
-        } else {
-          // If not selected, add it
-          return [...prev, countryId];
-        }
-      });
-    }
-    else if (type === 'category') {
-      setSelectedCategories((prev) => {
-        if (prev.includes(countryId)) {
-          // If already selected, remove it
-          return prev.filter((item) => item !== countryId);
-        } else {
-          // If not selected, add it
-          return [...prev, countryId];
-        }
-      });
+      setSelectedCountries((prev) => 
+        prev.includes(countryId) ? prev.filter((item) => item !== countryId) : [...prev, countryId]
+      );
+    } else if (type === 'category') {
+      setSelectedCategories((prev) => 
+        prev.includes(countryId) ? prev.filter((item) => item !== countryId) : [...prev, countryId]
+      );
     }
   };
-
-  console.log(selectedCountries, 'selectedCountries--');
-  console.log(selectedCategories, 'selectedCategories--');
-
-
-
-
-
-
 
   useEffect(() => {
     const getCountryFromDB = async () => {
       const getAccInfo = await SecureStore.getItemAsync('registerDetail')
       setAccountId(JSON.parse(getAccInfo).id);
       setAccountRole(JSON.parse(getAccInfo).role);
-
+      
       const response = await axios.get(`${ipURL}/api/country/get-all-countries`)
       const getCategory = await axios.get(`${ipURL}/api/category/get-all-categories`)
-      console.log(getCategory.data, 'getCategory--');
-
       setCategoryList(getCategory.data)
       setCountryList(response.data)
+      setLoading(false)
     }
     getCountryFromDB()
   }, [])
 
-
-
   const handleFinalRegisterForm = async () => {
-  
-
-
     try {
       if (accountRole === "USER") {
-        try {
-          const formData = {
-            userId: accountId,
-            addressOne,
-            addressTwo,
-            state,
-            city,
-            zipCode,
-            country
-          }
-          console.log(formData, 'formData--');
-          const response = await axios.post(`${ipURL}/api/address/create-user-address`, formData)
-          console.log(response.data);
-          await SecureStore.setItemAsync('registerDetail', JSON.stringify(response.data.data))
-
-          router.replace('/(tabs)/home')
+        const formData = {
+          userId: accountId,
+          addressOne,
+          addressTwo,
+          state,
+          city,
+          zipCode,
+          country
         }
-        catch (e) {
-          console.log(e, 'error--');
+        const response = await axios.post(`${ipURL}/api/address/create-user-address`, formData)
+        await SecureStore.setItemAsync('registerDetail', JSON.stringify(response.data.data))
+        router.replace('/(tabs)/home')
+      } else if (accountRole === "AGENT") {
+        const formData = {
+          userId: accountId,
+          selectedCountries,
+          selectedCategories
         }
-
+        const response = await axios.post(`${ipURL}/api/address/create-agent-address`, formData)
+        router.push({ pathname: '/(auth)/setAppointment', params: { accountId } })
       }
-      else if (accountRole === "AGENT") {
-        try {
-          const formData = {
-            userId: accountId,
-            selectedCountries,
-            selectedCategories
-          }
-          //This is the final step for agent registration. It not only adds address but also categories and countries
-          const response = await axios.post(`${ipURL}/api/address/create-agent-address`, formData)
-          router.push({ pathname: '/(auth)/setAppointment', params: { accountId } })
-        }
-        catch (e) {
-          console.log(e, 'error--');
-        }
-
-      }
-    }
-    catch (e) {
+    } catch (e) {
       console.log(e, 'error--');
     }
-
-
   }
 
-
+  const CustomInput = ({ label, value, onChangeText, placeholder, autoComplete }) => (
+    <ThemedView style={styles.inputContainer}>
+      <ThemedText type='default' style={styles.label}>{label}</ThemedText>
+      <ThemedView style={styles.inputWrapper}>
+        <TextInput
+          placeholder={placeholder}
+          placeholderTextColor="gray"
+          value={value}
+          onChangeText={onChangeText}
+          keyboardType='default'
+          autoComplete={autoComplete}
+          style={styles.input}
+        />
+      </ThemedView>
+    </ThemedView>
+  );
 
   return (
-    <ThemedView style={{
-      flex: 1,
-      marginTop: 40,
-      paddingHorizontal: 20,
-    }}>
-      <KeyboardAvoidingView
+    <ThemedView style={styles.container}>
+     {loading?
+     <ThemedView style={{flex:1,justifyContent:'center',alignItems:'center'}}>
+     <ActivityIndicator size="large" color="gray" />
+      </ThemedView>
+     : <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <ScrollView >
-
+          
+          <ScrollView showsVerticalScrollIndicator={false}>
             <ThemedText type='logoText' style={styles.logoText}>Velo</ThemedText>
             <ThemedText type='subtitle' style={styles.subheading}>Final Steps</ThemedText>
-
-            {/* USER FINAL STEPS */}
+            
             {accountRole === 'USER' && <>
               <ThemedView style={{ marginBottom: verticalScale(6) }}>
                 <ThemedText type='default' style={styles.textInputHeading}>Address 1</ThemedText>
@@ -268,40 +230,56 @@ const FinalRegisterForm = () => {
               </ThemedView>
             </>}
 
-            {/* AGENT FINAL STEPS */}
-            {accountRole === 'AGENT' && <>
-              <ThemedView style={styles.operationContainer}>
-                <ThemedView >
-                  <ThemedText type='default' style={styles.textInputHeading}>Countries You Operate</ThemedText>
-                  {countryList.map((item, index) => (
-                    <ThemedView key={index} style={styles.chipContainer}>
-                      <Chip icon={selectedCountries.includes(item.id) ? "plus" : "minus"} style={{ backgroundColor: selectedCountries.includes(item.id) ? '#4CAF50' : 'red' }} onPress={() => handleChipPress(item.name, item.id, 'country')} key={item.id} compact>{item.name}</Chip>
-                    </ThemedView>
-                  ))}
-                </ThemedView>
-                <ThemedView style={styles.operationContainer}>
-                  <ThemedText type='default'>Select the categories you like to operate</ThemedText>
-                  {categoryList.map((item, index) => (
-                    <ThemedView key={index} style={styles.chipContainer}>
-                      <Chip icon={selectedCategories.includes(item.id) ? "plus" : "minus"} style={{ backgroundColor: selectedCategories.includes(item.id) ? '#4CAF50' : 'red' }} onPress={() => handleChipPress(item.name, item.id, 'category')} key={item.id} compact>{item.name}</Chip>
-                    </ThemedView>
-                  ))}
-                </ThemedView>
-              </ThemedView>
-            </>}
+            {accountRole === 'AGENT' && (
+              <View style={styles.agentContainer}>
+                <View style={styles.sectionContainer}>
+                  <ThemedText type='default' style={styles.sectionTitle}>Countries of Operation</ThemedText>
+                  <Divider style={styles.divider} />
+                  <View style={styles.chipGrid}>
+                    {countryList.map((item) => (
+                      <Chip
+                        key={item.id}
+                        icon={selectedCountries.includes(item.id) ? "check" : "plus"}
+                        style={[
+                          styles.chip,
+                          selectedCountries.includes(item.id) && styles.selectedChip
+                        ]}
+                        onPress={() => handleChipPress(item.name, item.id, 'country')}
+                      >
+                        {item.name}
+                      </Chip>
+                    ))}
+                  </View>
+                </View>
 
+                <View style={styles.sectionContainer}>
+                  <ThemedText type='default' style={styles.sectionTitle}>Categories</ThemedText>
+                  <Divider style={styles.divider} />
+                  <View style={styles.chipGrid}>
+                    {categoryList.map((item) => (
+                      <Chip
+                        key={item.id}
+                        icon={selectedCategories.includes(item.id) ? "check" : "plus"}
+                        style={[
+                          styles.chip,
+                          selectedCategories.includes(item.id) && styles.selectedChip
+                        ]}
+                        onPress={() => handleChipPress(item.name, item.id, 'category')}
+                      >
+                        {item.name}
+                      </Chip>
+                    ))}
+                  </View>
+                </View>
+              </View>
+            )}
 
-            <ThemedView style={{ marginBottom: verticalScale(6) }}>
-
-              <ThemedView style={styles.buttonContainer}>
-                <CustomButton buttonText='Register' handlePress={handleFinalRegisterForm} />
-              </ThemedView>
-
-            </ThemedView>
-
+            <View style={styles.buttonContainer}>
+              <CustomButton buttonText='Complete Registration' handlePress={handleFinalRegisterForm} />
+            </View>
           </ScrollView>
         </TouchableWithoutFeedback>
-      </KeyboardAvoidingView>
+      </KeyboardAvoidingView>}
     </ThemedView>
   )
 }
@@ -310,14 +288,89 @@ export default FinalRegisterForm
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     marginTop: verticalScale(40),
     paddingHorizontal: horizontalScale(20),
   },
   logoText: {
-    marginTop: verticalScale(60),
+    marginTop: verticalScale(40),
+    textAlign: 'center',
   },
   subheading: {
-    marginTop: verticalScale(20),
+    marginTop: verticalScale(16),
+    marginBottom: verticalScale(24),
+    textAlign: 'center',
+  },
+  formContainer: {
+    marginTop: verticalScale(16),
+  },
+  inputContainer: {
+    marginBottom: verticalScale(16),
+  },
+  label: {
+    marginBottom: verticalScale(8),
+    fontSize: moderateScale(14),
+  },
+  inputWrapper: {
+    borderWidth: 1,
+    borderColor: 'gray',
+    borderRadius: moderateScale(8),
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  input: {
+    padding: moderateScale(12),
+    fontSize: moderateScale(16),
+    color: 'white',
+  },
+  rowContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: verticalScale(16),
+  },
+  halfWidth: {
+    width: '48%',
+  },
+  pickerContainer: {
+    borderWidth: 1,
+    borderColor: 'gray',
+    borderRadius: moderateScale(8),
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    overflow: 'hidden',
+  },
+  picker: {
+    height: verticalScale(50),
+  },
+  agentContainer: {
+    marginTop: verticalScale(16),
+  },
+  sectionContainer: {
+    marginBottom: verticalScale(24),
+  },
+  sectionTitle: {
+    fontSize: moderateScale(18),
+    marginBottom: verticalScale(12),
+  },
+  divider: {
+    backgroundColor: 'gray',
+    marginBottom: verticalScale(16),
+  },
+  chipGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: moderateScale(8),
+  },
+  chip: {
+    marginBottom: verticalScale(8),
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  selectedChip: {
+    backgroundColor: '#4CAF50',
+  },
+  buttonContainer: {
+    marginVertical: verticalScale(24),
+    flexDirection: 'row',
+    justifyContent: 'center',
+    
   },
   textInputHeading: {
     marginBottom: verticalScale(8),
@@ -331,7 +384,6 @@ const styles = StyleSheet.create({
     marginBottom: verticalScale(12),
     height: verticalScale(40),
   },
-
   chooseCountry: {
     borderColor: 'gray',
     borderRadius: moderateScale(5),
@@ -341,17 +393,4 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(14),
     color: 'gray',
   },
-  buttonContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  chipContainer: {
-    margin: moderateScale(4),
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
-  operationContainer: {
-    marginTop: verticalScale(20),
-  }
-
-})
+});

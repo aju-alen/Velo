@@ -1,4 +1,4 @@
-import { FlatList, StyleSheet, TouchableOpacity, Image } from 'react-native'
+import { FlatList, StyleSheet, TouchableOpacity, Image, ActivityIndicator, TextInput, Alert } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { ThemedView } from '@/components/ThemedView'
 import { ThemedText } from '@/components/ThemedText'
@@ -7,37 +7,78 @@ import { router, useLocalSearchParams } from 'expo-router'
 import axios from 'axios'
 import { ipURL } from '@/constants/backendUrl'
 import MaterialIcons from '@expo/vector-icons/MaterialIcons'
+import * as SecureStore from 'expo-secure-store'
 
 const MarketHome = () => {
+  const [accountDetails, setAccountDetails] = useState(null);
+
   const [getCatIdListing, setGetCatIdListing] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
   const { catId } = useLocalSearchParams();
 
+  useEffect(() => {
+    const checkUser = async () => {
+      let account = await SecureStore.getItemAsync('registerDetail');
+      setAccountDetails(JSON.parse(account));
+
+    }
+    checkUser();
+  }, []);
+  console.log(accountDetails, 'accountDetails------');
   
 
   useEffect(() => {
     const getLisitingFromCatId = async () => {
+      setGetCatIdListing([]);
+      setLoading(true);
       const getCatIdListing = await axios.get(`${ipURL}/api/listing/get-listing-by-category/${catId}`);
       setGetCatIdListing(getCatIdListing.data.listingData);
     }
     getLisitingFromCatId();
+    setLoading(false);
   }, [catId]);
 
+  const filteredListings = getCatIdListing.filter(item =>
+    item.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   const formatPrice = (price) => {
-    return `${price.toLocaleString()}`
+    return `$${price.toLocaleString()}`
+  }
+
+  const handleButtonPress = () => {
+    if (accountDetails.registerVerificationStatus !== 'LOGGED_IN') {
+      Alert.alert(
+        'Action Disabled',
+        'The button has been disabled until you have been verified by the admin team.'
+      );
+    } else {
+      const accountId = accountDetails.id;
+      router.push({pathname:'/(tabs)/market/createListing', params:{accountId}});
+    }
+  };
+
+  if (loading) {
+    return (
+      <ThemedView style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#FFAC1C" />
+      </ThemedView>
+    )
   }
 
   const renderMarketplaceCategoryCard = ({ item }) => {
     return (
-      <TouchableOpacity 
+      <TouchableOpacity
         activeOpacity={0.85}
         style={styles.cardContainer}
-        onPress={() => router.push("/(tabs)/market/123")}
+        onPress={() => router.push(`/(tabs)/market/${item.id}`)}
       >
         <ThemedView style={styles.card}>
           <ThemedView style={styles.imageContainer}>
             <MaterialIcons name="directions-car" size={40} color="#FFAC1C" />
           </ThemedView>
-          
+
           <ThemedView style={styles.contentContainer}>
             <ThemedView style={styles.headerContainer}>
               <ThemedText type="defaultSemiBold" style={styles.title} numberOfLines={1}>
@@ -48,8 +89,8 @@ const MarketHome = () => {
               </ThemedText>
             </ThemedView>
 
-            <ThemedText 
-              type="default" 
+            <ThemedText
+              type="default"
               style={styles.description}
               numberOfLines={2}
             >
@@ -63,13 +104,10 @@ const MarketHome = () => {
                   {new Date(item.createdAt).toLocaleDateString()}
                 </ThemedText>
               </ThemedView>
-              
-              <TouchableOpacity style={styles.viewButton}>
-                <ThemedText type="mini" style={styles.viewButtonText}>
-                  View Details
-                </ThemedText>
-                <MaterialIcons name="arrow-forward-ios" size={12} color="#FFAC1C" />
-              </TouchableOpacity>
+
+              <ThemedText type="mini" style={styles.viewButtonText}>
+                Condition: {item.condition}
+              </ThemedText>
             </ThemedView>
           </ThemedView>
         </ThemedView>
@@ -80,14 +118,35 @@ const MarketHome = () => {
   return (
     <ThemedView style={styles.container}>
       <ThemedView style={styles.header}>
-        <ThemedText type='logoText'>Velo</ThemedText>
+      <ThemedText type='logoText'>Velo</ThemedText>
+      {accountDetails?.role === "AGENT" && (
+        <TouchableOpacity
+
+          style={styles.createAdButton}
+          onPress={handleButtonPress}
+        >
+          <ThemedText style={styles.createAdText}>Create an ad</ThemedText>
+        </TouchableOpacity>
+      )}
+    </ThemedView>
+
+      <ThemedView style={styles.searchContainer}>
+        <MaterialIcons name="search" size={20} color="#666" style={styles.searchIcon} />
+        <TextInput
+
+          style={styles.searchInput}
+          placeholder="Search listings..."
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          placeholderTextColor="#666"
+        />
         <TouchableOpacity>
           <MaterialIcons name="filter-list" size={24} color="#666" />
         </TouchableOpacity>
       </ThemedView>
 
       <FlatList
-        data={getCatIdListing}
+        data={filteredListings}
         renderItem={renderMarketplaceCategoryCard}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContainer}
@@ -106,11 +165,45 @@ const styles = StyleSheet.create({
     paddingTop: verticalScale(60),
     paddingHorizontal: horizontalScale(20),
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: verticalScale(16),
+  },
+  createAdButton: {
+    backgroundColor: '#FFAC1C',
+    paddingHorizontal: horizontalScale(16),
+    paddingVertical: verticalScale(8),
+    borderRadius: moderateScale(8),
+  },
+  createAdText: {
+    color: '#FFF',
+    fontSize: moderateScale(14),
+    fontWeight: '600',
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+
+    borderRadius: moderateScale(12),
+    paddingHorizontal: horizontalScale(12),
     marginBottom: verticalScale(20),
+    height: verticalScale(44),
+  },
+  searchIcon: {
+    marginRight: horizontalScale(8),
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: moderateScale(16),
+    color: '#666',
+    marginRight: horizontalScale(8),
   },
   listContainer: {
     paddingBottom: verticalScale(20),
@@ -120,7 +213,6 @@ const styles = StyleSheet.create({
   },
   card: {
     flexDirection: 'row',
-
     borderRadius: moderateScale(16),
     padding: moderateScale(12),
     shadowColor: '#000',
@@ -178,10 +270,6 @@ const styles = StyleSheet.create({
   infoText: {
     color: '#666',
     marginLeft: horizontalScale(4),
-  },
-  viewButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
   },
   viewButtonText: {
     color: '#FFAC1C',

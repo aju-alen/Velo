@@ -72,7 +72,7 @@ const ChooseRole = () => {
         />
       }>
       <ThemedView style={styles.container}>
-        <ThemedText type="title" style={styles.title}>Choose Role</ThemedText>
+        <ThemedText type="title" style={styles.title}>Select Role</ThemedText>
 
         <ThemedView style={styles.cardsContainer}>
           {/* User Role Card */}

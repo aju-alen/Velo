@@ -1,214 +1,381 @@
-import { StyleSheet, TouchableOpacity, Animated } from 'react-native';
-import React, { useState, useEffect, useRef } from 'react';
-import { ThemedView } from '@/components/ThemedView';
-import { ThemedText } from '@/components/ThemedText';
-import * as DocumentPicker from 'expo-document-picker';
-import { ipURL } from '@/constants/backendUrl';
-import Entypo from '@expo/vector-icons/Entypo';
-import { moderateScale, verticalScale } from '@/constants/metrics';
-import * as SecureStore from 'expo-secure-store';
-import { router } from 'expo-router';
-
+import { StyleSheet, TouchableOpacity, Animated, View,ActivityIndicator } from 'react-native'
+import React, { useState, useEffect, useRef } from 'react'
+import { ThemedView } from '@/components/ThemedView'
+import { ThemedText } from '@/components/ThemedText'
+import * as DocumentPicker from 'expo-document-picker'
+import { ipURL } from '@/constants/backendUrl'
+import { Entypo, MaterialCommunityIcons } from '@expo/vector-icons'
+import { moderateScale, verticalScale, horizontalScale } from '@/constants/metrics'
+import * as SecureStore from 'expo-secure-store'
+import { router } from 'expo-router'
 
 const VerifyAgent = () => {
-  const [doc1, setDoc1] = useState(null);
-  const [docUrl, setDocUrl] = useState(null);
-  const [userId, setUserId] = useState(null);
-  const fadeAnim = useRef(new Animated.Value(0)).current; // Initial opacity
-  const [uploadEligible, setUploadEligible] = useState(false); //Agent can only upload if registerVerificationStatus is PARTIAL 
-
+  const [doc1, setDoc1] = useState(null)
+  const [docUrl, setDocUrl] = useState(null)
+  const [userId, setUserId] = useState(null)
+  const [isUploading, setIsUploading] = useState(false)
+  const [uploadEligible, setUploadEligible] = useState(false)
+  
+  // Animations
+  const fadeAnim = useRef(new Animated.Value(0)).current
+  const scaleAnim = useRef(new Animated.Value(0.95)).current
+  const progressAnim = useRef(new Animated.Value(0)).current
 
   useEffect(() => {
-    console.log('This is VerifyAgent Page');
-    
     const getAccountDetail = async () => {
-      let result = await SecureStore.getItemAsync('registerDetail');
-      console.log(result, 'result--');
-      setUserId(JSON.parse(result).id);
-
-      if(JSON.parse(result).registerVerificationStatus === 'PARTIAL'){
-        setUploadEligible(true);
+      const result = await SecureStore.getItemAsync('registerDetail')
+      if (result) {
+        const parsedResult = JSON.parse(result)
+        setUserId(parsedResult.id)
+        setUploadEligible(parsedResult.registerVerificationStatus === 'PARTIAL')
       }
-
     }
-    getAccountDetail();
-  }, []);
-
+    getAccountDetail()
+  }, [])
 
   useEffect(() => {
-    // Trigger animation when docUrl changes
     if (docUrl) {
-      Animated.timing(fadeAnim, {
-        toValue: 1, // Fully opaque
-        duration: 500, // Animation duration
-        useNativeDriver: true, // Use native driver for better performance
-      }).start();
-    } else {
-      Animated.timing(fadeAnim, {
-        toValue: 1, // Fade out when no document URL
-        duration: 100, // Animation duration
-        useNativeDriver: true, // Use native driver for better performance
-      }).start();
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 500,
+          useNativeDriver: true,
+        }),
+        Animated.spring(scaleAnim, {
+          toValue: 1,
+          tension: 50,
+          friction: 7,
+          useNativeDriver: true,
+        })
+      ]).start()
     }
-  }, [docUrl]); // Run effect when docUrl changes
+  }, [docUrl])
+
+  const animateProgress = () => {
+    progressAnim.setValue(0)
+    Animated.timing(progressAnim, {
+      toValue: 1,
+      duration: 1500,
+      useNativeDriver: false,
+    }).start()
+  }
 
   const postDocuments = async (document) => {
-    
-    const url = `${ipURL}/api/s3/upload-to-aws`;
-    const formData = new FormData();
+    setIsUploading(true)
+    animateProgress()
+
+    const url = `${ipURL}/api/s3/upload-to-aws`
+    const formData = new FormData()
 
     if (document) {
-      console.log(document, 'document--');
-
-      // Append the file to the formData
       formData.append('document1', {
-        uri: document.uri, // Use the URI directly
+        uri: document.uri,
         name: document.name,
         type: document.type,
-      });
+      })
     }
 
-    formData.append('id', userId);  // Add any additional form data
-
-    const options = {
-      method: 'POST',
-      body: formData,
-      headers: {
-        Accept: 'application/json', // Do NOT set 'Content-Type'
-      },
-    };
+    formData.append('id', userId)
 
     try {
-      const response = await fetch(url, options);
-      const responseData = await response.json();
-      console.log(responseData, 'responseData--');
-      
-      return responseData.data; // Return the data received from the server
+      const response = await fetch(url, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          Accept: 'application/json',
+        },
+      })
+      const responseData = await response.json()
+      setIsUploading(false)
+      return responseData.data
     } catch (error) {
-      console.error('Error:', error);
+      setIsUploading(false)
+      console.error('Error:', error)
     }
-  };
+  }
 
   const pickDocument = async () => {
-
-    let result = await DocumentPicker.getDocumentAsync({
-        type: "application/pdf", 
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: "application/pdf",
         copyToCacheDirectory: false,
-    });
+      })
 
-    if (!result.canceled) {
-        let { name, size, uri } = result["assets"][0];
-        let fileType = name.split('.').pop();
+      if (!result.canceled) {
+        const { name, size, uri } = result.assets[0]
+        const fileType = name.split('.').pop()
+        const MAX_SIZE = 3 * 1024 * 1024 // 3 MB
 
-        // Check if the size is less than or equal to 3 MB
-        const MAX_SIZE = 3 * 1024 * 1024; // 3 MB in bytes
         if (size > MAX_SIZE) {
-            alert("The selected document exceeds the maximum size of 3 MB.");
-            return; // Exit the function if the file is too large
+          alert("Maximum file size is 3 MB")
+          return
         }
 
         const selectedDocument = {
-            name: name,
-            size: size,
-            uri: uri,
-            type: "application/" + fileType
-        };
+          name,
+          size,
+          uri,
+          type: "application/" + fileType
+        }
 
-        setDoc1(selectedDocument);
-        
-        // Call postDocuments with the selected document
-        const uploadedDocURL = await postDocuments(selectedDocument);
-        setDocUrl(uploadedDocURL);
-    } else {
-        setDocUrl(null);
+        setDoc1(selectedDocument)
+        const uploadedDocURL = await postDocuments(selectedDocument)
+        setDocUrl(uploadedDocURL)
+      }
+    } catch (error) {
+      console.error('Error picking document:', error)
     }
-};
+  }
 
-console.log(docUrl, 'docUrl--');
-
-
-
+  const progressWidth = progressAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0%', '100%']
+  })
 
   return (
     <ThemedView style={styles.container}>
-      <ThemedText type='title'>Verification Process</ThemedText>
-      {docUrl &&(<>
-        <ThemedText type='default'>Document has been uploaded</ThemedText>
-      <ThemedText type='mini'>We will verify and get back to you.</ThemedText>
-      </>)}
+      <View style={styles.header}>
+        <MaterialCommunityIcons 
+          name="upload" 
+          size={moderateScale(48)} 
+          color="#FFAC1C" 
+        />
+        <ThemedText type='title' style={styles.title}>
+          Verification Process
+        </ThemedText>
+      </View>
 
-      {!docUrl &&(<>
-        <ThemedText type='default'>Upload document for verification</ThemedText>
-      <ThemedText type='mini'>National Identification or Passport eligible</ThemedText>
-      </>)}
+      <View style={styles.content}>
+        {docUrl ? (
+          <View style={styles.successContainer}>
+            <View style={styles.successIcon}>
+              <Entypo name="check" size={moderateScale(24)} color="#4CAF50" />
+            </View>
+            <ThemedText type='default' style={styles.successText}>
+              Document Successfully Uploaded
+            </ThemedText>
+            <ThemedText type='mini' style={styles.verifyText}>
+              We'll verify your document and notify you soon
+            </ThemedText>
+          </View>
+        ) : (
+          <View style={styles.instructionsContainer}>
+            <ThemedText type='default' style={styles.instructionTitle}>
+              Document Requirements:
+            </ThemedText>
+            <View style={styles.requirementItem}>
+              <Entypo name="dot-single" size={moderateScale(20)} color="#FFAC1C" />
+              <ThemedText type='mini'>National ID or Passport only</ThemedText>
+            </View>
+            <View style={styles.requirementItem}>
+              <Entypo name="dot-single" size={moderateScale(20)} color="#FFAC1C" />
+              <ThemedText type='mini'>PDF format, max 3MB</ThemedText>
+            </View>
+            <View style={styles.requirementItem}>
+              <Entypo name="dot-single" size={moderateScale(20)} color="#FFAC1C" />
+              <ThemedText type='mini'>Clear and legible scan</ThemedText>
+            </View>
+          </View>
+        )}
 
-     
-
-     {uploadEligible ? <TouchableOpacity onPress={pickDocument}>
-        <ThemedView style={[styles.uploadButtonContainer, docUrl && styles.uploadButtonComplete]}>
-          <Animated.View style={{ opacity: fadeAnim }}>
-            <ThemedText style={styles.uploadButtonText}>
-              {docUrl ? (
+        {uploadEligible ? (
+          <TouchableOpacity 
+            onPress={pickDocument}
+            disabled={isUploading}
+            style={[
+              styles.uploadButton,
+              docUrl && styles.uploadComplete,
+              isUploading && styles.uploading
+            ]}
+          >
+            <Animated.View 
+              style={[
+                styles.buttonContent,
+                { transform: [{ scale: scaleAnim }] }
+              ]}
+            >
+              {isUploading ? (
                 <>
-                  <Entypo name="check" size={moderateScale(16)} color="white" style={styles.icon} />
-                  Upload Complete
+                  <ActivityIndicator color="white" style={styles.uploadingIndicator} />
+                  <ThemedText style={styles.uploadButtonText}>
+                    Uploading...
+                  </ThemedText>
+                  <Animated.View 
+                    style={[
+                      styles.progressBar,
+                      { width: progressWidth }
+                    ]} 
+                  />
                 </>
               ) : (
-                <>
-                  <Entypo name="upload" size={moderateScale(16)} color="white" style={styles.icon} />
-                  Upload Document
-                </>
+                <ThemedText style={styles.uploadButtonText}>
+                  {docUrl ? (
+                    <>
+                      <Entypo name="check" size={moderateScale(16)} color="white" />
+                      {" "}Document Verified
+                    </>
+                  ) : (
+                    <>
+                      <Entypo name="upload" size={moderateScale(16)} color="white" />
+                      {" "}Upload Document
+                    </>
+                  )}
+                </ThemedText>
               )}
+            </Animated.View>
+          </TouchableOpacity>
+        ) : (
+          <View style={styles.notEligibleContainer}>
+            <MaterialCommunityIcons name="alert-circle-outline" size={moderateScale(24)} color="#FF6B6B" />
+            <ThemedText type='default' style={styles.notEligibleText}>
+              Contact administrator for upload eligibility
             </ThemedText>
-          </Animated.View>
-        </ThemedView>
-      </TouchableOpacity> : <ThemedText type='default'>You are not eligible to upload document. Contact Host</ThemedText>}
+          </View>
+        )}
+      </View>
 
-     {docUrl && <>
-     
-      <Animated.View style={[{ opacity: fadeAnim  },styles.submitButtonAnimateContainer]}>
-     <TouchableOpacity onPress={()=>router.replace('/finalRegisterForm')} style={styles.submitButtonContainer}>
-        <Entypo name="chevron-right" size={moderateScale(24)} color="black" />
-      </TouchableOpacity>
-      </Animated.View>
-      </>
-      }
+      {docUrl && (
+        <Animated.View 
+          style={[
+            styles.nextButtonContainer,
+            {
+              opacity: fadeAnim,
+              transform: [{ scale: scaleAnim }]
+            }
+          ]}
+        >
+          <TouchableOpacity 
+            onPress={() => router.replace('/finalRegisterForm')}
+            style={styles.nextButton}
+          >
+            <ThemedText style={styles.nextButtonText}>Continue</ThemedText>
+            <Entypo name="chevron-right" size={moderateScale(20)} color="white" />
+          </TouchableOpacity>
+        </Animated.View>
+      )}
     </ThemedView>
-  );
-};
-
-export default VerifyAgent;
+  )
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+    padding: moderateScale(20),
+  },
+  header: {
     alignItems: 'center',
-    fontFamily: 'Montserrat'
+    marginTop: verticalScale(40),
+    marginBottom: verticalScale(30),
   },
-  uploadButtonContainer: {
+  title: {
+    fontSize: moderateScale(24),
+    marginTop: verticalScale(10),
+  },
+  content: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  instructionsContainer: {
+    width: '100%',
+    marginBottom: verticalScale(30),
+    padding: moderateScale(20),
+    borderRadius: moderateScale(12),
+    backgroundColor: 'rgba(255, 172, 28, 0.1)',
+  },
+  instructionTitle: {
+    marginBottom: verticalScale(10),
+    fontSize: moderateScale(16),
+    fontWeight: '600',
+  },
+  requirementItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: verticalScale(8),
+  },
+  successContainer: {
+    alignItems: 'center',
+    marginBottom: verticalScale(30),
+  },
+  successIcon: {
+    width: moderateScale(50),
+    height: moderateScale(50),
+    borderRadius: moderateScale(25),
+    backgroundColor: 'rgba(76, 175, 80, 0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: verticalScale(10),
+  },
+  successText: {
+    fontSize: moderateScale(18),
+    fontWeight: '600',
+    marginBottom: verticalScale(5),
+  },
+  verifyText: {
+    opacity: 0.7,
+  },
+  uploadButton: {
+    width: '100%',
     backgroundColor: '#FFAC1C',
-    padding: moderateScale(10),
-    borderRadius: moderateScale(5),
-    marginTop: verticalScale(10)
+    borderRadius: moderateScale(12),
+    overflow: 'hidden',
   },
-  uploadButtonComplete: {
-    backgroundColor: '#4CAF50', 
+  uploadComplete: {
+    backgroundColor: '#4CAF50',
+  },
+  uploading: {
+    backgroundColor: '#FFAC1C',
+  },
+  buttonContent: {
+    padding: moderateScale(15),
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   uploadButtonText: {
     color: 'white',
+    fontSize: moderateScale(16),
+    fontWeight: '600',
   },
-  icon: {
-    marginRight: moderateScale(5),
+  uploadingIndicator: {
+    marginBottom: verticalScale(5),
   },
-  submitButtonContainer: {
-    backgroundColor: '#FFAC1C',
-    padding: moderateScale(10),
-    borderRadius: moderateScale(50),
-  },
-  submitButtonAnimateContainer: {
+  progressBar: {
     position: 'absolute',
-    right: moderateScale(20),
+    bottom: 0,
+    left: 0,
+    height: verticalScale(3),
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+  },
+  notEligibleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 107, 107, 0.1)',
+    padding: moderateScale(15),
+    borderRadius: moderateScale(12),
+  },
+  notEligibleText: {
+    marginLeft: horizontalScale(10),
+    color: '#FF6B6B',
+  },
+  nextButtonContainer: {
+    position: 'absolute',
     bottom: verticalScale(40),
-  }
-});
+    right: horizontalScale(20),
+  },
+  nextButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFAC1C',
+    paddingHorizontal: horizontalScale(20),
+    paddingVertical: verticalScale(12),
+    borderRadius: moderateScale(25),
+  },
+  nextButtonText: {
+    color: 'white',
+    marginRight: horizontalScale(5),
+    fontSize: moderateScale(16),
+    fontWeight: '600',
+  },
+})
+
+export default VerifyAgent

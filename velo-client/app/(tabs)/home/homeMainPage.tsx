@@ -1,4 +1,4 @@
-import { StyleSheet, Text, TouchableOpacity, View, FlatList } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, FlatList, Dimensions,ActivityIndicator } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
@@ -9,14 +9,20 @@ import axios from 'axios';
 import { ipURL } from '@/constants/backendUrl';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { router } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
+
+const { width } = Dimensions.get('window');
+const CARD_WIDTH = (width - horizontalScale(40) - horizontalScale(32)) / 3;
 
 const HomeMainPage = () => {
   const [categoryData, setCategoryData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const getCategoryData = async () => {
       const getCategory = await axios.get(`${ipURL}/api/category/get-all-categories`);
       setCategoryData(getCategory.data);
+      setLoading(false);
     };
     getCategoryData();
   }, []);
@@ -25,36 +31,76 @@ const HomeMainPage = () => {
     await SecureStore.deleteItemAsync('registerDetail');
   };
 
-  const renderMarketplaceCategoryCard = ({ item }) => {
-
-    const catId = item.id
+  const renderMarketplaceCategoryCard = ({ item, index }) => {
+    const catId = item.id;
+    
+    // Generate different gradient colors based on index
+    const gradientColors = getGradientColors(9);
+    
     return (
-      <TouchableOpacity activeOpacity={0.7} onPress={() => router.push({ pathname:'/(tabs)/market/marketHome',params:{catId}})}>
+      <TouchableOpacity 
+        activeOpacity={0.7} 
+        onPress={() => router.push({ pathname:'/(tabs)/market/marketHome', params:{catId}})}
+      >
         <ThemedView style={styles.marketplaceCardContainer}>
-          <ThemedView style={styles.iconContainer}>
-            <MaterialIcons name={item.categoryImgUrl} size={28} color="#FFAC1C" />
-          </ThemedView>
-          <ThemedText style={styles.categoryText} type='catText'>
-            {item.name}
-          </ThemedText>
+          <LinearGradient
+            colors={gradientColors}
+            style={styles.cardGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            <ThemedView style={styles.iconContainer}>
+              <MaterialIcons name={item.categoryImgUrl} size={28} color="#FFAC1C" />
+            </ThemedView>
+            <ThemedText style={styles.categoryText} type='catText'>
+              {item.name}
+            </ThemedText>
+          </LinearGradient>
         </ThemedView>
       </TouchableOpacity>
     );
   };
 
+  const getGradientColors = (index) => {
+    // Array of gradient color pairs
+    const gradients = [
+      ['#1a237e10', '#1a237e20'],
+      ['#00695c10', '#00695c20'],
+      ['#4a148c10', '#4a148c20'],
+      ['#bf360c10', '#bf360c20'],
+      ['#1b5e2010', '#1b5e2020'],
+      ['#4a148c10', '#4a148c20'],
+    ];
+    return gradients[index % gradients.length];
+  };
+
   const ListHeader = () => (
     <ThemedView style={styles.header}>
-      <ThemedText type='subtitle' style={styles.marketplaceTitle}>Marketplace</ThemedText>
-      <TouchableOpacity>
+      <ThemedView style={styles.titleContainer}>
+        <ThemedText type='subtitle' style={styles.marketplaceTitle}>Marketplace</ThemedText>
+        <ThemedText style={styles.subTitle}>Explore categories</ThemedText>
+      </ThemedView>
+      <TouchableOpacity style={styles.viewAllButton} onPress={()=>router.push({pathname:'/(tabs)/market/marketHome',params:{catId:'undefined'}})}>
         <ThemedText style={styles.viewAllText}>View All</ThemedText>
+        <MaterialIcons name="arrow-forward-ios" size={16} color="#FFAC1C" />
       </TouchableOpacity>
     </ThemedView>
   );
 
   return (
     <ThemedView style={styles.container}>
+
+      {loading?
+        <ThemedView style={{flex:1,justifyContent:'center',alignItems:'center'}}>
+        <ActivityIndicator size="large" color="gray" />
+        </ThemedView>
+      :
+      <>
       <ThemedView style={styles.topBar}>
-        <ThemedText type='logoText'>Home</ThemedText>
+        <ThemedView>
+          <ThemedText type='logoText'>Home</ThemedText>
+          <ThemedText style={styles.welcomeText}>Welcome back!</ThemedText>
+        </ThemedView>
         <TouchableOpacity onPress={handleDelete} style={styles.deleteButton}>
           <MaterialIcons name="delete-outline" size={24} color="#FF6B6B" />
         </TouchableOpacity>
@@ -72,7 +118,8 @@ const HomeMainPage = () => {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.flatListContent}
         />
-      </ThemedView>
+      </ThemedView></>}
+
     </ThemedView>
   );
 };
@@ -91,8 +138,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: verticalScale(24),
   },
+  welcomeText: {
+    fontSize: moderateScale(14),
+    color: '#999',
+    marginTop: verticalScale(4),
+  },
   deleteButton: {
-    padding: 8,
+    padding: moderateScale(8),
+    backgroundColor: 'rgba(255, 107, 107, 0.1)',
+    borderRadius: moderateScale(12),
   },
   marketplaceContainer: {
     flex: 1,
@@ -101,32 +155,44 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: verticalScale(16),
+    marginBottom: verticalScale(24),
+  },
+  titleContainer: {
+    flex: 1,
   },
   marketplaceTitle: {
-
+    fontSize: moderateScale(24),
+    fontWeight: '600',
+  },
+  subTitle: {
+    fontSize: moderateScale(14),
+    color: '#999',
+    marginTop: verticalScale(4),
+  },
+  viewAllButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 172, 28, 0.1)',
+    paddingHorizontal: horizontalScale(12),
+    paddingVertical: verticalScale(6),
+    borderRadius: moderateScale(20),
   },
   viewAllText: {
     color: '#FFAC1C',
+    marginRight: horizontalScale(4),
+    fontSize: moderateScale(14),
   },
   marketplaceCardContainer: {
-    flex: 1,
+    width: CARD_WIDTH,
+    margin: moderateScale(5),
+    borderRadius: moderateScale(16),
+    overflow: 'hidden',
+  },
+  cardGradient: {
+    padding: moderateScale(16),
     alignItems: 'center',
     justifyContent: 'center',
-    padding: verticalScale(16),
-    margin: moderateScale(6),
-    borderRadius: moderateScale(16),
-    shadowColor: 'rgba(0, 0, 0, 0.12)',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 12,
-    
-    elevation: 8,
-    borderWidth: moderateScale(1),
-    minHeight: verticalScale(100),
+    minHeight: verticalScale(120),
   },
   iconContainer: {
     width: horizontalScale(50),
@@ -135,11 +201,14 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 172, 28, 0.1)',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: verticalScale(8),
+    marginBottom: verticalScale(12),
+    borderWidth: 1,
+    borderColor: 'rgba(255, 172, 28, 0.2)',
   },
   categoryText: {
     textAlign: 'center',
-    marginTop: verticalScale(4),
+    fontSize: moderateScale(13),
+    fontWeight: '500',
   },
   marketplaceFlatlistContainer: {
     flex: 1,
@@ -148,6 +217,6 @@ const styles = StyleSheet.create({
     paddingBottom: verticalScale(20),
   },
   columnWrapper: {
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
   },
 });

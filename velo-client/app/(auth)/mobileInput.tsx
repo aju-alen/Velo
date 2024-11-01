@@ -46,10 +46,11 @@ const mobileInput = () => {
     try {
       const checkIfAlreadyRegistered = await axios.get(`${ipURL}/api/auth/check-registered-account/${selectedArea?.callingCode}/${mobile}`)
       console.log(checkIfAlreadyRegistered.data.accountExists, 'checkIfAlreadyRegistered.data--');
-      if (checkIfAlreadyRegistered.data.accountExists) {
-        alert('An account with this number already exists. Please Login')
+      if( checkIfAlreadyRegistered.data.accountExists){
+        alert('Account already exists. Please Login')
         router.push('/(auth)/login')
       }
+
       else {
 
         const mobileNumber = (selectedArea?.callingCode + mobile).replace("+", "");

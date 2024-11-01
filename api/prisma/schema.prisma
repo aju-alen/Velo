@@ -131,6 +131,7 @@ model Listing {
   price         Float
   categoryId    String
   agentId       String
+  condition     Condition       @default(NEW)
   updatedAt     DateTime        @updatedAt
   createdAt     DateTime        @default(now())
 
@@ -152,9 +153,13 @@ model AccountCtegory{
   }
   
 
-enum Role{
+enum Role {
   AGENT
   USER
   SUPERADMIN
+}
+enum Condition {
+  NEW
+  USED
 }
 
