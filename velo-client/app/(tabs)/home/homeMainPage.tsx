@@ -16,10 +16,15 @@ const CARD_WIDTH = (width - horizontalScale(40) - horizontalScale(32)) / 3;
 
 const HomeMainPage = () => {
   const [categoryData, setCategoryData] = useState([]);
+  const [accountName, setAccountName] = useState('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    
     const getCategoryData = async () => {
+      const getAccountDetails = await SecureStore.getItemAsync('registerDetail');
+      setAccountName(JSON.parse(getAccountDetails).name);
+
       const getCategory = await axios.get(`${ipURL}/api/category/get-all-categories`);
       setCategoryData(getCategory.data);
       setLoading(false);
@@ -99,13 +104,33 @@ const HomeMainPage = () => {
       <ThemedView style={styles.topBar}>
         <ThemedView>
           <ThemedText type='logoText'>Home</ThemedText>
-          <ThemedText style={styles.welcomeText}>Welcome back!</ThemedText>
+          <ThemedText style={styles.welcomeText}>Welcome {accountName}</ThemedText>
         </ThemedView>
         <TouchableOpacity onPress={handleDelete} style={styles.deleteButton}>
           <MaterialIcons name="delete-outline" size={24} color="#FF6B6B" />
         </TouchableOpacity>
       </ThemedView>
 
+      {/* Create Shipment Section */}
+      <TouchableOpacity onPress={()=>router.push('/(tabs)/home/createShipment/createShipmentHome')} activeOpacity={0.7}>
+
+       <ThemedView style={styles.createShipmentContainer}>
+
+          <LinearGradient
+            colors={getGradientColors(9)}
+            style={styles.cardGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            <MaterialIcons name="local-shipping" size={60} color="#FFAC1C" />
+            <ThemedText style={styles.marketplaceTitle}>Create a Shipment</ThemedText>
+            <ThemedText style={styles.subTitle}>Ship your items with ease</ThemedText>
+            </LinearGradient>
+        </ThemedView>
+      </TouchableOpacity>
+
+      
+      {/* Marketplace Section */}
       <ThemedView style={styles.marketplaceContainer}>
         <FlatList
           ListHeaderComponent={ListHeader}
@@ -118,7 +143,8 @@ const HomeMainPage = () => {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.flatListContent}
         />
-      </ThemedView></>}
+      </ThemedView>
+      </>}
 
     </ThemedView>
   );
@@ -159,6 +185,11 @@ const styles = StyleSheet.create({
   },
   titleContainer: {
     flex: 1,
+  },
+  createShipmentContainer: {
+    marginBottom: verticalScale(24),
+    borderRadius: moderateScale(12),
+    overflow: 'hidden',
   },
   marketplaceTitle: {
     fontSize: moderateScale(24),

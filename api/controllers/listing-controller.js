@@ -46,6 +46,9 @@ export const getListingByCategory = async (req, res, next) => {
   
       const listings = await prisma.listing.findMany({
         where: whereClause,
+        orderBy: {
+          createdAt: 'desc',
+        },
       });
       console.log(listings);
       

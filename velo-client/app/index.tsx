@@ -69,7 +69,7 @@ const RootIndex = () => {
     
       <ThemedView  style={styles.container}   >
         <ThemedView style={styles.logoContainer}>
-<ThemedText type='logoText' style={styles.logoText}>Velo</ThemedText>
+{/* <ThemedText type='logoText' style={styles.logoText}>Velo</ThemedText> */}
 <Image
             source={require('@/assets/images/logo.png')}
             style={styles.logoImgContainer}
@@ -93,7 +93,7 @@ const RootIndex = () => {
           <CustomButton
             buttonText='Get Started'
             handlePress={animateButton}
-            buttonWidth={horizontalScale(300)}
+            buttonWidth={horizontalScale(250)}
           />
           </Animated.View>
           <ThemedText type='default'>
@@ -118,15 +118,17 @@ const styles = StyleSheet.create({
   },
   logoContainer:{
     display:"flex",
-    flexDirection:'row-reverse',
+    flexDirection:"row-reverse",
     justifyContent:"center",
     alignItems:"center",
-    paddingBottom:verticalScale(20)
+    paddingBottom:verticalScale(20),
+
+    width:"100%"
     
   },
   logoImgContainer:{
-    width:horizontalScale(30),
-    height:verticalScale(30),
+    width:horizontalScale(100),
+    height:verticalScale(35),
     marginTop: verticalScale(60),
 
   },

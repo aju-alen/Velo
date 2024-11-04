@@ -43,7 +43,7 @@ const SetAppointment = () => {
         'registerDetail',
         JSON.stringify(setAppointmentDate.data.agentInfo)
       );
-      router.replace('/(tabs)/home');
+      router.replace('/(auth)/agentRestriction');
     } catch (err) {
       console.log(err, 'err--');
     }

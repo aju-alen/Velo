@@ -9,18 +9,71 @@ import * as SecureStore from 'expo-secure-store';
 
 
 const Register = () => {
-  console.log('This is Register Page');
-  
   const params = useLocalSearchParams();
   const { role } = params;
-  console.log(role, 'params--');
+  
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [reEnterPassword, setreEnterPassword] = useState('')
   
-  const handleRegister =async () => {
-    if (password === reEnterPassword) {
+  // Add error states
+  const [errors, setErrors] = useState({
+    name: '',
+    email: '',
+    password: '',
+    reEnterPassword: ''
+  })
+
+  // Validation functions
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return emailRegex.test(email)
+  }
+
+  const validatePassword = (password) => {
+    return password.length >= 8
+  }
+
+  const validateForm = () => {
+    let isValid = true
+    const newErrors = {
+      name: '',
+      email: '',
+      password: '',
+      reEnterPassword: ''
+    }
+
+    // Name validation
+    if (name.trim().length < 2) {
+      newErrors.name = 'Name must be at least 2 characters'
+      isValid = false
+    }
+
+    // Email validation
+    if (!validateEmail(email)) {
+      newErrors.email = 'Please enter a valid email'
+      isValid = false
+    }
+
+    // Password validation
+    if (!validatePassword(password)) {
+      newErrors.password = 'Password must be at least 8 characters'
+      isValid = false
+    }
+
+    // Re-enter password validation
+    if (password !== reEnterPassword) {
+      newErrors.reEnterPassword = 'Passwords do not match'
+      isValid = false
+    }
+
+    setErrors(newErrors)
+    return isValid
+  }
+  
+  const handleRegister = async () => {
+    if (validateForm()) {
       await SecureStore.setItemAsync('tempRegister', JSON.stringify({
         name,
         email,
@@ -28,146 +81,174 @@ const Register = () => {
         role
       }))
       router.replace('/mobileInput')
-    } else {
-      alert('Passwords do not match')
     }
   }
 
-
-
   return (
-    <ThemedView style={{
-      flex: 1,
-      marginTop: 40,
-      paddingHorizontal: 20,
-    }}>
+    <ThemedView style={styles.mainContainer}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <ScrollView >
+          <ScrollView showsVerticalScrollIndicator={false}>
+            <ThemedView style={styles.headerContainer}>
+              <ThemedText type='logoText' style={styles.logoText}>Velo</ThemedText>
+              <ThemedText type='subtitle' style={styles.subheading}>
+                {role === "USER" ? "User" : "Agent"} Registration
+              </ThemedText>
+            </ThemedView>
 
-            <ThemedText type='logoText' style={styles.logoText}>Velo</ThemedText>
-            <ThemedText type='subtitle' style={styles.subheading}>{role === "USER" ? "User" : "Agent"} Registration</ThemedText>
+            <ThemedView style={styles.formContainer}>
+              <InputField
+                label="Name"
+                placeholder="Enter Your Name"
+                value={name}
+                onChangeText={(text) => {
+                  setName(text)
+                  setErrors(prev => ({...prev, name: ''}))
+                }}
+                error={errors.name}
+                autoComplete='name'
+                keyboardType='default'
+              />
 
-            {/* Name Input */}
-            <ThemedView style={{ marginBottom: verticalScale(6) }}>
-              <ThemedText type='default' style={styles.textInputHeading}>Name</ThemedText>
-              <ThemedView style={styles.textInputBox}>
-                <TextInput
-                  placeholder="Enter Your Name"
-                  placeholderTextColor="gray"
-                  value={name}
-                  onChangeText={setName}
-                  keyboardType='default'
-                  autoComplete='name'
-                  keyboardAppearance='dark'
-                  returnKeyType='next'
-                  style={styles.textInputText}
+              <InputField
+                label="Email"
+                placeholder="Enter Your Email"
+                value={email}
+                onChangeText={(text) => {
+                  setEmail(text)
+                  setErrors(prev => ({...prev, email: ''}))
+                }}
+                error={errors.email}
+                autoCapitalize='none'
+                keyboardType='email-address'
+                autoComplete='email'
+              />
+
+              <InputField
+                label="Password"
+                placeholder="Enter Your Password"
+                value={password}
+                onChangeText={(text) => {
+                  setPassword(text)
+                  setErrors(prev => ({...prev, password: ''}))
+                }}
+                error={errors.password}
+                secureTextEntry
+              />
+
+              <InputField
+                label="Re-Enter Password"
+                placeholder="Re-Enter Your Password"
+                value={reEnterPassword}
+                onChangeText={(text) => {
+                  setreEnterPassword(text)
+                  setErrors(prev => ({...prev, reEnterPassword: ''}))
+                }}
+                error={errors.reEnterPassword}
+                secureTextEntry
+              />
+
+              <ThemedView style={styles.buttonWrapper}>
+                <CustomButton 
+                  disableButton={!name || !email || !password || !reEnterPassword}
+                  buttonText='Register'
+                  handlePress={handleRegister}
                 />
               </ThemedView>
             </ThemedView>
-
-           
-
-            {/* Email Input */}
-            <ThemedView style={{ marginBottom: verticalScale(6) }}>
-              <ThemedText type='default' style={styles.textInputHeading}>Email</ThemedText>
-              <ThemedView style={styles.textInputBox}>
-                <TextInput
-                  placeholder="Enter Your Email"
-                  placeholderTextColor="gray"
-                  value={email}
-                  autoCapitalize='none'
-                  onChangeText={setEmail}
-                  keyboardType='email-address'
-                  autoComplete='email'
-                  keyboardAppearance='dark'
-                  returnKeyType='next'
-                  style={styles.textInputText}
-                />
-              </ThemedView>
-            </ThemedView>
-
-            {/* Password Input */}
-            <ThemedView style={{ marginBottom: verticalScale(6) }}>
-              <ThemedText type='default' style={styles.textInputHeading}>Password</ThemedText>
-              <ThemedView style={styles.textInputBox}>
-                <TextInput
-                  placeholder="Enter Your Password"
-                  placeholderTextColor="gray"
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry
-                  keyboardAppearance='dark'
-                  returnKeyType='next'
-                  style={styles.textInputText}
-                />
-              </ThemedView>
-            </ThemedView>
-
-            {/* Re-Enter Password Input */}
-            <ThemedView style={{ marginBottom: verticalScale(6) }}>
-              <ThemedText type='default' style={styles.textInputHeading}>Re-Enter Password</ThemedText>
-              <ThemedView style={styles.textInputBox}>
-                <TextInput
-                  placeholder="Re-Enter Your Password"
-                  placeholderTextColor="gray"
-                  value={reEnterPassword}
-                  onChangeText={setreEnterPassword}
-                  secureTextEntry
-                  keyboardAppearance='dark'
-                  returnKeyType='done' // Done for the last field
-                  style={styles.textInputText}
-                />
-              </ThemedView>
-              <ThemedView style={styles.buttonContainer}>
-              <CustomButton disableButton={
-                !name || !email || !password || !reEnterPassword
-              } buttonText='Register'  handlePress={handleRegister} />
-              </ThemedView>
-            </ThemedView>
-
           </ScrollView>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
     </ThemedView>
-  )
-}
+  );
+};
 
-export default Register
+// Enhanced Input Field Component with error handling
+const InputField = ({ label, error, ...props }) => (
+  <ThemedView style={styles.inputContainer}>
+    <ThemedText type='default' style={styles.inputLabel}>{label}</ThemedText>
+    <ThemedView style={[
+      styles.inputWrapper,
+      error && styles.inputWrapperError
+    ]}>
+      <TextInput
+        {...props}
+        placeholderTextColor="rgba(128, 128, 128, 0.6)"
+        keyboardAppearance='dark'
+        style={styles.input}
+      />
+    </ThemedView>
+    {error ? (
+      <ThemedText style={styles.errorText}>{error}</ThemedText>
+    ) : null}
+  </ThemedView>
+);
+
 
 const styles = StyleSheet.create({
-  container: {
-    marginTop: verticalScale(40),
-    paddingHorizontal: horizontalScale(20),
-  },
-  logoText: {
-    marginTop: verticalScale(60),
-  },
-  subheading: {
-    marginTop: verticalScale(20),
-  },
-  textInputHeading: {
-    marginBottom: verticalScale(8),
-    marginTop: verticalScale(12),
-  },
-  textInputBox: {
-    borderBottomWidth: 1,
-    borderColor: 'gray',
-    borderRadius: moderateScale(5),
-    padding: moderateScale(10),
-    marginBottom: verticalScale(12),
-    height: verticalScale(40),
-  },
-  textInputText: {
-    fontSize: moderateScale(14),
-    color: 'gray',
-  },
-  buttonContainer:{
-    justifyContent:'center',
-    alignItems:'center',
-  }
-  
-})
+mainContainer: {
+  flex: 1,
+  paddingTop: Platform.OS === 'ios' ? verticalScale(60) : verticalScale(40),
+  paddingHorizontal: horizontalScale(24),
+},
+headerContainer: {
+  alignItems: 'center',
+  marginBottom: verticalScale(40),
+},
+inputWrapper: {
+  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+  borderRadius: moderateScale(12),
+  borderWidth: 1,
+  borderColor: 'rgba(255, 255, 255, 0.1)',
+  overflow: 'hidden',
+  height: verticalScale(52),
+},
+inputWrapperError: {
+  borderColor: '#FF6B6B', // Error color
+  borderWidth: 1,
+},
+errorText: {
+  color: '#FF6B6B',
+  fontSize: moderateScale(12),
+  marginTop: verticalScale(4),
+  marginLeft: horizontalScale(4),
+},
+input: {
+  flex: 1,
+  paddingHorizontal: horizontalScale(16),
+  fontSize: moderateScale(16),
+  color: '#666',
+  height: '100%',
+},
+logoText: {
+  fontSize: moderateScale(42),
+  marginBottom: verticalScale(16),
+},
+subheading: {
+  fontSize: moderateScale(24),
+  opacity: 0.9,
+},
+formContainer: {
+  paddingHorizontal: horizontalScale(8),
+},
+inputContainer: {
+  marginBottom: verticalScale(20),
+},
+inputLabel: {
+  fontSize: moderateScale(14),
+  marginBottom: verticalScale(8),
+  letterSpacing: 0.5,
+  opacity: 0.9,
+},
+
+buttonWrapper: {
+  marginTop: verticalScale(32),
+  alignItems: 'center',
+  paddingBottom: verticalScale(20),
+},
+});
+
+export default Register;

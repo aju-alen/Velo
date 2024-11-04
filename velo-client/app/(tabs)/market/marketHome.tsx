@@ -48,7 +48,7 @@ const MarketHome = () => {
   }
 
   const handleButtonPress = () => {
-    if (accountDetails.registerVerificationStatus !== 'LOGGED_IN') {
+    if (accountDetails.registerVerificationStatus === 'LOGGED_IN') {
       Alert.alert(
         'Action Disabled',
         'The button has been disabled until you have been verified by the admin team.'

@@ -5,9 +5,9 @@ import { ThemedText } from '@/components/ThemedText'
 import { horizontalScale, verticalScale, moderateScale } from '@/constants/metrics'
 import CustomButton from '@/components/CustomButton'
 import { router } from 'expo-router'
-import * as SecureStore from 'expo-secure-store';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import axios from 'axios';
+import * as SecureStore from 'expo-secure-store'
+import { useColorScheme } from '@/hooks/useColorScheme'
+import axios from 'axios'
 import { ipURL } from '@/constants/backendUrl'
 
 export type selectedArea = {
@@ -17,71 +17,73 @@ export type selectedArea = {
   flag: string
 }
 
-
-const mobileInput = () => {
-  console.log('This is mobileInput Page');
-  
-  const colorScheme = useColorScheme();
+const MobileInput = () => {
+  const colorScheme = useColorScheme()
   const [areas, setAreas] = useState([])
   const [mobile, setMobile] = useState('')
   const [selectedArea, setSelectedArea] = useState<selectedArea | null>(null)
   const [modalVisible, setModalVisible] = useState(false)
   const [finalModalVisible, setFinalModalVisible] = useState(false)
   const [tempRegister, setTempRegister] = useState({})
+  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
     const fetchTempRegister = async () => {
-      let result = await SecureStore.getItemAsync('tempRegister');
+      let result = await SecureStore.getItemAsync('tempRegister')
       setTempRegister(JSON.parse(result))
     }
     fetchTempRegister()
   }, [])
 
-  const handleConfirm = async () => {
+  const handleConfirm = () => {
+    if (!mobile || mobile.length < 9) {
+      alert('Please enter a valid mobile number')
+      return
+    }
     setFinalModalVisible(true)
   }
 
   const handleSubmit = async () => {
-
+    setIsLoading(true)
     try {
-      const checkIfAlreadyRegistered = await axios.get(`${ipURL}/api/auth/check-registered-account/${selectedArea?.callingCode}/${mobile}`)
-      console.log(checkIfAlreadyRegistered.data.accountExists, 'checkIfAlreadyRegistered.data--');
-      if( checkIfAlreadyRegistered.data.accountExists){
+      const checkIfAlreadyRegistered = await axios.get(
+        `${ipURL}/api/auth/check-registered-account/${selectedArea?.callingCode}/${mobile}`
+      )
+      
+      if (checkIfAlreadyRegistered.data.accountExists) {
         alert('Account already exists. Please Login')
         router.push('/(auth)/login')
+        return
       }
 
-      else {
+      const mobileNumber = (selectedArea?.callingCode + mobile).replace("+", "")
+      const resp = await axios.post(`https://api.smsala.com/api/Verify`, {
+        "api_id": process.env.EXPO_PUBLIC_SMSALA_API_ID,
+        "api_password": process.env.EXPO_PUBLIC_SMSALA_API_PASSWORD,
+        "brand": process.env.EXPO_PUBLIC_SMSALA_API_BRAND,
+        "phonenumber": mobileNumber,
+        "sender_id": process.env.EXPO_PUBLIC_SMSALA_API_SENDER_ID,
+      })
 
-        const mobileNumber = (selectedArea?.callingCode + mobile).replace("+", "");
+      await SecureStore.setItemAsync('tempMobile', JSON.stringify({
+        mobile: mobile,
+        code: selectedArea?.callingCode,
+        country: selectedArea?.code
+      }))
 
-        const resp = await axios.post(`https://api.smsala.com/api/Verify`, {
-          "api_id": process.env.EXPO_PUBLIC_SMSALA_API_ID,
-          "api_password": process.env.EXPO_PUBLIC_SMSALA_API_PASSWORD,
-          "brand": process.env.EXPO_PUBLIC_SMSALA_API_BRAND,
-          "phonenumber": mobileNumber,
-          "sender_id": process.env.EXPO_PUBLIC_SMSALA_API_SENDER_ID,
-        })
-        console.log(resp.data, 'resp.data--');
-        router.replace({
-          pathname: "/otpInput",
-          params: {
-            verfication_id: resp.data.verfication_id
-          }
-        })
-
-
-        await SecureStore.setItemAsync('tempMobile', JSON.stringify({
-          mobile: mobile,
-          code: selectedArea?.callingCode,
-          country: selectedArea?.code
-        }))
-
-      }
+      router.replace({
+        pathname: "/otpInput",
+        params: {
+          verfication_id: resp.data.verfication_id
+        }
+      })
+      
       setFinalModalVisible(false)
-    }
-    catch (e) {
-      console.log(e);
+    } catch (e) {
+      console.error(e)
+      alert('Something went wrong. Please try again.')
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -94,172 +96,141 @@ const mobileInput = () => {
     fetch("https://restcountries.com/v2/all")
       .then(response => response.json())
       .then(data => {
-        console.log(data);
-
-        let areaData = data.map((item) => {
-          return {
-            code: item.alpha2Code,
-            item: item.name,
-            callingCode: `+${item.callingCodes[0]}`,
-            flag: `https://flagsapi.com/${item.alpha2Code}/flat/64.png`
-          }
-        })
+        let areaData = data.map((item) => ({
+          code: item.alpha2Code,
+          item: item.name,
+          callingCode: `+${item.callingCodes[0]}`,
+          flag: `https://flagsapi.com/${item.alpha2Code}/flat/64.png`
+        }))
         setAreas(areaData)
+        
         if (areaData.length > 0) {
-          let defaultData = areaData.filter((a: any) => a.code == "AE");
-
+          let defaultData = areaData.filter((a: any) => a.code == "AE")
           if (defaultData.length > 0) {
             setSelectedArea(defaultData[0])
           }
         }
-
+      })
+      .catch(error => {
+        console.error('Error fetching country data:', error)
+        alert('Failed to load country data')
       })
   }, [])
-  console.log('====================================');
-  console.log(selectedArea, 'selectedArea');
-  console.log('====================================');
-  function renderAreasCodesModal() {
 
-    const renderItem = ({ item }) => {
-      return (
-        <TouchableOpacity
-          style={{
-            padding: moderateScale(10),
-            flexDirection: "row"
-          }}
-          onPress={() => {
-            setSelectedArea(item),
-              setModalVisible(false)
-          }}
-        >
-          <Image
-            source={{ uri: item.flag }}
-            style={{
-              height: verticalScale(30),
-              width: horizontalScale(30),
-              marginRight: horizontalScale(10)
-            }}
-          />
-          <Text style={{ fontSize: moderateScale(16), color: "#fff" }}>{item.item}</Text>
-        </TouchableOpacity>
-      )
-    }
+  const renderAreaItem = ({ item }) => (
+    <TouchableOpacity
+      style={styles.countryListItem}
+      onPress={() => {
+        setSelectedArea(item)
+        setModalVisible(false)
+      }}
+    >
+      <Image
+        source={{ uri: item.flag }}
+        style={styles.countryFlag}
+      />
+      <Text style={[styles.countryName, { color: "#fff" }]}>{item.item}</Text>
+    </TouchableOpacity>
+  )
 
-
-
-    return (
-
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-      >
-        <TouchableWithoutFeedback
-          onPress={() => setModalVisible(false)}
-        >
-          <View
-            style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
-          >
-            <View
-              style={{
-                height: verticalScale(400),
-                width: horizontalScale(400),
-                backgroundColor: "#111",
-                borderRadius: moderateScale(12),
-              }}
-            >
-              <FlatList
-                data={areas}
-                renderItem={renderItem}
-                horizontal={false}
-                keyExtractor={(item) => item.code}
-                style={{
-                  padding: moderateScale(20),
-                  marginBottom: verticalScale(20)
-                }}
-              />
-            </View>
+  const renderAreasCodesModal = () => (
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={modalVisible}
+    >
+      <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <FlatList
+              data={areas}
+              renderItem={renderAreaItem}
+              keyExtractor={(item) => item.code}
+              style={styles.countryList}
+            />
           </View>
-        </TouchableWithoutFeedback>
-      </Modal>
-    )
-  }
+        </View>
+      </TouchableWithoutFeedback>
+    </Modal>
+  )
 
-  const confirmDetails = (tempRegister) => {
-    console.log(tempRegister, 'tempRegister--');
-
-    return (
-      <Modal
-        animationType="slide"
-        transparent={false}
-        visible={finalModalVisible}
-      >
-        <ThemedView style={styles.container}>
-          <ThemedText type='subtitle'>
+  const ConfirmationModal = () => (
+    <Modal
+      animationType="slide"
+      transparent={false}
+      visible={finalModalVisible}
+    >
+      <ThemedView style={styles.confirmationContainer}>
+        <View style={styles.confirmationHeader}>
+          <ThemedText type='subtitle' style={styles.confirmationTitle}>
             Confirm Details
           </ThemedText>
-          <ThemedText type='default'>
-            Please confirm your details
+          <ThemedText type='default' style={styles.confirmationSubtitle}>
+            Please verify your information below
           </ThemedText>
-          <ThemedText type='subtitle'>
-            {selectedArea?.callingCode} {mobile}
-          </ThemedText>
-          <ThemedText type='subtitle'>
-            {tempRegister?.name}
-          </ThemedText>
-          <ThemedText type='subtitle'>
-            {tempRegister?.email}
-          </ThemedText>
-          <ThemedText type='subtitle'>
-            {tempRegister?.role}
-          </ThemedText>
+        </View>
 
+        <View style={styles.detailsContainer}>
+          <DetailItem label="Phone Number" value={`${selectedArea?.callingCode} ${mobile}`} />
+          <DetailItem label="Name" value={tempRegister?.name} />
+          <DetailItem label="Email" value={tempRegister?.email} />
+          <DetailItem label="Role" value={tempRegister?.role} />
+        </View>
+
+        <View style={styles.actionButtons}>
           <CustomButton
-            buttonText='Confirm'
-            handlePress={handleSubmit} />
+            buttonText={isLoading ? 'Processing...' : 'Confirm'}
+            handlePress={handleSubmit}
+            disabled={isLoading}
+          />
 
-          <ThemedText type='default' style={{
-            marginTop: verticalScale(20)
-          }}> Made a mistake? <ThemedText type='link' onPress={handleGoToChooseRole}>
-            Edit</ThemedText>
+          <ThemedText type='default' style={styles.editText}>
+            Made a mistake?{' '}
+            <ThemedText type='link' onPress={handleGoToChooseRole}>
+              Edit
+            </ThemedText>
           </ThemedText>
-        </ThemedView>
+        </View>
+      </ThemedView>
+    </Modal>
+  )
 
-      </Modal>
-    )
-
-
-  }
-
-
-
+  const DetailItem = ({ label, value }) => (
+    <View style={styles.detailItem}>
+      <ThemedText type='default' style={styles.detailLabel}>{label}</ThemedText>
+      <ThemedText type='subtitle' style={styles.detailValue}>{value}</ThemedText>
+    </View>
+  )
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <ThemedView style={styles.container}>
-        <ThemedText type='subtitle'>
-          Enter Your Mobile Number
-        </ThemedText>
-        <ThemedText type='default'>
-          We will send you a verification code
-        </ThemedText>
+        <View style={styles.headerContainer}>
+          <ThemedText type='subtitle' style={styles.title}>
+            Enter Your Mobile Number
+          </ThemedText>
+          <ThemedText type='default' style={styles.subtitle}>
+            We will send you a verification code
+          </ThemedText>
+        </View>
 
         <ThemedView style={styles.inputContainer}>
-          <TouchableOpacity style={styles.countryCodeTextButton} onPress={() => setModalVisible(true)}>
-            <ThemedView style={{ justifyContent: "center", marginLeft: 5 }}>
-              <Image
-                source={{ uri: selectedArea?.flag }}
-                style={{
-                  width: horizontalScale(30),
-                  height: verticalScale(30),
-                }}
-              />
-            </ThemedView>
-
-            <View style={{ justifyContent: "center", marginLeft: horizontalScale(5) }}>
-              <Text style={{ color: colorScheme === 'dark' ? '#fff' : '#000', fontSize: moderateScale(12) }}>{selectedArea?.callingCode}</Text>
-            </View>
+          <TouchableOpacity 
+            style={styles.countryCodeButton} 
+            onPress={() => setModalVisible(true)}
+          >
+            <Image
+              source={{ uri: selectedArea?.flag }}
+              style={styles.selectedFlag}
+            />
+            <Text style={[
+              styles.countryCode,
+              { color: colorScheme === 'dark' ? '#fff' : '#000' }
+            ]}>
+              {selectedArea?.callingCode}
+            </Text>
           </TouchableOpacity>
+
           <TextInput
             style={styles.input}
             value={mobile}
@@ -267,57 +238,148 @@ const mobileInput = () => {
             placeholder='Mobile Number'
             placeholderTextColor='grey'
             keyboardType='numeric'
-
-          ></TextInput>
+            maxLength={12}
+          />
         </ThemedView>
+
         <CustomButton
           buttonText='Continue'
-          handlePress={handleConfirm} />
+          handlePress={handleConfirm}
+          disabled={!mobile || mobile.length < 9}
+        />
 
         {renderAreasCodesModal()}
-        {confirmDetails(tempRegister)}
+        <ConfirmationModal />
       </ThemedView>
     </TouchableWithoutFeedback>
   )
 }
 
-export default mobileInput
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     alignItems: 'center',
-    marginTop: verticalScale(40),
-
-
+    paddingHorizontal: horizontalScale(20),
+    paddingTop: verticalScale(60),
   },
-  logoText: {
-    marginTop: verticalScale(60),
+  headerContainer: {
+    alignItems: 'center',
+    marginBottom: verticalScale(40),
   },
-  subheading: {
-
-    marginTop: verticalScale(20),
+  title: {
+    fontSize: moderateScale(24),
+    marginBottom: verticalScale(10),
+  },
+  subtitle: {
+    fontSize: moderateScale(16),
+    opacity: 0.8,
   },
   inputContainer: {
     flexDirection: 'row',
     borderColor: 'grey',
-    borderBottomWidth: moderateScale(0.4),
+    borderWidth: moderateScale(1),
+    borderRadius: moderateScale(12),
     width: "100%",
     height: verticalScale(58),
     alignItems: 'center',
-    justifyContent: 'space-between',
-    marginVertical: verticalScale(50),
+    marginBottom: verticalScale(30),
+    paddingHorizontal: horizontalScale(15),
   },
-  countryCodeTextButton: {
-    paddingLeft: horizontalScale(10),
-
+  countryCodeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingRight: horizontalScale(15),
+    borderRightWidth: 1,
+    borderRightColor: 'grey',
+  },
+  selectedFlag: {
+    width: horizontalScale(30),
+    height: verticalScale(30),
+    marginRight: horizontalScale(8),
+    borderRadius: moderateScale(4),
+  },
+  countryCode: {
+    fontSize: moderateScale(16),
+    fontWeight: '500',
   },
   input: {
     flex: 1,
-    marginLeft: horizontalScale(10),
+    marginLeft: horizontalScale(15),
     fontSize: moderateScale(16),
     color: 'grey',
-  }
-
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    width: '90%',
+    maxHeight: '70%',
+    backgroundColor: '#111',
+    borderRadius: moderateScale(16),
+    overflow: 'hidden',
+  },
+  countryList: {
+    padding: moderateScale(15),
+  },
+  countryListItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: moderateScale(12),
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.1)',
+  },
+  countryFlag: {
+    width: horizontalScale(30),
+    height: verticalScale(30),
+    marginRight: horizontalScale(12),
+    borderRadius: moderateScale(4),
+  },
+  countryName: {
+    fontSize: moderateScale(16),
+  },
+  confirmationContainer: {
+    flex: 1,
+    padding: moderateScale(20),
+    justifyContent: 'space-between',
+  },
+  confirmationHeader: {
+    alignItems: 'center',
+    marginBottom: verticalScale(30),
+  },
+  confirmationTitle: {
+    fontSize: moderateScale(24),
+    marginBottom: verticalScale(8),
+  },
+  confirmationSubtitle: {
+    fontSize: moderateScale(16),
+    opacity: 0.8,
+  },
+  detailsContainer: {
+    flex: 1,
+    paddingVertical: verticalScale(20),
+  },
+  detailItem: {
+    marginBottom: verticalScale(20),
+  },
+  detailLabel: {
+    fontSize: moderateScale(14),
+    opacity: 0.7,
+    marginBottom: verticalScale(4),
+  },
+  detailValue: {
+    fontSize: moderateScale(18),
+  },
+  actionButtons: {
+    paddingVertical: verticalScale(20),
+  },
+  editText: {
+    textAlign: 'center',
+    marginTop: verticalScale(15),
+  },
 })
+
+export default MobileInput

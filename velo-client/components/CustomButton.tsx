@@ -36,14 +36,25 @@ export default CustomButton
 const styles = StyleSheet.create({
   buttonContainer: {
     backgroundColor: '#FFAC1C',
-    padding: moderateScale(10),
-    borderRadius: moderateScale(10),
+    padding: moderateScale(12),
+    borderRadius: moderateScale(8),
     marginTop: verticalScale(20),
+    elevation: 3, // Adds subtle shadow on Android
+    shadowColor: '#000', // iOS shadow
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    alignItems: 'center', // Centers content horizontally
   },
   heroText: {
     fontSize: moderateScale(24),
-    fontWeight: 'bold',
+    fontWeight: '600', // Slightly less bold for better readability
     color: '#fff',
     textAlign: 'center',
+    letterSpacing: 0.5, // Improves text readability
+    includeFontPadding: false, // Removes extra padding around text
+    textShadowColor: 'rgba(0, 0, 0, 0.1)', // Subtle text shadow
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   }
 })

@@ -57,6 +57,7 @@ const FinalRegisterForm = () => {
   }, [])
 
   const handleFinalRegisterForm = async () => {
+
     try {
       if (accountRole === "USER") {
         const formData = {
@@ -123,7 +124,7 @@ const FinalRegisterForm = () => {
                 <ThemedText type='default' style={styles.textInputHeading}>Address 1</ThemedText>
                 <ThemedView style={styles.textInputBox}>
                   <TextInput
-                    placeholder="Enter Your Name"
+                    placeholder="Enter Address 1"
                     placeholderTextColor="gray"
                     value={addressOne}
                     onChangeText={setAddressOne}
@@ -140,7 +141,7 @@ const FinalRegisterForm = () => {
                 <ThemedText type='default' style={styles.textInputHeading}>Address 2</ThemedText>
                 <ThemedView style={styles.textInputBox}>
                   <TextInput
-                    placeholder="Enter Your Email"
+                    placeholder="Enter Address 2"
                     placeholderTextColor="gray"
                     value={addressTwo}
                     autoCapitalize='none'
@@ -158,7 +159,7 @@ const FinalRegisterForm = () => {
                 <ThemedText type='default' style={styles.textInputHeading}>State</ThemedText>
                 <ThemedView style={styles.textInputBox}>
                   <TextInput
-                    placeholder="Enter Your Email"
+                    placeholder="Enter Your State"
                     placeholderTextColor="gray"
                     value={state}
                     autoCapitalize='none'
@@ -176,7 +177,7 @@ const FinalRegisterForm = () => {
                 <ThemedText type='default' style={styles.textInputHeading}>City</ThemedText>
                 <ThemedView style={styles.textInputBox}>
                   <TextInput
-                    placeholder="Enter Your Email"
+                    placeholder="Enter Your City"
                     placeholderTextColor="gray"
                     value={city}
                     autoCapitalize='none'
@@ -194,7 +195,7 @@ const FinalRegisterForm = () => {
                 <ThemedText type='default' style={styles.textInputHeading}>Pin Code</ThemedText>
                 <ThemedView style={styles.textInputBox}>
                   <TextInput
-                    placeholder="Enter Your Email"
+                    placeholder="Enter Your Zipcode"
                     placeholderTextColor="gray"
                     value={zipCode}
                     autoCapitalize='none'

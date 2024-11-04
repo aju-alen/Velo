@@ -13,6 +13,7 @@ const VerifyAgent = () => {
   const [doc1, setDoc1] = useState(null)
   const [docUrl, setDocUrl] = useState(null)
   const [userId, setUserId] = useState(null)
+  const [userName, setUserName] = useState(null)
   const [isUploading, setIsUploading] = useState(false)
   const [uploadEligible, setUploadEligible] = useState(false)
   
@@ -27,6 +28,7 @@ const VerifyAgent = () => {
       if (result) {
         const parsedResult = JSON.parse(result)
         setUserId(parsedResult.id)
+        setUserName(parsedResult.name)
         setUploadEligible(parsedResult.registerVerificationStatus === 'PARTIAL')
       }
     }
@@ -76,6 +78,7 @@ const VerifyAgent = () => {
     }
 
     formData.append('id', userId)
+    formData.append('name', userName)
 
     try {
       const response = await fetch(url, {
@@ -212,7 +215,7 @@ const VerifyAgent = () => {
                   {docUrl ? (
                     <>
                       <Entypo name="check" size={moderateScale(16)} color="white" />
-                      {" "}Document Verified
+                      {" "}Document Uploaded
                     </>
                   ) : (
                     <>

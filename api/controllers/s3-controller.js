@@ -16,8 +16,7 @@ export const postProfileImageS3 = async (req, res, next) => {
     console.log(process.env.AWS_ACCESS_KEY_ID, process.env.AWS_SECRET_ACCESS_KEY, process.env.AWS_REGION);
 
     // Retrieve the body parameters
-    const { id } = req.body;
-
+    const { id,name } = req.body;
     // Access the uploaded file through `req.file` since you're using `upload.single()`
     const file = req.file;
     console.log(file, 'file---');  // Log the uploaded file
@@ -32,7 +31,7 @@ export const postProfileImageS3 = async (req, res, next) => {
     const params = {
         Bucket: process.env.S3_BUCKET_NAME,
         // Key: `${id}/verificationfiles/${file.originalname}`, // File name you want to save in S3
-        Key: `${id}/verificationfiles/verification.pdf`, // File name you want to save in S3
+        Key: `${id}-${name}/verificationfiles/verification.pdf`, // File name you want to save in S3
         Body: file.buffer,
         ContentType: file.mimetype,
     };

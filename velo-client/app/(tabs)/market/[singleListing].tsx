@@ -125,7 +125,7 @@ const SingleListing = () => {
 
           <TouchableOpacity style={styles.contactButton}>
             <MaterialIcons name="bookmark" size={24} color="#FFF" />
-            <ThemedText style={styles.contactButtonText}>View Dealers</ThemedText>
+            <ThemedText style={styles.contactButtonText}>View Shippers</ThemedText>
           </TouchableOpacity>
 
           <ThemedView style={styles.similarItemsContainer}>

@@ -128,7 +128,7 @@ const Login = () => {
 
             <ThemedView style={styles.signupContainer}>
               <ThemedText style={styles.signupText}>Don't have an account? </ThemedText>
-              <TouchableWithoutFeedback onPress={() => router.push('/(auth)/register')}>
+              <TouchableWithoutFeedback onPress={() => router.push('/(auth)/chooseRole')}>
                 <ThemedText style={styles.signupLink}>Sign Up</ThemedText>
               </TouchableWithoutFeedback>
             </ThemedView>
