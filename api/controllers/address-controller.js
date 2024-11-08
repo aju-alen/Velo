@@ -49,6 +49,24 @@ export const addUserAddress = async (req, res, next) => {
     }
 }
 
+export const addExternalUserAddress = async (req, res, next) => {
+    console.log(req.body,'external user address');
+    
+    try{
+        const createExternalSavedAddress = await prisma.savedAddress.create({
+            data: {...req.body,countryId:Number(req.body.countryId)}
+        });
+        await prisma.$disconnect();
+        res.status(200).json({message: "Address added successfully"});
+
+
+    }
+    catch (err) {
+        console.log(err);
+        next(err);
+    }
+}
+
 export const addAgentAddress = async (req, res, next) => {
     const {userId,selectedCountries,selectedCategories} = req.body;    
     console.log(userId,selectedCountries);
@@ -82,4 +100,30 @@ export const addAgentAddress = async (req, res, next) => {
         next(err);
     }
 };
+
+export const getSingleUserAddress = async (req, res, next) => {
+    try{
+        const userId = req.params.userId;
+        const userAddress = await prisma.userAddress.findMany({
+            where: {
+                userId: userId
+            },
+            include: {
+                country: {
+                    select: {
+                        id: true,
+                        name: true
+                    }
+                }
+
+            }
+        });
+        await prisma.$disconnect();
+        res.status(200).json({message: "User address fetched successfully", data: userAddress});
+    }
+    catch (err) {
+        console.log(err);
+        next(err);
+    }
+}
 

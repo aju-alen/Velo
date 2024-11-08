@@ -36,7 +36,7 @@ const MobileInput = () => {
   }, [])
 
   const handleConfirm = () => {
-    if (!mobile || mobile.length < 9) {
+    if (!mobile) {
       alert('Please enter a valid mobile number')
       return
     }
@@ -245,7 +245,7 @@ const MobileInput = () => {
         <CustomButton
           buttonText='Continue'
           handlePress={handleConfirm}
-          disabled={!mobile || mobile.length < 9}
+          disabled={!mobile}
         />
 
         {renderAreasCodesModal()}

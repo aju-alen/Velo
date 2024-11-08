@@ -1,131 +1,521 @@
-import { StyleSheet, Text, View, Modal, TouchableOpacity, Dimensions } from 'react-native'
-import React, { useState, useEffect } from 'react'
-import { horizontalScale, verticalScale } from '@/constants/metrics'
+import { StyleSheet, Text, Image, Modal, TouchableOpacity, Dimensions, TextInput, TouchableWithoutFeedback, View, FlatList, ScrollView } from 'react-native'
+import React, { useEffect, useState } from 'react'
+import { horizontalScale, moderateScale, verticalScale } from '@/constants/metrics'
 import { ThemedView } from '@/components/ThemedView'
 import { ThemedText } from '@/components/ThemedText'
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { RadioButton } from 'react-native-paper';
+import * as SecureStore from 'expo-secure-store';
+import axios from 'axios'
+import { ipURL } from '@/constants/backendUrl'
+import { useColorScheme } from '@/hooks/useColorScheme'
+import SaveAddressForm from '@/components/SaveAddressForm'
+import SelectPackage from '@/components/SelectPackage'
+
 
 const { width } = Dimensions.get('window')
 
 const CreateShipmentHome = () => {
-  const [modalVisible, setModalVisible] = useState(true)
-  const [selectedOption, setSelectedOption] = useState(null)
+  const colorScheme = useColorScheme()
+  const [userSecureStorage, setUserSecureStorage] = useState(false)
 
-  const options = [
-    { id: 1, text: 'Online Payment' },
-    { id: 2, text: 'Payment during pickup' }
-  ]
+  const [userAddress, setUserAddress] = useState('')
+  const [modalVisible, setModalVisible] = useState(true)
+  const [countryCodeModal, setCountryCodeModal] = useState(false)
+  const [addressModalVisible, setAddressModalVisible] = useState(false)
+  const [selectedOption, setSelectedOption] = useState(null)
+  const [date, setDate] = useState(new Date());
+  const [show, setShow] = useState(false);
+  const [checked, setChecked] = useState('false');
+
+
+  //modal useState
+  const [countryList, setCountryList] = useState([]);
+  const [areas, setAreas] = useState([])
+  const [selectedArea, setSelectedArea] = useState(null)
+
+  const [savedAddressData, setSavedAddressData] = useState({
+    name: '',
+    companyName: '',
+    addressOne: '',
+    addressTwo: '',
+    city: '',
+    state: '',
+    email: '',
+    mobileNumber: '',
+    countryId: '',
+    residentAddress: '',
+    saveAddress: '',
+    countryCode: '',
+    zipCode: ''
+  })
+
+  console.log(userSecureStorage, 'userSecureStorage in parent data');
+  
+
+  const handleGetSavedUserAddress = (name, companyName, addressOne, addressTwo, city, state, email, mobileNumber, countryId, residentAddress, saveAddress, countryCode, zipCode) => {
+    setSavedAddressData({
+      name: name,
+      companyName: companyName,
+      addressOne: addressOne,
+      addressTwo: addressTwo,
+      city: city,
+      state: state,
+      email: email,
+      mobileNumber: mobileNumber,
+      countryId: countryId,
+      residentAddress: residentAddress,
+      saveAddress: saveAddress,
+      countryCode: countryCode,
+      zipCode: zipCode
+    })
+  }
+  console.log(savedAddressData, 'savedAddressData in parent data');
+
+  const handleCloseSaveAddressModal = () => {
+    setAddressModalVisible(false)
+  }
+
+  useEffect(() => {
+    if (!addressModalVisible) return;
+
+    const getAllCountries = async () => {
+      try {
+        const allCountry = await axios.get(`${ipURL}/api/country/get-all-countries`);
+        setCountryList(allCountry.data);
+      } catch (error) {
+        console.error('Error fetching countries:', error);
+      }
+    };
+
+    getAllCountries();
+  }, [addressModalVisible]);  // Depend directly on addressModalVisible
+
+  useEffect(() => {
+    fetch("https://restcountries.com/v2/all")
+      .then(response => response.json())
+      .then(data => {
+        let areaData = data.map((item) => ({
+          code: item.alpha2Code,
+          item: item.name,
+          callingCode: `+${item.callingCodes[0]}`,
+          flag: `https://flagsapi.com/${item.alpha2Code}/flat/64.png`
+        }))
+        setAreas(areaData)
+
+        if (areaData.length > 0) {
+          let defaultData = areaData.filter((a: any) => a.code == "AE")
+          if (defaultData.length > 0) {
+            setSelectedArea(defaultData[0])
+          }
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching country data:', error)
+        alert('Failed to load country data')
+      })
+  }, [])
+
+  useEffect(() => {
+    const checkUser = async () => {
+      let user = await SecureStore.getItemAsync('registerDetail')
+      if (!user) return
+      const userData = JSON.parse(user)
+      setUserSecureStorage(userData)
+    }
+    checkUser()
+  }, [])
+
+  useEffect(() => {
+    const getUserAddress = async () => {
+      const userAddress = await axios.get(`${ipURL}/api/address/get-user-address/${userSecureStorage['id']}`)
+      setUserAddress(userAddress.data.data[0])
+    }
+    if (checked === 'document' || checked === 'package') {
+      getUserAddress();
+    }
+  }, [checked === 'document' || checked === 'package'])
 
   const handleOptionSelect = (option) => {
     setSelectedOption(option)
     setModalVisible(false)
   }
 
+  const onChange = (event, selectedDate) => {
+    const currentDate = selectedDate;
+    setShow(false);
+    setDate(currentDate);
+  };
+
+  const PaymentOption = ({ title, description, buttonText, isSecondary, onPress }) => (
+    <ThemedView style={styles.section}>
+      <ThemedView style={styles.sectionHeader}>
+        <ThemedText style={styles.sectionTitle}>{title}</ThemedText>
+        <ThemedText style={styles.sectionDescription}>{description}</ThemedText>
+      </ThemedView>
+      <TouchableOpacity
+        style={[styles.actionButton, isSecondary && styles.secondaryButton]}
+        onPress={onPress}
+        activeOpacity={0.7}
+      >
+        <ThemedText style={[styles.buttonText, isSecondary && styles.secondaryButtonText]}>
+          {buttonText}
+        </ThemedText>
+      </TouchableOpacity>
+    </ThemedView>
+  )
+
+
   return (
     <ThemedView style={styles.container}>
-        
+      {/* Modal component remains unchanged */}
       <Modal
-        animationType="slide"
+        animationType="fade"
         transparent={true}
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
       >
         <ThemedView style={styles.modalOverlay}>
           <ThemedView style={styles.modalContent}>
-            <ThemedText style={styles.modalTitle}>Select Payment Type</ThemedText>
+            <ThemedText style={styles.modalTitle}>Select Payment Method</ThemedText>
 
-            <ThemedView style={styles.optionsContainer}>
-              {options.map((option) => (
-                <TouchableOpacity
-                  key={option.id}
-                  style={[
-                    styles.optionButton,
-                    selectedOption?.id === option.id && styles.selectedOption
-                  ]}
-                  onPress={() => handleOptionSelect(option)}
-                  activeOpacity={0.8}
-                >
-                  <ThemedText style={[
-                    styles.optionText,
-                    selectedOption?.id === option.id && styles.selectedOptionText
-                  ]}>
-                    {option.text}
-                  </ThemedText>
-                </TouchableOpacity>
-              ))}
-            </ThemedView>
+            <PaymentOption
+              title="Online Payment"
+              description="Pay securely using your credit/debit card or digital wallet"
+              buttonText="Pay Online"
+              isSecondary={false}
+              onPress={() => handleOptionSelect({ id: 1, text: 'Online Payment' })}
+            />
+
+            <ThemedView style={styles.divider} />
+
+            <PaymentOption
+              title="Pay During Collection"
+              description="Pay with cash or card when your package is picked up"
+              buttonText="Pay Later"
+              isSecondary
+              onPress={() => handleOptionSelect({ id: 2, text: 'Payment during pickup' })}
+            />
           </ThemedView>
         </ThemedView>
       </Modal>
+      <SaveAddressForm
+        addressModalVisible={addressModalVisible}
+        onClose={handleCloseSaveAddressModal}
+        getAddressData={handleGetSavedUserAddress}
+        userId={userSecureStorage['id']}
+      />
 
-      <ThemedText style={styles.mainText}>
-        {selectedOption ? `Creating ${selectedOption.text}` : 'Create Shipment Home'}
-      </ThemedText>
+<ScrollView showsVerticalScrollIndicator={false} style={styles.contentContainer}>
+      <ThemedView >
+        {/* Shipping Date Section */}
+        <ThemedView style={styles.section}>
+          <ThemedView style={styles.shippingDateContainer}>
+            <ThemedText style={styles.sectionHeaderText}>Shipping Date</ThemedText>
+            <DateTimePicker
+              testID="dateTimePicker"
+              value={date}
+              mode={'date'}
+              onChange={onChange}
+              minimumDate={new Date()}
+              maximumDate={new Date(new Date().setDate(new Date().getDate() + 7))}
+            />
+          </ThemedView>
+        </ThemedView>
+
+        {/* Shipping Type Section */}
+        <ThemedView style={styles.section}>
+
+          <ThemedText style={styles.sectionHeaderText}>What are you shipping?</ThemedText>
+          <ThemedView style={styles.shippingTypeContainer}>
+            <TouchableOpacity
+              style={[
+                styles.shippingTypeOption,
+                checked === 'document' && styles.shippingTypeSelected
+              ]}
+              onPress={() => setChecked('document')}
+            >
+              <RadioButton
+                value="document"
+                status={checked === 'document' ? 'checked' : 'unchecked'}
+                onPress={() => setChecked('document')}
+              />
+              <ThemedText style={styles.shippingTypeText}>Document</ThemedText>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.shippingTypeOption,
+                checked === 'package' && styles.shippingTypeSelected
+              ]}
+              onPress={() => setChecked('package')}
+            >
+              <RadioButton
+                value="package"
+                status={checked === 'package' ? 'checked' : 'unchecked'}
+                onPress={() => setChecked('package')}
+              />
+              <ThemedText style={styles.shippingTypeText}>Package</ThemedText>
+            </TouchableOpacity>
+          </ThemedView>
+        </ThemedView>
+
+        {/* Shipping Address Section */}
+        {checked !== 'false' &&
+          <>
+            <ThemedView style={styles.section}>
+
+              <ThemedText style={styles.sectionHeaderText}>Shipping From</ThemedText>
+              <ThemedView style={styles.addressCard}>
+                <ThemedText style={styles.addressName}>{userSecureStorage['name']}</ThemedText>
+                <ThemedText style={styles.addressText}>{userAddress['addressOne']}</ThemedText>
+                <ThemedText style={styles.addressText}>{userAddress['addressTwo']}</ThemedText>
+                <ThemedText style={styles.addressText}>
+                  {userAddress['city']}, {userAddress['country']?.name}
+                </ThemedText>
+                <ThemedView style={styles.contactInfo}>
+                  <ThemedText style={styles.contactText}>{userSecureStorage['email']}</ThemedText>
+                  <ThemedText style={styles.contactText}>
+                    {userSecureStorage['mobileCode']} {userSecureStorage['mobileNumber']}
+                  </ThemedText>
+                </ThemedView>
+              </ThemedView>
+            </ThemedView>
+
+            <ThemedView style={styles.section}>
+
+              <ThemedText style={styles.sectionHeaderText}>Shipping To</ThemedText>
+              <ThemedView style={styles.addressCard}>
+                <ThemedText style={styles.addressName}>{savedAddressData.name}</ThemedText>
+                <ThemedText style={styles.addressText}>{savedAddressData.addressOne}</ThemedText>
+                <ThemedText style={styles.addressText}>{savedAddressData.addressTwo}</ThemedText>
+                <ThemedText style={styles.addressText}>
+                  {savedAddressData.city}, {savedAddressData.countryId}
+                </ThemedText>
+                <ThemedText style={styles.addressText}>
+                  PinCode:{savedAddressData.zipCode}
+                </ThemedText>
+                <ThemedView style={styles.contactInfo}>
+                  <ThemedText style={styles.contactText}>{savedAddressData.email}</ThemedText>
+                  <ThemedText style={styles.contactText}>{savedAddressData.countryCode} {savedAddressData.mobileNumber}
+                  </ThemedText>
+                </ThemedView>
+                <TouchableOpacity style={styles.addAddressContainer} onPress={() => setAddressModalVisible(true)}>
+
+                  <ThemedText style={styles.addressName}>Add New Address</ThemedText>
+                </TouchableOpacity>
+              </ThemedView>
+            </ThemedView>
+          </>
+        }
+        <SelectPackage />
+          
+      </ThemedView>
+      </ScrollView>
     </ThemedView>
+    
   )
 }
 
-export default CreateShipmentHome
-
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    marginTop: verticalScale(40),
-    paddingHorizontal: horizontalScale(20),
-  },
+  // Keeping existing modal styles unchanged
   modalOverlay: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    marginTop: verticalScale(100),
   },
   modalContent: {
+    borderRadius: 16,
+    width: width * 0.9,
+    paddingVertical: verticalScale(24),
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    textAlign: 'center',
+    marginBottom: verticalScale(24),
+    paddingHorizontal: horizontalScale(20),
+  },
+  section: {
+
+    paddingHorizontal: horizontalScale(10),
+    marginBottom: verticalScale(16),
+
+  },
+  shippingDateContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: verticalScale(16),
+    marginTop: verticalScale(16),
+  },
+  sectionHeader: {
+    marginBottom: verticalScale(16),
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: verticalScale(4),
+  },
+  sectionDescription: {
+    fontSize: 14,
+    lineHeight: 20,
+    opacity: 0.8,
+  },
+  actionButton: {
     backgroundColor: '#FFAC1C',
-    padding: verticalScale(20),
+    paddingVertical: verticalScale(14),
     borderRadius: 12,
-    width: width * 0.85,
-    elevation: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  secondaryButton: {
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: '#FFAC1C',
+  },
+  buttonText: {
+    fontSize: 16,
+    fontWeight: '600',
+
+  },
+  secondaryButtonText: {
+
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#E5E5E5',
+    marginVertical: verticalScale(16),
+  },
+
+  // New and enhanced styles
+  container: {
+    flex: 1,
+
+  },
+  contentContainer: {
+    flex: 1,
+    paddingTop: verticalScale(40),
+    paddingHorizontal: horizontalScale(20),
+  },
+
+  sectionHeaderText: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: verticalScale(12),
+  },
+
+  shippingTypeContainer: {
+    flexDirection: 'row',
+    marginTop: verticalScale(8),
+    
+  },
+  shippingTypeOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: horizontalScale(16),
+    paddingVertical: verticalScale(12),
+
+    borderRadius: 12,
+
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 2,
     },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    textAlign: 'center',
-    marginBottom: verticalScale(16),
-    color: '#000',
-  },
-  optionsContainer: {
-    gap: verticalScale(10),
-  },
-  optionButton: {
-    padding: verticalScale(14),
-    borderRadius: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    borderWidth: 0.5,
-    borderColor: 'rgba(0, 0, 0, 0.1)',
-  },
-  selectedOption: {
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    borderColor: 'rgba(0, 0, 0, 0.2)',
+  shippingTypeSelected: {
+
+    borderColor: '#FFAC1C',
     borderWidth: 1,
+    paddingHorizontal: horizontalScale(12),
   },
-  optionText: {
-    textAlign: 'center',
+  shippingTypeText: {
     fontSize: 16,
-    color: '#000',
-    opacity: 0.8,
-  },
-  selectedOptionText: {
     fontWeight: '500',
-    opacity: 1,
   },
-  mainText: {
+  addressCard: {
+
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  addressName: {
     fontSize: 18,
+    fontWeight: '600',
+    marginBottom: verticalScale(8),
+  },
+  addressText: {
+    fontSize: 16,
+    lineHeight: 24,
+
+  },
+  contactInfo: {
+    marginTop: verticalScale(16),
+    paddingTop: verticalScale(16),
+    borderTopWidth: 1,
+    borderTopColor: '#E5E5E5',
+  },
+  contactText: {
+    fontSize: 14,
+
+    marginBottom: verticalScale(4),
+  },
+  addAddressContainer: {
+    padding: horizontalScale(10),
+    backgroundColor: 'rgba(255, 107, 107, 0.1)',
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  countryList: {
+    padding: moderateScale(15),
+  },
+
+  countryCode: {
+    fontSize: moderateScale(16),
     fontWeight: '500',
   },
-})
+
+  input: {
+    height: verticalScale(50),
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: moderateScale(12),
+    paddingHorizontal: horizontalScale(15),
+    marginBottom: verticalScale(15),
+    fontSize: moderateScale(16),
+    color: '#666',
+  },
+  pickerContainer: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: moderateScale(12),
+    marginBottom: verticalScale(25),
+    overflow: 'hidden',
+    height: verticalScale(130),
+  },
+  picker: {
+    color: '#fff',
+
+  },
+});
+
+export default CreateShipmentHome

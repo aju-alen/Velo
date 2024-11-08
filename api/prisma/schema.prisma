@@ -32,6 +32,8 @@ model User {
 
    // Define the one-to-many relationship
   addresses                   UserAddress[] // A user can have multiple addresses
+
+  savedAddresses              SavedAddress[]
 }
 
 model Agent {
@@ -72,7 +74,8 @@ model Country {
   // Define the many-to-many relationship via the junction table
   agentCountries AgentCountry[]
   //Define the one-to-many relationship
-  addresses      UserAddress[] // A country can have multiple addresses
+  addresses      UserAddress[]
+  savedAddresses SavedAddress[]
 
 }
 
@@ -151,6 +154,29 @@ model AccountCtegory{
   assignedAt DateTime @default(now())      // Example: date when agent was assigned to country
   @@unique([agentId, categoryId]) 
   }
+
+model SavedAddress{
+  id String @id @default(cuid())
+  userId String
+  name String
+  companyName String?
+  addressOne String
+  addressTwo String
+  city String
+  state String
+  email String
+  mobileNumber String
+  countryId Int
+  residentAddress Boolean
+  saveAddress Boolean
+  countryCode String
+  zipCode String
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  country Country @relation(fields: [countryId], references: [id])
+  user    User  @relation(fields: [userId], references: [id])
+}
   
 
 enum Role {
