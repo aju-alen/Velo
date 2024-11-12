@@ -1,3 +1,3 @@
-export const ipURL = "http://192.168.0.175:3001" //http + ip + port
+export const ipURL = "http://10.65.1.54:3001" //http + ip + port
 
-// export const ipURL = "https://safari-books.onrender.com" //http + ip + port
+// export const ipURL = "https://velo-vackend.onrender.com" //http + ip + port

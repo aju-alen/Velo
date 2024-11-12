@@ -1,4 +1,4 @@
-import { StyleSheet, Text, Image, Modal, TouchableOpacity, Dimensions, TextInput, TouchableWithoutFeedback, View, FlatList, ScrollView } from 'react-native'
+import { StyleSheet, Text, Image, Modal, TouchableOpacity, Dimensions, TextInput, TouchableWithoutFeedback, View, FlatList, ScrollView, Touchable } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { horizontalScale, moderateScale, verticalScale } from '@/constants/metrics'
 import { ThemedView } from '@/components/ThemedView'
@@ -11,6 +11,7 @@ import { ipURL } from '@/constants/backendUrl'
 import { useColorScheme } from '@/hooks/useColorScheme'
 import SaveAddressForm from '@/components/SaveAddressForm'
 import SelectPackage from '@/components/SelectPackage'
+import ShipmentDetailPayment from '@/components/ShipmentDetailPayment'
 
 
 const { width } = Dimensions.get('window')
@@ -49,6 +50,13 @@ const CreateShipmentHome = () => {
     countryCode: '',
     zipCode: ''
   })
+  const [packageDetail, setPackageDetail] = useState({
+    length: '',
+    height: '',
+    width: '',
+    numberOfPieces: '',
+    weight: ''
+  })
 
   console.log(userSecureStorage, 'userSecureStorage in parent data');
   
@@ -69,6 +77,20 @@ const CreateShipmentHome = () => {
       countryCode: countryCode,
       zipCode: zipCode
     })
+  }
+
+  const handlePackagedetail = (length, height, width, numberOfPieces, weight) => {
+    setPackageDetail({
+      length: length,
+      height: height,
+      width: width,
+      numberOfPieces: numberOfPieces,
+      weight: weight
+    })
+  }
+
+  const handleContinuePackageDetail = () => {
+    
   }
   console.log(savedAddressData, 'savedAddressData in parent data');
 
@@ -308,8 +330,12 @@ const CreateShipmentHome = () => {
             </ThemedView>
           </>
         }
-        <SelectPackage />
-          
+        <SelectPackage getPackageDetail={handlePackagedetail} />
+        <ShipmentDetailPayment />
+
+        <TouchableOpacity style={styles.actionButton} onPress={handleContinuePackageDetail}>
+          <ThemedText style={styles.buttonText}>Continue</ThemedText>
+        </TouchableOpacity>  
       </ThemedView>
       </ScrollView>
     </ThemedView>

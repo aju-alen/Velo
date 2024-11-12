@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
   },
   logoImgContainer:{
     width:horizontalScale(100),
-    height:verticalScale(35),
+    height:verticalScale(45),
     marginTop: verticalScale(60),
 
   },

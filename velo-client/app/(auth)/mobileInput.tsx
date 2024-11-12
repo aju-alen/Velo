@@ -58,11 +58,11 @@ const MobileInput = () => {
 
       const mobileNumber = (selectedArea?.callingCode + mobile).replace("+", "")
       const resp = await axios.post(`https://api.smsala.com/api/Verify`, {
-        "api_id": process.env.EXPO_PUBLIC_SMSALA_API_ID,
-        "api_password": process.env.EXPO_PUBLIC_SMSALA_API_PASSWORD,
-        "brand": process.env.EXPO_PUBLIC_SMSALA_API_BRAND,
+        "api_id":"API913750181010",
+        "api_password": "Syndicate1#",
+        "brand": "EssayScam",
         "phonenumber": mobileNumber,
-        "sender_id": process.env.EXPO_PUBLIC_SMSALA_API_SENDER_ID,
+        "sender_id": "EssayScam",
       })
 
       await SecureStore.setItemAsync('tempMobile', JSON.stringify({
