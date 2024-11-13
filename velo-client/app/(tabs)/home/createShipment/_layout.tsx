@@ -10,6 +10,7 @@ export default function MarketLayout() {
     return (
         <Stack>
             <Stack.Screen name='createShipmentHome' options={{ headerShown: false }} />
+            <Stack.Screen name='shippingOptions' options={{ headerShown: false }} />
            
         </Stack>
     );

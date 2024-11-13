@@ -1,28 +1,39 @@
-import { StyleSheet, TextInput, View, Text } from 'react-native';
-import React, { useState } from 'react';
-import { ThemedView } from './ThemedView'; // Assuming ThemedView is a custom component
+import { StyleSheet, TextInput, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ThemedView } from './ThemedView';
 import { ThemedText } from './ThemedText';
 
-const ShipmentDetailPayment = () => {
+const ShipmentDetailPayment = ({onGetData,onButtonclick}) => {
   const [description, setDescription] = useState('');
+
+  useEffect(() => {
+    
+    onGetData(description);
+
+  }, [onButtonclick === true]);
+
 
   return (
     <ThemedView style={styles.container}>
-      {/* Description Section */}
-      <ThemedView style={styles.section}>
-        <ThemedText style={styles.title}>Describe the document that you are sending</ThemedText>
-        <TextInput
-          style={styles.textInput}
-          placeholder="Document description"
-          value={description}
-          onChangeText={setDescription}
-          multiline={true} // Allow multi-line input
-          numberOfLines={4} // 4 lines to show
-        />
+      <ThemedView style={styles.card}>
+        <ThemedView style={styles.section}>
+          <ThemedText style={styles.label}>Document Description</ThemedText>
+          <ThemedText style={styles.subtitle}>
+            Please provide details about the document you're sending
+          </ThemedText>
+          
+          <TextInput
+            style={styles.textInput}
+            placeholder="Enter your document description here..."
+            placeholderTextColor="#999"
+            value={description}
+            onChangeText={setDescription}
+            multiline={true}
+            numberOfLines={4}
+            textAlignVertical="top"
+          />
+        </ThemedView>
       </ThemedView>
-
-      {/* Payment Section */}
-    
     </ThemedView>
   );
 };
@@ -32,29 +43,45 @@ export default ShipmentDetailPayment;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
 
+
+  },
+  card: {
+
+    borderRadius: 12,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
   },
   section: {
-    marginBottom: 20, // Space between sections
+    marginBottom: 24,
   },
-  title: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 8, // Space between text and input
+  label: {
+    fontSize: 18,
+    fontWeight: '700',
+    marginBottom: 6,
 
+  },
+  subtitle: {
+    fontSize: 14,
+
+    marginBottom: 16,
+    lineHeight: 20,
   },
   textInput: {
     borderWidth: 1,
-    borderColor: '#ddd', // Subtle border color
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 14,
-    textAlignVertical: 'top', // Align text at the top for better appearance
-  },
-  paymentMethod: {
-    fontSize: 16,
-    fontWeight: '500',
-    marginTop: 8,
+    borderColor: '#e0e0e0',
+    borderRadius: 10,
+    padding: 16,
+    fontSize: 15,
+    minHeight: 120,
+    color: '#999',
+
   },
 });

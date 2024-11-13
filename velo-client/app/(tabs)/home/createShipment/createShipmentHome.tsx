@@ -4,7 +4,7 @@ import { horizontalScale, moderateScale, verticalScale } from '@/constants/metri
 import { ThemedView } from '@/components/ThemedView'
 import { ThemedText } from '@/components/ThemedText'
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { RadioButton } from 'react-native-paper';
+import { Divider, RadioButton } from 'react-native-paper';
 import * as SecureStore from 'expo-secure-store';
 import axios from 'axios'
 import { ipURL } from '@/constants/backendUrl'
@@ -12,6 +12,7 @@ import { useColorScheme } from '@/hooks/useColorScheme'
 import SaveAddressForm from '@/components/SaveAddressForm'
 import SelectPackage from '@/components/SelectPackage'
 import ShipmentDetailPayment from '@/components/ShipmentDetailPayment'
+import { router } from 'expo-router'
 
 
 const { width } = Dimensions.get('window')
@@ -26,8 +27,11 @@ const CreateShipmentHome = () => {
   const [addressModalVisible, setAddressModalVisible] = useState(false)
   const [selectedOption, setSelectedOption] = useState(null)
   const [date, setDate] = useState(new Date());
-  const [show, setShow] = useState(false);
+  const [show, setShow] = useState(true);
   const [checked, setChecked] = useState('false');
+  const [shippingToLoaded, setShippingToLoaded] = useState(false)
+  const [buttonClick, setButtonClick] = useState(false)
+
 
 
   //modal useState
@@ -57,6 +61,7 @@ const CreateShipmentHome = () => {
     numberOfPieces: '',
     weight: ''
   })
+  const [packageDescription, setPackageDescription] = useState('')
 
   console.log(userSecureStorage, 'userSecureStorage in parent data');
   
@@ -77,19 +82,36 @@ const CreateShipmentHome = () => {
       countryCode: countryCode,
       zipCode: zipCode
     })
+    setShippingToLoaded(true)
   }
 
-  const handlePackagedetail = (length, height, width, numberOfPieces, weight) => {
-    setPackageDetail({
-      length: length,
-      height: height,
-      width: width,
-      numberOfPieces: numberOfPieces,
+  const handleGetDescription = (description) => {
+    setPackageDescription(description)
+  }
+
+  const handlePackagedetail = (dimension,piece,weight) => {
+    console.log(dimension, 'dimension');
+    console.log(piece, 'piece');
+    console.log(weight, 'weight');
+
+    
+   setPackageDetail({
+      length: dimension.length,
+      height: dimension.height,
+      width: dimension.width,
+      numberOfPieces: piece,
       weight: weight
     })
   }
 
   const handleContinuePackageDetail = () => {
+    setButtonClick(true)
+    console.log(packageDetail, 'packageDetail in parent data');
+    console.log(packageDescription, 'packageDescription in parent data');
+    console.log('Clicked-----');
+    router.push('/home/createShipment/shippingOptions')
+    
+    
     
   }
   console.log(savedAddressData, 'savedAddressData in parent data');
@@ -164,10 +186,16 @@ const CreateShipmentHome = () => {
   }
 
   const onChange = (event, selectedDate) => {
+    console.log(event, 'event');
+    console.log(selectedDate, 'selectedDate');
+    
+    
     const currentDate = selectedDate;
     setShow(false);
     setDate(currentDate);
   };
+
+
 
   const PaymentOption = ({ title, description, buttonText, isSecondary, onPress }) => (
     <ThemedView style={styles.section}>
@@ -234,21 +262,24 @@ const CreateShipmentHome = () => {
         <ThemedView style={styles.section}>
           <ThemedView style={styles.shippingDateContainer}>
             <ThemedText style={styles.sectionHeaderText}>Shipping Date</ThemedText>
-            <DateTimePicker
+           {show && <DateTimePicker
               testID="dateTimePicker"
               value={date}
               mode={'date'}
               onChange={onChange}
               minimumDate={new Date()}
               maximumDate={new Date(new Date().setDate(new Date().getDate() + 7))}
-            />
+            />}
           </ThemedView>
         </ThemedView>
 
         {/* Shipping Type Section */}
         <ThemedView style={styles.section}>
 
-          <ThemedText style={styles.sectionHeaderText}>What are you shipping?</ThemedText>
+        <ThemedView style={styles.titleContainer}>
+          <ThemedText style={styles.title}>Shipment Details</ThemedText>
+          <View style={styles.titleUnderline} />
+        </ThemedView>
           <ThemedView style={styles.shippingTypeContainer}>
             <TouchableOpacity
               style={[
@@ -307,7 +338,10 @@ const CreateShipmentHome = () => {
             <ThemedView style={styles.section}>
 
               <ThemedText style={styles.sectionHeaderText}>Shipping To</ThemedText>
+              
               <ThemedView style={styles.addressCard}>
+                {shippingToLoaded &&
+                <>
                 <ThemedText style={styles.addressName}>{savedAddressData.name}</ThemedText>
                 <ThemedText style={styles.addressText}>{savedAddressData.addressOne}</ThemedText>
                 <ThemedText style={styles.addressText}>{savedAddressData.addressTwo}</ThemedText>
@@ -322,6 +356,8 @@ const CreateShipmentHome = () => {
                   <ThemedText style={styles.contactText}>{savedAddressData.countryCode} {savedAddressData.mobileNumber}
                   </ThemedText>
                 </ThemedView>
+                </>
+              }
                 <TouchableOpacity style={styles.addAddressContainer} onPress={() => setAddressModalVisible(true)}>
 
                   <ThemedText style={styles.addressName}>Add New Address</ThemedText>
@@ -330,8 +366,10 @@ const CreateShipmentHome = () => {
             </ThemedView>
           </>
         }
-        <SelectPackage getPackageDetail={handlePackagedetail} />
-        <ShipmentDetailPayment />
+        <Divider style={{ marginVertical: verticalScale(16) }} />
+       {shippingToLoaded && <SelectPackage getPackageDetail={handlePackagedetail} onButtonclick={buttonClick} />}
+       <Divider style={{ marginVertical: verticalScale(16) }} />
+        {shippingToLoaded && <ShipmentDetailPayment onGetData={handleGetDescription} onButtonclick={buttonClick} />}
 
         <TouchableOpacity style={styles.actionButton} onPress={handleContinuePackageDetail}>
           <ThemedText style={styles.buttonText}>Continue</ThemedText>
@@ -540,7 +578,21 @@ const styles = StyleSheet.create({
   },
   picker: {
     color: '#fff',
-
+  },
+  titleContainer: {
+    alignItems: 'center',
+    marginBottom: 22,
+  },
+  title: {
+    fontWeight: '700',
+    color: '#FFAC1C',
+    marginBottom: 8,
+  },
+  titleUnderline: {
+    width: 60,
+    height: 4,
+    backgroundColor: '#FFAC1C',
+    borderRadius: 2,
   },
 });
 
