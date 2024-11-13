@@ -13,6 +13,7 @@ import SaveAddressForm from '@/components/SaveAddressForm'
 import SelectPackage from '@/components/SelectPackage'
 import ShipmentDetailPayment from '@/components/ShipmentDetailPayment'
 import { router } from 'expo-router'
+import useShipmentStore from '@/store/shipmentStore'
 
 
 const { width } = Dimensions.get('window')
@@ -39,48 +40,55 @@ const CreateShipmentHome = () => {
   const [areas, setAreas] = useState([])
   const [selectedArea, setSelectedArea] = useState(null)
 
-  const [savedAddressData, setSavedAddressData] = useState({
-    name: '',
-    companyName: '',
-    addressOne: '',
-    addressTwo: '',
-    city: '',
-    state: '',
-    email: '',
-    mobileNumber: '',
-    countryId: '',
-    residentAddress: '',
-    saveAddress: '',
-    countryCode: '',
-    zipCode: ''
-  })
-  const [packageDetail, setPackageDetail] = useState({
-    length: '',
-    height: '',
-    width: '',
-    numberOfPieces: '',
-    weight: ''
-  })
-  const [packageDescription, setPackageDescription] = useState('')
+  // const [savedAddressData, setSavedAddressData] = useState({
+  //   name: '',
+  //   companyName: '',
+  //   addressOne: '',
+  //   addressTwo: '',
+  //   city: '',
+  //   state: '',
+  //   email: '',
+  //   mobileNumber: '',
+  //   countryId: '',
+  //   residentAddress: '',
+  //   saveAddress: '',
+  //   countryCode: '',
+  //   zipCode: ''
+  // })
+  // const [packageDetail, setPackageDetail] = useState({
+  //   length: '',
+  //   height: '',
+  //   width: '',
+  //   numberOfPieces: '',
+  //   weight: ''
+  // })
+  // const [packageDescription, setPackageDescription] = useState('')
+  const { 
+    setSavedAddressData, 
+    setPackageDetail,
+    setPackageDescription,
+    savedAddressData
+
+  } = useShipmentStore()
 
   console.log(userSecureStorage, 'userSecureStorage in parent data');
   
 
   const handleGetSavedUserAddress = (name, companyName, addressOne, addressTwo, city, state, email, mobileNumber, countryId, residentAddress, saveAddress, countryCode, zipCode) => {
     setSavedAddressData({
-      name: name,
-      companyName: companyName,
-      addressOne: addressOne,
-      addressTwo: addressTwo,
-      city: city,
-      state: state,
-      email: email,
-      mobileNumber: mobileNumber,
-      countryId: countryId,
-      residentAddress: residentAddress,
-      saveAddress: saveAddress,
-      countryCode: countryCode,
-      zipCode: zipCode
+      name,
+      companyName,
+      addressOne,
+      addressTwo,
+      city,
+      state,
+      email,
+      mobileNumber,
+      countryId,
+      residentAddress,
+      saveAddress,
+      countryCode,
+      zipCode
     })
     setShippingToLoaded(true)
   }
@@ -89,13 +97,9 @@ const CreateShipmentHome = () => {
     setPackageDescription(description)
   }
 
-  const handlePackagedetail = (dimension,piece,weight) => {
-    console.log(dimension, 'dimension');
-    console.log(piece, 'piece');
-    console.log(weight, 'weight');
 
-    
-   setPackageDetail({
+  const handlePackagedetail = (dimension, piece, weight) => {
+    setPackageDetail({
       length: dimension.length,
       height: dimension.height,
       width: dimension.width,
@@ -106,15 +110,15 @@ const CreateShipmentHome = () => {
 
   const handleContinuePackageDetail = () => {
     setButtonClick(true)
-    console.log(packageDetail, 'packageDetail in parent data');
-    console.log(packageDescription, 'packageDescription in parent data');
+
+
     console.log('Clicked-----');
     router.push('/home/createShipment/shippingOptions')
     
     
     
   }
-  console.log(savedAddressData, 'savedAddressData in parent data');
+
 
   const handleCloseSaveAddressModal = () => {
     setAddressModalVisible(false)
