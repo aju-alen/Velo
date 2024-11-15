@@ -18,9 +18,11 @@ import axios from 'axios';
 import { ipURL } from '@/constants/backendUrl';
 import * as SecureStore from 'expo-secure-store';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import useLoginAccountStore from '@/store/loginAccountStore';
 
 
 const Login = () => {
+  const { setAccountLoginData } = useLoginAccountStore();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -32,6 +34,7 @@ const Login = () => {
         password: password
       }
       const checkIfAlreadyRegistered = await axios.post(`${ipURL}/api/auth/login`, formData);
+      setAccountLoginData(checkIfAlreadyRegistered.data.accountExists)
       
       if (checkIfAlreadyRegistered.data.accountExists.registerVerificationStatus === "PARTIAL" && checkIfAlreadyRegistered.data.accountExists.role === "AGENT") {
         await SecureStore.setItemAsync('registerDetail', JSON.stringify(checkIfAlreadyRegistered.data.accountExists))

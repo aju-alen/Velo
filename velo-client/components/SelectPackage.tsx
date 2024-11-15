@@ -277,11 +277,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     height: 48,
     width: '100%',
+    color:'white'
 
   },
   unitText: {
     position: 'absolute',
-    right: 14,
+    right: 14, 
     top: '50%',
     transform: [{ translateY: -8 }],
     fontSize: 14,

@@ -7,8 +7,10 @@ import CustomButton from '@/components/CustomButton';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { verticalScale,horizontalScale,moderateScale } from '@/constants/metrics';
 import * as SecureStore from 'expo-secure-store';
+import useLoginAccountStore from '@/store/loginAccountStore';
 
 const RootIndex = () => {
+  const {setAccountLoginData} = useLoginAccountStore()
   const scaleValue = useRef(new Animated.Value(1)).current; // Initialize scale value
   const colorScheme = useColorScheme();
 
@@ -35,6 +37,7 @@ const RootIndex = () => {
   useEffect(() => {
     const checkUser = async () => {
       let user = await SecureStore.getItemAsync('registerDetail')
+      setAccountLoginData(JSON.parse(user))
       
       if(!user){
         return

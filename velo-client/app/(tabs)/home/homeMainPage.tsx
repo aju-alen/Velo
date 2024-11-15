@@ -10,11 +10,15 @@ import { ipURL } from '@/constants/backendUrl';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
+import useLoginAccountStore from '@/store/loginAccountStore';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = (width - horizontalScale(40) - horizontalScale(32)) / 3;
 
 const HomeMainPage = () => {
+  const {accountLoginData} = useLoginAccountStore();
+  console.log(accountLoginData,'accountLoginData----11----');
+  
   const [categoryData, setCategoryData] = useState([]);
   const [accountName, setAccountName] = useState('');
   const [loading, setLoading] = useState(true);

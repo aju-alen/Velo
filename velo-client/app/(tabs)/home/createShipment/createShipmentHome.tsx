@@ -19,18 +19,25 @@ import useShipmentStore from '@/store/shipmentStore'
 const { width } = Dimensions.get('window')
 
 const CreateShipmentHome = () => {
+  const { 
+    setPackageDetail,
+    setPackageDescription,
+    savedAddressData,
+    resetShipmentData,
+    accountAddressData,
+    setAccountAddressData,
+  } = useShipmentStore()
+
   const colorScheme = useColorScheme()
   const [userSecureStorage, setUserSecureStorage] = useState(false)
 
   const [userAddress, setUserAddress] = useState('')
-  const [modalVisible, setModalVisible] = useState(true)
-  const [countryCodeModal, setCountryCodeModal] = useState(false)
+  const [modalVisible, setModalVisible] = useState(false)
   const [addressModalVisible, setAddressModalVisible] = useState(false)
   const [selectedOption, setSelectedOption] = useState(null)
   const [date, setDate] = useState(new Date());
   const [show, setShow] = useState(true);
   const [checked, setChecked] = useState('false');
-  const [shippingToLoaded, setShippingToLoaded] = useState(false)
   const [buttonClick, setButtonClick] = useState(false)
 
 
@@ -40,58 +47,14 @@ const CreateShipmentHome = () => {
   const [areas, setAreas] = useState([])
   const [selectedArea, setSelectedArea] = useState(null)
 
-  // const [savedAddressData, setSavedAddressData] = useState({
-  //   name: '',
-  //   companyName: '',
-  //   addressOne: '',
-  //   addressTwo: '',
-  //   city: '',
-  //   state: '',
-  //   email: '',
-  //   mobileNumber: '',
-  //   countryId: '',
-  //   residentAddress: '',
-  //   saveAddress: '',
-  //   countryCode: '',
-  //   zipCode: ''
-  // })
-  // const [packageDetail, setPackageDetail] = useState({
-  //   length: '',
-  //   height: '',
-  //   width: '',
-  //   numberOfPieces: '',
-  //   weight: ''
-  // })
-  // const [packageDescription, setPackageDescription] = useState('')
-  const { 
-    setSavedAddressData, 
-    setPackageDetail,
-    setPackageDescription,
-    savedAddressData
-
-  } = useShipmentStore()
+  
+  console.log(savedAddressData, 'savedAddressData in parent data');
+  
 
   console.log(userSecureStorage, 'userSecureStorage in parent data');
   
 
-  const handleGetSavedUserAddress = (name, companyName, addressOne, addressTwo, city, state, email, mobileNumber, countryId, residentAddress, saveAddress, countryCode, zipCode) => {
-    setSavedAddressData({
-      name,
-      companyName,
-      addressOne,
-      addressTwo,
-      city,
-      state,
-      email,
-      mobileNumber,
-      countryId,
-      residentAddress,
-      saveAddress,
-      countryCode,
-      zipCode
-    })
-    setShippingToLoaded(true)
-  }
+  
 
   const handleGetDescription = (description) => {
     setPackageDescription(description)
@@ -178,6 +141,16 @@ const CreateShipmentHome = () => {
     const getUserAddress = async () => {
       const userAddress = await axios.get(`${ipURL}/api/address/get-user-address/${userSecureStorage['id']}`)
       setUserAddress(userAddress.data.data[0])
+      console.log(userAddress.data.data[0], 'userAddress----2-1-21-2-12-1-212');
+      setAccountAddressData({
+        addressOne: userAddress.data.data[0].addressOne,
+        addressTwo: userAddress.data.data[0].addressTwo,
+        city: userAddress.data.data[0].city,
+        countryId: userAddress.data.data[0].countryId,
+        state: userAddress.data.data[0].state,
+        country: userAddress.data.data[0].country
+      })
+      
     }
     if (checked === 'document' || checked === 'package') {
       getUserAddress();
@@ -187,6 +160,8 @@ const CreateShipmentHome = () => {
   const handleOptionSelect = (option) => {
     setSelectedOption(option)
     setModalVisible(false)
+    resetShipmentData()
+
   }
 
   const onChange = (event, selectedDate) => {
@@ -256,7 +231,6 @@ const CreateShipmentHome = () => {
       <SaveAddressForm
         addressModalVisible={addressModalVisible}
         onClose={handleCloseSaveAddressModal}
-        getAddressData={handleGetSavedUserAddress}
         userId={userSecureStorage['id']}
       />
 
@@ -325,10 +299,10 @@ const CreateShipmentHome = () => {
               <ThemedText style={styles.sectionHeaderText}>Shipping From</ThemedText>
               <ThemedView style={styles.addressCard}>
                 <ThemedText style={styles.addressName}>{userSecureStorage['name']}</ThemedText>
-                <ThemedText style={styles.addressText}>{userAddress['addressOne']}</ThemedText>
-                <ThemedText style={styles.addressText}>{userAddress['addressTwo']}</ThemedText>
+                <ThemedText style={styles.addressText}>{accountAddressData.addressOne}</ThemedText>
+                <ThemedText style={styles.addressText}>{accountAddressData.addressTwo}</ThemedText>
                 <ThemedText style={styles.addressText}>
-                  {userAddress['city']}, {userAddress['country']?.name}
+                  {accountAddressData.city}, {accountAddressData.country.name}
                 </ThemedText>
                 <ThemedView style={styles.contactInfo}>
                   <ThemedText style={styles.contactText}>{userSecureStorage['email']}</ThemedText>
@@ -344,7 +318,7 @@ const CreateShipmentHome = () => {
               <ThemedText style={styles.sectionHeaderText}>Shipping To</ThemedText>
               
               <ThemedView style={styles.addressCard}>
-                {shippingToLoaded &&
+                {savedAddressData.gotDetails &&
                 <>
                 <ThemedText style={styles.addressName}>{savedAddressData.name}</ThemedText>
                 <ThemedText style={styles.addressText}>{savedAddressData.addressOne}</ThemedText>
@@ -371,9 +345,9 @@ const CreateShipmentHome = () => {
           </>
         }
         <Divider style={{ marginVertical: verticalScale(16) }} />
-       {shippingToLoaded && <SelectPackage getPackageDetail={handlePackagedetail} onButtonclick={buttonClick} />}
+       {savedAddressData.gotDetails && <SelectPackage getPackageDetail={handlePackagedetail} onButtonclick={buttonClick} />}
        <Divider style={{ marginVertical: verticalScale(16) }} />
-        {shippingToLoaded && <ShipmentDetailPayment onGetData={handleGetDescription} onButtonclick={buttonClick} />}
+        {savedAddressData.gotDetails && <ShipmentDetailPayment onGetData={handleGetDescription} onButtonclick={buttonClick} />}
 
         <TouchableOpacity style={styles.actionButton} onPress={handleContinuePackageDetail}>
           <ThemedText style={styles.buttonText}>Continue</ThemedText>

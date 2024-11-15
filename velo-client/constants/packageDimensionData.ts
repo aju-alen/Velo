@@ -1,6 +1,16 @@
 
 export const getPackageDetailDimension = [
     {
+
+        id: 0,
+        name: 'Custom Size',
+        length: "0",
+        width: "0",
+        height: "0",
+        weight: 0,
+    },
+
+    {
         id: 1,
         name: 'Box 2 Flat',
         length: "34",

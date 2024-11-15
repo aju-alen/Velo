@@ -10,27 +10,16 @@ import { Picker } from '@react-native-picker/picker'
 import { useColorScheme } from '@/hooks/useColorScheme'
 import axios from 'axios'
 import { ipURL } from '@/constants/backendUrl'
+import useShipmentStore from '@/store/shipmentStore'
 
 const { width } = Dimensions.get('window')
 
-const SaveAddressForm = ({ addressModalVisible, onClose, getAddressData,userId }) => {
-
+const SaveAddressForm = ({ addressModalVisible, onClose, userId }) => {
+  const {  setSavedAddressData, resetShipmentData } = useShipmentStore()
+  const savedAddressData = useShipmentStore(state => state.savedAddressData)
   const colorScheme = useColorScheme()
 
-
-  const [addressName, setAddressName] = useState('')
-  const [addressCompany, setAddressCompany] = useState('')
-  const [addressLineOne, setAddressLineOne] = useState('')
-  const [addressLineTwo, setAddressLineTwo] = useState('')
-  const [addressCity, setAddressCity] = useState('')
-  const [addressState, setAddressState] = useState('')
-  const [addressEmail, setAddressEmail] = useState('')
-  const [zipCode, setZipCode] = useState('')
-  const [mobile, setMobile] = useState('')
   const [countryCodeModal, setCountryCodeModal] = useState(false)
-  const [residentialCheck, setResidentialCheck] = useState(false)
-  const [saveAddress, setSaveAddress] = useState(false)
-
   const [selectedArea, setSelectedArea] = useState(null)
   const [areas, setAreas] = useState([])
   const [countryList, setCountryList] = useState([]);
@@ -67,6 +56,7 @@ const SaveAddressForm = ({ addressModalVisible, onClose, getAddressData,userId }
           let defaultData = areaData.filter((a: any) => a.code == "AE")
           if (defaultData.length > 0) {
             setSelectedArea(defaultData[0])
+            savedAddressData.countryCode = defaultData[0].callingCode
           }
         }
       })
@@ -107,18 +97,8 @@ const SaveAddressForm = ({ addressModalVisible, onClose, getAddressData,userId }
 
   const handleClear = () => {
     try {
-      setAddressName('')
-      setAddressCompany('')
-      setAddressLineOne('')
-      setAddressLineTwo('')
-      setAddressCity('')
-      setAddressState('')
-      setAddressEmail('')
-      setMobile('')
-      setCountrySelect('')
-      setResidentialCheck(false)
-      setSaveAddress(false)
-      setZipCode('')
+      resetShipmentData()
+
     }
     catch (error) {
       console.error('Error clearing form:', error)
@@ -129,22 +109,22 @@ const SaveAddressForm = ({ addressModalVisible, onClose, getAddressData,userId }
 
 
     try {
-      if (saveAddress) {
+      if (savedAddressData.saveAddress) {
         const addressData = {
-          name: addressName,
-          companyName: addressCompany,
-          addressOne: addressLineOne,
-          addressTwo: addressLineTwo,
-          city: addressCity,
-          state: addressState,
-          email: addressEmail,
-          mobileNumber: mobile,
-          countryId: countrySelect,
-          residentAddress: residentialCheck,
-          saveAddress: saveAddress,
+          name: savedAddressData.name,
+          companyName: savedAddressData.companyName,
+          addressOne: savedAddressData.addressOne,
+          addressTwo: savedAddressData.addressTwo,
+          city: savedAddressData.city,
+          state: savedAddressData.state,
+          email: savedAddressData.email,
+          mobileNumber: savedAddressData.mobileNumber,
+          countryId: savedAddressData.countryId,
+          residentAddress: savedAddressData.residentAddress,
+          saveAddress: savedAddressData.saveAddress,
           userId,
-          countryCode: selectedArea['callingCode'],
-          zipCode: zipCode
+          countryCode: savedAddressData.countryCode,
+          zipCode: savedAddressData.zipCode
         }
         try {
           const saveAddressToDB = await axios.post(`${ipURL}/api/address/save-external-user-address`, addressData)
@@ -155,9 +135,7 @@ const SaveAddressForm = ({ addressModalVisible, onClose, getAddressData,userId }
         }
       }
       onClose()
-      getAddressData(addressName, addressCompany, addressLineOne, addressLineTwo, addressCity, addressState, addressEmail, mobile, countrySelect, residentialCheck, saveAddress, selectedArea['callingCode'], zipCode)
-
-
+      setSavedAddressData({gotDetails: true})
     }
     catch (error) {
       console.error('Error saving address:', error)
@@ -169,6 +147,8 @@ const SaveAddressForm = ({ addressModalVisible, onClose, getAddressData,userId }
       style={styles.countryListItem}
       onPress={() => {
         setSelectedArea(item)
+        savedAddressData.countryCode = item.callingCode
+        setSavedAddressData({ countryCode: item })
         setCountryCodeModal(false)
       }}
     >
@@ -230,16 +210,16 @@ const SaveAddressForm = ({ addressModalVisible, onClose, getAddressData,userId }
                   <ThemedView style={styles.formContainer}>
                     <TextInput
                       placeholder="Enter First And Last Name"
-                      value={addressName}
-                      onChangeText={setAddressName}
+                      value={savedAddressData.name}
+                      onChangeText={(text) => setSavedAddressData({ name: text })}
                       style={styles.input}
                       keyboardType="default"
                     />
 
                     <TextInput
                       placeholder="Enter Company Name"
-                      value={addressCompany}
-                      onChangeText={setAddressCompany}
+                      value={savedAddressData.companyName}
+                      onChangeText={(text) => setSavedAddressData({ companyName: text })}
                       style={styles.input}
                       keyboardType="default"
                     />
@@ -247,48 +227,48 @@ const SaveAddressForm = ({ addressModalVisible, onClose, getAddressData,userId }
 
                     <TextInput
                       placeholder="Address Line One"
-                      value={addressLineOne}
-                      onChangeText={setAddressLineOne}
+                      value={savedAddressData.addressOne}
+                      onChangeText={(text) => setSavedAddressData({ addressOne: text })}
                       style={styles.input}
                       keyboardType="default"
                     />
 
                     <TextInput
                       placeholder="Address Line Two"
-                      value={addressLineTwo}
-                      onChangeText={setAddressLineTwo}
+                      value={savedAddressData.addressTwo}
+                      onChangeText={(text) => setSavedAddressData({ addressTwo: text })}
                       style={styles.input}
                       keyboardType="default"
                     />
 
                     <TextInput
                       placeholder="City"
-                      value={addressCity}
-                      onChangeText={setAddressCity}
+                      value={savedAddressData.city}
+                      onChangeText={(text) => setSavedAddressData({ city: text })}
                       style={styles.input}
                       keyboardType="default"
                     />
 
                     <TextInput
                       placeholder="State"
-                      value={addressState}
-                      onChangeText={setAddressState}
+                      value={savedAddressData.state}
+                      onChangeText={(text) => setSavedAddressData({ state: text })}
                       style={styles.input}
                       keyboardType="default"
                     />
 
                     <TextInput
                       placeholder="Zip Code"
-                      value={zipCode}
-                      onChangeText={setZipCode}
+                      value={savedAddressData.zipCode}
+                      onChangeText={(text) => setSavedAddressData({ zipCode: text })}
                       style={styles.input}
                       keyboardType="default"
                     />
 
                     <TextInput
                       placeholder="Email Address"
-                      value={addressEmail}
-                      onChangeText={setAddressEmail}
+                      value={savedAddressData.email}
+                      onChangeText={(text) => setSavedAddressData({ email: text })}
                       style={styles.input}
                       keyboardType="email-address"
                       autoCapitalize='none'
@@ -315,8 +295,8 @@ const SaveAddressForm = ({ addressModalVisible, onClose, getAddressData,userId }
 
                       <TextInput
                         style={styles.phoneInput}
-                        value={mobile}
-                        onChangeText={setMobile}
+                        value={savedAddressData.mobileNumber}
+                        onChangeText={(text) => setSavedAddressData({ mobileNumber: text })}
                         placeholder="Mobile Number"
                         placeholderTextColor="gray"
                         keyboardType="numeric"
@@ -328,8 +308,8 @@ const SaveAddressForm = ({ addressModalVisible, onClose, getAddressData,userId }
                     <ThemedView style={styles.pickerContainer}>
                       <Picker
 
-                        selectedValue={countrySelect}
-                        onValueChange={(itemValue) => setCountrySelect(itemValue)}
+                        selectedValue={savedAddressData.countryId}
+                        onValueChange={(itemValue, itemIndex) => setSavedAddressData({ countryId: itemValue })}
                         mode="dialog"
                         style={styles.picker}
                       >
@@ -347,15 +327,15 @@ const SaveAddressForm = ({ addressModalVisible, onClose, getAddressData,userId }
 
                     <CheckboxItem
                       label="This is a residential address"
-                      status={residentialCheck}
-                      onPress={() => setResidentialCheck(!residentialCheck)}
+                      status={savedAddressData.residentAddress}
+                      onPress={() => setSavedAddressData({ residentAddress: !savedAddressData.residentAddress })}
 
                     />
 
                     <CheckboxItem
                       label="Save this address for future use"
-                      status={saveAddress}
-                      onPress={() => setSaveAddress(!saveAddress)}
+                      status={savedAddressData.saveAddress}
+                      onPress={() => setSavedAddressData({ saveAddress: !savedAddressData.saveAddress })}
                     />
 
                     <ThemedView style={styles.buttonContainer}>
