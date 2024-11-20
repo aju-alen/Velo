@@ -63,6 +63,8 @@ export const webhook = async (req, res, next) => {
                 break;
             case 'charge.succeeded':
                 const chargeSucceeded = event.data.object;
+                console.log('Charge Succeeded');
+                
                 // Then define and call a function to handle the event charge.succeeded
                 break;
             // ... handle other event types
