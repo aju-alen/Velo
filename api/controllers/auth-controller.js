@@ -1,4 +1,4 @@
-import crypto from "crypto";
+import jwt from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import nodemailer from "nodemailer";
@@ -44,7 +44,7 @@ export const register = async (req, res, next) => {
                     mobileCountry: country,
                 }
             });
-            await prisma.$disconnect();
+          
 
         }
         else if (role === "USER") {
@@ -59,8 +59,11 @@ export const register = async (req, res, next) => {
                     mobileCountry: country,
                 }
             });
-            await prisma.$disconnect();
+           
         }
+
+
+        await prisma.$disconnect();
 
         console.log("User registered successfully", userDetails);
         if (!userDetails) {

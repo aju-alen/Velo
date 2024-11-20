@@ -9,8 +9,13 @@ export default function MarketLayout() {
 
     return (
         <Stack>
-            <Stack.Screen name='createShipmentHome' options={{ headerShown: false }} />
-            <Stack.Screen name='shippingOptions' options={{ headerShown: false }} />
+            <Stack.Screen name='createShipmentHome' options={{ headerShown: true }} />
+            <Stack.Screen name='shippingOptions' options={{ headerShown: true }} />
+            <Stack.Screen name='shippingOptionalService' options={{ headerShown: true }} />
+            <Stack.Screen name='shipmentSchedulePickup' options={{ headerShown: true }} />
+            <Stack.Screen name='finalPreview' options={{ headerShown: true }} />
+            <Stack.Screen name='payment' options={{ headerShown: true }} />
+            <Stack.Screen name='paymentSuccess' options={{ headerShown: true }} />
            
         </Stack>
     );

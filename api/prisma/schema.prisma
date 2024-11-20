@@ -26,6 +26,7 @@ model User {
   mobileNumber String 
   firstTimeLogin Boolean @default(true)
   registerVerificationStatus String @default("PARTIAL")
+  verificationToken String?
   
   updatedAt DateTime @updatedAt
   createdAt DateTime @default(now())
@@ -34,6 +35,7 @@ model User {
   addresses                   UserAddress[] // A user can have multiple addresses
 
   savedAddresses              SavedAddress[]
+  shipments                   Shipment[]
 }
 
 model Agent {
@@ -48,6 +50,7 @@ model Agent {
   firstTimeLogin            Boolean    @default(true)
   registerVerificationStatus String     @default("PARTIAL")
   appointmentDate           DateTime?
+  verificationToken         String?
 
   updatedAt                 DateTime   @updatedAt
   createdAt                 DateTime   @default(now())
@@ -72,6 +75,7 @@ model Country {
   flag           String
 
   // Define the many-to-many relationship via the junction table
+  shippingCountries Shipment[]
   agentCountries AgentCountry[]
   //Define the one-to-many relationship
   addresses      UserAddress[]
@@ -176,6 +180,40 @@ model SavedAddress{
 
   country Country @relation(fields: [countryId], references: [id])
   user    User  @relation(fields: [userId], references: [id])
+}
+
+model Shipment{
+  id String @id @default(cuid())
+  userId String
+  senderName String
+  senderAddressOne String
+  senderAddressTwo String
+  senderCity String
+  senderState String
+  senderEmail String
+  senderMobileNumber String
+  senderCountryId Int
+  senderCountryCode String
+  shipmentDate DateTime
+ 
+
+  receiverName String
+  receiverAddressOne String
+  receiverAddressTwo String
+  receiverCity String
+  receiverState String
+  receiverEmail String
+  receiverMobileNumber String
+  receiverCountryId Int
+  receiverCountryCode String
+  receiverResidentAddress Boolean
+  receiverZipCode String
+
+
+
+   country Country @relation(fields: [senderCountryId], references: [id])
+   user    User  @relation(fields: [userId], references: [id])
+
 }
   
 

@@ -18,6 +18,8 @@ const SaveAddressForm = ({ addressModalVisible, onClose, userId }) => {
   const {  setSavedAddressData, resetShipmentData } = useShipmentStore()
   const savedAddressData = useShipmentStore(state => state.savedAddressData)
   const colorScheme = useColorScheme()
+  console.log(colorScheme, 'colorScheme------ in saved');
+  
 
   const [countryCodeModal, setCountryCodeModal] = useState(false)
   const [selectedArea, setSelectedArea] = useState(null)
@@ -156,7 +158,7 @@ const SaveAddressForm = ({ addressModalVisible, onClose, userId }) => {
         source={{ uri: item.flag }}
         style={styles.countryFlag}
       />
-      <Text style={[styles.countryName, { color: "#fff" }]}>{item.item}</Text>
+      <ThemedText style={[styles.countryName, { color: "#fff" }]}>{item.item}</ThemedText>
     </TouchableOpacity>
   )
 
@@ -167,16 +169,16 @@ const SaveAddressForm = ({ addressModalVisible, onClose, userId }) => {
       visible={countryCodeModal}
     >
       <TouchableWithoutFeedback onPress={() => setCountryCodeModal(false)}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+        <ThemedView style={styles.modalOverlay}>
+          <ThemedView style={styles.modalContent}>
             <FlatList
               data={areas}
               renderItem={renderAreaItem}
               keyExtractor={(item) => item.code}
               style={styles.countryList}
             />
-          </View>
-        </View>
+          </ThemedView>
+        </ThemedView>
       </TouchableWithoutFeedback>
     </Modal>
   )
@@ -212,7 +214,7 @@ const SaveAddressForm = ({ addressModalVisible, onClose, userId }) => {
                       placeholder="Enter First And Last Name"
                       value={savedAddressData.name}
                       onChangeText={(text) => setSavedAddressData({ name: text })}
-                      style={styles.input}
+                      style={[styles.input,{color: colorScheme === 'dark' ? '#fff' : '#000'}]}
                       keyboardType="default"
                     />
 
@@ -220,7 +222,7 @@ const SaveAddressForm = ({ addressModalVisible, onClose, userId }) => {
                       placeholder="Enter Company Name"
                       value={savedAddressData.companyName}
                       onChangeText={(text) => setSavedAddressData({ companyName: text })}
-                      style={styles.input}
+                      style={[styles.input,{color: colorScheme === 'dark' ? '#fff' : '#000'}]}
                       keyboardType="default"
                     />
 
@@ -229,7 +231,7 @@ const SaveAddressForm = ({ addressModalVisible, onClose, userId }) => {
                       placeholder="Address Line One"
                       value={savedAddressData.addressOne}
                       onChangeText={(text) => setSavedAddressData({ addressOne: text })}
-                      style={styles.input}
+                       style={[styles.input,{color: colorScheme === 'dark' ? '#fff' : '#000'}]}
                       keyboardType="default"
                     />
 
@@ -237,7 +239,7 @@ const SaveAddressForm = ({ addressModalVisible, onClose, userId }) => {
                       placeholder="Address Line Two"
                       value={savedAddressData.addressTwo}
                       onChangeText={(text) => setSavedAddressData({ addressTwo: text })}
-                      style={styles.input}
+                       style={[styles.input,{color: colorScheme === 'dark' ? '#fff' : '#000'}]}
                       keyboardType="default"
                     />
 
@@ -245,7 +247,7 @@ const SaveAddressForm = ({ addressModalVisible, onClose, userId }) => {
                       placeholder="City"
                       value={savedAddressData.city}
                       onChangeText={(text) => setSavedAddressData({ city: text })}
-                      style={styles.input}
+                       style={[styles.input,{color: colorScheme === 'dark' ? '#fff' : '#000'}]}
                       keyboardType="default"
                     />
 
@@ -253,7 +255,7 @@ const SaveAddressForm = ({ addressModalVisible, onClose, userId }) => {
                       placeholder="State"
                       value={savedAddressData.state}
                       onChangeText={(text) => setSavedAddressData({ state: text })}
-                      style={styles.input}
+                       style={[styles.input,{color: colorScheme === 'dark' ? '#fff' : '#000'}]}
                       keyboardType="default"
                     />
 
@@ -261,7 +263,7 @@ const SaveAddressForm = ({ addressModalVisible, onClose, userId }) => {
                       placeholder="Zip Code"
                       value={savedAddressData.zipCode}
                       onChangeText={(text) => setSavedAddressData({ zipCode: text })}
-                      style={styles.input}
+                       style={[styles.input,{color: colorScheme === 'dark' ? '#fff' : '#000'}]}
                       keyboardType="default"
                     />
 
@@ -269,7 +271,7 @@ const SaveAddressForm = ({ addressModalVisible, onClose, userId }) => {
                       placeholder="Email Address"
                       value={savedAddressData.email}
                       onChangeText={(text) => setSavedAddressData({ email: text })}
-                      style={styles.input}
+                       style={[styles.input,{color: colorScheme === 'dark' ? '#fff' : '#000'}]}
                       keyboardType="email-address"
                       autoCapitalize='none'
                     />
@@ -284,17 +286,17 @@ const SaveAddressForm = ({ addressModalVisible, onClose, userId }) => {
                           source={{ uri: selectedArea?.flag }}
                           style={styles.countryFlag}
                         />
-                        <Text style={[
+                        <ThemedText style={[
                           styles.countryCode,
                           { color: colorScheme === 'dark' ? '#fff' : '#000' }
                         ]}>
                           {selectedArea?.callingCode}
-                        </Text>
+                        </ThemedText>
                         <MaterialIcons name="arrow-drop-down" size={24} color={colorScheme === 'dark' ? '#fff' : '#000'} />
                       </TouchableOpacity>
 
                       <TextInput
-                        style={styles.phoneInput}
+                        style={[styles.phoneInput, { color: colorScheme === 'dark' ? '#fff' : '#000' }]}
                         value={savedAddressData.mobileNumber}
                         onChangeText={(text) => setSavedAddressData({ mobileNumber: text })}
                         placeholder="Mobile Number"
@@ -313,10 +315,10 @@ const SaveAddressForm = ({ addressModalVisible, onClose, userId }) => {
                         mode="dialog"
                         style={styles.picker}
                       >
-                        <Picker.Item color="white" label="Select Country" value="" />
+                        <Picker.Item color="#999" label="Select Country" value="" />
                         {countryList?.map((country, index) => (
                           <Picker.Item
-                            color="white"
+                            color="#999"
                             key={index}
                             label={country.name}
                             value={country.id}
@@ -411,7 +413,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: horizontalScale(15),
     marginBottom: verticalScale(15),
     fontSize: moderateScale(16),
-    color: '#666',
+    borderWidth: 1,
   },
   phoneContainer: {
     flexDirection: 'row',
@@ -442,7 +444,7 @@ const styles = StyleSheet.create({
     borderRadius: moderateScale(12),
     paddingHorizontal: horizontalScale(15),
     fontSize: moderateScale(16),
-    color: '#fff',
+
   },
   pickerContainer: {
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
@@ -452,7 +454,7 @@ const styles = StyleSheet.create({
     height: verticalScale(130),
   },
   picker: {
-    color: '#fff',
+
 
   },
   buttonContainer: {

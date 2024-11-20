@@ -6,7 +6,8 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
 import { PaperProvider } from 'react-native-paper';
-import * as SecureStore from 'expo-secure-store';
+import StripeProviderWrapper from '@/components/StripeProviderWrapper';
+
 
 
 
@@ -36,6 +37,7 @@ export default function RootLayout() {
   }
 
   return (
+      <StripeProviderWrapper>
     <PaperProvider>
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
@@ -46,5 +48,6 @@ export default function RootLayout() {
       </Stack>
     </ThemeProvider>
     </PaperProvider>
+    </StripeProviderWrapper>
   );
 }

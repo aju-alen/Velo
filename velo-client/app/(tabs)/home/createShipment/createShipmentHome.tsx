@@ -23,16 +23,19 @@ const CreateShipmentHome = () => {
     setPackageDetail,
     setPackageDescription,
     savedAddressData,
+    setSavedAddressData,
     resetShipmentData,
     accountAddressData,
     setAccountAddressData,
   } = useShipmentStore()
 
+  console.log(accountAddressData, 'accountAddressData in parent data');
+  
   const colorScheme = useColorScheme()
   const [userSecureStorage, setUserSecureStorage] = useState(false)
 
   const [userAddress, setUserAddress] = useState('')
-  const [modalVisible, setModalVisible] = useState(false)
+  const [modalVisible, setModalVisible] = useState(true)
   const [addressModalVisible, setAddressModalVisible] = useState(false)
   const [selectedOption, setSelectedOption] = useState(null)
   const [date, setDate] = useState(new Date());
@@ -73,6 +76,13 @@ const CreateShipmentHome = () => {
 
   const handleContinuePackageDetail = () => {
     setButtonClick(true)
+    setAccountAddressData({
+      ...accountAddressData,
+      userName: userSecureStorage['name'],
+      email: userSecureStorage['email'],
+      mobileNumber: userSecureStorage['mobileNumber'],
+      countryCode: userSecureStorage['mobileCode']
+    })
 
 
     console.log('Clicked-----');
@@ -132,7 +142,10 @@ const CreateShipmentHome = () => {
       let user = await SecureStore.getItemAsync('registerDetail')
       if (!user) return
       const userData = JSON.parse(user)
+      console.log(userData, 'userData------');
+      
       setUserSecureStorage(userData)
+      
     }
     checkUser()
   }, [])
@@ -143,6 +156,7 @@ const CreateShipmentHome = () => {
       setUserAddress(userAddress.data.data[0])
       console.log(userAddress.data.data[0], 'userAddress----2-1-21-2-12-1-212');
       setAccountAddressData({
+        ...accountAddressData,
         addressOne: userAddress.data.data[0].addressOne,
         addressTwo: userAddress.data.data[0].addressTwo,
         city: userAddress.data.data[0].city,
@@ -170,9 +184,17 @@ const CreateShipmentHome = () => {
     
     
     const currentDate = selectedDate;
-    setShow(false);
     setDate(currentDate);
+    console.log(currentDate, 'currentDate');
+    
+    setSavedAddressData({
+      ...savedAddressData,
+      shipmentDate: currentDate
+    })
   };
+  console.log(savedAddressData, 'savedAddressData-----asdasd-----121-2-12-12');
+  
+
 
 
 
@@ -242,7 +264,7 @@ const CreateShipmentHome = () => {
             <ThemedText style={styles.sectionHeaderText}>Shipping Date</ThemedText>
            {show && <DateTimePicker
               testID="dateTimePicker"
-              value={date}
+              value={savedAddressData.shipmentDate}
               mode={'date'}
               onChange={onChange}
               minimumDate={new Date()}
@@ -342,16 +364,17 @@ const CreateShipmentHome = () => {
                 </TouchableOpacity>
               </ThemedView>
             </ThemedView>
+            <Divider style={{ marginVertical: verticalScale(16) }} />
           </>
         }
-        <Divider style={{ marginVertical: verticalScale(16) }} />
+       
        {savedAddressData.gotDetails && <SelectPackage getPackageDetail={handlePackagedetail} onButtonclick={buttonClick} />}
-       <Divider style={{ marginVertical: verticalScale(16) }} />
+      
         {savedAddressData.gotDetails && <ShipmentDetailPayment onGetData={handleGetDescription} onButtonclick={buttonClick} />}
 
-        <TouchableOpacity style={styles.actionButton} onPress={handleContinuePackageDetail}>
+       { savedAddressData.gotDetails &&<TouchableOpacity style={styles.actionButton} onPress={handleContinuePackageDetail}>
           <ThemedText style={styles.buttonText}>Continue</ThemedText>
-        </TouchableOpacity>  
+        </TouchableOpacity>  }
       </ThemedView>
       </ScrollView>
     </ThemedView>
@@ -443,12 +466,13 @@ const styles = StyleSheet.create({
   // New and enhanced styles
   container: {
     flex: 1,
+    
 
   },
   contentContainer: {
     flex: 1,
-    paddingTop: verticalScale(40),
     paddingHorizontal: horizontalScale(20),
+    paddingBottom:verticalScale(80)
   },
 
   sectionHeaderText: {
@@ -477,7 +501,7 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.05,
     shadowRadius: 4,
-    elevation: 2,
+    elevation: 0,
   },
   shippingTypeSelected: {
 

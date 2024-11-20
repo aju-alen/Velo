@@ -20,11 +20,18 @@
       "bundleIdentifier": "com.anonymous.velo-client"
     },
     "android": {
+      "package": "com.anonymous.veloclient",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/appIcon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundImage": "./assets/images/appIcon.png",
+        "backgroundColor": "#FFFFFF"
       },
-      "package": "com.anonymous.veloclient"
+      "icon": "./assets/images/appIcon.png",
+      "splash": {
+        "image": "./assets/images/appIcon.png",
+        "resizeMode": "contain",
+        "backgroundColor": "#ffffff"
+      }
     },
     "web": {
       "bundler": "metro",

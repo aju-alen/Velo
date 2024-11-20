@@ -16,6 +16,7 @@ interface SavedAddressData {
   countryCode: string
   zipCode: string
   gotDetails: boolean
+  shipmentDate: Date
 }
 
 interface AccountAddressData {
@@ -27,7 +28,12 @@ interface AccountAddressData {
   country: {
     name: string
     id: number
-  }
+  },
+  userName: string
+  email: string
+  mobileNumber: string
+  countryCode: string
+
 }
 
 interface PackageDetail {
@@ -39,16 +45,37 @@ interface PackageDetail {
   packageName: string
 }
 
+interface DeliveryServices {
+  verbalNotification: boolean
+  adultSignature: boolean
+  directSignature: boolean
+  deliveryPickupTimeFrom: string
+  deliveryPickupTimeTo: string
+  pickupInstruction: string
+  pickupSpecialInstruction: string
+}
+
+interface CummilativeExpence {
+  adultSignature: number
+  directSignature: number
+  verbalNotification: number
+}
+
 // Define the store state interface
 interface ShipmentState {
   savedAddressData: SavedAddressData
   packageDetail: PackageDetail
   packageDescription: string
   accountAddressData: AccountAddressData
+  deliveryServices: DeliveryServices
+  cummilativeExpence: CummilativeExpence
+  
   setSavedAddressData: (data: Partial<SavedAddressData>) => void
   setAccountAddressData: (data: Partial<AccountAddressData>) => void
   setPackageDetail: (data: Partial<PackageDetail>) => void
   setPackageDescription: (description: string) => void
+  setDeliveryServices: (data: Partial<DeliveryServices>) => void
+  setCuminativeExpence: (data: Partial<CummilativeExpence>) => void
   resetShipmentData: () => void
 }
 
@@ -69,7 +96,8 @@ const useShipmentStore = create<ShipmentState>((set) => ({
     saveAddress: false,
     countryCode: '',
     zipCode: '',
-    gotDetails: false
+    gotDetails: false,
+    shipmentDate: new Date()
   },
   accountAddressData: {
     addressOne:'',
@@ -80,9 +108,22 @@ const useShipmentStore = create<ShipmentState>((set) => ({
     country:{
       name:"",
       id:0
-    }
-  },
+    },
+    userName:'',
+    email:'',
+    mobileNumber:'',
+    countryCode:'',
 
+  },
+  deliveryServices:{
+    verbalNotification:false,
+    adultSignature:false,
+    directSignature:false,
+    deliveryPickupTimeFrom:'9:30',
+    deliveryPickupTimeTo:'17:00',
+    pickupInstruction: '',
+    pickupSpecialInstruction: ''    
+  },
 
   // Package Details
   packageDetail: {
@@ -96,6 +137,12 @@ const useShipmentStore = create<ShipmentState>((set) => ({
 
   // Package Description
   packageDescription: '',
+
+  cummilativeExpence : {
+    adultSignature:0,
+    directSignature: 0,
+    verbalNotification: 0,
+  },
 
   // Actions
   setSavedAddressData: (data) => 
@@ -127,25 +174,84 @@ const useShipmentStore = create<ShipmentState>((set) => ({
       packageDescription: description
     })),
 
+  setDeliveryServices: (data) =>
+    set((state) => ({
+      deliveryServices: {
+        ...state.deliveryServices,
+        ...data
+      }
+    })),
+
+    setCuminativeExpence: (data) =>
+    set((state) => ({
+      cummilativeExpence: {
+        ...state.cummilativeExpence,
+        ...data
+      }
+    })),
+
   // Reset all data
   resetShipmentData: () =>
     set(() => ({
-      savedAddressData: {
-        name: '',
-        companyName: '',
-        addressOne: '',
-        addressTwo: '',
-        city: '',
-        state: '',
-        email: '',
-        mobileNumber: '',
-        countryId: '',
-        residentAddress: false,
-        saveAddress: false,
-        countryCode: '',
-        zipCode: '',
-        gotDetails: false
-      }
+     savedAddressData: {
+    name: '',
+    companyName: '',
+    addressOne: '',
+    addressTwo: '',
+    city: '',
+    state: '',
+    email: '',
+    mobileNumber: '',
+    countryId: '',
+    residentAddress: false,
+    saveAddress: false,
+    countryCode: '',
+    zipCode: '',
+    gotDetails: false,
+    shipmentDate: new Date()
+  },
+  accountAddressData: {
+    addressOne:'',
+    addressTwo:'',
+    city:'',
+    countryId:'',
+    state:'',
+    country:{
+      name:"",
+      id:0
+    },
+    userName:'',
+    email:'',
+    mobileNumber:'',
+    countryCode:'',
+
+  },
+  deliveryServices:{
+    verbalNotification:false,
+    adultSignature:false,
+    directSignature:false,
+    deliveryPickupTimeFrom:'',
+    deliveryPickupTimeTo:'',
+    pickupInstruction: '',
+    pickupSpecialInstruction: ''
+  },
+  packageDetail: {
+    packageName:'',
+    length: '',
+    height: '',
+    width: '',
+    numberOfPieces: '',
+    weight: '',
+   
+  },
+  packageDescription: '',
+
+  cummilativeExpence : {
+    adultSignature:0,
+    directSignature: 0,
+    verbalNotification: 0,
+  },
+
     }))
 }))
 

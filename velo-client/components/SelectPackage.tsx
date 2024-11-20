@@ -3,10 +3,13 @@ import React, { useEffect, useState } from 'react';
 import { ThemedView } from './ThemedView';
 import { ThemedText } from './ThemedText';
 import { Divider } from 'react-native-paper';
+import { useColorScheme } from '@/hooks/useColorScheme'
 import { MaterialIcons } from '@expo/vector-icons';
 import { getPackageDetailDimension } from '@/constants/packageDimensionData';
+import { verticalScale } from '@/constants/metrics';
 
 const SelectPackage = ({getPackageDetail,onButtonclick}) => {
+  const colorScheme = useColorScheme();
 
   const [showPackageDetail, setShowPackageDetail] = useState(false);
   const [openPackageModal, setOpenPackageModal] = useState(false);
@@ -80,7 +83,7 @@ const SelectPackage = ({getPackageDetail,onButtonclick}) => {
       <ThemedView style={styles.card}>
         <ThemedView style={styles.titleContainer}>
           <ThemedText style={styles.title}>Package Details</ThemedText>
-          <View style={styles.titleUnderline} />
+          <ThemedView style={styles.titleUnderline} />
         </ThemedView>
 
         <ThemedText style={styles.title}>Package Type</ThemedText>
@@ -149,7 +152,7 @@ const SelectPackage = ({getPackageDetail,onButtonclick}) => {
                   <ThemedText style={styles.inputLabel}>{dimension}</ThemedText>
                   <ThemedView style={styles.inputContainer}>
                     <TextInput
-                      style={styles.input}
+                      style={[styles.input,{color:colorScheme === 'dark' ? 'white' : 'black'}]}
                       placeholder="0.0"
                       value={dimensions[dimension.toLowerCase()]}
                       keyboardType="decimal-pad"
@@ -169,7 +172,7 @@ const SelectPackage = ({getPackageDetail,onButtonclick}) => {
                 <ThemedText style={styles.inputLabel}>Number of Pieces</ThemedText>
                 <ThemedView style={styles.inputContainer}>
                   <TextInput
-                    style={styles.input}
+                   style={[styles.input,{color:colorScheme === 'dark' ? 'white' : 'black'}]}
                     placeholder="0"
                     value={numberOfPieces}
                     keyboardType="numeric"
@@ -182,7 +185,7 @@ const SelectPackage = ({getPackageDetail,onButtonclick}) => {
                 <ThemedText style={styles.inputLabel}>Weight per Piece</ThemedText>
                 <ThemedView style={styles.inputContainer}>
                   <TextInput
-                    style={styles.input}
+                    style={[styles.input,{color:colorScheme === 'dark' ? 'white' : 'black'}]}
                     placeholder="0.0"
                     value={weight}
                     keyboardType="decimal-pad"
@@ -206,6 +209,7 @@ const SelectPackage = ({getPackageDetail,onButtonclick}) => {
           </ThemedView>
         </>}
 
+      <Divider style={{ marginVertical: verticalScale(16) }} />
       </ThemedView>
     </ThemedView>
   );
@@ -218,10 +222,6 @@ const styles = StyleSheet.create({
 
   },
   card: {
-
-
-
-
   },
   titleContainer: {
     alignItems: 'center',
@@ -277,7 +277,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     height: 48,
     width: '100%',
-    color:'white'
 
   },
   unitText: {

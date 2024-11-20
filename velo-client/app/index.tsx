@@ -55,7 +55,7 @@ const RootIndex = () => {
         router.replace('/(tabs)/home')
       }
       else if(userData.registerVerificationStatus === 'LOGGED_IN' && userData.role === 'USER'){
-        router.replace('/(tabs)/home')
+        router.replace('/(tabs)/home/createShipment/payment')
       }
       
      
@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
   },
   logoImgContainer:{
     width:horizontalScale(100),
-    height:verticalScale(45),
+    height:verticalScale(60),
     marginTop: verticalScale(60),
 
   },

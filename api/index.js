@@ -9,6 +9,7 @@ import countryRoutes from './routes/country-route.js';
 import addressRoutes from './routes/address-route.js';
 import categoryRoutes from './routes/category-route.js';
 import listingRoutes from './routes/listing-route.js';
+import stripeRoutes from './routes/stripe-route.js';
 
 const app = express();
 app.use(cors({
@@ -30,6 +31,7 @@ app.use('/api/country',countryRoutes);
 app.use('/api/address',addressRoutes);
 app.use('/api/category',categoryRoutes);
 app.use('/api/listing',listingRoutes);
+app.use('/api/stripe',stripeRoutes);
 
 app.use(errorHandler);
 

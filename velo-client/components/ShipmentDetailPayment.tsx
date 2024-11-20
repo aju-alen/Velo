@@ -2,8 +2,10 @@ import { StyleSheet, TextInput, View } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { ThemedView } from './ThemedView';
 import { ThemedText } from './ThemedText';
+import { useColorScheme } from '@/hooks/useColorScheme'
 
 const ShipmentDetailPayment = ({onGetData,onButtonclick}) => {
+  const colorScheme = useColorScheme();
   const [description, setDescription] = useState('');
 
   useEffect(() => {
@@ -23,7 +25,7 @@ const ShipmentDetailPayment = ({onGetData,onButtonclick}) => {
           </ThemedText>
           
           <TextInput
-            style={styles.textInput}
+            style={[styles.textInput, { color: colorScheme === 'light' ? '#000' : '#fff' }]}
             placeholder="Enter your document description here..."
             placeholderTextColor="#999"
             value={description}
@@ -81,7 +83,5 @@ const styles = StyleSheet.create({
     padding: 16,
     fontSize: 15,
     minHeight: 120,
-    color: '#999',
-
   },
 });
