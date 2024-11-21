@@ -75,7 +75,8 @@ const SelectPackage = ({getPackageDetail,onButtonclick}) => {
     useEffect(() => {
       
       getPackageDetail(dimensions,numberOfPieces,weight);
-    }, [onButtonclick === true]);
+    }, [onButtonclick]);
+    
     
 
   return (

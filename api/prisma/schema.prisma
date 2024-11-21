@@ -75,11 +75,11 @@ model Country {
   flag           String
 
   // Define the many-to-many relationship via the junction table
-  shippingCountries Shipment[]
   agentCountries AgentCountry[]
   //Define the one-to-many relationship
   addresses      UserAddress[]
   savedAddresses SavedAddress[]
+  shipments      Shipment[]
 
 }
 
@@ -185,18 +185,15 @@ model SavedAddress{
 model Shipment{
   id String @id @default(cuid())
   userId String
+
   senderName String
   senderAddressOne String
   senderAddressTwo String
   senderCity String
   senderState String
-  senderEmail String
-  senderMobileNumber String
-  senderCountryId Int
-  senderCountryCode String
+
   shipmentDate DateTime
  
-
   receiverName String
   receiverAddressOne String
   receiverAddressTwo String
@@ -209,11 +206,28 @@ model Shipment{
   receiverResidentAddress Boolean
   receiverZipCode String
 
+  packageLength Float
+  packageWidth Float
+  packageHeight Float
+  packageWeight Float
+  packagePieces Int
+
+  verbalNotificationService Boolean
+  adultSignatureService Boolean
+  directSignatureService Boolean
+  pickupTimeDrom String
+  pickupTimeTo String
+  pickupInstructions String
+  pickupSpecialInstructions String
+
+  packageDescription String
+
+  packageDeliveryDate DateTime
 
 
-   country Country @relation(fields: [senderCountryId], references: [id])
+
    user    User  @relation(fields: [userId], references: [id])
-
+    receiverCountry Country @relation(fields: [receiverCountryId], references: [id])
 }
   
 

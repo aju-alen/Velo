@@ -19,6 +19,7 @@ interface AccountLoginData {
 interface LoginAccountState {
     accountLoginData: AccountLoginData;
     setAccountLoginData: (data: Partial<AccountLoginData>) => void;
+    resetAccountLoginData: () => void;
 }
 
 // Custom storage for SecureStore
@@ -45,6 +46,23 @@ const useLoginAccountStore = create<LoginAccountState>()(
                     accountLoginData: {
                         ...state.accountLoginData,
                         ...data
+                    }
+                })),
+            resetAccountLoginData: () =>
+                set(() => ({
+                    accountLoginData: {
+                        createdAt: "",
+                        email: "",
+                        firstTimeLogin: true,
+                        id: "",
+                        mobileCode: "",
+                        mobileCountry: "",
+                        mobileNumber: "",
+                        name: "",
+                        password: "",
+                        registerVerificationStatus: "",
+                        role: "",
+                        updatedAt: "",
                     }
                 })),
         }),

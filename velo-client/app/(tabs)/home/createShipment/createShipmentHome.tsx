@@ -1,5 +1,5 @@
-import { StyleSheet, Text, Image, Modal, TouchableOpacity, Dimensions, TextInput, TouchableWithoutFeedback, View, FlatList, ScrollView, Touchable } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import { StyleSheet,  Modal, TouchableOpacity, Dimensions, View, ScrollView } from 'react-native'
+import React, { useEffect, useState,useCallback } from 'react'
 import { horizontalScale, moderateScale, verticalScale } from '@/constants/metrics'
 import { ThemedView } from '@/components/ThemedView'
 import { ThemedText } from '@/components/ThemedText'
@@ -12,7 +12,7 @@ import { useColorScheme } from '@/hooks/useColorScheme'
 import SaveAddressForm from '@/components/SaveAddressForm'
 import SelectPackage from '@/components/SelectPackage'
 import ShipmentDetailPayment from '@/components/ShipmentDetailPayment'
-import { router } from 'expo-router'
+import { router, useFocusEffect } from 'expo-router'
 import useShipmentStore from '@/store/shipmentStore'
 
 
@@ -29,7 +29,7 @@ const CreateShipmentHome = () => {
     setAccountAddressData,
   } = useShipmentStore()
 
-  console.log(accountAddressData, 'accountAddressData in parent data');
+  // console.log(accountAddressData, 'accountAddressData in parent data');
   
   const colorScheme = useColorScheme()
   const [userSecureStorage, setUserSecureStorage] = useState(false)
@@ -51,10 +51,10 @@ const CreateShipmentHome = () => {
   const [selectedArea, setSelectedArea] = useState(null)
 
   
-  console.log(savedAddressData, 'savedAddressData in parent data');
+  // console.log(savedAddressData, 'savedAddressData in parent data');
   
 
-  console.log(userSecureStorage, 'userSecureStorage in parent data');
+  // console.log(userSecureStorage, 'userSecureStorage in parent data');
   
 
   
@@ -70,9 +70,19 @@ const CreateShipmentHome = () => {
       height: dimension.height,
       width: dimension.width,
       numberOfPieces: piece,
-      weight: weight
+      weight: (Number(weight) * Number(piece)).toString(),
     })
   }
+  useFocusEffect(
+    useCallback(() => {
+      // Do something when the screen is focused
+      setButtonClick(false)
+      setSavedAddressData({
+        ...savedAddressData,
+        gotDetails: false
+      })
+    }, [])
+  )
 
   const handleContinuePackageDetail = () => {
     setButtonClick(true)
@@ -87,9 +97,6 @@ const CreateShipmentHome = () => {
 
     console.log('Clicked-----');
     router.push('/home/createShipment/shippingOptions')
-    
-    
-    
   }
 
 
@@ -142,7 +149,8 @@ const CreateShipmentHome = () => {
       let user = await SecureStore.getItemAsync('registerDetail')
       if (!user) return
       const userData = JSON.parse(user)
-      console.log(userData, 'userData------');
+      // console.log(userData, 'userData------');
+
       
       setUserSecureStorage(userData)
       
@@ -154,7 +162,7 @@ const CreateShipmentHome = () => {
     const getUserAddress = async () => {
       const userAddress = await axios.get(`${ipURL}/api/address/get-user-address/${userSecureStorage['id']}`)
       setUserAddress(userAddress.data.data[0])
-      console.log(userAddress.data.data[0], 'userAddress----2-1-21-2-12-1-212');
+      // console.log(userAddress.data.data[0], 'userAddress----2-1-21-2-12-1-212');
       setAccountAddressData({
         ...accountAddressData,
         addressOne: userAddress.data.data[0].addressOne,
@@ -179,20 +187,20 @@ const CreateShipmentHome = () => {
   }
 
   const onChange = (event, selectedDate) => {
-    console.log(event, 'event');
-    console.log(selectedDate, 'selectedDate');
+    // console.log(event, 'event');
+    // console.log(selectedDate, 'selectedDate');
     
     
     const currentDate = selectedDate;
     setDate(currentDate);
-    console.log(currentDate, 'currentDate');
+    // console.log(currentDate, 'currentDate');
     
     setSavedAddressData({
       ...savedAddressData,
       shipmentDate: currentDate
     })
   };
-  console.log(savedAddressData, 'savedAddressData-----asdasd-----121-2-12-12');
+  // console.log(savedAddressData, 'savedAddressData-----asdasd-----121-2-12-12');
   
 
 
@@ -278,7 +286,7 @@ const CreateShipmentHome = () => {
 
         <ThemedView style={styles.titleContainer}>
           <ThemedText style={styles.title}>Shipment Details</ThemedText>
-          <View style={styles.titleUnderline} />
+          <ThemedView style={styles.titleUnderline} />
         </ThemedView>
           <ThemedView style={styles.shippingTypeContainer}>
             <TouchableOpacity

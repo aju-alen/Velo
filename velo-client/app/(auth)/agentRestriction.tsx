@@ -32,7 +32,7 @@ const AgentRestriction = () => {
 
         {/* Action Button */}
         <TouchableOpacity 
-          onPress={() => router.push('/(tabs)/home/homeMainPage')} 
+          onPress={() => router.replace('/(tabs)/home/homeMainPage')} 
           style={styles.buttonContainer}
         >
           <ThemedText style={styles.buttonText}>

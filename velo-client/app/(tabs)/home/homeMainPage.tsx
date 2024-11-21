@@ -16,7 +16,7 @@ const { width } = Dimensions.get('window');
 const CARD_WIDTH = (width - horizontalScale(40) - horizontalScale(32)) / 3;
 
 const HomeMainPage = () => {
-  const {accountLoginData} = useLoginAccountStore();
+  const {accountLoginData,resetAccountLoginData} = useLoginAccountStore();
   console.log(accountLoginData,'accountLoginData----11----');
   
   const [categoryData, setCategoryData] = useState([]);
@@ -38,6 +38,9 @@ const HomeMainPage = () => {
 
   const handleDelete = async () => {
     await SecureStore.deleteItemAsync('registerDetail');
+    resetAccountLoginData();
+    router.replace('/(auth)/login');
+    
   };
 
   const renderMarketplaceCategoryCard = ({ item, index }) => {
@@ -111,14 +114,14 @@ const HomeMainPage = () => {
           <ThemedText style={styles.welcomeText}>Welcome {accountName}</ThemedText>
         </ThemedView>
         <TouchableOpacity onPress={handleDelete} style={styles.deleteButton}>
-          <MaterialIcons name="delete-outline" size={24} color="#FF6B6B" />
+          <MaterialIcons name="logout" size={24} color="#FF6B6B" />
         </TouchableOpacity>
       </ThemedView>
 
       {/* Create Shipment Section */}
       <TouchableOpacity onPress={()=>router.push('/(tabs)/home/createShipment/createShipmentHome')} activeOpacity={0.7}>
 
-       <ThemedView style={styles.createShipmentContainer}>
+       {accountLoginData.role === "USER" && <ThemedView style={styles.createShipmentContainer}>
 
           <LinearGradient
             colors={getGradientColors(9)}
@@ -130,7 +133,7 @@ const HomeMainPage = () => {
             <ThemedText style={styles.marketplaceTitle}>Create a Shipment</ThemedText>
             <ThemedText style={styles.subTitle}>Ship your items with ease</ThemedText>
             </LinearGradient>
-        </ThemedView>
+        </ThemedView>}
       </TouchableOpacity>
 
       

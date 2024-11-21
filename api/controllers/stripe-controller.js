@@ -19,7 +19,7 @@ export const getKeys = async (req, res, next) => {
 }
 
 export const createPaymentIntent = async (req, res, next) => {
-    const { amount } = req.body;
+    const { amount,accountId } = req.body;
     console.log(amount, typeof (amount), 'amount------');
 
 
@@ -33,6 +33,9 @@ export const createPaymentIntent = async (req, res, next) => {
             amount: amount * 100,
             currency: 'aed',
             customer: customer.id,
+            metadata: {
+              accountId: accountId
+              },
         });
         res.status(201).json({
             paymentIntent: paymentIntent.client_secret,
@@ -57,13 +60,14 @@ export const webhook = async (req, res, next) => {
             case 'payment_intent.succeeded':
                 const paymentIntent = event.data.object;
                 console.log('PaymentIntent was successful!');
+                
 
                 // Then define and call a method to handle the successful payment intent.
                 // handlePaymentIntentSucceeded(paymentIntent);
                 break;
             case 'charge.succeeded':
                 const chargeSucceeded = event.data.object;
-                console.log('Charge Succeeded');
+                console.log('Charge Succeeded',chargeSucceeded);
                 
                 // Then define and call a function to handle the event charge.succeeded
                 break;

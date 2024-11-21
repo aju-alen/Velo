@@ -17,6 +17,7 @@ interface SavedAddressData {
   zipCode: string
   gotDetails: boolean
   shipmentDate: Date
+  deliveryDate: Date
 }
 
 interface AccountAddressData {
@@ -97,7 +98,9 @@ const useShipmentStore = create<ShipmentState>((set) => ({
     countryCode: '',
     zipCode: '',
     gotDetails: false,
-    shipmentDate: new Date()
+    shipmentDate: new Date(),
+    deliveryDate: new Date()
+
   },
   accountAddressData: {
     addressOne:'',
@@ -208,7 +211,8 @@ const useShipmentStore = create<ShipmentState>((set) => ({
     countryCode: '',
     zipCode: '',
     gotDetails: false,
-    shipmentDate: new Date()
+    shipmentDate: new Date(),
+    deliveryDate: new Date()
   },
   accountAddressData: {
     addressOne:'',

@@ -77,6 +77,7 @@ const RootIndex = () => {
             source={require('@/assets/images/logo.png')}
             style={styles.logoImgContainer}
           />
+          <ThemedText type='subtitle' style={[styles.heroText, styles.heroTextLogoText]}>Velo</ThemedText>
 </ThemedView>
         <ThemedView>
           <Image
@@ -87,7 +88,7 @@ const RootIndex = () => {
 
         <ThemedView style={styles.heroTextcontainer}>
           <ThemedText type='subtitle' style={styles.heroText}>
-            Send Anywhere, Ship with care using <ThemedText type='subtitle' style={[styles.heroText, styles.heroTextLogoText]}>Velo</ThemedText>
+            Shipping made simple, anywhere. 
           </ThemedText>
         </ThemedView>
 
@@ -121,11 +122,10 @@ const styles = StyleSheet.create({
   },
   logoContainer:{
     display:"flex",
-    flexDirection:"row-reverse",
+    flexDirection:"column",
     justifyContent:"center",
     alignItems:"center",
     paddingBottom:verticalScale(20),
-
     width:"100%"
     
   },

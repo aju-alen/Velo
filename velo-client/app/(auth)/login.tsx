@@ -38,23 +38,23 @@ const Login = () => {
       
       if (checkIfAlreadyRegistered.data.accountExists.registerVerificationStatus === "PARTIAL" && checkIfAlreadyRegistered.data.accountExists.role === "AGENT") {
         await SecureStore.setItemAsync('registerDetail', JSON.stringify(checkIfAlreadyRegistered.data.accountExists))
-        router.push('/verifyAgent')
+        router.replace('/verifyAgent')
       }
       else if(checkIfAlreadyRegistered.data.accountExists.registerVerificationStatus === "APPOINTMENT_BOOKED" && checkIfAlreadyRegistered.data.accountExists.role === "AGENT" ){
         await SecureStore.setItemAsync('registerDetail', JSON.stringify(checkIfAlreadyRegistered.data.accountExists))
-        router.push('/(tabs)/home')
+        router.replace('/(tabs)/home')
       }
       else if(checkIfAlreadyRegistered.data.accountExists.registerVerificationStatus === "LOGGED_IN" && checkIfAlreadyRegistered.data.accountExists.role === "AGENT" ){
         await SecureStore.setItemAsync('registerDetail', JSON.stringify(checkIfAlreadyRegistered.data.accountExists))
-        router.push('/(tabs)/home')
+        router.replace('/(tabs)/home')
       }
       else if (checkIfAlreadyRegistered.data.accountExists.registerVerificationStatus === "PARTIAL" && checkIfAlreadyRegistered.data.accountExists.role === "USER" ) {
         await SecureStore.setItemAsync('registerDetail', JSON.stringify(checkIfAlreadyRegistered.data.accountExists))
-        router.push('/(auth)/finalRegisterForm')
+        router.replace('/(auth)/finalRegisterForm')
       }
       else if (checkIfAlreadyRegistered.data.accountExists.registerVerificationStatus === "LOGGED_IN" && checkIfAlreadyRegistered.data.accountExists.role === "USER" ) {
         await SecureStore.setItemAsync('registerDetail', JSON.stringify(checkIfAlreadyRegistered.data.accountExists))
-        router.push('/(tabs)/home')
+        router.replace('/(tabs)/home')
       }
     }
     catch(err) {
