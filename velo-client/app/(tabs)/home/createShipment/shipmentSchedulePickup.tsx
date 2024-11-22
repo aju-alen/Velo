@@ -2,7 +2,7 @@ import { SafeAreaView, StyleSheet, TouchableOpacity, TextInput, View, ScrollView
 import React, { useState } from 'react'
 import { ThemedView } from '@/components/ThemedView'
 import { ThemedText } from '@/components/ThemedText'
-import { horizontalScale } from '@/constants/metrics'
+import { horizontalScale, moderateScale } from '@/constants/metrics'
 import { Divider} from 'react-native-paper'
 import useShipmentStore from '@/store/shipmentStore'
 import Ionicons from '@expo/vector-icons/Ionicons'
@@ -156,7 +156,7 @@ const ShipmentSchedulePickup = () => {
         </ThemedView>
         <ThemedView>
           <TouchableOpacity style={styles.buttonContainer} onPress={()=> router.replace('/(tabs)/home/createShipment/finalPreview')}>
-            <ThemedText>
+            <ThemedText style={styles.finalPreviewText}>
               Preview Final Changes
             </ThemedText>
           </TouchableOpacity>
@@ -314,6 +314,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontWeight: '500',
+    
   },
   buttonContainer: {
     backgroundColor: '#FFAC1C',
@@ -331,5 +332,11 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.1,
     shadowRadius: 4,
+    fontSize: moderateScale(16),
+
+  },
+  finalPreviewText: {
+    fontSize: 16,
+    fontWeight: '600',
   },
 })

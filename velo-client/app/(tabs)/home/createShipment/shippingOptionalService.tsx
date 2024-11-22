@@ -3,7 +3,7 @@ import React, { useState } from 'react'
 import { ThemedView } from '@/components/ThemedView'
 import { ThemedText } from '@/components/ThemedText'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { horizontalScale, verticalScale } from '@/constants/metrics'
+import { horizontalScale, moderateScale, verticalScale } from '@/constants/metrics'
 import { Divider } from 'react-native-paper'
 import Checkbox from 'expo-checkbox'
 import useShipmentStore from '@/store/shipmentStore'
@@ -142,19 +142,19 @@ const styles = StyleSheet.create({
     marginBottom: verticalScale(8),
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: moderateScale(20),
     marginLeft: horizontalScale(8),
   },
   headerDescription: {
 
-    fontSize: 14,
-    lineHeight: 20,
+    fontSize: moderateScale(14),
+    lineHeight: moderateScale(20),
   },
   divider: {
     marginVertical: verticalScale(16),
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: moderateScale(18),
     marginBottom: verticalScale(16),
   },
   servicesList: {
@@ -179,8 +179,8 @@ const styles = StyleSheet.create({
     marginRight: horizontalScale(12),
   },
   checkbox: {
-    height: 22,
-    width: 22,
+    height: verticalScale(22),
+    width: horizontalScale(22),
   },
   serviceContent: {
     flex: 1,
@@ -191,13 +191,13 @@ const styles = StyleSheet.create({
     marginBottom: verticalScale(8),
   },
   serviceName: {
-    fontSize: 16,
+    fontSize: moderateScale(16),
     marginLeft: horizontalScale(8),
   },
   serviceDescription: {
 
-    fontSize: 14,
-    lineHeight: 20,
+    fontSize: moderateScale(14),
+    lineHeight: moderateScale(20),
     marginBottom: verticalScale(8),
   },
   priceContainer: {
@@ -205,19 +205,19 @@ const styles = StyleSheet.create({
 
     paddingHorizontal: horizontalScale(10),
     paddingVertical: verticalScale(4),
-    borderRadius: 16,
+    borderRadius: moderateScale(16),
   },
   priceText: {
     color: '#FFAC1C',
-    fontSize: 14,
+    fontSize: moderateScale(14),
   },
   buttonContainer: {
     backgroundColor: '#FFAC1C',
     padding: verticalScale(16),
-    borderRadius: 12,
+    borderRadius: moderateScale(12),
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 'auto',
+    marginTop: verticalScale(24),
     marginBottom: verticalScale(24),
     elevation: 2,
     shadowColor: '#000',
@@ -229,7 +229,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   buttonText: {
-    fontSize: 16,
+    fontSize: moderateScale(16),
     fontWeight: '600',
   },
 })

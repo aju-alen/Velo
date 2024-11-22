@@ -1,4 +1,4 @@
-import { StyleSheet,  Modal, TouchableOpacity, Dimensions, View, ScrollView } from 'react-native'
+import { StyleSheet,  Modal, TouchableOpacity, Dimensions, ScrollView, Platform, ActivityIndicator } from 'react-native'
 import React, { useEffect, useState,useCallback } from 'react'
 import { horizontalScale, moderateScale, verticalScale } from '@/constants/metrics'
 import { ThemedView } from '@/components/ThemedView'
@@ -39,9 +39,12 @@ const CreateShipmentHome = () => {
   const [addressModalVisible, setAddressModalVisible] = useState(false)
   const [selectedOption, setSelectedOption] = useState(null)
   const [date, setDate] = useState(new Date());
-  const [show, setShow] = useState(true);
+  const [show, setShow] = useState(Platform.OS === 'ios' ? true : false);
   const [checked, setChecked] = useState('false');
   const [buttonClick, setButtonClick] = useState(false)
+
+  console.log(date, 'date----');
+  
 
 
 
@@ -172,6 +175,7 @@ const CreateShipmentHome = () => {
         state: userAddress.data.data[0].state,
         country: userAddress.data.data[0].country
       })
+
       
     }
     if (checked === 'document' || checked === 'package') {
@@ -187,18 +191,15 @@ const CreateShipmentHome = () => {
   }
 
   const onChange = (event, selectedDate) => {
-    // console.log(event, 'event');
-    // console.log(selectedDate, 'selectedDate');
-    
-    
     const currentDate = selectedDate;
     setDate(currentDate);
-    // console.log(currentDate, 'currentDate');
+    console.log(currentDate, 'currentDate');
     
     setSavedAddressData({
       ...savedAddressData,
       shipmentDate: currentDate
     })
+    setShow(Platform.OS === 'ios' ? true : false);
   };
   // console.log(savedAddressData, 'savedAddressData-----asdasd-----121-2-12-12');
   
@@ -267,9 +268,11 @@ const CreateShipmentHome = () => {
 <ScrollView showsVerticalScrollIndicator={false} style={styles.contentContainer}>
       <ThemedView >
         {/* Shipping Date Section */}
-        <ThemedView style={styles.section}>
+
+        {Platform.OS === 'ios' &&<ThemedView style={styles.section}>
           <ThemedView style={styles.shippingDateContainer}>
             <ThemedText style={styles.sectionHeaderText}>Shipping Date</ThemedText>
+            
            {show && <DateTimePicker
               testID="dateTimePicker"
               value={savedAddressData.shipmentDate}
@@ -279,7 +282,7 @@ const CreateShipmentHome = () => {
               maximumDate={new Date(new Date().setDate(new Date().getDate() + 7))}
             />}
           </ThemedView>
-        </ThemedView>
+        </ThemedView>}
 
         {/* Shipping Type Section */}
         <ThemedView style={styles.section}>
@@ -294,12 +297,18 @@ const CreateShipmentHome = () => {
                 styles.shippingTypeOption,
                 checked === 'document' && styles.shippingTypeSelected
               ]}
-              onPress={() => setChecked('document')}
+              onPress={() => {
+                setChecked('document')
+
+              }}
             >
               <RadioButton
                 value="document"
                 status={checked === 'document' ? 'checked' : 'unchecked'}
-                onPress={() => setChecked('document')}
+                onPress={() => {
+                  setChecked('document')
+
+                }}
               />
               <ThemedText style={styles.shippingTypeText}>Document</ThemedText>
             </TouchableOpacity>
@@ -309,12 +318,18 @@ const CreateShipmentHome = () => {
                 styles.shippingTypeOption,
                 checked === 'package' && styles.shippingTypeSelected
               ]}
-              onPress={() => setChecked('package')}
+              onPress={() => {
+                setChecked('package')
+
+              }}
             >
               <RadioButton
                 value="package"
                 status={checked === 'package' ? 'checked' : 'unchecked'}
-                onPress={() => setChecked('package')}
+                onPress={() => {
+                  setChecked('package')
+
+                }}
               />
               <ThemedText style={styles.shippingTypeText}>Package</ThemedText>
             </TouchableOpacity>
@@ -322,8 +337,8 @@ const CreateShipmentHome = () => {
         </ThemedView>
 
         {/* Shipping Address Section */}
-        {checked !== 'false' &&
-          <>
+        {checked !== 'false' && 
+         ( <>
             <ThemedView style={styles.section}>
 
               <ThemedText style={styles.sectionHeaderText}>Shipping From</ThemedText>
@@ -373,8 +388,9 @@ const CreateShipmentHome = () => {
               </ThemedView>
             </ThemedView>
             <Divider style={{ marginVertical: verticalScale(16) }} />
-          </>
+          </>) 
         }
+       
        
        {savedAddressData.gotDetails && <SelectPackage getPackageDetail={handlePackagedetail} onButtonclick={buttonClick} />}
       
@@ -448,6 +464,7 @@ const styles = StyleSheet.create({
   actionButton: {
     backgroundColor: '#FFAC1C',
     paddingVertical: verticalScale(14),
+    marginBottom: verticalScale(16),
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
@@ -531,7 +548,7 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.05,
     shadowRadius: 4,
-    elevation: 2,
+
   },
   addressName: {
     fontSize: 18,
@@ -591,18 +608,17 @@ const styles = StyleSheet.create({
   },
   titleContainer: {
     alignItems: 'center',
-    marginBottom: 22,
+    marginBottom: verticalScale(22),
   },
   title: {
     fontWeight: '700',
-    color: '#FFAC1C',
-    marginBottom: 8,
+    marginBottom: verticalScale(8),
   },
   titleUnderline: {
-    width: 60,
-    height: 4,
+    width: horizontalScale(60),
+    height: verticalScale(4),
     backgroundColor: '#FFAC1C',
-    borderRadius: 2,
+    borderRadius: moderateScale(2),
   },
 });
 

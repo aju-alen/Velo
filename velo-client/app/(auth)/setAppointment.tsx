@@ -17,11 +17,12 @@ const SetAppointment = () => {
 
   const [date, setDate] = useState(new Date());
   const [mode, setMode] = useState('date');
-  const [show, setShow] = useState(true);
+  const [show, setShow] = useState(Platform.OS === 'ios'? true : false);
 
   const onChange = (event, selectedDate) => {
     const currentDate = selectedDate;
     setDate(currentDate);
+    setShow(Platform.OS === 'ios'? true : false);
   };
 
   const showMode = (currentMode) => {

@@ -19,7 +19,9 @@ export const getKeys = async (req, res, next) => {
 }
 
 export const createPaymentIntent = async (req, res, next) => {
-    const { amount,accountId } = req.body;
+    console.log(req.body, 'req.body');
+    
+    const { amount,accountId,addressLineOne,addressCity, addressState,addressCountry,addressName} = req.body;
     console.log(amount, typeof (amount), 'amount------');
 
 
@@ -33,6 +35,16 @@ export const createPaymentIntent = async (req, res, next) => {
             amount: amount * 100,
             currency: 'aed',
             customer: customer.id,
+            shipping: {
+                address: {
+                  line1: addressLineOne,
+                  city: addressCity,
+                  state: addressState,
+                  postal_code: '0000',
+                  country: 'AE',
+                },
+                name: addressName // Customer's full name
+              },
             metadata: {
               accountId: accountId
               },

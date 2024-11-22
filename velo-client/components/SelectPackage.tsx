@@ -6,7 +6,7 @@ import { Divider } from 'react-native-paper';
 import { useColorScheme } from '@/hooks/useColorScheme'
 import { MaterialIcons } from '@expo/vector-icons';
 import { getPackageDetailDimension } from '@/constants/packageDimensionData';
-import { verticalScale } from '@/constants/metrics';
+import { verticalScale,moderateScale,horizontalScale } from '@/constants/metrics';
 
 const SelectPackage = ({getPackageDetail,onButtonclick}) => {
   const colorScheme = useColorScheme();
@@ -105,7 +105,7 @@ const SelectPackage = ({getPackageDetail,onButtonclick}) => {
               <ThemedText style={styles.title}>Shipping Package Options</ThemedText>
               <MaterialIcons >
                 <TouchableOpacity onPress={() => setOpenPackageModal(false)}>
-                  <MaterialIcons name="close" size={24} color="white" />
+                  <MaterialIcons name="close" size={24} color= {colorScheme === 'dark' ? '#fff' : '#000'} />
                 </TouchableOpacity>
               </MaterialIcons>
             </ThemedView>
@@ -226,104 +226,106 @@ const styles = StyleSheet.create({
   },
   titleContainer: {
     alignItems: 'center',
-    marginBottom: 22,
+    marginBottom: verticalScale(22),
   },
   title: {
-    marginBottom: 8,
+    marginBottom: verticalScale(8),
   },
   titleUnderline: {
-    width: 60,
-    height: 4,
+    width: horizontalScale(60),
+    height: verticalScale(4),
     backgroundColor: '#FFAC1C',
-    borderRadius: 2,
+    borderRadius: moderateScale(2),
   },
 
   section: {
-    marginBottom: 32,
+    marginBottom: verticalScale(32),
   },
   sectionTitle: {
     fontWeight: '600',
-    marginBottom: 8,
+    marginBottom: verticalScale(8),
   },
   dimensionsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: 8,
+    gap: moderateScale(8),
   },
   quantityRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: 8,
+    gap: moderateScale(8),
   },
   inputWrapper: {
     flex: 1,
   },
   inputLabel: {
-    fontSize: 14,
+    fontSize: moderateScale(14),
     fontWeight: '500',
-    marginBottom: 8,
+    marginBottom: verticalScale(8),
 
   },
   inputContainer: {
     position: 'relative',
-    height: 48,
+    height: verticalScale(48),
   },
   input: {
     flex: 1,
-    borderWidth: 1.5,
+    borderWidth: moderateScale(1),
     borderColor: '#E2E8F0',
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingRight: 40,
-    fontSize: 16,
-    height: 48,
+    borderRadius: moderateScale(12),
+    paddingHorizontal: horizontalScale(14),
+    paddingRight: horizontalScale(40),
+    fontSize: moderateScale(16),
+    height: verticalScale(48),
     width: '100%',
 
   },
   unitText: {
     position: 'absolute',
-    right: 14, 
+    right: moderateScale(14), 
     top: '50%',
     transform: [{ translateY: -8 }],
-    fontSize: 14,
+    fontSize: moderateScale(14),
     fontWeight: '500',
     color: '#718096',
   },
   summary: {
 
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 24,
+    borderRadius: moderateScale(16),
+    padding: moderateScale(20),
+    marginBottom: verticalScale(24),
   },
   summaryRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 8,
+    paddingVertical: verticalScale(8),
   },
   summaryLabel: {
-    fontSize: 16,
+    fontSize: moderateScale(16),
     color: '#4A5568',
     fontWeight: '500',
   },
   summaryValue: {
-    fontSize: 18,
+    fontSize: moderateScale(18),
     fontWeight: '600',
     color: '#2D3748',
   },
   selectPackageContainer: {
-    borderWidth: 1,
+    borderWidth: moderateScale(1),
     borderColor: '#E2E8F0',
-    borderRadius: 12,
-    paddingTop: 12,
-    paddingLeft: 14,
-    marginBottom: 16,
+    borderRadius: moderateScale(12),
+    paddingTop: verticalScale(12),
+    paddingLeft: horizontalScale(14),
+    marginBottom: verticalScale(16),
   },
   modalContent: {
-    height: '90%',
+    height: '70%',
     width: '100%',
-    borderTopRightRadius: 18,
-    borderTopLeftRadius: 18,
+    borderTopRightRadius: horizontalScale(18),
+    borderTopWidth: verticalScale(4),
+    borderTopColor: '#FFAC1C',
+    borderTopLeftRadius: horizontalScale(18),
     position: 'absolute',
     bottom: 0,
   },
@@ -331,10 +333,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 20,
+    padding: moderateScale(20),
   },
   modalBodyContainer: {
-    padding: 20,
+    padding: moderateScale(20),
   },
 
 });

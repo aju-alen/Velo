@@ -8,8 +8,10 @@ import axios from 'axios'
 import { ipURL } from '@/constants/backendUrl'
 import MaterialIcons from '@expo/vector-icons/MaterialIcons'
 import * as SecureStore from 'expo-secure-store'
+import { useColorScheme } from '@/hooks/useColorScheme';
 
 const MarketHome = () => {
+  const colorScheme = useColorScheme();
   const [accountDetails, setAccountDetails] = useState(null);
 
   const [getCatIdListing, setGetCatIdListing] = useState([]);
@@ -74,7 +76,7 @@ const MarketHome = () => {
         style={styles.cardContainer}
         onPress={() => router.push(`/(tabs)/market/${item.id}`)}
       >
-        <ThemedView style={styles.card}>
+        <ThemedView style={[styles.card,{elevation:colorScheme === 'dark'? 8 :2}]}>
           <ThemedView style={styles.imageContainer}>
             <MaterialIcons name="directions-car" size={40} color="#FFAC1C" />
           </ThemedView>
@@ -222,7 +224,6 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.15,
     shadowRadius: 4,
-    elevation: 8,
   },
   imageContainer: {
     width: horizontalScale(80),

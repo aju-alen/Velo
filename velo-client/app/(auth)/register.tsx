@@ -6,9 +6,11 @@ import { verticalScale, horizontalScale, moderateScale } from '@/constants/metri
 import CustomButton from '@/components/CustomButton';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
+import { useColorScheme } from '@/hooks/useColorScheme';
 
 
 const Register = () => {
+
   const params = useLocalSearchParams();
   const { role } = params;
   
@@ -171,7 +173,7 @@ const InputField = ({ label, error, ...props }) => (
   <ThemedView style={styles.inputContainer}>
     <ThemedText type='default' style={styles.inputLabel}>{label}</ThemedText>
     <ThemedView style={[
-      styles.inputWrapper,
+      styles.inputWrapper,{borderColor: useColorScheme() === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)'},
       error && styles.inputWrapperError
     ]}>
       <TextInput
@@ -202,7 +204,7 @@ inputWrapper: {
   backgroundColor: 'rgba(255, 255, 255, 0.05)',
   borderRadius: moderateScale(12),
   borderWidth: 1,
-  borderColor: 'rgba(255, 255, 255, 0.1)',
+  
   overflow: 'hidden',
   height: verticalScale(52),
 },

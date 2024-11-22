@@ -6,6 +6,7 @@ import useShipmentStore from '@/store/shipmentStore';
 import { Divider } from 'react-native-paper';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
+import { horizontalScale, moderateScale, verticalScale } from '@/constants/metrics';
 
 const FinalPreview = () => {
   const { 
@@ -115,9 +116,9 @@ const FinalPreview = () => {
           </ThemedText>
         </ThemedView>
       </ThemedView>
-      <ThemedView style={styles.confirmButtonContainer}>
+      <ThemedView style={styles.buttonContainer}>
         <TouchableOpacity onPress={()=>router.push('/(tabs)/home/createShipment/payment')}>
-          <ThemedText>Confirm Shipment</ThemedText>
+          <ThemedText style={styles.finalPreviewText}>Confirm Shipment</ThemedText>
         </TouchableOpacity>
       </ThemedView>
     </ScrollView>
@@ -129,11 +130,12 @@ export default FinalPreview;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingHorizontal:horizontalScale(16),
 
   },
   section: {
-    marginBottom: 24,
-    padding: 16,
+    marginBottom: verticalScale(24),
+    padding: moderateScale(16),
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -143,56 +145,79 @@ const styles = StyleSheet.create({
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: verticalScale(12),
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: moderateScale(18),
     fontWeight: '600',
 
-    marginLeft: 8,
+    marginLeft: horizontalScale(8),
   },
   sectionDivider: {
-    marginVertical: 12,
+    marginVertical: verticalScale(12),
 
   },
   card: {
-    padding: 16,
+    padding: moderateScale(16),
 
-    borderRadius: 10,
-    marginBottom: 16,
+    borderRadius: moderateScale(8),
+    marginBottom: verticalScale(16),
   },
   cardTitle: {
-    fontSize: 14,
+    fontSize: moderateScale(14),
     fontWeight: '600',
 
-    marginBottom: 8,
+    marginBottom: verticalScale(8),
   },
   cardDivider: {
-    marginVertical: 8,
+    marginVertical: verticalScale(8),
 
   },
   nameText: {
-    fontSize: 16,
+    fontSize: moderateScale(16),
     fontWeight: '500',
 
-    marginBottom: 4,
+    marginBottom: verticalScale(4),
   },
   detailText: {
-    fontSize: 14,
+    fontSize: moderateScale(14),
 
-    marginBottom: 4,
+    marginBottom: verticalScale(4),
   },
   highlightText: {
-    fontSize: 16,
+    fontSize: moderateScale(14),
     fontWeight: '500',
     color: '#FFAC1C',
   },
   confirmButtonContainer:{
     alignItems: 'center',
-    marginTop: 16,
-    marginBottom: 32,
-    paddingVertical: 12,
+    marginTop: verticalScale(16),
+    marginBottom: verticalScale(32),
+    paddingVertical: verticalScale(12),
     backgroundColor: '#FFAC1C',
-    borderRadius: 10,
-  }
+    borderRadius: moderateScale(10),
+  },
+  buttonContainer: {
+    backgroundColor: '#FFAC1C',
+    padding: horizontalScale(16),
+    borderRadius: moderateScale(12),
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 'auto',
+    marginBottom: horizontalScale(24),
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: moderateScale(4),
+    fontSize: moderateScale(16),
+
+  },
+  finalPreviewText: {
+    fontSize: moderateScale(16),
+    fontWeight: '600',
+  },
 });

@@ -1,6 +1,6 @@
 const  pricing = {
-    transport: 300,
-    fuel: 74,
+    transport: 1,
+    fuel: 1,
 }
 
 export default pricing;

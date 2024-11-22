@@ -1,8 +1,8 @@
-import { ScrollView, StyleSheet, TouchableOpacity } from 'react-native'
 import React from 'react'
+import { ScrollView, StyleSheet, TouchableOpacity } from 'react-native'
 import { ThemedView } from '@/components/ThemedView'
 import { ThemedText } from '@/components/ThemedText'
-import { verticalScale, horizontalScale } from '@/constants/metrics'
+import { verticalScale, horizontalScale, moderateScale } from '@/constants/metrics'
 import useShipmentStore from '@/store/shipmentStore'
 import useLoginAccountStore from '@/store/loginAccountStore'
 import { Divider } from 'react-native-paper'
@@ -10,21 +10,25 @@ import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { router } from 'expo-router'
 
 const ShippingOptions = () => {
-  const { savedAddressData, packageDetail, packageDescription, accountAddressData } = useShipmentStore()
+  const { savedAddressData, packageDetail, accountAddressData } = useShipmentStore()
   const { accountLoginData } = useLoginAccountStore()
 
   const renderAddressBlock = (title, data, icon) => (
-    <ThemedView style={styles.addressBlock}>
+    <ThemedView style={styles.addressContainer}>
       <ThemedView style={styles.addressHeader}>
         <MaterialCommunityIcons name={icon} size={24} color="#666" />
-        <ThemedText type='defaultSemiBold' style={styles.addressTitle}>{title}</ThemedText>
+        <ThemedText type='defaultSemiBold' style={styles.addressHeaderText}>{title}</ThemedText>
       </ThemedView>
-      <ThemedView style={styles.addressContent}>
-        <ThemedText type='default' style={styles.addressText}>
-          {`${data.name}, ${data.state}${data.country?.name ? `, ${data.country.name}` : ''}`}
+      
+      <ThemedView style={styles.addressDetailsContainer}>
+        <ThemedText style={styles.addressNameText}>
+          {`${data.name}`}
         </ThemedText>
-        <ThemedText type='default' style={styles.contactText}>{data.email}</ThemedText>
-        <ThemedText type='default' style={styles.contactText}>
+        <ThemedText style={styles.addressLocationText}>
+          {`${data.state}${data.country?.name ? `, ${data.country.name}` : ''}`}
+        </ThemedText>
+        <ThemedText style={styles.contactInfoText}>{data.email}</ThemedText>
+        <ThemedText style={styles.contactInfoText}>
           {`${data.mobileCode || data.countryCode}${data.mobileNumber}`}
         </ThemedText>
       </ThemedView>
@@ -32,53 +36,57 @@ const ShippingOptions = () => {
   )
 
   return (
-    <ScrollView >
-    <ThemedView style={styles.container}>
-      {/* Package Details Section */}
-      <ThemedView style={styles.section}>
-        <ThemedView style={styles.sectionHeader}>
-          <MaterialCommunityIcons name="package-variant" size={24} color="#666" />
-          <ThemedText type='defaultSemiBold' style={styles.sectionTitle}>Your shipment details</ThemedText>
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <ThemedView style={styles.container}>
+        {/* Package Details */}
+        <ThemedView style={styles.sectionContainer}>
+          <ThemedView style={styles.sectionTitleContainer}>
+            <MaterialCommunityIcons name="package-variant" size={24} color="#666" />
+            <ThemedText type='defaultSemiBold' style={styles.sectionTitleText}>
+              Shipment Details
+            </ThemedText>
+          </ThemedView>
+          
+          <ThemedView style={styles.packageDetailsContainer}>
+            <ThemedText style={styles.packageNameText}>
+              {packageDetail.packageName}
+            </ThemedText>
+            <ThemedText style={styles.packageMetaText}>
+              {`Dimensions: ${packageDetail.length} × ${packageDetail.width} × ${packageDetail.height} cm`}
+            </ThemedText>
+            <ThemedText style={styles.packageMetaText}>
+              {`${packageDetail.numberOfPieces} Piece(s) • ${packageDetail.weight} kg`}
+            </ThemedText>
+          </ThemedView>
         </ThemedView>
-        
-        <ThemedView style={styles.packageDetails}>
-          <ThemedText type='default' style={styles.packageName}>{packageDetail.packageName}</ThemedText>
-          <ThemedText type='default' style={styles.dimensionText}>
-            {`Dimensions: ${packageDetail.length} × ${packageDetail.width} × ${packageDetail.height} cm`}
+
+        <Divider style={styles.divider} />
+
+        {/* Shipping Addresses */}
+        <ThemedView style={styles.sectionContainer}>
+          <ThemedText type='defaultSemiBold' style={styles.sectionTitleText}>
+            Shipping From/To
           </ThemedText>
-          <ThemedText type='default' style={styles.weightText}>
-            {`${packageDetail.numberOfPieces} Piece(s) • ${packageDetail.weight} kg`}
+          
+          {renderAddressBlock('From', {...accountLoginData, ...accountAddressData}, 'arrow-up-circle')}
+          <ThemedView style={styles.addressConnector} />
+          {renderAddressBlock('To', savedAddressData, 'arrow-down-circle')}
+        </ThemedView>
+
+        <Divider style={styles.divider} />
+
+        {/* Shipping Options */}
+     
+
+        <TouchableOpacity 
+          style={styles.continueButton} 
+          onPress={() => router.push('/(tabs)/home/createShipment/shippingOptionalService')}
+        >
+          <ThemedText style={styles.continueButtonText}>
+            Continue
           </ThemedText>
-        </ThemedView>
+        </TouchableOpacity>
       </ThemedView>
-
-      <Divider style={styles.divider} />
-
-      {/* Shipping Addresses Section */}
-      <ThemedView style={styles.section}>
-        <ThemedText type='defaultSemiBold' style={styles.sectionTitle}>Shipping from/to</ThemedText>
-        
-        {renderAddressBlock('From', {...accountLoginData, ...accountAddressData}, 'arrow-up-circle')}
-        <ThemedView style={styles.addressDivider} />
-        {renderAddressBlock('To', savedAddressData, 'arrow-down-circle')}
-      </ThemedView>
-
-      <Divider style={styles.divider} />
-
-      {/* Shipping Options Section */}
-      <ThemedView style={styles.section}>
-        <ThemedView style={styles.sectionHeader}>
-          <MaterialCommunityIcons name="truck-delivery" size={24} color="#666" />
-          <ThemedText type='defaultSemiBold' style={styles.sectionTitle}>Select a shipping option</ThemedText>
-        </ThemedView>
-        {/* Add your shipping options here */}
-      </ThemedView>
-      <TouchableOpacity style={styles.buttonContainer} onPress={()=>router.push('/(tabs)/home/createShipment/shippingOptionalService')}>
-        <ThemedText>
-          Continue
-        </ThemedText>
-      </TouchableOpacity>
-    </ThemedView>
     </ScrollView>
   )
 }
@@ -86,79 +94,88 @@ const ShippingOptions = () => {
 export default ShippingOptions
 
 const styles = StyleSheet.create({
+  scrollContainer: {
+    flexGrow: 1,
+  },
   container: {
     flex: 1,
+    padding: horizontalScale(16),
   },
-  section: {
-    marginBottom: verticalScale(24),
+  sectionContainer: {
+    marginBottom: verticalScale(16),
   },
-  sectionHeader: {
+  sectionTitleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: verticalScale(12),
   },
-  sectionTitle: {
-    fontSize: 18,
+  sectionTitleText: {
+    fontSize: moderateScale(18),
     marginLeft: horizontalScale(8),
   },
-  packageDetails: {
-
+  packageDetailsContainer: {
     padding: verticalScale(12),
-    borderRadius: 8,
-    marginTop: verticalScale(8),
+    borderRadius: moderateScale(8),
   },
-  packageName: {
-    fontSize: 16,
+  packageNameText: {
+    fontSize: moderateScale(16),
     marginBottom: verticalScale(4),
   },
-  dimensionText: {
+  packageMetaText: {
     color: '#666',
     marginBottom: verticalScale(4),
-  },
-  weightText: {
-    color: '#666',
   },
   divider: {
     marginVertical: verticalScale(16),
   },
-  addressBlock: {
+  addressContainer: {
     marginVertical: verticalScale(8),
   },
   addressHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: verticalScale(0),
+    marginBottom: verticalScale(8),
   },
-  addressTitle: {
+  addressHeaderText: {
     marginLeft: horizontalScale(8),
-    fontSize: 16,
+    fontSize: moderateScale(16),
   },
-  addressContent: {
+  addressDetailsContainer: {
 
     padding: verticalScale(12),
-    borderRadius: 8,
+    borderRadius: moderateScale(8),
     marginLeft: horizontalScale(32),
   },
-  addressText: {
-    fontSize: 15,
-    marginBottom: verticalScale(0),
+  addressNameText: {
+    fontSize: moderateScale(15),
+    marginBottom: verticalScale(4),
   },
-  contactText: {
+  addressLocationText: {
+    fontSize: moderateScale(14),
+    color: '#666',
+    marginBottom: verticalScale(4),
+  },
+  contactInfoText: {
     color: '#666',
     fontSize: 14,
     marginBottom: verticalScale(2),
   },
-  addressDivider: {
-
-    width: 2,
-    marginLeft: horizontalScale(11),
+  addressConnector: {
+    height: verticalScale(16),
+    width: horizontalScale(2),
+    backgroundColor: '#666',
+    marginLeft: horizontalScale(40),
   },
-  buttonContainer:{
+  continueButton: {
     backgroundColor: '#FFAC1C',
     padding: verticalScale(12),
-    borderRadius: 8,
+    borderRadius: moderateScale(8),
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: verticalScale(24),
+  },
+  continueButtonText: {
+
+    fontWeight: '600',
   }
 })

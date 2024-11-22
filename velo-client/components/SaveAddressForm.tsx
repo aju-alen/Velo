@@ -1,4 +1,4 @@
-import { StyleSheet, Modal, TouchableWithoutFeedback, ScrollView, TouchableOpacity, TextInput, Image, Text, Dimensions, View, FlatList } from 'react-native'
+import { StyleSheet, Modal, TouchableWithoutFeedback, ScrollView, TouchableOpacity, TextInput, Image, Dimensions, FlatList, Platform } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { ThemedView } from './ThemedView'
 import { ThemedText } from './ThemedText'
@@ -85,7 +85,11 @@ const SaveAddressForm = ({ addressModalVisible, onClose, userId }) => {
 
   const CheckboxItem = ({ label, status, onPress }) => (
     <ThemedView style={styles.checkboxTextContainer}>
-      <ThemedView style={styles.checboxContainer}>
+      <ThemedView style={[styles.checboxContainer,{
+         borderRadius: Platform.OS === 'ios' ? moderateScale(4) : moderateScale(0),
+         borderWidth:Platform.OS === 'ios' ? moderateScale(2) : moderateScale(0),
+
+      }]}>
 
         <Checkbox
           status={status ? 'checked' : 'unchecked'}
@@ -206,7 +210,7 @@ const SaveAddressForm = ({ addressModalVisible, onClose, userId }) => {
                       onPress={onClose}
                       style={styles.closeButton}
                     >
-                      <MaterialIcons name="close" size={24} color="white" />
+                      <MaterialIcons name="close" size={24} color= {colorScheme === 'dark' ? '#fff' : '#000'} />
                     </TouchableOpacity>
                   </ThemedView>
                   <ThemedView style={styles.formContainer}>
@@ -214,7 +218,7 @@ const SaveAddressForm = ({ addressModalVisible, onClose, userId }) => {
                       placeholder="Enter First And Last Name"
                       value={savedAddressData.name}
                       onChangeText={(text) => setSavedAddressData({ name: text })}
-                      style={[styles.input,{color: colorScheme === 'dark' ? '#fff' : '#000'}]}
+                      style={[styles.input,{color: colorScheme === 'dark' ? '#fff' : '#000',backgroundColor: colorScheme ==='dark'?'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)'}]}
                       keyboardType="default"
                     />
 
@@ -222,7 +226,7 @@ const SaveAddressForm = ({ addressModalVisible, onClose, userId }) => {
                       placeholder="Enter Company Name"
                       value={savedAddressData.companyName}
                       onChangeText={(text) => setSavedAddressData({ companyName: text })}
-                      style={[styles.input,{color: colorScheme === 'dark' ? '#fff' : '#000'}]}
+                      style={[styles.input,{color: colorScheme === 'dark' ? '#fff' : '#000',backgroundColor: colorScheme ==='dark'?'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)' }]}
                       keyboardType="default"
                     />
 
@@ -231,7 +235,7 @@ const SaveAddressForm = ({ addressModalVisible, onClose, userId }) => {
                       placeholder="Address Line One"
                       value={savedAddressData.addressOne}
                       onChangeText={(text) => setSavedAddressData({ addressOne: text })}
-                       style={[styles.input,{color: colorScheme === 'dark' ? '#fff' : '#000'}]}
+                       style={[styles.input,{color: colorScheme === 'dark' ? '#fff' : '#000',backgroundColor: colorScheme ==='dark'?'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)' }]}
                       keyboardType="default"
                     />
 
@@ -239,7 +243,7 @@ const SaveAddressForm = ({ addressModalVisible, onClose, userId }) => {
                       placeholder="Address Line Two"
                       value={savedAddressData.addressTwo}
                       onChangeText={(text) => setSavedAddressData({ addressTwo: text })}
-                       style={[styles.input,{color: colorScheme === 'dark' ? '#fff' : '#000'}]}
+                       style={[styles.input,{color: colorScheme === 'dark' ? '#fff' : '#000',backgroundColor: colorScheme ==='dark'?'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)' }]}
                       keyboardType="default"
                     />
 
@@ -247,7 +251,7 @@ const SaveAddressForm = ({ addressModalVisible, onClose, userId }) => {
                       placeholder="City"
                       value={savedAddressData.city}
                       onChangeText={(text) => setSavedAddressData({ city: text })}
-                       style={[styles.input,{color: colorScheme === 'dark' ? '#fff' : '#000'}]}
+                       style={[styles.input,{color: colorScheme === 'dark' ? '#fff' : '#000',backgroundColor: colorScheme ==='dark'?'rgba(255, 255, 255, 0.1)' :  'rgba(255, 255, 255, 0.9)'}]}
                       keyboardType="default"
                     />
 
@@ -255,7 +259,7 @@ const SaveAddressForm = ({ addressModalVisible, onClose, userId }) => {
                       placeholder="State"
                       value={savedAddressData.state}
                       onChangeText={(text) => setSavedAddressData({ state: text })}
-                       style={[styles.input,{color: colorScheme === 'dark' ? '#fff' : '#000'}]}
+                       style={[styles.input,{color: colorScheme === 'dark' ? '#fff' : '#000',backgroundColor: colorScheme ==='dark'?'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)' }]}
                       keyboardType="default"
                     />
 
@@ -263,7 +267,7 @@ const SaveAddressForm = ({ addressModalVisible, onClose, userId }) => {
                       placeholder="Zip Code"
                       value={savedAddressData.zipCode}
                       onChangeText={(text) => setSavedAddressData({ zipCode: text })}
-                       style={[styles.input,{color: colorScheme === 'dark' ? '#fff' : '#000'}]}
+                       style={[styles.input,{color: colorScheme === 'dark' ? '#fff' : '#000',backgroundColor: colorScheme ==='dark'?'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)' }]}
                       keyboardType="default"
                     />
 
@@ -271,7 +275,7 @@ const SaveAddressForm = ({ addressModalVisible, onClose, userId }) => {
                       placeholder="Email Address"
                       value={savedAddressData.email}
                       onChangeText={(text) => setSavedAddressData({ email: text })}
-                       style={[styles.input,{color: colorScheme === 'dark' ? '#fff' : '#000'}]}
+                       style={[styles.input,{color: colorScheme === 'dark' ? '#fff' : '#000',backgroundColor: colorScheme ==='dark'?'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)'  }]}
                       keyboardType="email-address"
                       autoCapitalize='none'
                     />
@@ -296,7 +300,7 @@ const SaveAddressForm = ({ addressModalVisible, onClose, userId }) => {
                       </TouchableOpacity>
 
                       <TextInput
-                        style={[styles.phoneInput, { color: colorScheme === 'dark' ? '#fff' : '#000' }]}
+                        style={[styles.phoneInput, { color: colorScheme === 'dark' ? '#fff' : '#000', backgroundColor: colorScheme ==='dark'?'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)' }]}
                         value={savedAddressData.mobileNumber}
                         onChangeText={(text) => setSavedAddressData({ mobileNumber: text })}
                         placeholder="Mobile Number"
@@ -307,18 +311,18 @@ const SaveAddressForm = ({ addressModalVisible, onClose, userId }) => {
 
                     </ThemedView>
 
-                    <ThemedView style={styles.pickerContainer}>
+                    <ThemedView style={[styles.pickerContainer, {height:Platform.OS === 'ios'? verticalScale(130) : verticalScale(40)}]}>
                       <Picker
 
                         selectedValue={savedAddressData.countryId}
                         onValueChange={(itemValue, itemIndex) => setSavedAddressData({ countryId: itemValue })}
-                        mode="dialog"
+                        mode='dropdown'
                         style={styles.picker}
                       >
-                        <Picker.Item color="#999" label="Select Country" value="" />
+                        <Picker.Item color="red" label="Select Country" value="" />
                         {countryList?.map((country, index) => (
                           <Picker.Item
-                            color="#999"
+                            color={colorScheme === 'dark' ? '#fff' : '#000'}
                             key={index}
                             label={country.name}
                             value={country.id}
@@ -408,12 +412,11 @@ const styles = StyleSheet.create({
   },
   input: {
     height: verticalScale(50),
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     borderRadius: moderateScale(12),
     paddingHorizontal: horizontalScale(15),
     marginBottom: verticalScale(15),
     fontSize: moderateScale(16),
-    borderWidth: 1,
+
   },
   phoneContainer: {
     flexDirection: 'row',
@@ -424,7 +427,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingRight: horizontalScale(15),
-    borderRightWidth: 1,
     borderRightColor: 'grey',
   },
   countryFlag: {
@@ -440,10 +442,11 @@ const styles = StyleSheet.create({
   phoneInput: {
     flex: 1,
     height: verticalScale(50),
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     borderRadius: moderateScale(12),
     paddingHorizontal: horizontalScale(15),
     fontSize: moderateScale(16),
+
+    
 
   },
   pickerContainer: {
@@ -451,7 +454,7 @@ const styles = StyleSheet.create({
     borderRadius: moderateScale(12),
     marginBottom: verticalScale(25),
     overflow: 'hidden',
-    height: verticalScale(130),
+
   },
   picker: {
 
@@ -481,9 +484,7 @@ const styles = StyleSheet.create({
     marginBottom: verticalScale(15),
   },
   checboxContainer: {
-    borderRadius: moderateScale(4),
-    borderWidth: moderateScale(2),
-    borderColor: '#FFAC1C',
+    borderColor:  '#FFAC1C',
   },
   checkboxLabel: {
     marginLeft: horizontalScale(8),

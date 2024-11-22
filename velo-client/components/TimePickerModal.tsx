@@ -3,6 +3,7 @@ import { Modal, FlatList, Pressable, StyleSheet } from 'react-native';
 import { ThemedView } from './ThemedView';
 import { ThemedText } from './ThemedText';
 import useShipmentStore from '@/store/shipmentStore';
+import { verticalScale, moderateScale, horizontalScale } from '@/constants/metrics';
 
 const TimePickerModal = ({ openModal, handleCloseModal }) => {
     const { deliveryServices, setDeliveryServices } = useShipmentStore();
@@ -101,8 +102,8 @@ const styles = StyleSheet.create({
         width: '90%',
         height: '50%',
 
-        borderRadius: 15,
-        padding: 20,
+        borderRadius: moderateScale(15),
+        padding: moderateScale(20),
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.25,
@@ -110,18 +111,18 @@ const styles = StyleSheet.create({
         elevation: 5,
     },
     modalTitle: {
-        fontSize: 20,
+        fontSize: moderateScale(20),
         fontWeight: 'bold',
 
         textAlign: 'center',
-        marginBottom: 15,
+        marginBottom: verticalScale(15),
     },
     timeSlot: {
-        paddingVertical: 12,
-        paddingHorizontal: 16,
-        marginBottom: 10,
+        paddingVertical: verticalScale(12),
+        paddingHorizontal: horizontalScale(16),
+        marginBottom: verticalScale(10),
 
-        borderRadius: 10,
+        borderRadius: moderateScale(10),
         alignItems: 'center',
         borderWidth: 1,
         borderColor: '#e0e0e0',
@@ -130,19 +131,19 @@ const styles = StyleSheet.create({
         backgroundColor: '#d0e8fc',
     },
     timeText: {
-        fontSize: 16,
+        fontSize: moderateScale(16),
 
         fontWeight: '600',
     },
     closeButton: {
-        marginTop: 20,
-        paddingVertical: 12,
+        marginTop: verticalScale(20),
+        paddingVertical: verticalScale(12),
         alignItems: 'center',
-        backgroundColor: '#ff5c5c',
-        borderRadius: 10,
+        backgroundColor: '#FFAC1C',
+        borderRadius: moderateScale(10),
     },
     closeButtonText: {
-        fontSize: 16,
+        fontSize: moderateScale(16),
 
         fontWeight: 'bold',
     },

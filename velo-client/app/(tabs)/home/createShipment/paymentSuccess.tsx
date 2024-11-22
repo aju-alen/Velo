@@ -11,17 +11,19 @@ import { ThemedView } from '@/components/ThemedView'
 import { ThemedText } from '@/components/ThemedText'
 import { router } from 'expo-router'
 import useShipmentStore from '@/store/shipmentStore'
+import { useLocalSearchParams } from 'expo-router'
 
 const { width, height } = Dimensions.get('window')
 
 const PaymentSuccess = () => {
+  const {totalAmount} = useLocalSearchParams();
   // Animation values
   const scaleValue = useRef(new Animated.Value(0)).current
   const fadeValue = useRef(new Animated.Value(0)).current
   const translateYValue = useRef(new Animated.Value(50)).current
 
   // Get shipment details from store
-  const { savedAddressData, packageDetail } = useShipmentStore()
+  const { savedAddressData, packageDetail,deliveryServices } = useShipmentStore()
 
   useEffect(() => {
     // Parallel animation sequence
@@ -106,7 +108,12 @@ const PaymentSuccess = () => {
           <AnimatedDetailsRow 
             icon="account-balance-wallet" 
             label="Payment Amount" 
-            value={`AED 1340`} 
+            value={`AED ${totalAmount}`} 
+          />
+          <AnimatedDetailsRow 
+            icon="account-balance-wallet" 
+            label="Payment Amount" 
+            value={`AED ${totalAmount}`} 
           />
         </ThemedView>
 
@@ -118,7 +125,7 @@ const PaymentSuccess = () => {
           <ThemedText style={styles.homeButtonText}>
             Back to Home
           </ThemedText>
-          <MaterialIcons name="home" size={20} color='#fff' />
+          <MaterialIcons name="home" size={20} color='black' />
         </TouchableOpacity>
       </Animated.View>
     </ThemedView>
@@ -142,7 +149,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 6,
-    elevation: 5,
   },
   successIconContainer: {
     marginBottom: 20,

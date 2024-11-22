@@ -36,7 +36,7 @@ const HomeMainPage = () => {
     getCategoryData();
   }, []);
 
-  const handleDelete = async () => {
+  const handleLogout = async () => {
     await SecureStore.deleteItemAsync('registerDetail');
     resetAccountLoginData();
     router.replace('/(auth)/login');
@@ -113,7 +113,7 @@ const HomeMainPage = () => {
           <ThemedText type='logoText'>Home</ThemedText>
           <ThemedText style={styles.welcomeText}>Welcome {accountName}</ThemedText>
         </ThemedView>
-        <TouchableOpacity onPress={handleDelete} style={styles.deleteButton}>
+        <TouchableOpacity onPress={handleLogout} style={styles.deleteButton}>
           <MaterialIcons name="logout" size={24} color="#FF6B6B" />
         </TouchableOpacity>
       </ThemedView>

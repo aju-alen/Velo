@@ -3,6 +3,7 @@ import { Modal, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
 import { ThemedView } from './ThemedView';
 import { ThemedText } from './ThemedText';
 import useShipmentStore from '@/store/shipmentStore';
+import { verticalScale,moderateScale,horizontalScale } from '@/constants/metrics';
 
 const PickupInstructionModal = ({openModal,handleCloseModal}) => {
     const {setDeliveryServices,deliveryServices} = useShipmentStore();
@@ -63,8 +64,8 @@ const styles = StyleSheet.create({
   contentContainer: {
     width: '90%',
 
-    borderRadius: 15,
-    padding: 20,
+    borderRadius: moderateScale(15),
+    padding: moderateScale(20),
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
@@ -72,32 +73,34 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   title: {
-    fontSize: 20,
+    fontSize: moderateScale(20),
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginBottom: verticalScale(20),
 
     textAlign: 'center',
   },
   option: {
-    padding: 15,
-    marginVertical: 8,
-    borderRadius: 10,
+    padding: moderateScale(15),
+    marginVertical: verticalScale(8),
+    borderRadius: moderateScale(10),
+    borderColor: '#e0e0e0',
     borderWidth: 1,
+
     alignItems: 'center',
   },
   optionText: {
-    fontSize: 16,
+    fontSize: moderateScale(16),
 
   },
   closeButton: {
-    marginTop: 20,
-    paddingVertical: 12,
+    marginTop: moderateScale(20),
+    paddingVertical: verticalScale(12),
     alignItems: 'center',
-    backgroundColor: '#ff5c5c',
-    borderRadius: 10,
+    backgroundColor: '#FFAC1C',
+    borderRadius: moderateScale(10),
   },
   closeButtonText: {
-    fontSize: 16,
+    fontSize: moderateScale(16),
     fontWeight: 'bold',
   },
 });

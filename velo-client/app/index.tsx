@@ -55,7 +55,7 @@ const RootIndex = () => {
         router.replace('/(tabs)/home')
       }
       else if(userData.registerVerificationStatus === 'LOGGED_IN' && userData.role === 'USER'){
-        router.replace('/(tabs)/home/createShipment/payment')
+        router.replace('/(tabs)/home')
       }
       
      

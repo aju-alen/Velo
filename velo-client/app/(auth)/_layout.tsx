@@ -17,7 +17,7 @@ export default function AuthLayout() {
             <Stack.Screen name='verifyAgent' options={{ headerShown: false }} />
             <Stack.Screen name='finalRegisterForm' options={{ headerShown: false }} />
             <Stack.Screen name='setAppointment' options={{ headerShown: false }} />
-            <Stack.Screen name='agentRestriction' options={{ headerShown: false }} />
+            <Stack.Screen name='agentRestriction' options={{ headerShown: false, gestureEnabled:false}} />
         </Stack>
     );
 }
