@@ -1,9 +1,9 @@
-import { StyleSheet,  Modal, TouchableOpacity, Dimensions, ScrollView, Platform, ActivityIndicator } from 'react-native'
+import { StyleSheet,  Modal, TouchableOpacity, Dimensions, ScrollView, Platform, ActivityIndicator, SafeAreaView, Button } from 'react-native'
 import React, { useEffect, useState,useCallback } from 'react'
 import { horizontalScale, moderateScale, verticalScale } from '@/constants/metrics'
 import { ThemedView } from '@/components/ThemedView'
 import { ThemedText } from '@/components/ThemedText'
-import DateTimePicker from '@react-native-community/datetimepicker';
+import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { Divider, RadioButton } from 'react-native-paper';
 import * as SecureStore from 'expo-secure-store';
 import axios from 'axios'
@@ -14,6 +14,8 @@ import SelectPackage from '@/components/SelectPackage'
 import ShipmentDetailPayment from '@/components/ShipmentDetailPayment'
 import { router, useFocusEffect } from 'expo-router'
 import useShipmentStore from '@/store/shipmentStore'
+import { MaterialIcons } from '@expo/vector-icons'
+
 
 
 const { width } = Dimensions.get('window')
@@ -27,6 +29,8 @@ const CreateShipmentHome = () => {
     resetShipmentData,
     accountAddressData,
     setAccountAddressData,
+    setItemType,
+    setCreateShipment,
   } = useShipmentStore()
 
   // console.log(accountAddressData, 'accountAddressData in parent data');
@@ -126,6 +130,8 @@ const CreateShipmentHome = () => {
     fetch("https://restcountries.com/v2/all")
       .then(response => response.json())
       .then(data => {
+        console.log(data, 'data----');
+        
         let areaData = data.map((item) => ({
           code: item.alpha2Code,
           item: item.name,
@@ -145,7 +151,7 @@ const CreateShipmentHome = () => {
         console.error('Error fetching country data:', error)
         alert('Failed to load country data')
       })
-  }, [])
+  }, [ ])
 
   useEffect(() => {
     const checkUser = async () => {
@@ -187,6 +193,7 @@ const CreateShipmentHome = () => {
     setSelectedOption(option)
     setModalVisible(false)
     resetShipmentData()
+    setCreateShipment(true)
 
   }
 
@@ -200,6 +207,24 @@ const CreateShipmentHome = () => {
       shipmentDate: currentDate
     })
     setShow(Platform.OS === 'ios' ? true : false);
+  };
+
+  const onChangeAndroid = (event, selectedDate) => {
+    const currentDate = selectedDate;
+    setDate(currentDate);
+  };
+
+  const showMode = (currentMode) => {
+    DateTimePickerAndroid.open({
+      value: date,
+      onChange: onChangeAndroid,
+      mode: currentMode,
+      is24Hour: true,
+    });
+  };
+
+  const showDatepicker = () => {
+    showMode('date');
   };
   // console.log(savedAddressData, 'savedAddressData-----asdasd-----121-2-12-12');
   
@@ -228,6 +253,7 @@ const CreateShipmentHome = () => {
 
   return (
     <ThemedView style={styles.container}>
+      
       {/* Modal component remains unchanged */}
       <Modal
         animationType="fade"
@@ -237,10 +263,18 @@ const CreateShipmentHome = () => {
       >
         <ThemedView style={styles.modalOverlay}>
           <ThemedView style={styles.modalContent}>
-            <ThemedText style={styles.modalTitle}>Select Payment Method</ThemedText>
+            <ThemedView style={styles.shippingMethodHeadContainer}>
+            <ThemedText style={styles.modalTitle}>Select Shipping Method</ThemedText>
+            <TouchableOpacity
+                      onPress={()=>router.push('/home/homeMainPage')}
+
+                    >
+                      <MaterialIcons name="close" size={24} color= {colorScheme === 'dark' ? '#fff' : '#000'} />
+                    </TouchableOpacity>
+            </ThemedView>
 
             <PaymentOption
-              title="Online Payment"
+              title="Ship and pay online"
               description="Pay securely using your credit/debit card or digital wallet"
               buttonText="Pay Online"
               isSecondary={false}
@@ -250,7 +284,7 @@ const CreateShipmentHome = () => {
             <ThemedView style={styles.divider} />
 
             <PaymentOption
-              title="Pay During Collection"
+              title="Ship and pay on collection"
               description="Pay with cash or card when your package is picked up"
               buttonText="Pay Later"
               isSecondary
@@ -265,7 +299,7 @@ const CreateShipmentHome = () => {
         userId={userSecureStorage['id']}
       />
 
-<ScrollView showsVerticalScrollIndicator={false} style={styles.contentContainer}>
+{!modalVisible && <ScrollView showsVerticalScrollIndicator={false} style={styles.contentContainer}>
       <ThemedView >
         {/* Shipping Date Section */}
 
@@ -281,15 +315,27 @@ const CreateShipmentHome = () => {
               minimumDate={new Date()}
               maximumDate={new Date(new Date().setDate(new Date().getDate() + 7))}
             />}
+
+
           </ThemedView>
         </ThemedView>}
+
+        {Platform.OS === 'android' && <SafeAreaView style={styles.section}>
+          <ThemedView style={styles.shippingDateContainer}>
+          <ThemedText style={styles.sectionHeaderText}>Shipping Date</ThemedText>
+      <TouchableOpacity onPress={showDatepicker} style={styles.androidDateButton}  >
+        <ThemedText>{date.toDateString()}</ThemedText>
+      </TouchableOpacity>
+      
+      </ThemedView>
+    </SafeAreaView>}
 
         {/* Shipping Type Section */}
         <ThemedView style={styles.section}>
 
         <ThemedView style={styles.titleContainer}>
-          <ThemedText style={styles.title}>Shipment Details</ThemedText>
-          <ThemedView style={styles.titleUnderline} />
+
+          
         </ThemedView>
           <ThemedView style={styles.shippingTypeContainer}>
             <TouchableOpacity
@@ -299,6 +345,7 @@ const CreateShipmentHome = () => {
               ]}
               onPress={() => {
                 setChecked('document')
+                setItemType('document')
 
               }}
             >
@@ -307,6 +354,7 @@ const CreateShipmentHome = () => {
                 status={checked === 'document' ? 'checked' : 'unchecked'}
                 onPress={() => {
                   setChecked('document')
+                  setItemType('document')
 
                 }}
               />
@@ -320,6 +368,7 @@ const CreateShipmentHome = () => {
               ]}
               onPress={() => {
                 setChecked('package')
+                setItemType('package')
 
               }}
             >
@@ -328,6 +377,7 @@ const CreateShipmentHome = () => {
                 status={checked === 'package' ? 'checked' : 'unchecked'}
                 onPress={() => {
                   setChecked('package')
+                  setItemType('package')
 
                 }}
               />
@@ -372,7 +422,7 @@ const CreateShipmentHome = () => {
                   {savedAddressData.city}, {savedAddressData.countryId}
                 </ThemedText>
                 <ThemedText style={styles.addressText}>
-                  PinCode:{savedAddressData.zipCode}
+                  ZipCode:{savedAddressData.zipCode}
                 </ThemedText>
                 <ThemedView style={styles.contactInfo}>
                   <ThemedText style={styles.contactText}>{savedAddressData.email}</ThemedText>
@@ -392,15 +442,15 @@ const CreateShipmentHome = () => {
         }
        
        
-       {savedAddressData.gotDetails && <SelectPackage getPackageDetail={handlePackagedetail} onButtonclick={buttonClick} />}
+       {savedAddressData.gotDetails && <SelectPackage itemType={checked} getPackageDetail={handlePackagedetail} onButtonclick={buttonClick} />}
       
-        {savedAddressData.gotDetails && <ShipmentDetailPayment onGetData={handleGetDescription} onButtonclick={buttonClick} />}
+        {savedAddressData.gotDetails && <ShipmentDetailPayment itemType={checked} onGetData={handleGetDescription} onButtonclick={buttonClick} />}
 
        { savedAddressData.gotDetails &&<TouchableOpacity style={styles.actionButton} onPress={handleContinuePackageDetail}>
           <ThemedText style={styles.buttonText}>Continue</ThemedText>
         </TouchableOpacity>  }
       </ThemedView>
-      </ScrollView>
+      </ScrollView>}
     </ThemedView>
     
   )
@@ -427,12 +477,17 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
   },
+  shippingMethodHeadContainer:{
+    display:"flex",
+    flexDirection:"row",
+    justifyContent:"space-around",
+    alignItems:"center",
+    marginBottom:verticalScale(20),
+  },
   modalTitle: {
     fontSize: 22,
     fontWeight: '700',
-    textAlign: 'center',
-    marginBottom: verticalScale(24),
-    paddingHorizontal: horizontalScale(20),
+ 
   },
   section: {
 
@@ -491,6 +546,7 @@ const styles = StyleSheet.create({
   // New and enhanced styles
   container: {
     flex: 1,
+
     
 
   },
@@ -499,11 +555,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: horizontalScale(20),
     paddingBottom:verticalScale(80)
   },
-
+  androidDateButton:{
+    backgroundColor: '#FFAC1C',
+    padding: verticalScale(10),
+    borderRadius: moderateScale(8),
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   sectionHeaderText: {
     fontSize: 18,
     fontWeight: '600',
-    marginBottom: verticalScale(12),
+
   },
 
   shippingTypeContainer: {

@@ -26,9 +26,11 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async() => {
     try {
+      setLoading(true)
       const formData = {
         email: email,
         password: password
@@ -56,10 +58,12 @@ const Login = () => {
         await SecureStore.setItemAsync('registerDetail', JSON.stringify(checkIfAlreadyRegistered.data.accountExists))
         router.replace('/(tabs)/home')
       }
+      setLoading(false)
     }
     catch(err) {
       console.log(err, 'error--');
       alert(`${err.response.data.message}`)
+      setLoading(false)
     }
   }
 
@@ -126,6 +130,7 @@ const Login = () => {
                 buttonText='Sign In' 
                 buttonWidth={horizontalScale(300)} 
                 handlePress={handleLogin}
+                disableButton={loading}
               />
             </ThemedView>
 

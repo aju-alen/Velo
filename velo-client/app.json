@@ -1,14 +1,14 @@
 {
   "expo": {
-    "name": "velo-client",
+    "name": "Velo",
     "slug": "velo-client",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/appIcon.png",
+    "icon": "./assets/images/logo.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/images/splash.png",
+      "image": "./assets/images/logo.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -20,18 +20,7 @@
       "bundleIdentifier": "com.anonymous.velo-client"
     },
     "android": {
-      "package": "com.anonymous.veloclient",
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/images/appIcon.png",
-        "backgroundImage": "./assets/images/appIcon.png",
-        "backgroundColor": "#FFFFFF"
-      },
-      "icon": "./assets/images/appIcon.png",
-      "splash": {
-        "image": "./assets/images/appIcon.png",
-        "resizeMode": "contain",
-        "backgroundColor": "#ffffff"
-      }
+      "package": "com.anonymous.veloclient"
     },
     "web": {
       "bundler": "metro",

@@ -6,10 +6,11 @@ import { Divider } from 'react-native-paper';
 import { useColorScheme } from '@/hooks/useColorScheme'
 import { MaterialIcons } from '@expo/vector-icons';
 import { getPackageDetailDimension } from '@/constants/packageDimensionData';
-import { verticalScale,moderateScale,horizontalScale } from '@/constants/metrics';
+import { verticalScale, moderateScale, horizontalScale } from '@/constants/metrics';
 
-const SelectPackage = ({getPackageDetail,onButtonclick}) => {
+const SelectPackage = ({ getPackageDetail, onButtonclick, itemType }) => {
   const colorScheme = useColorScheme();
+
 
   const [showPackageDetail, setShowPackageDetail] = useState(false);
   const [openPackageModal, setOpenPackageModal] = useState(false);
@@ -72,145 +73,169 @@ const SelectPackage = ({getPackageDetail,onButtonclick}) => {
     ? (Number(numberOfPieces) * Number(weight)).toFixed(1)
     : '0';
 
-    useEffect(() => {
-      
-      getPackageDetail(dimensions,numberOfPieces,weight);
-    }, [onButtonclick]);
-    
-    
+  useEffect(() => {
+
+    getPackageDetail(dimensions, numberOfPieces, weight);
+  }, [onButtonclick]);
+
+
 
   return (
     <ThemedView style={styles.container}>
       <ThemedView style={styles.card}>
         <ThemedView style={styles.titleContainer}>
-          <ThemedText style={styles.title}>Package Details</ThemedText>
+          <ThemedText style={styles.title}>{itemType === 'document' ? 'Document' : 'Package'} Details</ThemedText>
           <ThemedView style={styles.titleUnderline} />
         </ThemedView>
 
-        <ThemedText style={styles.title}>Package Type</ThemedText>
-        <ThemedView style={styles.selectPackageContainer}>
-          <TouchableOpacity onPress={() => setOpenPackageModal(true)}>
-            <ThemedText type='mini' style={styles.sectionTitle}>Package type</ThemedText>
-            <ThemedText style={styles.sectionTitle}>Tap to select</ThemedText>
-          </TouchableOpacity>
-        </ThemedView>
-        <Modal
-          animationType='slide'
-          transparent={true}
-          visible={openPackageModal}
-          onRequestClose={() => setOpenPackageModal(false)}
-        >
-          <ThemedView style={styles.modalContent}>
-            <ThemedView style={styles.modalTitleContainer}>
-              <ThemedText style={styles.title}>Shipping Package Options</ThemedText>
-              <MaterialIcons >
-                <TouchableOpacity onPress={() => setOpenPackageModal(false)}>
-                  <MaterialIcons name="close" size={24} color= {colorScheme === 'dark' ? '#fff' : '#000'} />
-                </TouchableOpacity>
-              </MaterialIcons>
-            </ThemedView>
-            <Divider />
-            <ThemedView style={styles.modalBodyContainer}>
-              <ThemedText type='mini' style={styles.title}>Packaging dimensions are written as length x width x height</ThemedText>
-              <ScrollView showsVerticalScrollIndicator={false}>
-            {getPackageDetailDimension.map((packageDetail) => (
-              <TouchableOpacity
-                key={packageDetail.id}
-                onPress={() => {
-                 setDimensions({
-                    length: packageDetail.length,
-                    width: packageDetail.width,
-                    height: packageDetail.height
-                  });
-                  setNumberOfPieces('1');
-                  setWeight(packageDetail.weight.toString());
-                  setOpenPackageModal(false);
-                  setShowPackageDetail(true);
-                  
-                  
-                }}
-              >
-                <ThemedView style={styles.selectPackageContainer}>
-                  <ThemedText style={styles.sectionTitle}>{packageDetail.name}</ThemedText>
-                  <ThemedText style={styles.sectionTitle}>
-                    {packageDetail.length} x {packageDetail.width} x {packageDetail.height} cm, {packageDetail.weight} kg
-                  </ThemedText>
-                </ThemedView>
-              </TouchableOpacity>
-            ))}
-             </ScrollView>
+        <ThemedText style={styles.title}>{itemType === 'document' ? '' : "Package Type"}</ThemedText>
 
-            
+        {/* Pacakge type when checkbox is checked package */}
+        {itemType === 'package' &&
+          <>
+            <ThemedView style={styles.selectPackageContainer}>
+              <TouchableOpacity onPress={() => setOpenPackageModal(true)}>
+                <ThemedText type='mini' style={styles.sectionTitle}>Package type</ThemedText>
+                <ThemedText style={styles.sectionTitle}>Tap to select</ThemedText>
+              </TouchableOpacity>
             </ThemedView>
-          </ThemedView>
-        </Modal>
-        {showPackageDetail && <>
-          <ThemedView style={styles.section}>
-            <ThemedText style={styles.sectionTitle}>Dimensions (cm)</ThemedText>
-            <ThemedView style={styles.dimensionsRow}>
-              {['Length', 'Width', 'Height'].map((dimension) => (
-                <ThemedView key={dimension} style={styles.inputWrapper}>
-                  <ThemedText style={styles.inputLabel}>{dimension}</ThemedText>
-                  <ThemedView style={styles.inputContainer}>
-                    <TextInput
-                      style={[styles.input,{color:colorScheme === 'dark' ? 'white' : 'black'}]}
-                      placeholder="0.0"
-                      value={dimensions[dimension.toLowerCase()]}
-                      keyboardType="decimal-pad"
-                      onChangeText={(text) => handleInputChange(dimension.toLowerCase(), text)}
-                    />
-                    <ThemedText style={styles.unitText}>cm</ThemedText>
+            <Modal
+              animationType='slide'
+              transparent={true}
+              visible={openPackageModal}
+              onRequestClose={() => setOpenPackageModal(false)}
+            >
+              <ThemedView style={styles.modalContent}>
+                <ThemedView style={styles.modalTitleContainer}>
+                  <ThemedText style={styles.title}>Shipping Package Options</ThemedText>
+                  <MaterialIcons >
+                    <TouchableOpacity onPress={() => setOpenPackageModal(false)}>
+                      <MaterialIcons name="close" size={24} color={colorScheme === 'dark' ? '#fff' : '#000'} />
+                    </TouchableOpacity>
+                  </MaterialIcons>
+                </ThemedView>
+                <Divider />
+                <ThemedView style={styles.modalBodyContainer}>
+                  <ThemedText type='mini' style={styles.title}>Packaging dimensions are written as length x width x height</ThemedText>
+                  <ScrollView showsVerticalScrollIndicator={false}>
+                    {getPackageDetailDimension.map((packageDetail) => (
+                      <TouchableOpacity
+                        key={packageDetail.id}
+                        onPress={() => {
+                          setDimensions({
+                            length: packageDetail.length,
+                            width: packageDetail.width,
+                            height: packageDetail.height
+                          });
+                          setNumberOfPieces('1');
+                          setWeight(packageDetail.weight.toString());
+                          setOpenPackageModal(false);
+                          setShowPackageDetail(true);
+
+
+                        }}
+                      >
+                        <ThemedView style={styles.selectPackageContainer}>
+                          <ThemedText style={styles.sectionTitle}>{packageDetail.name}</ThemedText>
+                          <ThemedText style={styles.sectionTitle}>
+                            {packageDetail.length} x {packageDetail.width} x {packageDetail.height} cm, {packageDetail.weight} kg
+                          </ThemedText>
+                        </ThemedView>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+
+
+                </ThemedView>
+              </ThemedView>
+            </Modal>
+            {showPackageDetail && <>
+              <ThemedView style={styles.section}>
+                <ThemedText style={styles.sectionTitle}>Dimensions (cm)</ThemedText>
+                <ThemedView style={styles.dimensionsRow}>
+                  {['Length', 'Width', 'Height'].map((dimension) => (
+                    <ThemedView key={dimension} style={styles.inputWrapper}>
+                      <ThemedText style={styles.inputLabel}>{dimension}</ThemedText>
+                      <ThemedView style={styles.inputContainer}>
+                        <TextInput
+                          style={[styles.input, { color: colorScheme === 'dark' ? 'white' : 'black' }]}
+                          placeholder="0.0"
+                          value={dimensions[dimension.toLowerCase()]}
+                          keyboardType="decimal-pad"
+                          onChangeText={(text) => handleInputChange(dimension.toLowerCase(), text)}
+                        />
+                        <ThemedText style={styles.unitText}>cm</ThemedText>
+                      </ThemedView>
+                    </ThemedView>
+                  ))}
+                </ThemedView>
+              </ThemedView>
+
+              <ThemedView style={styles.section}>
+                <ThemedText style={styles.sectionTitle}>Quantity & Weight</ThemedText>
+                <ThemedView style={styles.quantityRow}>
+                  <ThemedView style={[styles.inputWrapper, { flex: 0.4 }]}>
+                    <ThemedText style={styles.inputLabel}>Number of Pieces</ThemedText>
+                    <ThemedView style={styles.inputContainer}>
+                      <TextInput
+                        style={[styles.input, { color: colorScheme === 'dark' ? 'white' : 'black' }]}
+                        placeholder="0"
+                        value={numberOfPieces}
+                        keyboardType="numeric"
+                        onChangeText={handleInputPieceChange}
+                      />
+                    </ThemedView>
+                  </ThemedView>
+
+                  <ThemedView style={[styles.inputWrapper, { flex: 0.7 }]}>
+                    <ThemedText style={styles.inputLabel}>Weight per Piece</ThemedText>
+                    <ThemedView style={styles.inputContainer}>
+                      <TextInput
+                        style={[styles.input, { color: colorScheme === 'dark' ? 'white' : 'black' }]}
+                        placeholder="0.0"
+                        value={weight}
+                        keyboardType="decimal-pad"
+                        onChangeText={handleInputWeightChange}
+                      />
+                      <ThemedText style={styles.unitText}>kg</ThemedText>
+                    </ThemedView>
                   </ThemedView>
                 </ThemedView>
-              ))}
-            </ThemedView>
-          </ThemedView>
-
-          <ThemedView style={styles.section}>
-            <ThemedText style={styles.sectionTitle}>Quantity & Weight</ThemedText>
-            <ThemedView style={styles.quantityRow}>
-              <ThemedView style={[styles.inputWrapper, { flex: 0.4 }]}>
-                <ThemedText style={styles.inputLabel}>Number of Pieces</ThemedText>
-                <ThemedView style={styles.inputContainer}>
-                  <TextInput
-                   style={[styles.input,{color:colorScheme === 'dark' ? 'white' : 'black'}]}
-                    placeholder="0"
-                    value={numberOfPieces}
-                    keyboardType="numeric"
-                    onChangeText={handleInputPieceChange}
-                  />
-                </ThemedView>
               </ThemedView>
 
-              <ThemedView style={[styles.inputWrapper, { flex: 0.7 }]}>
-                <ThemedText style={styles.inputLabel}>Weight per Piece</ThemedText>
-                <ThemedView style={styles.inputContainer}>
-                  <TextInput
-                    style={[styles.input,{color:colorScheme === 'dark' ? 'white' : 'black'}]}
-                    placeholder="0.0"
-                    value={weight}
-                    keyboardType="decimal-pad"
-                    onChangeText={handleInputWeightChange}
-                  />
-                  <ThemedText style={styles.unitText}>kg</ThemedText>
+              <ThemedView style={styles.summary}>
+                <ThemedView style={styles.summaryRow}>
+                  <ThemedText style={styles.summaryLabel}>Total Packages</ThemedText>
+                  <ThemedText style={styles.summaryValue}>{numberOfPieces || '0'}</ThemedText>
+                </ThemedView>
+                <ThemedView style={styles.summaryRow}>
+                  <ThemedText style={styles.summaryLabel}>Total Weight</ThemedText>
+                  <ThemedText style={styles.summaryValue}>{totalWeight} kg</ThemedText>
                 </ThemedView>
               </ThemedView>
-            </ThemedView>
-          </ThemedView>
+            </>}
+          </>
+        }
 
-          <ThemedView style={styles.summary}>
-            <ThemedView style={styles.summaryRow}>
-              <ThemedText style={styles.summaryLabel}>Total Packages</ThemedText>
-              <ThemedText style={styles.summaryValue}>{numberOfPieces || '0'}</ThemedText>
-            </ThemedView>
-            <ThemedView style={styles.summaryRow}>
-              <ThemedText style={styles.summaryLabel}>Total Weight</ThemedText>
-              <ThemedText style={styles.summaryValue}>{totalWeight} kg</ThemedText>
-            </ThemedView>
-          </ThemedView>
-        </>}
+        {/* document type when checkbox is checked document */}
 
-      <Divider style={{ marginVertical: verticalScale(16) }} />
+        {itemType === 'document' &&
+          <ThemedView style={styles.numberOfDocumentsContainer}>
+            <ThemedText style={styles.title}>{'Number of document(s)'}</ThemedText>
+            <TextInput
+              style={[styles.documentInput, { color: colorScheme === 'dark' ? 'white' : 'black' }]}
+              placeholder="0"
+              value={numberOfPieces}
+              keyboardType="numeric"
+              onChangeText={handleInputPieceChange}
+            />
+          </ThemedView>
+        }
+
+
+
+
+        <Divider style={{ marginVertical: verticalScale(16) }} />
       </ThemedView>
     </ThemedView>
   );
@@ -280,9 +305,26 @@ const styles = StyleSheet.create({
     width: '100%',
 
   },
+  numberOfDocumentsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    marginBottom: verticalScale(16),
+  },
+  documentInput: {
+    borderWidth: moderateScale(1),
+    borderColor: '#E2E8F0',
+    borderRadius: moderateScale(12),
+    paddingHorizontal: horizontalScale(14),
+    paddingRight: horizontalScale(40),
+    fontSize: moderateScale(16),
+    height: verticalScale(48),
+    width: '30%',
+    marginBottom: verticalScale(16),
+  },
   unitText: {
     position: 'absolute',
-    right: moderateScale(14), 
+    right: moderateScale(14),
     top: '50%',
     transform: [{ translateY: -8 }],
     fontSize: moderateScale(14),

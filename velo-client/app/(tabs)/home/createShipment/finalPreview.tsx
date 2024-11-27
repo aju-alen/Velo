@@ -14,7 +14,8 @@ const FinalPreview = () => {
     packageDetail, 
     packageDescription, 
     accountAddressData, 
-    deliveryServices 
+    deliveryServices,
+    itemType,
   } = useShipmentStore();
 
   const renderAddressCard = (title, data) => (
@@ -68,9 +69,9 @@ const FinalPreview = () => {
           <ThemedText style={styles.cardTitle}>Package Details</ThemedText>
           <Divider style={styles.cardDivider} />
           <ThemedText style={styles.detailText}>{packageDetail.packageName}</ThemedText>
-          <ThemedText style={styles.detailText}>
+         {itemType === 'package' && <ThemedText style={styles.detailText}>
             Dimensions: {packageDetail.length} x {packageDetail.width} x {packageDetail.height} cm
-          </ThemedText>
+          </ThemedText>}
           <ThemedText style={styles.detailText}>
             {packageDetail.numberOfPieces} Piece(s) • {packageDetail.weight} kg
           </ThemedText>

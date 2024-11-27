@@ -18,6 +18,7 @@ const Register = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [reEnterPassword, setreEnterPassword] = useState('')
+  const [buttonLoading, setButtonLoading] = useState(false)
   
   // Add error states
   const [errors, setErrors] = useState({
@@ -76,6 +77,7 @@ const Register = () => {
   
   const handleRegister = async () => {
     if (validateForm()) {
+      setButtonLoading(true)
       await SecureStore.setItemAsync('tempRegister', JSON.stringify({
         name,
         email,
@@ -83,6 +85,7 @@ const Register = () => {
         role
       }))
       router.replace('/mobileInput')
+      setButtonLoading(false)
     }
   }
 
@@ -155,7 +158,7 @@ const Register = () => {
 
               <ThemedView style={styles.buttonWrapper}>
                 <CustomButton 
-                  disableButton={!name || !email || !password || !reEnterPassword}
+                  disableButton={buttonLoading}
                   buttonText='Register'
                   handlePress={handleRegister}
                 />

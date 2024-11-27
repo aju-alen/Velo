@@ -4,7 +4,7 @@ import { ThemedView } from './ThemedView';
 import { ThemedText } from './ThemedText';
 import { useColorScheme } from '@/hooks/useColorScheme'
 
-const ShipmentDetailPayment = ({onGetData,onButtonclick}) => {
+const ShipmentDetailPayment = ({onGetData,onButtonclick,itemType}) => {
   const colorScheme = useColorScheme();
   const [description, setDescription] = useState('');
 
@@ -19,9 +19,9 @@ const ShipmentDetailPayment = ({onGetData,onButtonclick}) => {
     <ThemedView style={styles.container}>
       <ThemedView style={styles.card}>
         <ThemedView style={styles.section}>
-          <ThemedText style={styles.label}>Document Description</ThemedText>
+          <ThemedText style={styles.label}>{itemType === 'document' ? "Document": "Package"} Description</ThemedText>
           <ThemedText style={styles.subtitle}>
-            Please provide details about the document you're sending
+            Please provide details about the document you're sending {itemType === 'document' && '(Identity documents should be clearly described.)'}
           </ThemedText>
           
           <TextInput

@@ -7,7 +7,7 @@ import { verticalScale,moderateScale,horizontalScale } from '@/constants/metrics
 
 const PickupInstructionModal = ({openModal,handleCloseModal}) => {
     const {setDeliveryServices,deliveryServices} = useShipmentStore();
-  const instructions = ['Front Door', 'Ring Door', 'Reception'];
+  const instructions = ['Doorstep', 'Reception'];
 
 //   ---------------------------------
   const handleSelectitem = (item) => { 

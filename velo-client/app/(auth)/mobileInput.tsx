@@ -1,4 +1,4 @@
-import { StyleSheet, Text, TextInput, TouchableOpacity, View, Modal, Image, TouchableWithoutFeedback, FlatList, Keyboard } from 'react-native'
+import { StyleSheet, TextInput, TouchableOpacity, Modal, Image, TouchableWithoutFeedback, FlatList, Keyboard, ActivityIndicator } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { ThemedView } from '@/components/ThemedView'
 import { ThemedText } from '@/components/ThemedText'
@@ -129,7 +129,7 @@ const MobileInput = () => {
         source={{ uri: item.flag }}
         style={styles.countryFlag}
       />
-      <Text style={[styles.countryName, { color: "#fff" }]}>{item.item}</Text>
+      <ThemedText style={[styles.countryName, { color: "#fff" }]}>{item.item}</ThemedText>
     </TouchableOpacity>
   )
 
@@ -140,79 +140,78 @@ const MobileInput = () => {
       visible={modalVisible}
     >
       <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+        <ThemedView style={styles.modalOverlay}>
+          <ThemedView style={styles.modalContent}>
             <FlatList
               data={areas}
               renderItem={renderAreaItem}
               keyExtractor={(item) => item.code}
               style={styles.countryList}
             />
-          </View>
-        </View>
+          </ThemedView>
+        </ThemedView>
       </TouchableWithoutFeedback>
     </Modal>
   )
 
   const ConfirmationModal = () => (
-    <Modal
-      animationType="slide"
-      transparent={false}
-      visible={finalModalVisible}
-    >
-      <ThemedView style={styles.confirmationContainer}>
-        <View style={styles.confirmationHeader}>
-          <ThemedText type='subtitle' style={styles.confirmationTitle}>
-            Confirm Details
-          </ThemedText>
-          <ThemedText type='default' style={styles.confirmationSubtitle}>
-            Please verify your information below
-          </ThemedText>
-        </View>
-
-        <View style={styles.detailsContainer}>
-          <DetailItem label="Phone Number" value={`${selectedArea?.callingCode} ${mobile}`} />
-          <DetailItem label="Name" value={tempRegister?.name} />
-          <DetailItem label="Email" value={tempRegister?.email} />
-          <DetailItem label="Role" value={tempRegister?.role} />
-        </View>
-
-        <View style={styles.actionButtons}>
-          <CustomButton
-            buttonText={isLoading ? 'Processing...' : 'Confirm'}
-            handlePress={handleSubmit}
-            disabled={isLoading}
-          />
-
-          <ThemedText type='default' style={styles.editText}>
-            Made a mistake?{' '}
-            <ThemedText type='link' onPress={handleGoToChooseRole}>
-              Edit
+    <Modal animationType="slide" transparent={true} visible={finalModalVisible}>
+      <ThemedView style={styles.overlay}>
+        <ThemedView style={styles.modalContainer}>
+          {/* Header Section */}
+          <ThemedView style={styles.header}>
+            <ThemedText type="title" style={styles.title}>
+              Confirm Your Details
             </ThemedText>
-          </ThemedText>
-        </View>
+            <ThemedText type="subtitle" style={styles.subtitle}>
+              Please review and confirm your information.
+            </ThemedText>
+          </ThemedView>
+  
+          {/* Details Section */}
+          <ThemedView style={styles.detailsContainer}>
+            <DetailItem label="Phone Number" value={`${selectedArea?.callingCode} ${mobile}`} />
+            <DetailItem label="Name" value={tempRegister?.name} />
+            <DetailItem label="Email" value={tempRegister?.email} />
+            <DetailItem label="Role" value={tempRegister?.role} />
+          </ThemedView>
+  
+          {/* Action Buttons Section */}
+          <ThemedView style={styles.actionContainer}>
+            <CustomButton
+              buttonText='Confirm'
+              handlePress={handleSubmit}
+              disableButton={false}
+            />
+            <TouchableOpacity onPress={handleGoToChooseRole} style={styles.editLink}>
+              <ThemedText type="link" style={styles.editText}>
+                Edit Details
+              </ThemedText>
+            </TouchableOpacity>
+          </ThemedView>
+        </ThemedView>
       </ThemedView>
     </Modal>
-  )
+  );
 
   const DetailItem = ({ label, value }) => (
-    <View style={styles.detailItem}>
+    <ThemedView style={styles.detailItem}>
       <ThemedText type='default' style={styles.detailLabel}>{label}</ThemedText>
       <ThemedText type='subtitle' style={styles.detailValue}>{value}</ThemedText>
-    </View>
+    </ThemedView>
   )
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <ThemedView style={styles.container}>
-        <View style={styles.headerContainer}>
+        <ThemedView style={styles.headerContainer}>
           <ThemedText type='subtitle' style={styles.title}>
             Enter Your Mobile Number
           </ThemedText>
           <ThemedText type='default' style={styles.subtitle}>
             We will send you a verification code
           </ThemedText>
-        </View>
+        </ThemedView>
 
         <ThemedView style={styles.inputContainer}>
           <TouchableOpacity 
@@ -223,12 +222,12 @@ const MobileInput = () => {
               source={{ uri: selectedArea?.flag }}
               style={styles.selectedFlag}
             />
-            <Text style={[
+            <ThemedText style={[
               styles.countryCode,
               { color: colorScheme === 'dark' ? '#fff' : '#000' }
             ]}>
               {selectedArea?.callingCode}
-            </Text>
+            </ThemedText>
           </TouchableOpacity>
 
           <TextInput
@@ -267,14 +266,55 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: verticalScale(40),
   },
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContainer: {
+    width: '90%',
+
+    borderRadius: 12,
+    padding: 20,
+    alignItems: 'center',
+    elevation: 5,
+  },
+  header: {
+    marginBottom: 20,
+    alignItems: 'center',
+  },
   title: {
-    fontSize: moderateScale(24),
-    marginBottom: verticalScale(10),
+    fontSize: 20,
+    fontWeight: 'bold',
   },
   subtitle: {
-    fontSize: moderateScale(16),
-    opacity: 0.8,
+    fontSize: 14,
+
+    textAlign: 'center',
   },
+  detailsContainer: {
+    width: '100%',
+    marginVertical: 15,
+  },
+  actionContainer: {
+    width: '100%',
+    alignItems: 'center',
+  },
+  confirmButton: {
+    width: '100%',
+    paddingVertical: 12,
+    borderRadius: 8,
+
+  },
+  editLink: {
+    marginTop: 10,
+  },
+  editText: {
+    fontSize: 14,
+    textDecorationLine: 'underline',
+  },
+  
   inputContainer: {
     flexDirection: 'row',
     borderColor: 'grey',
@@ -358,10 +398,7 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(16),
     opacity: 0.8,
   },
-  detailsContainer: {
-    flex: 1,
-    paddingVertical: verticalScale(20),
-  },
+  
   detailItem: {
     marginBottom: verticalScale(20),
   },
@@ -376,10 +413,8 @@ const styles = StyleSheet.create({
   actionButtons: {
     paddingVertical: verticalScale(20),
   },
-  editText: {
-    textAlign: 'center',
-    marginTop: verticalScale(15),
-  },
+  
+  
 })
 
 export default MobileInput

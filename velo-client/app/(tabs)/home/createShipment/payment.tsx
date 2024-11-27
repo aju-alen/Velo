@@ -95,16 +95,6 @@ const Payment = () => {
           country: accountLoginData.mobileCountry,
         },
       },
-      defaultShippingDetails: {
-        name: accountAddressData.userName,
-        address: {
-          line1: accountAddressData.addressOne,
-          city: accountAddressData.city,
-          state: accountAddressData.state,
-          postalCode: '0000',
-          country: accountAddressData.countryCode,
-        }
-      },
       returnURL: 'myapp://home',
     });
     

@@ -322,7 +322,7 @@ const SaveAddressForm = ({ addressModalVisible, onClose, userId }) => {
                         <Picker.Item color="red" label="Select Country" value="" />
                         {countryList?.map((country, index) => (
                           <Picker.Item
-                            color={colorScheme === 'dark' ? '#fff' : '#000'}
+                            
                             key={index}
                             label={country.name}
                             value={country.id}
@@ -345,14 +345,18 @@ const SaveAddressForm = ({ addressModalVisible, onClose, userId }) => {
                     />
 
                     <ThemedView style={styles.buttonContainer}>
+
                       <CustomButton
                         buttonText="Clear"
                         handlePress={handleClear}
+                        buttonWidth={130}
+
 
                       />
                       <CustomButton
                         buttonText="Save Address"
                         handlePress={handleSave}
+                        buttonWidth={150}
                       />
                     </ThemedView>
                   </ThemedView>
@@ -461,9 +465,11 @@ const styles = StyleSheet.create({
 
   },
   buttonContainer: {
-    flexDirection: 'column',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: verticalScale(20),
+    
+
   },
   countryListItem: {
     flexDirection: 'row',

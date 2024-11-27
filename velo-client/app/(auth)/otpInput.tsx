@@ -1,161 +1,164 @@
-import { StyleSheet, Text, TextInput, TouchableOpacity, View, Modal,Image, TouchableWithoutFeedback, FlatList} from 'react-native'
-import React, { useEffect, useState } from 'react'
-import { ThemedView } from '@/components/ThemedView'
-import { ThemedText } from '@/components/ThemedText'
-import { horizontalScale, verticalScale, moderateScale } from '@/constants/metrics'
-import { router,useLocalSearchParams } from 'expo-router'
-import { OtpInput } from 'react-native-otp-entry'
+import { StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ThemedView } from '@/components/ThemedView';
+import { ThemedText } from '@/components/ThemedText';
+import { horizontalScale, verticalScale } from '@/constants/metrics';
+import { router, useLocalSearchParams } from 'expo-router';
+import { OtpInput } from 'react-native-otp-entry';
 import * as SecureStore from 'expo-secure-store';
 import CustomButton from '@/components/CustomButton';
-import axios from 'axios'
-import { ipURL } from '@/constants/backendUrl'
+import axios from 'axios';
+import { ipURL } from '@/constants/backendUrl';
 
-
-export type selectedArea ={
-    code: string,
-    item: string,
-    callingCode: string,
-    flag: string
-}
-
+export type selectedArea = {
+  code: string;
+  item: string;
+  callingCode: string;
+  flag: string;
+};
 
 const OtpInputs = () => {
-  console.log('This is OtpInputs Page');
-  
   const params = useLocalSearchParams();
   const { verfication_id } = params;
-  const [phoneNumber, setPhoneNumber] =useState({
-    mobile:'',
-    code:'',
-    country:''
-  })
-const [userDetails, setUserDetails] = useState({
 
-})
-  const [otp, setOtp] = useState('')
-  console.log(verfication_id, 'verfication_id--');
+  const [phoneNumber, setPhoneNumber] = useState({
+    mobile: '',
+    code: '',
+    country: '',
+  });
 
-  
+  const [loading, setLoading] = useState(false);
+  const [userDetails, setUserDetails] = useState({});
+  const [otp, setOtp] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     const getSecureStoreMobileData = async () => {
-      let secureMobile = await SecureStore.getItemAsync('tempMobile');
-      let secureUser = await SecureStore.getItemAsync('tempRegister');
-      
+      const secureMobile = await SecureStore.getItemAsync('tempMobile');
+      const secureUser = await SecureStore.getItemAsync('tempRegister');
 
-      setPhoneNumber(JSON.parse(secureMobile))
-      setUserDetails(JSON.parse(secureUser))
-    }
+      setPhoneNumber(JSON.parse(secureMobile));
+      setUserDetails(JSON.parse(secureUser));
+    };
 
-    getSecureStoreMobileData()
-  }, [])
-  console.log(phoneNumber, 'phoneNumber--');
-  console.log(userDetails, 'userDetails--');
-  
+    getSecureStoreMobileData();
+  }, []);
 
-  const handleVerifyNumber = async () => {
+  const handleVerifyNumber = async (otp) => {
     try {
+      console.log(otp, 'otp');
       
-      const resp = await axios.post('https://api.smsala.com/api/VerifyStatus',{
+      setLoading(true);
+      const resp = await axios.post('https://api.smsala.com/api/VerifyStatus', {
         verfication_id: verfication_id,
-        verfication_code: otp
-      })
-      console.log(resp.data, 'resp.data--');
-      
+        verfication_code: otp,
+      });
 
-      if(resp.data.status === 'V'){
-        const formData = {
-          ...userDetails,
-          ...phoneNumber
-        }
-        console.log('formData--',formData);
-        const saveUserToDB = await axios.post(`${ipURL}/api/auth/register`, formData)
-        console.log(saveUserToDB.data, 'saveUserToDB.data--');
-       try{
+      if (resp.data.status === 'V') {
+        const formData = { ...userDetails, ...phoneNumber };
+        const saveUserToDB = await axios.post(`${ipURL}/api/auth/register`, formData);
+
         await SecureStore.deleteItemAsync('tempRegister');
         await SecureStore.deleteItemAsync('tempMobile');
-        const finalSavedData = await SecureStore.setItemAsync('registerDetail', JSON.stringify(saveUserToDB.data.userDetails))
-        console.log(finalSavedData, 'finalSavedData--');
-        
+        await SecureStore.setItemAsync('registerDetail', JSON.stringify(saveUserToDB.data.userDetails));
 
-        if(saveUserToDB.data.userDetails.role === 'AGENT'){
-          router.replace('/(auth)/verifyAgent')
+        if (saveUserToDB.data.userDetails.role === 'AGENT') {
+          router.replace('/(auth)/verifyAgent');
+        } else {
+          router.replace('/(auth)/finalRegisterForm');
         }
-        else if(saveUserToDB.data.userDetails.role === 'USER'){
-          router.replace('/(auth)/finalRegisterForm')
-        }
-
-       }
-        catch(e){
-          console.log(e,'error--');
-        } 
-
-        
+      } else {
+        setErrorMessage('Invalid OTP. Please try again.');
       }
-      else{
-        alert('Invalid OTP. Please try again')
-      }
+    } catch (error) {
+      setErrorMessage(error.response?.data?.message || 'An error occurred.');
+    } finally {
+      setLoading(false);
     }
-    catch (error) {
-      console.log(error, 'error--');
-      alert(error.response.data.message)
-    }
-  }
+  };
 
   return (
     <ThemedView style={styles.container}>
-      <ThemedText type='subtitle'>
-        Enter Verification Code
+      <ThemedText style={styles.header}>Verify Your Number</ThemedText>
+      <ThemedText style={styles.subText}>
+        We’ve sent a 4-digit verification code to {phoneNumber.code} {phoneNumber.mobile}.
       </ThemedText>
-      <ThemedText type='default'>
-        Enter the 4 digit code sent to you at 
-      </ThemedText> 
-      
-      <ThemedText type='subtitle'>
-         {phoneNumber?.code} {phoneNumber?.mobile}
-      </ThemedText> 
-      <ThemedView style={styles.optContainer}>
-      <OtpInput 
-        numberOfDigits={4}
-        onTextChange={ (otp) =>setOtp(otp)}
-        focusColor='#FFAC1C'
-        focusStickBlinkingDuration={400}
-        theme={{
-            pinCodeContainerStyle:{
-                backgroundColor:'#fff',
-                width: horizontalScale(58),
-                height: verticalScale(58),
-                borderRadius: 10,
-            }
-        }}
-/>   
-</ThemedView>
-<CustomButton buttonText='Verify' handlePress={handleVerifyNumber} />
-    </ThemedView>
-  )
-}
 
-export default OtpInputs
+      <ThemedView style={styles.otpContainer}>
+        <OtpInput
+          numberOfDigits={4}
+          onTextChange={(otp) => {
+            setOtp(otp)
+            console.log(otp);
+            if(otp.length === 4){
+              handleVerifyNumber(otp)
+            }
+            
+          }}
+          focusColor="#FFAC1C"
+          focusStickBlinkingDuration={400}
+          theme={{
+            pinCodeContainerStyle: {
+              backgroundColor: '#f9f9f9',
+              width: horizontalScale(58),
+              height: verticalScale(58),
+              borderRadius: 12,
+              borderWidth: 1,
+              borderColor: '#d3d3d3',
+            },
+          }}
+        />
+      </ThemedView>
+
+      {errorMessage ? <ThemedText style={styles.errorText}>{errorMessage}</ThemedText> : null}
+
+      <CustomButton
+        disableButton={loading}
+        buttonText='Verify Number'
+        handlePress={()=>handleVerifyNumber(otp)}
+      />
+
+     
+    </ThemedView>
+  );
+};
+
+export default OtpInputs;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    padding: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 40,
-
 
   },
-  logoText: {
-    marginTop: 60,
-  },
-  subheading: {
+  header: {
+    fontSize: 24,
+    fontWeight: '600',
 
-    marginTop: 20,
+    marginBottom: 10,
   },
-  optContainer:{
+  subText: {
+    fontSize: 16,
+
+    textAlign: 'center',
+    marginBottom: 20,
+    paddingHorizontal: 20,
+  },
+  otpContainer: {
     width: '80%',
-    paddingTop: 20,
-  }
-
-})
+    marginBottom: 20,
+  },
+  errorText: {
+    color: '#FF4D4D',
+    fontSize: 14,
+    marginBottom: 10,
+  },
+  resendText: {
+    color: '#FFAC1C',
+    fontSize: 14,
+    fontWeight: '500',
+    marginTop: 10,
+  },
+});

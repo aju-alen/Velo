@@ -101,16 +101,6 @@ const PaymentSuccess = () => {
             value={new Date(savedAddressData.shipmentDate).toLocaleDateString()} 
           />
           <AnimatedDetailsRow 
-            icon="category" 
-            label="Package Weight" 
-            value={`${packageDetail.weight} kg`} 
-          />
-          <AnimatedDetailsRow 
-            icon="account-balance-wallet" 
-            label="Payment Amount" 
-            value={`AED ${totalAmount}`} 
-          />
-          <AnimatedDetailsRow 
             icon="account-balance-wallet" 
             label="Payment Amount" 
             value={`AED ${totalAmount}`} 

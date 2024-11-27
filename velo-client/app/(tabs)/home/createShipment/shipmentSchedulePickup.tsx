@@ -14,7 +14,7 @@ import { router } from 'expo-router'
 
 const ShipmentSchedulePickup = () => {
   const colorScheme = useColorScheme()
-  const { savedAddressData, accountAddressData, deliveryServices, packageDetail, setDeliveryServices } = useShipmentStore()
+  const { savedAddressData, accountAddressData, deliveryServices, packageDetail, setDeliveryServices,itemType } = useShipmentStore()
   const [checked, setChecked] = useState('yes')
   const [openTimeModal, setOpenTimeModal] = useState(false)
   const [pickupInstructionmodal, setPickupInstructionModal] = useState(false)
@@ -25,6 +25,10 @@ const ShipmentSchedulePickup = () => {
     month: 'short',
     day: 'numeric',
   })
+  console.log(packageDetail,'packageDetail----');
+  console.log(itemType,'itemType----');
+  
+  
 
   const handleCloseTimeModal = () => setOpenTimeModal(false)
   const handleClosInstructioneModal = () => setPickupInstructionModal(false)
@@ -74,7 +78,12 @@ const ShipmentSchedulePickup = () => {
           <View style={styles.infoBox}>
             <Ionicons name="information-circle-sharp" size={24} color="#FFAC1C" />
             <ThemedText style={styles.infoText}>
-              If you wish to change any of the data, go back to step 1
+              If you wish to change any of the data,
+              <TouchableOpacity onPress={()=>router.replace('/(tabs)/home/createShipment')}>
+                <ThemedText type='link'>
+                  CLICK HERE
+                </ThemedText>
+              </TouchableOpacity>
             </ThemedText>
           </View>
         </ThemedView>
@@ -113,14 +122,23 @@ const ShipmentSchedulePickup = () => {
           </TouchableOpacity>
         </ThemedView>
 
-        {/* Weight Section */}
-        <ThemedView style={styles.sectionContainer}>
+        {/* Weight Section ONLY FOR PACKAGE TYPE*/}
+        {itemType === 'package' &&<ThemedView style={styles.sectionContainer}>
           <ThemedText style={styles.sectionTitle}>Weight (kg)</ThemedText>
           <View style={styles.weightCard}>
             <ThemedText style={styles.weightLabel}>Total Weight</ThemedText>
             <ThemedText style={styles.weightValue}>{packageDetail.weight}</ThemedText>
           </View>
-        </ThemedView>
+        </ThemedView>}
+
+        {/* Num of pieces Section ONLY FOR DOCUMENT TYPE*/}
+        {itemType === 'document' &&<ThemedView style={styles.sectionContainer}>
+          <ThemedText style={styles.sectionTitle}>Number of pieces</ThemedText>
+          <View style={styles.weightCard}>
+            <ThemedText style={styles.weightLabel}>Total Pieces</ThemedText>
+            <ThemedText style={styles.weightValue}>{packageDetail.numberOfPieces}</ThemedText>
+          </View>
+        </ThemedView>}
 
         {/* Pickup Instructions Section */}
         <ThemedView style={styles.sectionContainer}>
@@ -141,11 +159,11 @@ const ShipmentSchedulePickup = () => {
 
         {/* Special Instructions Section */}
         <ThemedView style={styles.sectionContainer}>
-          <ThemedText style={styles.sectionTitle}>Special Instructions</ThemedText>
+          <ThemedText style={styles.sectionTitle}>Special Instruction(s)</ThemedText>
           <TextInput
             style={[styles.textInput,{color: colorScheme === 'light' ? '#000' : '#fff'}]}
             multiline
-            placeholder="Add any special instructions here..."
+            placeholder="Eg: Don't ring bell, call on arrival"
             numberOfLines={4}
             value={deliveryServices.pickupSpecialInstruction}
             onChangeText={(text) => 

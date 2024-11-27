@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { StyleSheet, TextInput, ScrollView, Platform, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, View,ActivityIndicator } from 'react-native';
+import { StyleSheet, TextInput, ScrollView, Platform, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, ActivityIndicator } from 'react-native';
 import { ThemedView } from '@/components/ThemedView'
 import { ThemedText } from '@/components/ThemedText'
 import { verticalScale, horizontalScale, moderateScale } from '@/constants/metrics'
@@ -10,8 +10,10 @@ import { Chip, Divider } from 'react-native-paper';
 import { Picker } from '@react-native-picker/picker';
 import axios from 'axios';
 import { ipURL } from '@/constants/backendUrl';
+import { useColorScheme } from '@/hooks/useColorScheme';
 
 const FinalRegisterForm = () => {
+  const colorScheme = useColorScheme();
   // ... keeping all the existing state and handlers ...
   const [countryList, setCountryList] = useState([])
   const [categoryList, setCategoryList] = useState([])
@@ -26,6 +28,7 @@ const FinalRegisterForm = () => {
   const [selectedCountries, setSelectedCountries] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [loading,setLoading] = useState(true)
+  const [buttonDisable, setButtonDisable] = useState(false)
 
   // ... keeping all the existing useEffect and handlers ...
   
@@ -59,6 +62,7 @@ const FinalRegisterForm = () => {
   const handleFinalRegisterForm = async () => {
 
     try {
+      setButtonDisable(true)
       if (accountRole === "USER") {
         const formData = {
           userId: accountId,
@@ -80,6 +84,7 @@ const FinalRegisterForm = () => {
         }
         const response = await axios.post(`${ipURL}/api/address/create-agent-address`, formData)
         router.push({ pathname: '/(auth)/setAppointment', params: { accountId } })
+        setButtonDisable(false)
       }
     } catch (e) {
       console.log(e, 'error--');
@@ -192,7 +197,7 @@ const FinalRegisterForm = () => {
               </ThemedView>
 
               <ThemedView style={{ marginBottom: verticalScale(6) }}>
-                <ThemedText type='default' style={styles.textInputHeading}>Pin Code</ThemedText>
+                <ThemedText type='default' style={styles.textInputHeading}>Zip Code</ThemedText>
                 <ThemedView style={styles.textInputBox}>
                   <TextInput
                     placeholder="Enter Your Zipcode"
@@ -220,11 +225,11 @@ const FinalRegisterForm = () => {
                     setCountry(itemValue)
                   }
                   }>
-                  <Picker.Item color='white' label="--Select--" />
+                  <Picker.Item color='red' label="--Select--" />
                   {
                     countryList.map((item, index) => {
                       return (
-                        <Picker.Item color="white" key={index} label={item.name} value={item.id} />
+                        <Picker.Item color={colorScheme==='dark' ? 'white ' :'black'} key={index} label={item.name} value={item.id} />
                       )
                     })}
                 </Picker>
@@ -232,11 +237,11 @@ const FinalRegisterForm = () => {
             </>}
 
             {accountRole === 'AGENT' && (
-              <View style={styles.agentContainer}>
-                <View style={styles.sectionContainer}>
+              <ThemedView style={styles.agentContainer}>
+                <ThemedView style={styles.sectionContainer}>
                   <ThemedText type='default' style={styles.sectionTitle}>Countries of Operation</ThemedText>
                   <Divider style={styles.divider} />
-                  <View style={styles.chipGrid}>
+                  <ThemedView style={styles.chipGrid}>
                     {countryList.map((item) => (
                       <Chip
                         key={item.id}
@@ -250,13 +255,13 @@ const FinalRegisterForm = () => {
                         {item.name}
                       </Chip>
                     ))}
-                  </View>
-                </View>
+                  </ThemedView>
+                </ThemedView>
 
-                <View style={styles.sectionContainer}>
+                <ThemedView style={styles.sectionContainer}>
                   <ThemedText type='default' style={styles.sectionTitle}>Categories</ThemedText>
                   <Divider style={styles.divider} />
-                  <View style={styles.chipGrid}>
+                  <ThemedView style={styles.chipGrid}>
                     {categoryList.map((item) => (
                       <Chip
                         key={item.id}
@@ -270,14 +275,16 @@ const FinalRegisterForm = () => {
                         {item.name}
                       </Chip>
                     ))}
-                  </View>
-                </View>
-              </View>
+                  </ThemedView>
+                </ThemedView>
+              </ThemedView>
             )}
 
-            <View style={styles.buttonContainer}>
-              <CustomButton buttonText='Complete Registration' handlePress={handleFinalRegisterForm} />
-            </View>
+            <ThemedView style={styles.buttonContainer}>
+              <CustomButton buttonText='Complete Registration' handlePress={handleFinalRegisterForm}
+              disableButton={buttonDisable}
+              />
+            </ThemedView>
           </ScrollView>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>}

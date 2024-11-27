@@ -70,13 +70,16 @@ interface ShipmentState {
   accountAddressData: AccountAddressData
   deliveryServices: DeliveryServices
   cummilativeExpence: CummilativeExpence
-  
+  itemType: string
+  createShipment: Boolean
+  setCreateShipment: (data: Boolean) => void
   setSavedAddressData: (data: Partial<SavedAddressData>) => void
   setAccountAddressData: (data: Partial<AccountAddressData>) => void
   setPackageDetail: (data: Partial<PackageDetail>) => void
   setPackageDescription: (description: string) => void
   setDeliveryServices: (data: Partial<DeliveryServices>) => void
   setCuminativeExpence: (data: Partial<CummilativeExpence>) => void
+  setItemType: (itemType: string) => void
   resetShipmentData: () => void
 }
 
@@ -140,6 +143,8 @@ const useShipmentStore = create<ShipmentState>((set) => ({
 
   // Package Description
   packageDescription: '',
+  itemType: '',
+  createShipment: false,
 
   cummilativeExpence : {
     adultSignature:0,
@@ -192,6 +197,17 @@ const useShipmentStore = create<ShipmentState>((set) => ({
         ...data
       }
     })),
+
+  setItemType: (itemType) =>
+    set(() => ({
+      itemType
+    })),
+
+  setCreateShipment: (data) =>
+    set(() => ({
+      createShipment: data
+    })),
+
 
   // Reset all data
   resetShipmentData: () =>
