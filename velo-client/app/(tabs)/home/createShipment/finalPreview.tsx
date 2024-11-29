@@ -152,7 +152,7 @@ const FinalPreview = () => {
 
         {/* Pickup Time */}
         <ThemedView style={styles.card}>
-          <ThemedText style={styles.cardTitle}>Pickup Time.</ThemedText>
+          <ThemedText style={styles.cardTitle}>Pickup Time</ThemedText>
           <Divider style={styles.cardDivider} />
           <ThemedText style={styles.highlightText}>
             {deliveryServices.deliveryPickupTimeFrom} - {deliveryServices.deliveryPickupTimeTo}
