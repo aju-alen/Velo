@@ -159,6 +159,9 @@ const FinalPreview = () => {
           </ThemedText>
         </ThemedView>
 
+        
+        {/* Pickup Services */}
+
         {/* Pickup Instructions */}
         <ThemedView style={styles.card}>
           <ThemedText style={styles.cardTitle}>Pickup Instruction</ThemedText>
