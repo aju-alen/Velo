@@ -1,22 +1,82 @@
-import { StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import React from 'react';
+import { StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import React,{useState} from 'react';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import useShipmentStore from '@/store/shipmentStore';
+import useLoginAccountStore from '@/store/loginAccountStore';
 import { Divider } from 'react-native-paper';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
 import { horizontalScale, moderateScale, verticalScale } from '@/constants/metrics';
+import axios from 'axios';
+import { ipURL } from '@/constants/backendUrl';
 
 const FinalPreview = () => {
-  const { 
-    savedAddressData, 
-    packageDetail, 
-    packageDescription, 
-    accountAddressData, 
+  const {
+    savedAddressData,
+    packageDetail,
+    packageDescription,
+    accountAddressData,
     deliveryServices,
     itemType,
   } = useShipmentStore();
+  const { accountLoginData } = useLoginAccountStore();
+  const [laoding, setLoading] = useState(false);
+
+  const handleSendShipmentToDb = async() => {
+    try {
+      setLoading(true);
+      const formData = {
+        userId: accountLoginData.id,
+        senderName: accountAddressData.userName,
+        senderAddressOne: accountAddressData.addressOne,
+        senderAddressTwo: accountAddressData.addressTwo,
+        senderCity: accountAddressData.city,
+        senderState: accountAddressData.state,
+
+        shipmentDate: savedAddressData.shipmentDate,
+        deliveryDate: savedAddressData.deliveryDate,
+
+        receiverName: savedAddressData.name,
+        receiverAddressOne: savedAddressData.addressOne,
+        receiverAddressTwo: savedAddressData.addressTwo,
+        receiverCity: savedAddressData.city,
+        receiverState: savedAddressData.state,
+        receiverEmail: savedAddressData.email,
+        receiverMobileNumber: savedAddressData.mobileNumber,
+        receiverCountryId: savedAddressData.countryId,
+        receiverCountryCode: savedAddressData.countryCode,
+        receiverResidentAddress: savedAddressData.residentAddress,
+        receiverZipCode: savedAddressData.zipCode,
+
+        packageLength: packageDetail.length,
+        packageWidth: packageDetail.width,
+        packageHeight: packageDetail.height,
+        packageWeight: packageDetail.weight,
+        packagePieces: packageDetail.numberOfPieces,
+
+        verbalNotificationService: deliveryServices.verbalNotification,
+        adultSignatureService: deliveryServices.adultSignature,
+        directSignatureService: deliveryServices.directSignature,
+        pickupTimeFrom: deliveryServices.deliveryPickupTimeFrom,
+        pickupTimeTo: deliveryServices.deliveryPickupTimeTo,
+        pickupInstructions: deliveryServices.pickupInstruction,
+        pickupSpecialInstructions: deliveryServices.pickupSpecialInstruction,
+
+        packageDescription: packageDescription,
+
+      }
+      const sendNewShipment = await axios.post(`${ipURL}/api/shipment/create-new-shipment`, formData);
+      console.log(sendNewShipment.data,'______________________');
+      
+      setLoading(false);
+      router.push({pathname:'/(tabs)/home/createShipment/payment',params:{shipmentId:sendNewShipment.data.shipmentId}});
+
+    }
+    catch (error) {
+      console.log(error);
+    }
+  }
 
   const renderAddressCard = (title, data) => (
     <ThemedView style={styles.card}>
@@ -49,12 +109,12 @@ const FinalPreview = () => {
       <ThemedView style={styles.section}>
         {renderIconHeader("cube-outline", "Shipment Details")}
         <Divider style={styles.sectionDivider} />
-        
+
         <ThemedView style={styles.card}>
           <ThemedText style={styles.cardTitle}>Shipping Date</ThemedText>
           <Divider style={styles.cardDivider} />
           <ThemedText style={styles.highlightText}>
-            {savedAddressData.shipmentDate.toDateString()}
+            {savedAddressData.deliveryDate.toDateString()}
           </ThemedText>
         </ThemedView>
 
@@ -69,7 +129,7 @@ const FinalPreview = () => {
           <ThemedText style={styles.cardTitle}>Package Details</ThemedText>
           <Divider style={styles.cardDivider} />
           <ThemedText style={styles.detailText}>{packageDetail.packageName}</ThemedText>
-         {itemType === 'package' && <ThemedText style={styles.detailText}>
+          {itemType === 'package' && <ThemedText style={styles.detailText}>
             Dimensions: {packageDetail.length} x {packageDetail.width} x {packageDetail.height} cm
           </ThemedText>}
           <ThemedText style={styles.detailText}>
@@ -118,8 +178,12 @@ const FinalPreview = () => {
         </ThemedView>
       </ThemedView>
       <ThemedView style={styles.buttonContainer}>
-        <TouchableOpacity onPress={()=>router.push('/(tabs)/home/createShipment/payment')}>
+        <TouchableOpacity onPress={handleSendShipmentToDb}>
+          {
+          laoding? <ActivityIndicator size="small" color="#fff" /> : 
           <ThemedText style={styles.finalPreviewText}>Confirm Shipment</ThemedText>
+          }
+          
         </TouchableOpacity>
       </ThemedView>
     </ScrollView>
@@ -131,7 +195,7 @@ export default FinalPreview;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal:horizontalScale(16),
+    paddingHorizontal: horizontalScale(16),
 
   },
   section: {
@@ -190,7 +254,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: '#FFAC1C',
   },
-  confirmButtonContainer:{
+  confirmButtonContainer: {
     alignItems: 'center',
     marginTop: verticalScale(16),
     marginBottom: verticalScale(32),

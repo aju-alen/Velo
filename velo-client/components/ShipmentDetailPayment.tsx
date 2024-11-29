@@ -3,18 +3,24 @@ import React, { useEffect, useState } from 'react';
 import { ThemedView } from './ThemedView';
 import { ThemedText } from './ThemedText';
 import { useColorScheme } from '@/hooks/useColorScheme'
+import useShipmentStore from '@/store/shipmentStore';
 
 const ShipmentDetailPayment = ({onGetData,onButtonclick,itemType}) => {
+  const { packageDescription,setPackageDescription } = useShipmentStore();
   const colorScheme = useColorScheme();
   const [description, setDescription] = useState('');
 
   useEffect(() => {
     
-    onGetData(description);
+    onGetData(packageDescription);
 
   }, [onButtonclick === true]);
 
-
+  const handleSetDescription = (text) => {
+    setPackageDescription(text);
+  };
+  console.log(packageDescription,'packageDescription----');
+  
   return (
     <ThemedView style={styles.container}>
       <ThemedView style={styles.card}>
@@ -28,8 +34,8 @@ const ShipmentDetailPayment = ({onGetData,onButtonclick,itemType}) => {
             style={[styles.textInput, { color: colorScheme === 'light' ? '#000' : '#fff' }]}
             placeholder="Enter your document description here..."
             placeholderTextColor="#999"
-            value={description}
-            onChangeText={setDescription}
+            value={packageDescription}
+            onChangeText={handleSetDescription}
             multiline={true}
             numberOfLines={4}
             textAlignVertical="top"

@@ -47,6 +47,15 @@ export default function TabLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="shippinghistory"
+        options={{
+          title: 'History',
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon name={focused ? 'construct' : 'construct-outline'} color={color} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }

@@ -72,6 +72,8 @@ interface ShipmentState {
   cummilativeExpence: CummilativeExpence
   itemType: string
   createShipment: Boolean
+  editData: Boolean
+  setEditData: (data: Boolean) => void
   setCreateShipment: (data: Boolean) => void
   setSavedAddressData: (data: Partial<SavedAddressData>) => void
   setAccountAddressData: (data: Partial<AccountAddressData>) => void
@@ -145,6 +147,7 @@ const useShipmentStore = create<ShipmentState>((set) => ({
   packageDescription: '',
   itemType: '',
   createShipment: false,
+  editData: false,
 
   cummilativeExpence : {
     adultSignature:0,
@@ -207,6 +210,11 @@ const useShipmentStore = create<ShipmentState>((set) => ({
     set(() => ({
       createShipment: data
     })),
+
+    setEditData: (data)=>
+      set(()=>({
+        editData:data
+      })),
 
 
   // Reset all data

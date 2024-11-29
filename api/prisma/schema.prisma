@@ -193,6 +193,7 @@ model Shipment{
   senderState String
 
   shipmentDate DateTime
+  deliveryDate DateTime
  
   receiverName String
   receiverAddressOne String
@@ -206,23 +207,28 @@ model Shipment{
   receiverResidentAddress Boolean
   receiverZipCode String
 
-  packageLength Float
-  packageWidth Float
-  packageHeight Float
-  packageWeight Float
-  packagePieces Int
+  packageLength String
+  packageWidth  String
+  packageHeight String
+  packageWeight String
+  packagePieces String
 
   verbalNotificationService Boolean
   adultSignatureService Boolean
   directSignatureService Boolean
-  pickupTimeDrom String
+  pickupTimeFrom String
   pickupTimeTo String
   pickupInstructions String
   pickupSpecialInstructions String
 
   packageDescription String
 
-  packageDeliveryDate DateTime
+  paymentSuccess Boolean @default(false)
+  paymentAmount Float @default(0)
+  customerId String?
+  recieptUrl String?
+  stripeId String?
+  paymentCurrency String?
 
 
 

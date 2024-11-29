@@ -5,7 +5,7 @@ import { ThemedText } from '@/components/ThemedText'
 import { useStripe } from '@stripe/stripe-react-native'
 import { MaterialIcons } from '@expo/vector-icons'
 import { Divider } from 'react-native-paper'
-import { router } from 'expo-router'
+import { router,useLocalSearchParams } from 'expo-router'
 import { moderateScale,verticalScale,horizontalScale } from '@/constants/metrics'
 
 // Store imports
@@ -15,6 +15,9 @@ import pricing from '@/constants/temPricing'
 import { ipURL } from '@/constants/backendUrl'
 
 const Payment = () => {
+  const {shipmentId} = useLocalSearchParams()
+  console.log(shipmentId,'payment___________');
+  
   const { 
     savedAddressData, 
     cummilativeExpence, 
@@ -39,7 +42,7 @@ const Payment = () => {
     });
   }, []);
 
-  const stringDate = newDate.toLocaleDateString('en-US', {
+  const stringDate = savedAddressData.deliveryDate.toLocaleDateString('en-US', {
     weekday: 'short',
     year: 'numeric',
     month: 'short',
@@ -71,6 +74,8 @@ const Payment = () => {
         addressState:accountAddressData.state,
         addressCountry:accountAddressData.countryCode,
         addressName:accountAddressData.userName,
+        shipmentId:shipmentId
+
       }),
     });
     return await response.json();

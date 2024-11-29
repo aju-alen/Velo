@@ -11,6 +11,7 @@ import { useColorScheme } from '@/hooks/useColorScheme'
 import axios from 'axios'
 import { ipURL } from '@/constants/backendUrl'
 import useShipmentStore from '@/store/shipmentStore'
+import AntDesign from '@expo/vector-icons/AntDesign';
 
 const { width } = Dimensions.get('window')
 
@@ -25,48 +26,52 @@ const SaveAddressForm = ({ addressModalVisible, onClose, userId }) => {
   const [selectedArea, setSelectedArea] = useState(null)
   const [areas, setAreas] = useState([])
   const [countryList, setCountryList] = useState([]);
-  const [countrySelect, setCountrySelect] = useState('');
+  const [contactModal, setContactModal] = useState(false)
+  const [savedContact, setSavedContact] = useState([])
+  console.log(savedContact,'savedContact');
+  
+
+
+ 
 
   useEffect(() => {
-    if (!addressModalVisible) return;
-
-    const getAllCountries = async () => {
-      try {
-        const allCountry = await axios.get(`${ipURL}/api/country/get-all-countries`);
-        setCountryList(allCountry.data);
-      } catch (error) {
-        console.error('Error fetching countries:', error);
-      }
-    };
-
-    getAllCountries();
-  }, [addressModalVisible]);  // Depend directly on addressModalVisible
-
-  useEffect(() => {
+    if (areas.length > 0) return; // Prevent refetch
     fetch("https://restcountries.com/v2/all")
       .then(response => response.json())
       .then(data => {
-        let areaData = data.map((item) => ({
+        const areaData = data.map(item => ({
           code: item.alpha2Code,
           item: item.name,
           callingCode: `+${item.callingCodes[0]}`,
-          flag: `https://flagsapi.com/${item.alpha2Code}/flat/64.png`
-        }))
-        setAreas(areaData)
-
-        if (areaData.length > 0) {
-          let defaultData = areaData.filter((a: any) => a.code == "AE")
-          if (defaultData.length > 0) {
-            setSelectedArea(defaultData[0])
-            savedAddressData.countryCode = defaultData[0].callingCode
-          }
+          flag: `https://flagsapi.com/${item.alpha2Code}/flat/64.png`,
+        }));
+        setAreas(areaData);
+  
+        const defaultArea = areaData.find(a => a.code === "AE");
+        if (defaultArea) {
+          setSelectedArea(defaultArea);
+          setSavedAddressData({ countryCode: defaultArea.callingCode });
         }
       })
       .catch(error => {
-        console.error('Error fetching country data:', error)
-        alert('Failed to load country data')
-      })
-  }, [])
+        console.error("Error fetching country data:", error);
+        alert("Failed to load country data");
+      });
+  }, [areas]);
+
+  useEffect(() => {
+    const getAllSavedAddress = async () => {
+      try {
+        const savedAddress = await axios.get(`${ipURL}/api/address/get-external-user-address/${userId}`);
+
+        setSavedContact(savedAddress.data.data)
+      } catch (error) {
+        console.error('Error fetching saved addresses:', error)
+      }
+    }
+    getAllSavedAddress()
+  }, [contactModal])
+  
 
   useEffect(() => {
     if (!addressModalVisible) return;
@@ -108,6 +113,15 @@ const SaveAddressForm = ({ addressModalVisible, onClose, userId }) => {
     }
     catch (error) {
       console.error('Error clearing form:', error)
+    }
+  }
+
+  const handleGetSavedContact = async () => {
+    try{
+      
+    }
+    catch (error) {
+      console.error('Error getting saved contact:', error)
     }
   }
 
@@ -187,6 +201,80 @@ const SaveAddressForm = ({ addressModalVisible, onClose, userId }) => {
     </Modal>
   )
 
+  const savedContactFlatlist = ({ item }) => (
+    
+    <TouchableOpacity
+      style={styles.contactItemContainer}
+      onPress={() => {
+        setSavedAddressData({
+          name: item.name,
+          companyName: item.companyName,
+          addressOne: item.addressOne,
+          addressTwo: item.addressTwo,
+          city: item.city,
+          state: item.state,
+          email: item.email,
+          mobileNumber: item.mobileNumber,
+          countryId: item.countryId,
+          residentAddress: item.residentAddress,
+          saveAddress: false,
+          countryCode: item.countryCode,
+          zipCode: item.zipCode
+        })
+        setContactModal(false)
+      }}
+    >
+      <ThemedView style={styles.contactInfoContainer}>
+        <ThemedView style={styles.contactHeader}>
+          <ThemedText style={styles.contactName} numberOfLines={1}>
+            {item.name}
+          </ThemedText>
+      
+        </ThemedView>
+        
+        <ThemedView style={styles.contactDetails}>
+          <ThemedView style={styles.contactDetailRow}>
+            <MaterialIcons name="location-on" size={16} color="#FFAC1C" />
+            <ThemedText style={styles.contactDetailText} numberOfLines={2}>
+              {item.addressOne}
+            </ThemedText>
+          </ThemedView>
+          
+          <ThemedView style={styles.contactDetailRow}>
+            <MaterialIcons name="phone" size={16} color="#FFAC1C" />
+            <ThemedText style={styles.contactDetailText}>
+              {`${item.countryCode} ${item.mobileNumber}`}
+            </ThemedText>
+          </ThemedView>
+        </ThemedView>
+      </ThemedView>
+    </TouchableOpacity>
+  )
+
+
+  const renderContactModal = () => (
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={contactModal}
+    >
+      <TouchableWithoutFeedback onPress={() => setContactModal(false)}>
+        
+        <ThemedView style={styles.modalOverlay}>
+        
+          <ThemedView style={styles.modalContent}>
+            <FlatList
+              data={savedContact}
+              renderItem={savedContactFlatlist}
+              keyExtractor={(item) => item.id}
+              style={styles.countryList}
+            />
+          </ThemedView>
+        </ThemedView>
+      </TouchableWithoutFeedback>
+    </Modal>
+  )
+
   return (
     <ThemedView>
       <Modal
@@ -203,8 +291,11 @@ const SaveAddressForm = ({ addressModalVisible, onClose, userId }) => {
               <ThemedView style={styles.modalContent}>
 
 
-                <ScrollView showsVerticalScrollIndicator={false}>
+               
                   <ThemedView style={styles.modalHeader}>
+                    <TouchableOpacity onPress={()=>setContactModal(true)}>
+                    <AntDesign name="contacts" size={24} color="black" />
+                    </TouchableOpacity>
                     <ThemedText style={styles.modalTitle}>Add New Address</ThemedText>
                     <TouchableOpacity
                       onPress={onClose}
@@ -213,6 +304,7 @@ const SaveAddressForm = ({ addressModalVisible, onClose, userId }) => {
                       <MaterialIcons name="close" size={24} color= {colorScheme === 'dark' ? '#fff' : '#000'} />
                     </TouchableOpacity>
                   </ThemedView>
+                  <ScrollView showsVerticalScrollIndicator={false}>
                   <ThemedView style={styles.formContainer}>
                     <TextInput
                       placeholder="Enter First And Last Name"
@@ -366,6 +458,7 @@ const SaveAddressForm = ({ addressModalVisible, onClose, userId }) => {
           </ThemedView>
         </TouchableWithoutFeedback>
         {renderAreasCodesModal()}
+        {renderContactModal()}
       </Modal>
     </ThemedView>
   )
@@ -402,13 +495,12 @@ const styles = StyleSheet.create({
   },
   modalHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    justifyContent: 'space-around',
     paddingHorizontal: horizontalScale(20),
     marginBottom: verticalScale(20),
   },
   closeButton: {
-    padding: moderateScale(8),
+
   },
   formContainer: {
     paddingHorizontal: horizontalScale(20),
@@ -494,5 +586,36 @@ const styles = StyleSheet.create({
   },
   checkboxLabel: {
     marginLeft: horizontalScale(8),
+  },
+  contactItemContainer: {
+    marginBottom: verticalScale(15),
+    overflow: 'hidden',
+  },
+  contactInfoContainer: {
+  },
+  contactHeader: {
+    marginBottom: verticalScale(10),
+  },
+  contactName: {
+    fontSize: moderateScale(18),
+    fontWeight: '700',
+    marginBottom: verticalScale(5),
+  },
+  companyName: {
+    fontSize: moderateScale(14),
+    color: 'gray',
+  },
+  contactDetails: {
+    marginBottom: verticalScale(10),
+  },
+  contactDetailRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: verticalScale(5),
+  },
+  contactDetailText: {
+    marginLeft: horizontalScale(10),
+    fontSize: moderateScale(14),
+    flex: 1,
   },
 })

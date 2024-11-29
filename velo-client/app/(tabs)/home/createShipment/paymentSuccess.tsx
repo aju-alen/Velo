@@ -98,7 +98,7 @@ const PaymentSuccess = () => {
           <AnimatedDetailsRow 
             icon="local-shipping" 
             label="Shipment Date" 
-            value={new Date(savedAddressData.shipmentDate).toLocaleDateString()} 
+            value={new Date(savedAddressData.deliveryDate).toLocaleDateString()} 
           />
           <AnimatedDetailsRow 
             icon="account-balance-wallet" 

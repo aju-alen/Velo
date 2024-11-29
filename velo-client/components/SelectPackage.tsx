@@ -7,9 +7,13 @@ import { useColorScheme } from '@/hooks/useColorScheme'
 import { MaterialIcons } from '@expo/vector-icons';
 import { getPackageDetailDimension } from '@/constants/packageDimensionData';
 import { verticalScale, moderateScale, horizontalScale } from '@/constants/metrics';
+import useShipmentStore from '@/store/shipmentStore';
+
 
 const SelectPackage = ({ getPackageDetail, onButtonclick, itemType }) => {
+  const {packageDetail,setPackageDetail} = useShipmentStore();
   const colorScheme = useColorScheme();
+
 
 
   const [showPackageDetail, setShowPackageDetail] = useState(false);
@@ -44,13 +48,13 @@ const SelectPackage = ({ getPackageDetail, onButtonclick, itemType }) => {
 
   const handleInputPieceChange = (input) => {
     if (input === '') {
-      setNumberOfPieces('');
+      setPackageDetail({ ...packageDetail, numberOfPieces: '' });
       return;
     }
     const cleanedInput = input.replace(/[^0-9]/g, '');
     const numericValue = parseInt(cleanedInput);
     if (!isNaN(numericValue) && numericValue <= 10) {
-      setNumberOfPieces(cleanedInput);
+      setPackageDetail({ ...packageDetail, numberOfPieces: cleanedInput });
     }
   };
 
@@ -75,7 +79,7 @@ const SelectPackage = ({ getPackageDetail, onButtonclick, itemType }) => {
 
   useEffect(() => {
 
-    getPackageDetail(dimensions, numberOfPieces, weight);
+    getPackageDetail(dimensions, packageDetail.numberOfPieces, weight);
   }, [onButtonclick]);
 
 
@@ -225,9 +229,11 @@ const SelectPackage = ({ getPackageDetail, onButtonclick, itemType }) => {
             <TextInput
               style={[styles.documentInput, { color: colorScheme === 'dark' ? 'white' : 'black' }]}
               placeholder="0"
-              value={numberOfPieces}
+              value={packageDetail.numberOfPieces}
               keyboardType="numeric"
-              onChangeText={handleInputPieceChange}
+              onChangeText={
+                (text) => setPackageDetail({ ...packageDetail, numberOfPieces: text })
+              }
             />
           </ThemedView>
         }

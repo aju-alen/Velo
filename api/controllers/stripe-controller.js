@@ -21,7 +21,7 @@ export const getKeys = async (req, res, next) => {
 export const createPaymentIntent = async (req, res, next) => {
     console.log(req.body, 'req.body');
     
-    const { amount,accountId,addressLineOne,addressCity, addressState,addressCountry,addressName} = req.body;
+    const { amount,accountId,addressLineOne,addressCity, addressState,addressCountry,addressName,shipmentId} = req.body;
     console.log(amount, typeof (amount), 'amount------');
 
 
@@ -46,7 +46,8 @@ export const createPaymentIntent = async (req, res, next) => {
                 name: addressName // Customer's full name
               },
             metadata: {
-              accountId: accountId
+              accountId: accountId,
+              shipmentId: shipmentId
               },
         });
         res.status(201).json({
@@ -83,7 +84,27 @@ export const webhook = async (req, res, next) => {
                 
                 // Then define and call a function to handle the event charge.succeeded
                 break;
-            // ... handle other event types
+                case 'charge.updated':
+                    const chargeUpdated = event.data.object;
+                    console.log('Charge Succeeded',chargeUpdated);
+                    const updateShipment = await prisma.shipment.update({
+                        where: {
+                            id: chargeUpdated.metadata.shipmentId
+                        },
+                        data:{
+                            paymentSuccess:chargeUpdated.paid,
+                            paymentAmount:chargeUpdated.amount/100,
+                            customerId:chargeUpdated.customer,
+                            recieptUrl:chargeUpdated.receipt_url,
+                            stripeId:chargeUpdated.id,
+                            paymentCurrency:chargeUpdated.currency,
+                        }
+
+                    });
+                            
+                    
+                    // Then define and call a function to handle the event charge.succeeded
+                    break;
             default:
                 console.log(`Unhandled event type ${event.type}`);
         }

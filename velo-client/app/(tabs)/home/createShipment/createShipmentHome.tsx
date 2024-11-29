@@ -31,6 +31,7 @@ const CreateShipmentHome = () => {
     setAccountAddressData,
     setItemType,
     setCreateShipment,
+    editData,
   } = useShipmentStore()
 
   // console.log(accountAddressData, 'accountAddressData in parent data');
@@ -47,7 +48,8 @@ const CreateShipmentHome = () => {
   const [checked, setChecked] = useState('false');
   const [buttonClick, setButtonClick] = useState(false)
 
-  console.log(date, 'date----');
+  // console.log(date, 'date----');
+
   
 
 
@@ -79,6 +81,7 @@ const CreateShipmentHome = () => {
       numberOfPieces: piece,
       weight: (Number(weight) * Number(piece)).toString(),
     })
+    
   }
   useFocusEffect(
     useCallback(() => {
@@ -91,6 +94,13 @@ const CreateShipmentHome = () => {
     }, [])
   )
 
+
+  useEffect(()=>{
+    if(editData){
+      setModalVisible(false)
+    }
+  },[])
+
   const handleContinuePackageDetail = () => {
     setButtonClick(true)
     setAccountAddressData({
@@ -98,11 +108,17 @@ const CreateShipmentHome = () => {
       userName: userSecureStorage['name'],
       email: userSecureStorage['email'],
       mobileNumber: userSecureStorage['mobileNumber'],
+
       countryCode: userSecureStorage['mobileCode']
+
+    })
+    setSavedAddressData({
+      ...savedAddressData,
+      shipmentDate:date,
+      deliveryDate: new Date(new Date(date).setDate(new Date(date).getDate() + 1))
     })
 
 
-    console.log('Clicked-----');
     router.push('/home/createShipment/shippingOptions')
   }
 
@@ -126,32 +142,36 @@ const CreateShipmentHome = () => {
     getAllCountries();
   }, [addressModalVisible]);  // Depend directly on addressModalVisible
 
-  useEffect(() => {
-    fetch("https://restcountries.com/v2/all")
-      .then(response => response.json())
-      .then(data => {
-        console.log(data, 'data----');
-        
-        let areaData = data.map((item) => ({
-          code: item.alpha2Code,
-          item: item.name,
-          callingCode: `+${item.callingCodes[0]}`,
-          flag: `https://flagsapi.com/${item.alpha2Code}/flat/64.png`
-        }))
-        setAreas(areaData)
-
-        if (areaData.length > 0) {
-          let defaultData = areaData.filter((a: any) => a.code == "AE")
-          if (defaultData.length > 0) {
-            setSelectedArea(defaultData[0])
-          }
-        }
-      })
-      .catch(error => {
-        console.error('Error fetching country data:', error)
-        alert('Failed to load country data')
-      })
-  }, [ ])
+  // useEffect(() => {
+    
+  //     const getCountryData = async()=>{
+  //       try{
+  //         const resp = await axios.get("https://restcountries.com/v2/all")
+  //         const data = resp.data
+  //         let areaData = data.map((item) => ({
+  //           code: item.alpha2Code,
+  //           item: item.name,
+  //           callingCode: `+${item.callingCodes[0]}`,
+  //           flag: `https://flagsapi.com/${item.alpha2Code}/flat/64.png`
+  //         }))
+  //         setAreas(areaData)
+  
+  //         if (areaData.length > 0) {
+  //           let defaultData = areaData.filter((a: any) => a.code == "AE")
+  //           if (defaultData.length > 0) {
+  //             setSelectedArea(defaultData[0])
+  //           }
+  //         }
+  //       }
+  //       catch(error) {
+  //         console.error('Error fetching country data:', error)
+  //         alert('Failed to load country data')
+  //       }
+  //     }
+    
+  //     getCountryData()
+       
+  // }, [ ])
 
   useEffect(() => {
     const checkUser = async () => {
@@ -200,7 +220,7 @@ const CreateShipmentHome = () => {
   const onChange = (event, selectedDate) => {
     const currentDate = selectedDate;
     setDate(currentDate);
-    console.log(currentDate, 'currentDate');
+
     
     setSavedAddressData({
       ...savedAddressData,
@@ -226,7 +246,6 @@ const CreateShipmentHome = () => {
   const showDatepicker = () => {
     showMode('date');
   };
-  // console.log(savedAddressData, 'savedAddressData-----asdasd-----121-2-12-12');
   
 
 
@@ -255,7 +274,7 @@ const CreateShipmentHome = () => {
     <ThemedView style={styles.container}>
       
       {/* Modal component remains unchanged */}
-      <Modal
+     {!editData &&  <Modal
         animationType="fade"
         transparent={true}
         visible={modalVisible}
@@ -266,7 +285,9 @@ const CreateShipmentHome = () => {
             <ThemedView style={styles.shippingMethodHeadContainer}>
             <ThemedText style={styles.modalTitle}>Select Shipping Method</ThemedText>
             <TouchableOpacity
-                      onPress={()=>router.push('/home/homeMainPage')}
+                      onPress={()=>{
+                        setCreateShipment(false)
+                        router.push('/home/homeMainPage')}}
 
                     >
                       <MaterialIcons name="close" size={24} color= {colorScheme === 'dark' ? '#fff' : '#000'} />
@@ -292,14 +313,14 @@ const CreateShipmentHome = () => {
             />
           </ThemedView>
         </ThemedView>
-      </Modal>
+      </Modal>}
       <SaveAddressForm
         addressModalVisible={addressModalVisible}
         onClose={handleCloseSaveAddressModal}
         userId={userSecureStorage['id']}
       />
 
-{!modalVisible && <ScrollView showsVerticalScrollIndicator={false} style={styles.contentContainer}>
+{(!modalVisible || editData) && <ScrollView showsVerticalScrollIndicator={false} style={styles.contentContainer}>
       <ThemedView >
         {/* Shipping Date Section */}
 
@@ -387,7 +408,7 @@ const CreateShipmentHome = () => {
         </ThemedView>
 
         {/* Shipping Address Section */}
-        {checked !== 'false' && 
+        {checked !== 'false'  && 
          ( <>
             <ThemedView style={styles.section}>
 

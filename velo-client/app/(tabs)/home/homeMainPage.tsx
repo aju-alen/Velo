@@ -11,11 +11,13 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import useLoginAccountStore from '@/store/loginAccountStore';
+import useShipmentStore from '@/store/shipmentStore';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = (width - horizontalScale(40) - horizontalScale(32)) / 3;
 
 const HomeMainPage = () => {
+  const {setEditData} = useShipmentStore()
   const {accountLoginData,resetAccountLoginData} = useLoginAccountStore();
   console.log(accountLoginData,'accountLoginData----11----');
   
@@ -119,7 +121,9 @@ const HomeMainPage = () => {
       </ThemedView>
 
       {/* Create Shipment Section */}
-      <TouchableOpacity onPress={()=>router.push('/(tabs)/home/createShipment/createShipmentHome')} activeOpacity={0.7}>
+      <TouchableOpacity onPress={()=>{
+        setEditData(false)
+        router.push('/(tabs)/home/createShipment/createShipmentHome')}} activeOpacity={0.7}>
 
        {accountLoginData.role === "USER" && <ThemedView style={styles.createShipmentContainer}>
 

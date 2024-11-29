@@ -14,19 +14,24 @@ import { router } from 'expo-router'
 
 const ShipmentSchedulePickup = () => {
   const colorScheme = useColorScheme()
-  const { savedAddressData, accountAddressData, deliveryServices, packageDetail, setDeliveryServices,itemType } = useShipmentStore()
+  const { savedAddressData, accountAddressData, deliveryServices, packageDetail, setDeliveryServices,itemType,setEditData,packageDescription } = useShipmentStore()
   const [checked, setChecked] = useState('yes')
   const [openTimeModal, setOpenTimeModal] = useState(false)
   const [pickupInstructionmodal, setPickupInstructionModal] = useState(false)
 
-  const formattedDate = savedAddressData.shipmentDate.toLocaleDateString('en-US', {
+  console.log(packageDescription,'saved--as-da-sd-asd-a-sd');
+  
+
+  const formattedDate = savedAddressData.deliveryDate.toLocaleDateString('en-US', {
     weekday: 'short',
     year: 'numeric',
     month: 'short',
     day: 'numeric',
   })
-  console.log(packageDetail,'packageDetail----');
-  console.log(itemType,'itemType----');
+ console.log(formattedDate,'formatDate');
+ console.log(savedAddressData.shipmentDate,'shipmentDate');
+ 
+ 
   
   
 
@@ -71,7 +76,7 @@ const ShipmentSchedulePickup = () => {
         {/* Pickup Date Section */}
         <ThemedView style={styles.sectionContainer}>
           <View style={styles.pickupDateHeaderContainer}>
-            <ThemedText style={styles.sectionTitle}>Pickup date</ThemedText>
+            <ThemedText style={styles.sectionTitle}>Pickup Date</ThemedText>
             <ThemedText style={styles.dateText}>{formattedDate}</ThemedText>
           </View>
           
@@ -79,7 +84,10 @@ const ShipmentSchedulePickup = () => {
             <Ionicons name="information-circle-sharp" size={24} color="#FFAC1C" />
             <ThemedText style={styles.infoText}>
               If you wish to change any of the data,
-              <TouchableOpacity onPress={()=>router.replace('/(tabs)/home/createShipment')}>
+              <TouchableOpacity onPress={()=>{
+              setEditData(true)
+              router.replace('/(tabs)/home/createShipment')
+                }}>
                 <ThemedText type='link'>
                   CLICK HERE
                 </ThemedText>

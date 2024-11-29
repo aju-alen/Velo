@@ -127,3 +127,21 @@ export const getSingleUserAddress = async (req, res, next) => {
     }
 }
 
+export const getAllExternalSaveAddress = async (req, res, next) => {
+    const {userId} = req.params;
+    console.log(userId);
+    try{
+    const savedContactAddress = await prisma.savedAddress.findMany({
+        where: {
+            userId: userId
+        },
+    });
+    await prisma.$disconnect();
+    res.status(200).json({message: "User address fetched successfully", data: savedContactAddress});
+    }
+    catch (err) {
+        console.log(err);
+        next(err);
+    }
+}
+
