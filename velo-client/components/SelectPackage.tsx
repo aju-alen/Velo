@@ -47,6 +47,8 @@ const SelectPackage = ({ getPackageDetail, onButtonclick, itemType }) => {
   };
 
   const handleInputPieceChange = (input) => {
+    console.log(input,'numbe rof pieces');
+    
     if (input === '') {
       setPackageDetail({ ...packageDetail, numberOfPieces: '' });
       return;
@@ -74,7 +76,7 @@ const SelectPackage = ({ getPackageDetail, onButtonclick, itemType }) => {
   };
 
   const totalWeight = numberOfPieces && weight
-    ? (Number(numberOfPieces) * Number(weight)).toFixed(1)
+    ? (Number(packageDetail.numberOfPieces) * Number(weight)).toFixed(1)
     : '0';
 
   useEffect(() => {
@@ -135,8 +137,6 @@ const SelectPackage = ({ getPackageDetail, onButtonclick, itemType }) => {
                           setWeight(packageDetail.weight.toString());
                           setOpenPackageModal(false);
                           setShowPackageDetail(true);
-
-
                         }}
                       >
                         <ThemedView style={styles.selectPackageContainer}>
@@ -184,7 +184,7 @@ const SelectPackage = ({ getPackageDetail, onButtonclick, itemType }) => {
                       <TextInput
                         style={[styles.input, { color: colorScheme === 'dark' ? 'white' : 'black' }]}
                         placeholder="0"
-                        value={numberOfPieces}
+                        value={packageDetail.numberOfPieces}
                         keyboardType="numeric"
                         onChangeText={handleInputPieceChange}
                       />
@@ -210,7 +210,7 @@ const SelectPackage = ({ getPackageDetail, onButtonclick, itemType }) => {
               <ThemedView style={styles.summary}>
                 <ThemedView style={styles.summaryRow}>
                   <ThemedText style={styles.summaryLabel}>Total Packages</ThemedText>
-                  <ThemedText style={styles.summaryValue}>{numberOfPieces || '0'}</ThemedText>
+                  <ThemedText style={styles.summaryValue}>{packageDetail.numberOfPieces || '0'}</ThemedText>
                 </ThemedView>
                 <ThemedView style={styles.summaryRow}>
                   <ThemedText style={styles.summaryLabel}>Total Weight</ThemedText>

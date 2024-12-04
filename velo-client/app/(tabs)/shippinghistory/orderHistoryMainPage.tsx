@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { 
   StyleSheet, 
   ScrollView, 
   View, 
-  TouchableOpacity,
-  Dimensions 
+  TouchableOpacity, 
+  Dimensions, 
+  RefreshControl 
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { ThemedView } from '@/components/ThemedView';
@@ -17,8 +18,9 @@ import useLoginAccountStore from '@/store/loginAccountStore';
 const { width } = Dimensions.get('window');
 
 const OrderHistoryMainPage = () => {
-    const {accountLoginData} = useLoginAccountStore();
+  const { accountLoginData } = useLoginAccountStore();
   const [orderHistory, setOrderHistory] = useState([]);
+  const [refreshing, setRefreshing] = useState(false); // State for refresh control
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -30,17 +32,20 @@ const OrderHistoryMainPage = () => {
   };
 
   const getPaidOrderHistory = async () => {
-    try{
-        const getOrder = await axios.get(`${ipURL}/api/shipment/get-all-paid-shipments/${accountLoginData.id}`);
-        console.log(getOrder.data,'order datqa ______');
-        setOrderHistory(getOrder.data);
-        
+    try {
+      const getOrder = await axios.get(`${ipURL}/api/shipment/get-all-paid-shipments/${accountLoginData.id}`);
+      setOrderHistory(getOrder.data);
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
-    }
-    catch(err){
-        console.log(err)
-    }
-}
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true); // Start the refresh animation
+    await getPaidOrderHistory(); // Fetch data again
+    setRefreshing(false); // End the refresh animation
+  }, []);
+
   useEffect(() => {
     getPaidOrderHistory();
   }, []);
@@ -65,7 +70,7 @@ const OrderHistoryMainPage = () => {
               ]}
             >
               <ThemedText style={styles.statusText}>
-              In Transit
+                In Transit
               </ThemedText>
             </ThemedView>
           </ThemedView>
@@ -82,7 +87,7 @@ const OrderHistoryMainPage = () => {
             <Ionicons name="cube-outline" size={20} color="#666" />
             <ThemedText style={styles.detailLabel}>Dimensions</ThemedText>
             <ThemedText style={styles.detailValue}>
-              {`${order.packageLength === ''?0:order.packageLength} × ${order.packageWidth === ''?0:order.packageWidth} × ${order.packageHeight === ''?0:order.packageHeight} cm`}
+              {`${order.packageLength || 0} × ${order.packageWidth || 0} × ${order.packageHeight || 0} cm`}
             </ThemedText>
           </ThemedView>
 
@@ -125,6 +130,13 @@ const OrderHistoryMainPage = () => {
       
       <ScrollView 
         contentContainerStyle={styles.scrollViewContent}
+        refreshControl={
+          <RefreshControl 
+            refreshing={refreshing} 
+            onRefresh={onRefresh} 
+            tintColor="#666" 
+          />
+        }
         showsVerticalScrollIndicator={false}
       >
         {orderHistory.length > 0 ? (

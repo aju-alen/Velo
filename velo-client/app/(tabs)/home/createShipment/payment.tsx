@@ -74,7 +74,8 @@ const Payment = () => {
         addressState:accountAddressData.state,
         addressCountry:accountAddressData.countryCode,
         addressName:accountAddressData.userName,
-        shipmentId:shipmentId
+        shipmentId:shipmentId,
+        email:accountLoginData.email,
 
       }),
     });

@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
-import nodemailer from "nodemailer";
+import { createTransport } from "../utils/emailTransport.js";
 import dotenv from "dotenv";
 import { log } from "console";
 dotenv.config();
@@ -137,13 +137,7 @@ export const bookAgentAppointment = async (req, res, next) => {
 
 const sendAppoitmentEmail = async (name, email, date, agentId) => {
 
-    const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-            user: process.env.EMAIL,
-            pass: process.env.GMAIL_PASSWORD
-        }
-    })
+   
     const mailOptions = {
         from: process.env.EMAIL,
         to: email,
@@ -169,8 +163,8 @@ const sendAppoitmentEmail = async (name, email, date, agentId) => {
 
     //send the mail
     try {
-        const sendEmailToAdmin = await transporter.sendMail(mailOptions);
-        const sendEmailToAgent = await transporter.sendMail(mailOptionsOne);
+        const sendEmailToAdmin = await createTransport.sendMail(mailOptions);
+        const sendEmailToAgent = await createTransport.sendMail(mailOptionsOne);
     }
     catch (err) {
         console.log("Err sending verification email", err);

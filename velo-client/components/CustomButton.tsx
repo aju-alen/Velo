@@ -16,20 +16,20 @@ export type CustomButton = {
 
 const CustomButton = ({ buttonText, handlePress, buttonWidth, disableButton }: CustomButton) => {
   return (
+    <TouchableOpacity
+    onPress={handlePress}
+    activeOpacity={0.7}
+    disabled={disableButton ? true : false}
+  >
     <ThemedView style={[styles.buttonContainer, { width: buttonWidth ? horizontalScale(buttonWidth) : horizontalScale(300) }]}>
-      <TouchableOpacity
-        onPress={handlePress}
-        activeOpacity={0.7}
-        disabled={disableButton ? true : false}
-
-      >
+     
         {disableButton ?(
           <ActivityIndicator size="small" color="white" />
         ):<ThemedText style={styles.heroText}>
           {buttonText}
         </ThemedText>}
-      </TouchableOpacity>
     </ThemedView>
+      </TouchableOpacity>
   )
 }
 

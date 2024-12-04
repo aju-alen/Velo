@@ -11,8 +11,10 @@ import { Picker } from '@react-native-picker/picker';
 import axios from 'axios';
 import { ipURL } from '@/constants/backendUrl';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import useLoginAccountStore from '@/store/loginAccountStore';
 
 const FinalRegisterForm = () => {
+  const {accountLoginData, setAccountLoginData} = useLoginAccountStore();
   const colorScheme = useColorScheme();
   // ... keeping all the existing state and handlers ...
   const [countryList, setCountryList] = useState([])
@@ -74,6 +76,12 @@ const FinalRegisterForm = () => {
           country
         }
         const response = await axios.post(`${ipURL}/api/address/create-user-address`, formData)
+
+        setAccountLoginData({
+          ...accountLoginData,
+          role: accountRole
+        })
+
         await SecureStore.setItemAsync('registerDetail', JSON.stringify(response.data.data))
         router.replace('/(tabs)/home')
       } else if (accountRole === "AGENT") {
@@ -91,22 +99,22 @@ const FinalRegisterForm = () => {
     }
   }
 
-  const CustomInput = ({ label, value, onChangeText, placeholder, autoComplete }) => (
-    <ThemedView style={styles.inputContainer}>
-      <ThemedText type='default' style={styles.label}>{label}</ThemedText>
-      <ThemedView style={styles.inputWrapper}>
-        <TextInput
-          placeholder={placeholder}
-          placeholderTextColor="gray"
-          value={value}
-          onChangeText={onChangeText}
-          keyboardType='default'
-          autoComplete={autoComplete}
-          style={styles.input}
-        />
-      </ThemedView>
-    </ThemedView>
-  );
+  // const CustomInput = ({ label, value, onChangeText, placeholder, autoComplete }) => (
+  //   <ThemedView style={styles.inputContainer}>
+  //     <ThemedText type='default' style={styles.label}>{label}</ThemedText>
+  //     <ThemedView style={styles.inputWrapper}>
+  //       <TextInput
+  //         placeholder={placeholder}
+  //         placeholderTextColor="gray"
+  //         value={value}
+  //         onChangeText={onChangeText}
+  //         keyboardType='default'
+  //         autoComplete={autoComplete}
+  //         style={styles.input}
+  //       />
+  //     </ThemedView>
+  //   </ThemedView>
+  // );
 
   return (
     <ThemedView style={styles.container}>
@@ -224,7 +232,9 @@ const FinalRegisterForm = () => {
 
                     setCountry(itemValue)
                   }
-                  }>
+                  }
+                  style={{ ...styles.picker, color: colorScheme === 'dark' ? 'white' : 'black' }}
+                  >
                   <Picker.Item color='red' label="--Select--" />
                   {
                     countryList.map((item, index) => {

@@ -1,4 +1,4 @@
-import { StyleSheet,  Modal, TouchableOpacity, Dimensions, ScrollView, Platform, ActivityIndicator, SafeAreaView, Button } from 'react-native'
+import { StyleSheet,  Modal, TouchableOpacity, Dimensions, ScrollView, Platform,SafeAreaView } from 'react-native'
 import React, { useEffect, useState,useCallback } from 'react'
 import { horizontalScale, moderateScale, verticalScale } from '@/constants/metrics'
 import { ThemedView } from '@/components/ThemedView'
@@ -187,11 +187,14 @@ const CreateShipmentHome = () => {
     checkUser()
   }, [])
 
+  
+
   useEffect(() => {
     const getUserAddress = async () => {
       const userAddress = await axios.get(`${ipURL}/api/address/get-user-address/${userSecureStorage['id']}`)
       setUserAddress(userAddress.data.data[0])
-      // console.log(userAddress.data.data[0], 'userAddress----2-1-21-2-12-1-212');
+      console.log(userAddress.data.data[0], 'userAddress.data.data[0]------');
+      
       setAccountAddressData({
         ...accountAddressData,
         addressOne: userAddress.data.data[0].addressOne,
@@ -201,13 +204,11 @@ const CreateShipmentHome = () => {
         state: userAddress.data.data[0].state,
         country: userAddress.data.data[0].country
       })
-
-      
     }
     if (checked === 'document' || checked === 'package') {
       getUserAddress();
     }
-  }, [checked === 'document' || checked === 'package'])
+  }, [checked])
 
   const handleOptionSelect = (option) => {
     setSelectedOption(option)
@@ -367,6 +368,7 @@ const CreateShipmentHome = () => {
               onPress={() => {
                 setChecked('document')
                 setItemType('document')
+                resetShipmentData()
 
               }}
             >
@@ -376,6 +378,7 @@ const CreateShipmentHome = () => {
                 onPress={() => {
                   setChecked('document')
                   setItemType('document')
+                  resetShipmentData()
 
                 }}
               />
@@ -390,6 +393,7 @@ const CreateShipmentHome = () => {
               onPress={() => {
                 setChecked('package')
                 setItemType('package')
+                resetShipmentData()
 
               }}
             >
@@ -399,6 +403,7 @@ const CreateShipmentHome = () => {
                 onPress={() => {
                   setChecked('package')
                   setItemType('package')
+                  resetShipmentData()
 
                 }}
               />

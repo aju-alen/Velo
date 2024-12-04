@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import dotenv from "dotenv";
+import { createTransport } from '../utils/emailTransport.js';
 dotenv.config();
 
 import Stripe from 'stripe';
@@ -21,7 +22,7 @@ export const getKeys = async (req, res, next) => {
 export const createPaymentIntent = async (req, res, next) => {
     console.log(req.body, 'req.body');
     
-    const { amount,accountId,addressLineOne,addressCity, addressState,addressCountry,addressName,shipmentId} = req.body;
+    const { amount,accountId,addressLineOne,addressCity, addressState,addressCountry,addressName,shipmentId,email} = req.body;
     console.log(amount, typeof (amount), 'amount------');
 
 
@@ -47,7 +48,8 @@ export const createPaymentIntent = async (req, res, next) => {
               },
             metadata: {
               accountId: accountId,
-              shipmentId: shipmentId
+              shipmentId: shipmentId,
+                email: email
               },
         });
         res.status(201).json({
@@ -99,9 +101,12 @@ export const webhook = async (req, res, next) => {
                             stripeId:chargeUpdated.id,
                             paymentCurrency:chargeUpdated.currency,
                         }
-
+                        
                     });
-                            
+                    console.log('--Before Email----');
+                    
+                    sendSuccessPaymentEmail(chargeUpdated.metadata.email,chargeUpdated.amount/100,chargeUpdated.currency,chargeUpdated.receipt_url);
+                    console.log('--After Email----');
                     
                     // Then define and call a function to handle the event charge.succeeded
                     break;
@@ -115,5 +120,30 @@ export const webhook = async (req, res, next) => {
     catch (err) {
         console.log(err);
         next(err);
+    }
+}
+
+//Success Payment Email function.
+
+const sendSuccessPaymentEmail = async (email,price,currency,url) => {
+    const mailOptions = {
+        from: process.env.EMAIL,
+        to: email,
+        subject: 'Payment Success',
+        text: `
+        Hi there,
+
+        Your payment of ${currency}${price} has been successfully processed.
+        Please find the reciept below.
+        ${url}
+
+        Thank you for using our service.
+        `}
+    //send the mail
+    try {
+        const sendEmailToAdmin = await createTransport.sendMail(mailOptions);
+    }
+    catch (err) {
+        console.log("Err sending verification email", err);
     }
 }

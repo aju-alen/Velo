@@ -12,15 +12,20 @@ import axios from 'axios'
 import { ipURL } from '@/constants/backendUrl'
 import useShipmentStore from '@/store/shipmentStore'
 import AntDesign from '@expo/vector-icons/AntDesign';
+import useLoginAccountStore from '@/store/loginAccountStore'
 
 const { width } = Dimensions.get('window')
 
 const SaveAddressForm = ({ addressModalVisible, onClose, userId }) => {
   const {  setSavedAddressData, resetShipmentData } = useShipmentStore()
+const {accountLoginData} = useLoginAccountStore()
+console.log(accountLoginData['id'],'accountLoginData----saveAddressForm----');
+
   const savedAddressData = useShipmentStore(state => state.savedAddressData)
   const colorScheme = useColorScheme()
   // console.log(colorScheme, 'colorScheme------ in saved');
   
+
 
   const [countryCodeModal, setCountryCodeModal] = useState(false)
   const [selectedArea, setSelectedArea] = useState(null)
@@ -30,6 +35,7 @@ const SaveAddressForm = ({ addressModalVisible, onClose, userId }) => {
   const [savedContact, setSavedContact] = useState([])
   console.log(savedContact,'savedContact');
   
+console.log(savedAddressData,'savedAddressData------______');
 
 
  
@@ -62,7 +68,9 @@ const SaveAddressForm = ({ addressModalVisible, onClose, userId }) => {
   useEffect(() => {
     const getAllSavedAddress = async () => {
       try {
-        const savedAddress = await axios.get(`${ipURL}/api/address/get-external-user-address/${userId}`);
+        console.log('userId:', userId);
+        
+        const savedAddress = await axios.get(`${ipURL}/api/address/get-external-user-address/${accountLoginData['id']}`);
 
         setSavedContact(savedAddress.data.data)
       } catch (error) {
@@ -162,13 +170,13 @@ const SaveAddressForm = ({ addressModalVisible, onClose, userId }) => {
     }
   }
 
-  const renderAreaItem = ({ item }) => (
+  const renderAreaItem = ({ item }) => {    
+    return(
     <TouchableOpacity
       style={styles.countryListItem}
       onPress={() => {
         setSelectedArea(item)
-        savedAddressData.countryCode = item.callingCode
-        setSavedAddressData({ countryCode: item })
+        setSavedAddressData({ countryCode: item.callingCode })
         setCountryCodeModal(false)
       }}
     >
@@ -176,9 +184,10 @@ const SaveAddressForm = ({ addressModalVisible, onClose, userId }) => {
         source={{ uri: item.flag }}
         style={styles.countryFlag}
       />
-      <ThemedText style={[styles.countryName, { color: "#fff" }]}>{item.item}</ThemedText>
+      <ThemedText style={[styles.countryName, { color: colorScheme === 'dark' ? 'white' : 'black' }]}>{item.item}</ThemedText>
     </TouchableOpacity>
-  )
+
+  )}
 
   const renderAreasCodesModal = () => (
     <Modal
@@ -189,6 +198,10 @@ const SaveAddressForm = ({ addressModalVisible, onClose, userId }) => {
       <TouchableWithoutFeedback onPress={() => setCountryCodeModal(false)}>
         <ThemedView style={styles.modalOverlay}>
           <ThemedView style={styles.modalContent}>
+          <ThemedView style={styles.selectCountryMainHeader}>
+      <ThemedText>Select countries</ThemedText>
+      <MaterialIcons name="close" size={24} color= {colorScheme === 'dark' ? '#fff' : '#000'} />
+      </ThemedView>
             <FlatList
               data={areas}
               renderItem={renderAreaItem}
@@ -283,9 +296,8 @@ const SaveAddressForm = ({ addressModalVisible, onClose, userId }) => {
         visible={addressModalVisible}
         onRequestClose={onClose}
 
-
       >
-        <TouchableWithoutFeedback onPress={onClose}>
+      
           <ThemedView style={styles.modalOverlay}>
             <TouchableWithoutFeedback>
               <ThemedView style={styles.modalContent}>
@@ -294,12 +306,11 @@ const SaveAddressForm = ({ addressModalVisible, onClose, userId }) => {
                
                   <ThemedView style={styles.modalHeader}>
                     <TouchableOpacity onPress={()=>setContactModal(true)}>
-                    <AntDesign name="contacts" size={24} color="black" />
+                    <AntDesign name="contacts" size={24} color={colorScheme === 'dark' ? 'white' : 'black'} />
                     </TouchableOpacity>
                     <ThemedText style={styles.modalTitle}>Add New Address</ThemedText>
                     <TouchableOpacity
                       onPress={onClose}
-                      style={styles.closeButton}
                     >
                       <MaterialIcons name="close" size={24} color= {colorScheme === 'dark' ? '#fff' : '#000'} />
                     </TouchableOpacity>
@@ -409,7 +420,7 @@ const SaveAddressForm = ({ addressModalVisible, onClose, userId }) => {
                         selectedValue={savedAddressData.countryId}
                         onValueChange={(itemValue, itemIndex) => setSavedAddressData({ countryId: itemValue })}
                         mode='dropdown'
-                        style={styles.picker}
+                        style={{ color: colorScheme === 'dark' ? '#fff' : '#000', backgroundColor: colorScheme ==='dark'?'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)' }}
                       >
                         <Picker.Item color="red" label="Select Country" value="" />
                         {countryList?.map((country, index) => (
@@ -456,7 +467,7 @@ const SaveAddressForm = ({ addressModalVisible, onClose, userId }) => {
               </ThemedView>
             </TouchableWithoutFeedback>
           </ThemedView>
-        </TouchableWithoutFeedback>
+
         {renderAreasCodesModal()}
         {renderContactModal()}
       </Modal>
@@ -472,10 +483,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: verticalScale(100),
+
   },
   modalContent: {
-    borderRadius: 16,
-    width: width * 0.9,
+    borderRadius: moderateScale(16),
+    width: width * 1.0,
+    height: '130%',
     paddingVertical: verticalScale(24),
     elevation: 5,
     shadowColor: '#000',
@@ -490,7 +503,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: '700',
     textAlign: 'center',
-    marginBottom: verticalScale(24),
+
     paddingHorizontal: horizontalScale(20),
   },
   modalHeader: {
@@ -499,12 +512,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: horizontalScale(20),
     marginBottom: verticalScale(20),
   },
-  closeButton: {
 
-  },
   formContainer: {
     paddingHorizontal: horizontalScale(20),
-    paddingBottom: verticalScale(30),
+    paddingBottom: verticalScale(100),
   },
   input: {
     height: verticalScale(50),
@@ -541,27 +552,16 @@ const styles = StyleSheet.create({
     borderRadius: moderateScale(12),
     paddingHorizontal: horizontalScale(15),
     fontSize: moderateScale(16),
-
-    
-
   },
   pickerContainer: {
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     borderRadius: moderateScale(12),
     marginBottom: verticalScale(25),
     overflow: 'hidden',
-
-  },
-  picker: {
-
-
   },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: verticalScale(20),
-    
-
   },
   countryListItem: {
     flexDirection: 'row',
@@ -618,4 +618,11 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(14),
     flex: 1,
   },
+  selectCountryMainHeader:{
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: horizontalScale(20),
+    marginBottom: verticalScale(20),
+  }
 })

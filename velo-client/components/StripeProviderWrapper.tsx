@@ -9,9 +9,7 @@ const StripeProviderWrapper = ({ children }) => {
   const fetchPublishableKey = async () => {
     try {
       const response = await fetch(`${ipURL}/api/stripe/get-keys`); // Replace with your server endpoint
-      const data = await response.json();
-      console.log('Publishable key:', data.publishableKey);
-      
+      const data = await response.json();      
       setPublishableKey(data.publishableKey);
     } catch (error) {
       console.error('Error fetching publishable key:', error);

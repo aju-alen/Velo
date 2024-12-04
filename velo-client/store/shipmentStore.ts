@@ -139,7 +139,7 @@ const useShipmentStore = create<ShipmentState>((set) => ({
     length: '',
     height: '',
     width: '',
-    numberOfPieces: '',
+    numberOfPieces: '1',
     weight: ''
   },
 

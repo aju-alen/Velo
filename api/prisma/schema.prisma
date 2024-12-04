@@ -144,7 +144,7 @@ model Listing {
 
   // Define the relationship with Category
   category      Category         @relation(fields: [categoryId], references: [id])
-  agent         Agent            @relation(fields: [agentId], references: [id])
+  agent         Agent            @relation(fields: [agentId], references: [id],onDelete: Cascade)
 }
 
 model AccountCtegory{
@@ -179,7 +179,7 @@ model SavedAddress{
   createdAt DateTime @default(now())
 
   country Country @relation(fields: [countryId], references: [id])
-  user    User  @relation(fields: [userId], references: [id])
+  user    User  @relation(fields: [userId], references: [id],onDelete: Cascade)
 }
 
 model Shipment{
@@ -232,7 +232,7 @@ model Shipment{
 
 
 
-   user    User  @relation(fields: [userId], references: [id])
+   user    User  @relation(fields: [userId], references: [id],onDelete: Cascade)
     receiverCountry Country @relation(fields: [receiverCountryId], references: [id])
 }
   

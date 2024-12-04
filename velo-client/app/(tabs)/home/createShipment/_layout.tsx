@@ -25,7 +25,7 @@ export default function MarketLayout() {
                 title:'Shipment Details',
                 headerLeft:()=>(
                     <TouchableOpacity onPress={handleGoBackHome}>
-                    <AntDesign name="arrowleft" size={24}  color="black" />
+                    <AntDesign name="arrowleft" size={24}  color={colorScheme === 'dark' ? 'white' : 'black'} />
                     </TouchableOpacity>
                 )
                 }} />

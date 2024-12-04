@@ -1,4 +1,4 @@
-import { SafeAreaView, StyleSheet, TouchableOpacity, TextInput, View, ScrollView } from 'react-native'
+import { SafeAreaView, StyleSheet, TouchableOpacity, TextInput, View, ScrollView,Alert } from 'react-native'
 import React, { useState } from 'react'
 import { ThemedView } from '@/components/ThemedView'
 import { ThemedText } from '@/components/ThemedText'
@@ -32,7 +32,18 @@ const ShipmentSchedulePickup = () => {
  console.log(savedAddressData.shipmentDate,'shipmentDate');
  
  
-  
+ const handleFinalPreview = () => {
+  if (!deliveryServices.deliveryPickupTimeFrom || !deliveryServices.deliveryPickupTimeTo) {
+    Alert.alert(
+      'Missing Information',
+      'Please select both pickup start and end times before proceeding.',
+      [{ text: 'OK' }]
+    )
+    return
+  }
+
+  router.replace('/(tabs)/home/createShipment/finalPreview')
+}
   
 
   const handleCloseTimeModal = () => setOpenTimeModal(false)
@@ -181,12 +192,22 @@ const ShipmentSchedulePickup = () => {
           />
         </ThemedView>
         <ThemedView>
-          <TouchableOpacity style={styles.buttonContainer} onPress={()=> router.replace('/(tabs)/home/createShipment/finalPreview')}>
-            <ThemedText style={styles.finalPreviewText}>
-              Preview Final Changes
-            </ThemedText>
-          </TouchableOpacity>
-        </ThemedView>
+            <TouchableOpacity 
+              style={[
+                styles.buttonContainer, 
+                (!deliveryServices.deliveryPickupTimeFrom || !deliveryServices.deliveryPickupTimeTo) 
+                  && styles.disabledButton
+              ]}
+              onPress={handleFinalPreview}
+              disabled={
+                !deliveryServices.deliveryPickupTimeFrom || !deliveryServices.deliveryPickupTimeTo
+              }
+            >
+              <ThemedText style={styles.finalPreviewText}>
+                Preview Final Changes
+              </ThemedText>
+            </TouchableOpacity>
+          </ThemedView>
       </SafeAreaView>
 
       <TimePickerModal 
@@ -211,6 +232,20 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     paddingHorizontal: horizontalScale(16),
+  },
+  buttonContainer: {
+    padding: 15,
+    backgroundColor: '#FFAC1C',
+    borderRadius: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  disabledButton: {
+    backgroundColor: '#cccccc', // Light gray color for disabled state
+  },
+  finalPreviewText: {
+    color: '#fff',
+    fontWeight: 'bold',
   },
   header: {
     fontSize: 24,
@@ -342,27 +377,8 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     
   },
-  buttonContainer: {
-    backgroundColor: '#FFAC1C',
-    padding: horizontalScale(16),
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 'auto',
-    marginBottom: horizontalScale(24),
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    fontSize: moderateScale(16),
+  
 
-  },
-  finalPreviewText: {
-    fontSize: 16,
-    fontWeight: '600',
-  },
+ 
+  
 })
