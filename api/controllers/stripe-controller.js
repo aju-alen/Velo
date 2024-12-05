@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import dotenv from "dotenv";
 import { createTransport } from '../utils/emailTransport.js';
+import {nanoid,} from 'nanoid';
 dotenv.config();
 
 import Stripe from 'stripe';
@@ -100,6 +101,7 @@ export const webhook = async (req, res, next) => {
                             recieptUrl:chargeUpdated.receipt_url,
                             stripeId:chargeUpdated.id,
                             paymentCurrency:chargeUpdated.currency,
+                            shipmentId:nanoid()
                         }
                         
                     });
