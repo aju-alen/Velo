@@ -13,17 +13,19 @@ import { ipURL } from '@/constants/backendUrl'
 import useShipmentStore from '@/store/shipmentStore'
 import AntDesign from '@expo/vector-icons/AntDesign';
 import useLoginAccountStore from '@/store/loginAccountStore'
+import axiosInstance from '@/constants/axiosHeader'
 
 const { width } = Dimensions.get('window')
 
 const SaveAddressForm = ({ addressModalVisible, onClose, userId }) => {
   const {  setSavedAddressData, resetShipmentData } = useShipmentStore()
 const {accountLoginData} = useLoginAccountStore()
-console.log(accountLoginData['id'],'accountLoginData----saveAddressForm----');
 
   const savedAddressData = useShipmentStore(state => state.savedAddressData)
   const colorScheme = useColorScheme()
   // console.log(colorScheme, 'colorScheme------ in saved');
+
+  console.log(savedAddressData,'savedAddressData------______');
   
 
 
@@ -52,8 +54,12 @@ console.log(savedAddressData,'savedAddressData------______');
           flag: `https://flagsapi.com/${item.alpha2Code}/flat/64.png`,
         }));
         setAreas(areaData);
+        console.log('areaData:', areaData);
+        
   
-        const defaultArea = areaData.find(a => a.code === "AE");
+        const defaultArea = areaData.find(a => a.callingCode === "+971");
+        console.log('defaultArea:', defaultArea);
+        
         if (defaultArea) {
           setSelectedArea(defaultArea);
           setSavedAddressData({ countryCode: defaultArea.callingCode });
@@ -69,8 +75,9 @@ console.log(savedAddressData,'savedAddressData------______');
     const getAllSavedAddress = async () => {
       try {
         console.log('userId:', userId);
+
         
-        const savedAddress = await axios.get(`${ipURL}/api/address/get-external-user-address/${accountLoginData['id']}`);
+        const savedAddress = await axiosInstance.get(`/api/address/get-external-user-address/${accountLoginData['id']}`);
 
         setSavedContact(savedAddress.data.data)
       } catch (error) {
@@ -86,7 +93,7 @@ console.log(savedAddressData,'savedAddressData------______');
 
     const getAllCountries = async () => {
       try {
-        const allCountry = await axios.get(`${ipURL}/api/country/get-all-countries`);
+        const allCountry = await axios.get(`/api/country/get-all-countries`);
         setCountryList(allCountry.data);
       } catch (error) {
         console.error('Error fetching countries:', error);
@@ -124,20 +131,13 @@ console.log(savedAddressData,'savedAddressData------______');
     }
   }
 
-  const handleGetSavedContact = async () => {
-    try{
-      
-    }
-    catch (error) {
-      console.error('Error getting saved contact:', error)
-    }
-  }
-
   const handleSave = async () => {
 
 
     try {
       if (savedAddressData.saveAddress) {
+        console.log(savedAddressData,'savedAddressData----- in saveHandle function');
+        
         const addressData = {
           name: savedAddressData.name,
           companyName: savedAddressData.companyName,
@@ -151,11 +151,11 @@ console.log(savedAddressData,'savedAddressData------______');
           residentAddress: savedAddressData.residentAddress,
           saveAddress: savedAddressData.saveAddress,
           userId,
-          countryCode: savedAddressData.countryCode,
+          countryCode: savedAddressData.countryCode === ''? "+971" : savedAddressData.countryCode,
           zipCode: savedAddressData.zipCode
         }
         try {
-          const saveAddressToDB = await axios.post(`${ipURL}/api/address/save-external-user-address`, addressData)
+          const saveAddressToDB = await axiosInstance.post(`${ipURL}/api/address/save-external-user-address`, addressData)
           console.log('Address saved:', saveAddressToDB.data)
         }
         catch (error) {
@@ -235,6 +235,11 @@ console.log(savedAddressData,'savedAddressData------______');
           zipCode: item.zipCode
         })
         setContactModal(false)
+        
+        const selectedArea = areas.find(a => a.callingCode === item.countryCode)
+        console.log(selectedArea,'selectedArea');
+        
+        setSelectedArea(areas.find(a => a.callingCode === item.countryCode))
       }}
     >
       <ThemedView style={styles.contactInfoContainer}>

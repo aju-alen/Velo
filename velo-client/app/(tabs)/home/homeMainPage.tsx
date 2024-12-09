@@ -12,6 +12,7 @@ import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import useLoginAccountStore from '@/store/loginAccountStore';
 import useShipmentStore from '@/store/shipmentStore';
+import axiosInstance, { setAuthorizationHeader } from '@/constants/axiosHeader';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = (width - horizontalScale(40) - horizontalScale(32)) / 3;
@@ -29,9 +30,11 @@ const HomeMainPage = () => {
     
     const getCategoryData = async () => {
       const getAccountDetails = await SecureStore.getItemAsync('registerDetail');
+      
       setAccountName(JSON.parse(getAccountDetails).name);
 
-      const getCategory = await axios.get(`${ipURL}/api/category/get-all-categories`);
+      setAuthorizationHeader(accountLoginData.token);
+      const getCategory = await axiosInstance.get(`/api/category/get-all-categories`);
       setCategoryData(getCategory.data);
       setLoading(false);
     };
@@ -39,9 +42,14 @@ const HomeMainPage = () => {
   }, []);
 
   const handleLogout = async () => {
-    await SecureStore.deleteItemAsync('registerDetail');
-    resetAccountLoginData();
-    router.replace('/(auth)/login');
+    try{
+      await SecureStore.deleteItemAsync('registerDetail');
+      resetAccountLoginData();
+      router.replace('/(auth)/login');
+    }
+    catch(err){
+      console.log(err);
+    }
     
   };
 

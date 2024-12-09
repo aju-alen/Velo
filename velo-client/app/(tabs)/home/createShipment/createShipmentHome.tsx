@@ -34,7 +34,6 @@ const CreateShipmentHome = () => {
     editData,
   } = useShipmentStore()
 
-  // console.log(accountAddressData, 'accountAddressData in parent data');
   
   const colorScheme = useColorScheme()
   const [userSecureStorage, setUserSecureStorage] = useState(false)
@@ -48,30 +47,9 @@ const CreateShipmentHome = () => {
   const [checked, setChecked] = useState('false');
   const [buttonClick, setButtonClick] = useState(false)
 
-  // console.log(date, 'date----');
-
-  
-
-
-
-  //modal useState
-  const [countryList, setCountryList] = useState([]);
-  const [areas, setAreas] = useState([])
-  const [selectedArea, setSelectedArea] = useState(null)
-
-  
-  // console.log(savedAddressData, 'savedAddressData in parent data');
-  
-
-  // console.log(userSecureStorage, 'userSecureStorage in parent data');
-  
-
-  
-
   const handleGetDescription = (description) => {
     setPackageDescription(description)
   }
-
 
   const handlePackagedetail = (dimension, piece, weight) => {
     setPackageDetail({
@@ -127,51 +105,22 @@ const CreateShipmentHome = () => {
     setAddressModalVisible(false)
   }
 
-  useEffect(() => {
-    if (!addressModalVisible) return;
-
-    const getAllCountries = async () => {
-      try {
-        const allCountry = await axios.get(`${ipURL}/api/country/get-all-countries`);
-        setCountryList(allCountry.data);
-      } catch (error) {
-        console.error('Error fetching countries:', error);
-      }
-    };
-
-    getAllCountries();
-  }, [addressModalVisible]);  // Depend directly on addressModalVisible
-
   // useEffect(() => {
-    
-  //     const getCountryData = async()=>{
-  //       try{
-  //         const resp = await axios.get("https://restcountries.com/v2/all")
-  //         const data = resp.data
-  //         let areaData = data.map((item) => ({
-  //           code: item.alpha2Code,
-  //           item: item.name,
-  //           callingCode: `+${item.callingCodes[0]}`,
-  //           flag: `https://flagsapi.com/${item.alpha2Code}/flat/64.png`
-  //         }))
-  //         setAreas(areaData)
-  
-  //         if (areaData.length > 0) {
-  //           let defaultData = areaData.filter((a: any) => a.code == "AE")
-  //           if (defaultData.length > 0) {
-  //             setSelectedArea(defaultData[0])
-  //           }
-  //         }
-  //       }
-  //       catch(error) {
-  //         console.error('Error fetching country data:', error)
-  //         alert('Failed to load country data')
-  //       }
+  //   if (!addressModalVisible) return;
+
+  //   const getAllCountries = async () => {
+  //     try {
+  //       const allCountry = await axios.get(`${ipURL}/api/country/get-all-countries`);
+  //       setCountryList(allCountry.data);
+  //     } catch (error) {
+  //       console.error('Error fetching countries:', error);
   //     }
-    
-  //     getCountryData()
-       
-  // }, [ ])
+  //   };
+
+  //   getAllCountries();
+  // }, [addressModalVisible]);  // Depend directly on addressModalVisible
+
+  
 
   useEffect(() => {
     const checkUser = async () => {

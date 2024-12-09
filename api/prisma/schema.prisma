@@ -59,6 +59,7 @@ model Agent {
   agentCountries            AgentCountry[]
   agentCategories           AccountCtegory[]
   listings                  Listing[]
+   shipments                Shipment[]
 }
 
 model Country {
@@ -186,12 +187,15 @@ model Shipment{
   id String @id @default(cuid())
   userId String
   shipmentId String @default("0")
+  assignedAgentId String?
 
   senderName String
   senderAddressOne String
   senderAddressTwo String
   senderCity String
   senderState String
+  senderEmail String
+  senderMobileNumber String
 
   shipmentDate DateTime
   deliveryDate DateTime
@@ -230,10 +234,11 @@ model Shipment{
   recieptUrl String?
   stripeId String?
   paymentCurrency String?
-  shipmentStatus ShipmentStatus @default(ORDER_PLACED)
+  shipmentStatus ShipmentStatus @default(PAYMENT_PENDING)
 
 
    user    User  @relation(fields: [userId], references: [id],onDelete: Cascade)
+  agent    Agent?     @relation(fields: [assignedAgentId], references: [id], onDelete: Cascade)
     receiverCountry Country @relation(fields: [receiverCountryId], references: [id])
 }
   
@@ -249,6 +254,7 @@ enum Condition {
 }
 
 enum ShipmentStatus {
+  PAYMENT_PENDING
   ORDER_PLACED
   ORDER_CONFIRMED
   SHIPMENT_PICKED

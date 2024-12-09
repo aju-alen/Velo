@@ -100,7 +100,7 @@ const useShipmentStore = create<ShipmentState>((set) => ({
     countryId: '',
     residentAddress: false,
     saveAddress: false,
-    countryCode: '',
+    countryCode: '+971',
     zipCode: '',
     gotDetails: false,
     shipmentDate: new Date(),

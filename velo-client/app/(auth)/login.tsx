@@ -36,7 +36,20 @@ const Login = () => {
         password: password
       }
       const checkIfAlreadyRegistered = await axios.post(`${ipURL}/api/auth/login`, formData);
-      setAccountLoginData(checkIfAlreadyRegistered.data.accountExists)
+      console.log(checkIfAlreadyRegistered.data, 'checkIfAlreadyRegistered');
+      
+      setAccountLoginData({
+        id: checkIfAlreadyRegistered.data.accountExists.id,
+        mobileCode: checkIfAlreadyRegistered.data.accountExists.mobileCode,
+        mobileCountry: checkIfAlreadyRegistered.data.accountExists.mobileCountry,
+        mobileNumber: checkIfAlreadyRegistered.data.accountExists.mobileNumber,
+        name: checkIfAlreadyRegistered.data.accountExists.name,
+        password: checkIfAlreadyRegistered.data.accountExists.password,
+        registerVerificationStatus: checkIfAlreadyRegistered.data.accountExists.registerVerificationStatus,
+        role: checkIfAlreadyRegistered.data.accountExists.role,
+        updatedAt: checkIfAlreadyRegistered.data.accountExists.updatedAt,
+        token: checkIfAlreadyRegistered.data.accountExists.token
+      })
       
       if (checkIfAlreadyRegistered.data.accountExists.registerVerificationStatus === "PARTIAL" && checkIfAlreadyRegistered.data.accountExists.role === "AGENT") {
         await SecureStore.setItemAsync('registerDetail', JSON.stringify(checkIfAlreadyRegistered.data.accountExists))

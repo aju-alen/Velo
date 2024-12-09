@@ -14,6 +14,7 @@ interface AccountLoginData {
     registerVerificationStatus: string;
     role: string;
     updatedAt: string;
+    token?: string;
 }
 
 interface LoginAccountState {
@@ -40,6 +41,7 @@ const useLoginAccountStore = create<LoginAccountState>()(
                 registerVerificationStatus: "",
                 role: "",
                 updatedAt: "",
+                token: "",
             },
             setAccountLoginData: (data) =>
                 set((state) => ({

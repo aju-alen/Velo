@@ -1,4 +1,4 @@
-import { StyleSheet, TextInput, TouchableOpacity, ScrollView, Platform, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard } from 'react-native'
+import { StyleSheet, TextInput, TouchableOpacity, ScrollView, Platform, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard,RefreshControl } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { ThemedView } from '@/components/ThemedView'
 import { ThemedText } from '@/components/ThemedText'
@@ -10,6 +10,7 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons'
 import CustomButton from '@/components/CustomButton'
 import {Picker} from '@react-native-picker/picker';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import axiosInstance from '@/constants/axiosHeader'
 
 const CreateListing = () => {
   const colorScheme = useColorScheme()
@@ -102,7 +103,7 @@ const CreateListing = () => {
         console.log(listingData,'listingData');
         
         
-        const response = await axios.post(`${ipURL}/api/listing/create-listing`, listingData)
+        const response = await axiosInstance.post(`/api/listing/create-listing`, listingData)
         console.log(response.data,'response.data');
         
         if (response.data) {

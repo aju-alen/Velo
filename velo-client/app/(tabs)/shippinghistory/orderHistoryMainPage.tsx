@@ -14,6 +14,7 @@ import { horizontalScale, verticalScale } from '@/constants/metrics';
 import axios from 'axios';
 import { ipURL } from '@/constants/backendUrl';
 import useLoginAccountStore from '@/store/loginAccountStore';
+import axiosInstance from '@/constants/axiosHeader';
 
 const { width } = Dimensions.get('window');
 
@@ -24,8 +25,11 @@ const OrderHistoryMainPage = () => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'Delivered': return '#4CAF50';
+
+      case 'PAYMENT_PENDING': return '#DB4626';
+      case 'ORDER_PLACED': return '#FF9800';
       case 'In Transit': return '#FF9800';
+      case 'DELIVERED': return '#4CAF50';
       case 'Pending': return '#2196F3';
       default: return '#9E9E9E';
     }
@@ -33,7 +37,7 @@ const OrderHistoryMainPage = () => {
 
   const getPaidOrderHistory = async () => {
     try {
-      const getOrder = await axios.get(`${ipURL}/api/shipment/get-all-paid-shipments/${accountLoginData.id}`);
+      const getOrder = await axiosInstance.get(`${ipURL}/api/shipment/get-all-paid-shipments/${accountLoginData.id}`);
       setOrderHistory(getOrder.data);
     } catch (err) {
       console.log(err);
@@ -41,9 +45,9 @@ const OrderHistoryMainPage = () => {
   };
 
   const onRefresh = useCallback(async () => {
-    setRefreshing(true); // Start the refresh animation
-    await getPaidOrderHistory(); // Fetch data again
-    setRefreshing(false); // End the refresh animation
+    setRefreshing(true); 
+    await getPaidOrderHistory();
+    setRefreshing(false); 
   }, []);
 
   useEffect(() => {
@@ -70,7 +74,7 @@ const OrderHistoryMainPage = () => {
               ]}
             >
               <ThemedText style={styles.statusText}>
-                In Transit
+              {order.shipmentStatus.replace(/_/g, ' ')}
               </ThemedText>
             </ThemedView>
           </ThemedView>

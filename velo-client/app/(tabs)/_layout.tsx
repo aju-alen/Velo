@@ -1,15 +1,17 @@
 import { Tabs } from 'expo-router';
-import React, {useState,useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import * as SecureStore from 'expo-secure-store';
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import useLoginAccountStore from '@/store/loginAccountStore';
 
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const { accountLoginData } = useLoginAccountStore();
 
-  const [accountDetail,setAccountDetail] = useState(null)
+  const [accountDetail, setAccountDetail] = useState(null)
 
   useEffect(() => {
     const getSecureStoreData = async () => {
@@ -28,7 +30,7 @@ export default function TabLayout() {
         headerShown: false,
       }}>
 
-       <Tabs.Screen
+      <Tabs.Screen
         name="home"
 
         options={{
@@ -54,8 +56,22 @@ export default function TabLayout() {
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon name={focused ? 'construct' : 'construct-outline'} color={color} />
           ),
+          href: (accountLoginData.role === "USER")? "/shippinghistory" : null 
         }}
       />
+    
+        <Tabs.Screen
+          name="adminorderdetail"
+          options={{
+            title: 'Order',
+            tabBarIcon: ({ color, focused }) => (
+              <TabBarIcon name={focused ? 'construct' : 'construct-outline'} color={color} />
+            ),
+            href: (accountLoginData.role === "AGENT")? "/adminorderdetail" : null 
+          
+          }}
+        />
+      
     </Tabs>
   );
 }

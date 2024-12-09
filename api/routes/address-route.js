@@ -1,6 +1,7 @@
 import express from "express";
 const router = express.Router()
 import {addUserAddress,addAgentAddress,getSingleUserAddress,addExternalUserAddress,getAllExternalSaveAddress} from '../controllers/address-controller.js';
+import { verifyToken } from "../middlewares/jwtVerify.js";
 
 
 

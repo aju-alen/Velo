@@ -1,4 +1,4 @@
-import { StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import React,{useState} from 'react';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
@@ -10,6 +10,7 @@ import { router } from 'expo-router';
 import { horizontalScale, moderateScale, verticalScale } from '@/constants/metrics';
 import axios from 'axios';
 import { ipURL } from '@/constants/backendUrl';
+import axiosInstance from '@/constants/axiosHeader';
 
 const FinalPreview = () => {
   const {
@@ -22,7 +23,10 @@ const FinalPreview = () => {
   } = useShipmentStore();
   const { accountLoginData } = useLoginAccountStore();
   const [laoding, setLoading] = useState(false);
-
+  console.log(savedAddressData,'savedAddressData');
+  console.log(accountAddressData,'accountAddressData');
+  
+  
   const handleSendShipmentToDb = async() => {
     try {
       setLoading(true);
@@ -33,6 +37,8 @@ const FinalPreview = () => {
         senderAddressTwo: accountAddressData.addressTwo,
         senderCity: accountAddressData.city,
         senderState: accountAddressData.state,
+        senderEmail: accountAddressData.email,
+        senderMobileNumber : `${accountAddressData.countryCode}${accountAddressData.mobileNumber}`, 
 
         shipmentDate: savedAddressData.shipmentDate,
         deliveryDate: savedAddressData.deliveryDate,
@@ -43,7 +49,7 @@ const FinalPreview = () => {
         receiverCity: savedAddressData.city,
         receiverState: savedAddressData.state,
         receiverEmail: savedAddressData.email,
-        receiverMobileNumber: savedAddressData.mobileNumber,
+        receiverMobileNumber: `${savedAddressData.countryCode}${savedAddressData.mobileNumber}`,
         receiverCountryId: savedAddressData.countryId,
         receiverCountryCode: savedAddressData.countryCode,
         receiverResidentAddress: savedAddressData.residentAddress,
@@ -66,7 +72,7 @@ const FinalPreview = () => {
         packageDescription: packageDescription,
 
       }
-      const sendNewShipment = await axios.post(`${ipURL}/api/shipment/create-new-shipment`, formData);
+      const sendNewShipment = await axiosInstance.post(`${ipURL}/api/shipment/create-new-shipment`, formData);
       console.log(sendNewShipment.data,'______________________');
       
       setLoading(false);
@@ -74,7 +80,9 @@ const FinalPreview = () => {
 
     }
     catch (error) {
+      setLoading(false);
       console.log(error);
+      Alert.alert('Error', 'Something went wrong, please try again later');
     }
   }
 

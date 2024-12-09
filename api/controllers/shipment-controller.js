@@ -12,6 +12,8 @@ export const createNewShipment = async (req, res, next) => {
         senderAddressOne,
         senderAddressTwo,
         senderCity,
+        senderEmail,
+        senderMobileNumber,
         senderState,
         shipmentDate,
         deliveryDate,
@@ -41,6 +43,7 @@ export const createNewShipment = async (req, res, next) => {
         packageDescription,
     } = req.body;
     try {
+        if (req.verifyRole !== "USER" && req.verifyUserId !== userId) return res.status(403).send("You are not authorized to create a shipment"); 
         const newShipment = await prisma.shipment.create({
             data: {
                 userId,
@@ -49,6 +52,8 @@ export const createNewShipment = async (req, res, next) => {
                 senderAddressTwo,
                 senderCity,
                 senderState,
+                senderEmail,
+                senderMobileNumber,
                 shipmentDate,
                 deliveryDate,
                 receiverName,
@@ -75,6 +80,7 @@ export const createNewShipment = async (req, res, next) => {
                 pickupInstructions,
                 pickupSpecialInstructions,
                 packageDescription,
+
             }
         });
         
@@ -91,6 +97,7 @@ export const createNewShipment = async (req, res, next) => {
 export const getAllPaidShipments = async (req, res, next) => {
     const { userId } = req.params;
     try{
+        if (req.verifyRole !== "USER" && req.verifyUserId !== userId) return res.status(403).send("You are not authorized to view paid shipments"); 
         const allPaidShipments = await prisma.shipment.findMany({
             where: {
                 userId,
@@ -100,6 +107,65 @@ export const getAllPaidShipments = async (req, res, next) => {
         await prisma.$disconnect();
         return res.status(200).json(allPaidShipments);
                 
+    }
+    catch(err){
+        console.log(err);
+        next(err);
+    }
+}
+
+export const getAllPendingShipments = async (req, res, next) => {
+    try{
+        if (req.verifyRole !== "AGENT") return res.status(403).send("You are not authorized to view all pending shipments"); 
+       const allPendingShipments = await prisma.shipment.findMany({
+           where:{
+               shipmentStatus:"ORDER_PLACED"
+           }
+         });
+        await prisma.$disconnect();
+        return res.status(200).json(allPendingShipments);
+                
+    }
+    catch(err){
+        console.log(err);
+        next(err);
+    }
+}
+
+export const getSinglePendingShipments = async (req, res, next) => {
+    const { singleShipmentId } = req.params;
+    try{
+        if (req.verifyRole !== "AGENT") return res.status(403).send("You are not authorized to view single pending shipments"); 
+        const singlePendingShipments = await prisma.shipment.findUnique({
+            where:{
+                id:singleShipmentId
+            }
+        });
+        await prisma.$disconnect();
+        return res.status(200).json(singlePendingShipments);
+
+    }
+    catch(err){
+        console.log(err);
+        next(err);
+    }
+
+}
+
+export const agentUpdateShipmentStatus = async (req, res, next) => {
+    const { shipmentId } = req.params;
+    try{
+        if (req.verifyRole !== "AGENT") return res.status(403).send("You are not authorized to update shipment status");
+        const updateShipment = await prisma.shipment.update({
+            where: {
+                id: shipmentId
+            },
+            data:{
+                shipmentStatus:"ORDER_CONFIRMED"
+            }
+        });
+        await prisma.$disconnect();
+        return res.status(200).json({ message: "Shipment status updated successfully" });
     }
     catch(err){
         console.log(err);
