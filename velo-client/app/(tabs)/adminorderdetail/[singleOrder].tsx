@@ -1,4 +1,4 @@
-import { StyleSheet, ScrollView, TouchableOpacity } from 'react-native'
+import { StyleSheet, ScrollView, TouchableOpacity,ActivityIndicator } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { Ionicons } from '@expo/vector-icons'
 import { ThemedView } from '@/components/ThemedView'
@@ -12,12 +12,13 @@ const SingleOrder = () => {
     const router = useRouter();
     const { singleOrder } = useLocalSearchParams();
     const [orderData, setOrderData] = useState<any>(null);
+    const [loading, setLoading] = useState(false);
 
     const getAdminSingleOrderData = async () => {
         try {
             const response = await axiosInstance.get(`${ipURL}/api/shipment/agent/get-single-pending-shipments/${singleOrder}`);
             setOrderData(response.data);
-            console.log(response.data);
+            console.log(response.data,'single order data');
 
         } catch (err) {
             console.log(err);
@@ -30,8 +31,11 @@ const SingleOrder = () => {
 
     const handleAcceptShipment = async () => {
         try {
+            setLoading(true);
             const response = await axiosInstance.put(`${ipURL}/api/shipment/agent-update-shipment-status/${singleOrder}`, );
             console.log(response.data);
+            setLoading(false);
+            router.push('/(tabs)/adminorderdetail/adminOrderDetailMain');
         }
         catch (err) {
 
@@ -152,9 +156,16 @@ const SingleOrder = () => {
                         orderData.paymentSuccess ? 'Successful' : 'Failed'
                     )}
                 </ThemedView>
-                <TouchableOpacity style={styles.acceptOrderButton} onPress={handleAcceptShipment}>
-                    <ThemedText>Accept Shipment</ThemedText>
+              {orderData.shipmentStatus === 'ORDER_PLACED'?  <TouchableOpacity style={styles.acceptOrderButton} onPress={handleAcceptShipment}>
+                    {loading?(
+                        <ActivityIndicator size="small" color="#fff" />
+                    ):
+                    <ThemedText>Accept Shipment</ThemedText>}
+                </TouchableOpacity> :
+                <TouchableOpacity style={styles.acceptOrderButton} disabled>
+                    <ThemedText>Update Shipping Status</ThemedText>
                 </TouchableOpacity>
+                }
             </ScrollView>
         </ThemedView>
     )

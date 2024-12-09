@@ -3,20 +3,46 @@ import { StyleSheet, FlatList, TouchableOpacity, RefreshControl, View } from 're
 import { Ionicons } from '@expo/vector-icons';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
-import axios from 'axios';
 import { ipURL } from '@/constants/backendUrl';
 import { router } from 'expo-router';
 import axiosInstance from '@/constants/axiosHeader';
+import { useColorScheme } from '@/hooks/useColorScheme';
+
+const cardData = [
+  {
+    title: 'Pending Shipent',
+    status: 'pending',
+  },
+  {
+    title: 'Accepted Shipment',
+    status: 'accepted'
+  },
+  {
+    title: 'Completed Shipment',
+    status: 'completed'
+  }
+];
 
 const AdminOrderDetailMain = () => {
+  const colorScheme = useColorScheme();
   const [pendingOrders, setPendingOrders] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [orderStatus, setOrderStatus] = useState('pending');
 
   const getAdminPendingOrders = async () => {
     try {
+      console.log('------__________-----------');
+      
       setRefreshing(true);
-      const response = await axiosInstance.get(`${ipURL}/api/shipment/agent/get-all-pending-shipments`);
-      setPendingOrders(response.data);
+      if(orderStatus === 'pending') {
+        const response = await axiosInstance.get(`/api/shipment/agent/get-all-pending-shipments`);
+        setPendingOrders(response.data);
+      }
+      if(orderStatus === 'accepted') {
+        const response = await axiosInstance.get(`/api/shipment/agent/get-all-accepted-shipments`);
+        setPendingOrders(response.data);
+      }
+      
       setRefreshing(false);
     } catch (err) {
       console.error(err);
@@ -26,7 +52,7 @@ const AdminOrderDetailMain = () => {
 
   useEffect(() => {
     getAdminPendingOrders();
-  }, []);
+  }, [orderStatus]);
 
   const renderCard = ({ item }) => (
     <TouchableOpacity
@@ -85,11 +111,31 @@ const AdminOrderDetailMain = () => {
     <ThemedView style={styles.container}>
       <ThemedView style={styles.headerContainer}>
         <ThemedText style={styles.pageTitle}>Pending Shipments</ThemedText>
-        <TouchableOpacity>
-          <Ionicons name="filter" size={24} color="#4A4A4A" />
-        </TouchableOpacity>
       </ThemedView>
-      
+
+      <ThemedView >
+        <FlatList
+          data={cardData}
+          keyExtractor={(item) => item.title}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              onPress={() => setOrderStatus(item.status)}
+              style={[styles.statusCardContainer, {
+                backgroundColor: orderStatus === item.status ? '#4CAF50' : 'transparent', 
+              }]} >
+              <ThemedView >
+                <ThemedText type='mini' style={{ backgroundColor: orderStatus === item.status ? '#4CAF50' :'transparent' }}>
+                  {item.title}
+                </ThemedText>
+              </ThemedView>
+            </TouchableOpacity>
+          )}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: 20 }}
+        />
+      </ThemedView>
+
       {pendingOrders.length > 0 ? (
         <FlatList
           data={pendingOrders}
@@ -97,10 +143,10 @@ const AdminOrderDetailMain = () => {
           renderItem={renderCard}
           contentContainerStyle={styles.listContent}
           refreshControl={
-            <RefreshControl 
-              refreshing={refreshing} 
-              onRefresh={getAdminPendingOrders} 
-              tintColor="#4A4A4A" 
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={getAdminPendingOrders}
+              tintColor="#4A4A4A"
             />
           }
           showsVerticalScrollIndicator={false}
@@ -131,7 +177,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   pageTitle: {
-    fontSize: 26,
+    fontSize: 22,
     fontWeight: '700',
 
   },
@@ -208,7 +254,6 @@ const styles = StyleSheet.create({
     gap: 15,
   },
   locationIcon: {
-
     padding: 10,
     borderRadius: 15,
   },
@@ -217,14 +262,12 @@ const styles = StyleSheet.create({
   },
   locationTitle: {
     fontSize: 12,
-
     marginBottom: 5,
     textTransform: 'uppercase',
   },
   locationText: {
     fontSize: 15,
     fontWeight: '600',
-
   },
   emptyStateContainer: {
     flex: 1,
@@ -234,8 +277,15 @@ const styles = StyleSheet.create({
   },
   emptyStateText: {
     fontSize: 16,
-
     textAlign: 'center',
+  },
+  statusCardContainer: {
+
+    paddingHorizontal: 8,
+    paddingVertical: 10,
+    borderRadius: 15,
+    marginRight: 15,
+
   },
 });
 

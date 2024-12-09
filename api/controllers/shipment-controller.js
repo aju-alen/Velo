@@ -132,6 +132,24 @@ export const getAllPendingShipments = async (req, res, next) => {
     }
 }
 
+export const getAllAcceptedShipments = async (req, res, next) => {
+    try{
+        if (req.verifyRole !== "AGENT") return res.status(403).send("You are not authorized to view all accepted shipments"); 
+       const allAcceptedShipments = await prisma.shipment.findMany({
+           where:{
+                shipmentStatus:"ORDER_CONFIRMED",
+                assignedAgentId:req.verifyUserId
+              }
+            });
+          await prisma.$disconnect();
+          return res.status(200).json(allAcceptedShipments);
+    }
+    catch(err){
+        console.log(err);
+        next(err);
+    }
+}
+
 export const getSinglePendingShipments = async (req, res, next) => {
     const { singleShipmentId } = req.params;
     try{
@@ -161,7 +179,9 @@ export const agentUpdateShipmentStatus = async (req, res, next) => {
                 id: shipmentId
             },
             data:{
-                shipmentStatus:"ORDER_CONFIRMED"
+                shipmentStatus:"ORDER_CONFIRMED",
+                assignedAgentId:req.verifyUserId
+
             }
         });
         await prisma.$disconnect();
