@@ -11,6 +11,7 @@ export default function HomeLayout() {
         <Stack>
             <Stack.Screen name='adminOrderDetailMain' options={{ headerShown: false, gestureEnabled:false }}/>
             <Stack.Screen name='[singleOrder]' options={{ headerShown: false }}/>
+            <Stack.Screen name='adminUpdateShipment' options={{ headerShown: false }}/>
 
             
 

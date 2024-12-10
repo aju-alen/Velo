@@ -180,7 +180,7 @@ export const agentUpdateShipmentStatus = async (req, res, next) => {
             },
             data:{
                 shipmentStatus:"ORDER_CONFIRMED",
-                assignedAgentId:req.verifyUserId
+                orderPlacedAssignedAgentId:req.verifyUserId
 
             }
         });

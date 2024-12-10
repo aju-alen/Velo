@@ -93,7 +93,7 @@ console.log(savedAddressData,'savedAddressData------______');
 
     const getAllCountries = async () => {
       try {
-        const allCountry = await axios.get(`/api/country/get-all-countries`);
+        const allCountry = await axiosInstance.get(`/api/country/get-all-countries`);
         setCountryList(allCountry.data);
       } catch (error) {
         console.error('Error fetching countries:', error);
@@ -155,7 +155,7 @@ console.log(savedAddressData,'savedAddressData------______');
           zipCode: savedAddressData.zipCode
         }
         try {
-          const saveAddressToDB = await axiosInstance.post(`${ipURL}/api/address/save-external-user-address`, addressData)
+          const saveAddressToDB = await axios.post(`${ipURL}/api/address/save-external-user-address`, addressData)
           console.log('Address saved:', saveAddressToDB.data)
         }
         catch (error) {

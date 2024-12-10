@@ -42,7 +42,7 @@ const SingleOrder = () => {
         }
     }
 
-    const renderDetailRow = (icon: string, title: string, value: string) => (
+    const renderDetailRow = (icon: keyof typeof Ionicons.glyphMap, title: string, value: string) => (
         <ThemedView style={styles.detailRow}>
             <ThemedView style={styles.detailIcon}>
                 <Ionicons name={icon} size={20} color="#4A4A4A" />
@@ -162,7 +162,7 @@ const SingleOrder = () => {
                     ):
                     <ThemedText>Accept Shipment</ThemedText>}
                 </TouchableOpacity> :
-                <TouchableOpacity style={styles.acceptOrderButton} disabled>
+                <TouchableOpacity style={styles.acceptOrderButton} onPress={()=>router.push('/(tabs)/adminorderdetail/adminUpdateShipment/adminUpdateStatus')}>
                     <ThemedText>Update Shipping Status</ThemedText>
                 </TouchableOpacity>
                 }

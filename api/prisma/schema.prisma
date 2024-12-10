@@ -36,6 +36,9 @@ model User {
 
   savedAddresses              SavedAddress[]
   shipments                   Shipment[]
+
+  agentShipmentId AgentShipment?
+
 }
 
 model Agent {
@@ -59,7 +62,10 @@ model Agent {
   agentCountries            AgentCountry[]
   agentCategories           AccountCtegory[]
   listings                  Listing[]
-   shipments                Shipment[]
+  assignedShipments         AgentShipment[] @relation("shipmentAcceptedAgent")
+  pickedShipments           AgentShipment[] @relation("ShipmentPickedAgent")
+  deliveredShipments        AgentShipment[] @relation("ShipmentDeliverAgent")
+
 }
 
 model Country {
@@ -183,11 +189,10 @@ model SavedAddress{
   user    User  @relation(fields: [userId], references: [id],onDelete: Cascade)
 }
 
-model Shipment{
+model Shipment {
   id String @id @default(cuid())
   userId String
-  shipmentId String @default("0")
-  assignedAgentId String?
+  shipmentId String?
 
   senderName String
   senderAddressOne String
@@ -199,7 +204,7 @@ model Shipment{
 
   shipmentDate DateTime
   deliveryDate DateTime
- 
+
   receiverName String
   receiverAddressOne String
   receiverAddressTwo String
@@ -236,11 +241,33 @@ model Shipment{
   paymentCurrency String?
   shipmentStatus ShipmentStatus @default(PAYMENT_PENDING)
 
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  receiverCountry Country @relation(fields: [receiverCountryId], references: [id])
 
-   user    User  @relation(fields: [userId], references: [id],onDelete: Cascade)
-  agent    Agent?     @relation(fields: [assignedAgentId], references: [id], onDelete: Cascade)
-    receiverCountry Country @relation(fields: [receiverCountryId], references: [id])
+  agentShipment AgentShipment?
 }
+
+model AgentShipment {
+  id String @id @default(cuid())
+  shipmentId String @unique
+  userId String @unique
+  shipmentAcceptedAssignedAgentId String?
+  shipmentPickedAgentId String?
+  shipmentDeliveryAgentId String?
+
+  
+  agent Agent? @relation("shipmentAcceptedAgent", fields: [shipmentAcceptedAssignedAgentId], references: [id], onDelete: Cascade)
+
+  shipmentPickedAgent Agent? @relation("ShipmentPickedAgent", fields: [shipmentPickedAgentId], references: [id], onDelete: Cascade)
+  
+  shipmentDeliverAgent Agent? @relation("ShipmentDeliverAgent", fields: [shipmentDeliveryAgentId], references: [id], onDelete: Cascade)
+
+  // Owns the relation
+  shipment Shipment @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+
   
 
 enum Role {

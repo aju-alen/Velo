@@ -104,9 +104,15 @@ export const webhook = async (req, res, next) => {
                             shipmentId:nanoid(10),
                             shipmentStatus:"ORDER_PLACED",
                         }
-                        
                     });
-                    console.log('--Before Email----');
+                    await prisma.agentShipment.create({
+                        data:{
+                            shipmentId: chargeUpdated.metadata.shipmentId,
+                            userId: chargeUpdated.metadata.accountId,
+                        }
+                    })
+                    await prisma.$disconnect();
+
                     
                     sendSuccessPaymentEmail(chargeUpdated.metadata.email,chargeUpdated.amount/100,chargeUpdated.currency,chargeUpdated.receipt_url);
                     console.log('--After Email----');
