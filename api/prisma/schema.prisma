@@ -41,6 +41,22 @@ model User {
 
 }
 
+model SuperAdmin{
+ id String @id @default(cuid())
+  name String
+  email String @unique
+  password String
+  role Role 
+  mobileCode String
+  mobileCountry String
+  mobileNumber String
+  firstTimeLogin Boolean @default(true)
+  registerVerificationStatus String @default("SUPERADMINLOGGEDIN")
+
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+}
+
 model Agent {
   id                        String     @id @default(cuid())
   name                      String

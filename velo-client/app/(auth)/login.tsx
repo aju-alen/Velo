@@ -2,12 +2,11 @@ import React, { useState } from 'react'
 import { 
   StyleSheet, 
   TextInput, 
-  ScrollView, 
   Platform, 
   KeyboardAvoidingView, 
-  TouchableWithoutFeedback, 
-  Keyboard,
-  Dimensions 
+  TouchableWithoutFeedback,
+  Alert, 
+
 } from 'react-native';
 import { ThemedView } from '@/components/ThemedView'
 import { ThemedText } from '@/components/ThemedText'
@@ -70,6 +69,13 @@ const Login = () => {
       else if (checkIfAlreadyRegistered.data.accountExists.registerVerificationStatus === "LOGGED_IN" && checkIfAlreadyRegistered.data.accountExists.role === "USER" ) {
         await SecureStore.setItemAsync('registerDetail', JSON.stringify(checkIfAlreadyRegistered.data.accountExists))
         router.replace('/(tabs)/home')
+      }
+      else if (checkIfAlreadyRegistered.data.accountExists.registerVerificationStatus === "SUPERADMINLOGGEDIN" && checkIfAlreadyRegistered.data.accountExists.role === "SUPERADMIN" ) {
+        await SecureStore.setItemAsync('registerDetail', JSON.stringify(checkIfAlreadyRegistered.data.accountExists))
+        router.replace('/(tabs)/home')
+      }
+      else {
+        Alert.alert('Error', 'Something went wrong')
       }
       setLoading(false)
     }

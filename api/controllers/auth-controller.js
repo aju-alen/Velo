@@ -25,7 +25,14 @@ export const register = async (req, res, next) => {
             }
         });
 
-        if (userExists || agentExists) {
+        const superAdminExists = await prisma.superAdmin.findUnique({
+            where: {
+                email
+            }
+        });
+
+
+        if (userExists || agentExists || superAdminExists) {
             return res.status(400).json({ message: "This email already exists or Mobile number already exist. You can login" });
         }
 
@@ -60,6 +67,23 @@ export const register = async (req, res, next) => {
                 }
             });
            
+        }
+        else if (role === "SUPERADMIN") {
+            // userDetails = await prisma.superAdmin.create({
+            //     data: {
+            //         email: lowercaseEmail,
+            //         password: hashedPassword,
+            //         name,
+            //         role,
+            //         mobileNumber: mobile,
+            //         mobileCode: code,
+            //         mobileCountry: country,
+            //     }
+            // });
+            return res.status(400).json({ message: "Invalid role" });
+        }
+        else {
+            return res.status(400).json({ message: "Invalid role" });
         }
 
 
@@ -183,6 +207,13 @@ export const loginAccount = async (req, res, next) => {
 
         if (!accountExists) {
             accountExists = await prisma.agent.findFirst({
+                where: {
+                    email
+                }
+            });
+        }
+        if (!accountExists) {
+            accountExists = await prisma.superAdmin.findFirst({
                 where: {
                     email
                 }

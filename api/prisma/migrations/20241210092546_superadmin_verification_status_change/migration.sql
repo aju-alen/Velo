@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `SuperAdmin` MODIFY `registerVerificationStatus` VARCHAR(191) NOT NULL DEFAULT 'SUPERADMINLOGGEDIN';
