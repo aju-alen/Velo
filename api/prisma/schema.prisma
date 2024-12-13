@@ -57,6 +57,20 @@ model SuperAdmin{
   createdAt DateTime @default(now())
 }
 
+model Organisation {
+  id                        String   @id @default(cuid())
+  organisationName          String?
+  organisationAddress       String?
+  organisationWebsiteUrl    String?
+  modeOfWork                String
+  superAdminApproval        Boolean  @default(false)
+
+  organisationLeaderId      String? @unique // Foreign key for the leader
+  organisationLeader        Agent?   @relation("OrganisationLeader", fields: [organisationLeaderId], references: [id])
+
+  organisationEmployees     Agent[]  @relation("OrganisationEmployees")  // Many-to-one relationship
+}
+
 model Agent {
   id                        String     @id @default(cuid())
   name                      String
@@ -74,7 +88,7 @@ model Agent {
   updatedAt                 DateTime   @updatedAt
   createdAt                 DateTime   @default(now())
 
-  // Define the many-to-many relationship via the junction table
+  // Define the many-to-many relationships
   agentCountries            AgentCountry[]
   agentCategories           AccountCtegory[]
   listings                  Listing[]
@@ -82,7 +96,13 @@ model Agent {
   pickedShipments           AgentShipment[] @relation("ShipmentPickedAgent")
   deliveredShipments        AgentShipment[] @relation("ShipmentDeliverAgent")
 
+  // Define relationships with Organisation
+  worksForOrganisationId    String?        // Foreign key for organisation
+  worksForOrganisation      Organisation?  @relation("OrganisationEmployees", fields: [worksForOrganisationId], references: [id])
+
+  leadsOrganisation         Organisation?  @relation("OrganisationLeader")
 }
+
 
 model Country {
   id             Int    @id @default(autoincrement())

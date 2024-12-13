@@ -115,7 +115,7 @@ export const addExternalUserAddress = async (req, res, next) => {
 }
 
 export const addAgentAddress = async (req, res, next) => {
-    const {userId,selectedCountries,selectedCategories} = req.body;    
+    const {userId,selectedCountries,selectedCategories, modeOfWork,organisationName,organisationAddress,organisationWebsiteUrl,} = req.body;    
     console.log(userId,selectedCountries);
     
     try{
@@ -127,6 +127,16 @@ export const addAgentAddress = async (req, res, next) => {
             data: agentCountryRecords,
             skipDuplicates: true, // Optional: Skip duplicates if they already exist
           });
+        
+        const createorganisation = await prisma.organisation.create({
+            data: {
+                organisationName,
+                organisationAddress,
+                organisationWebsiteUrl,
+                modeOfWork,
+                organisationLeaderId:userId
+            }
+        });
         
         const agentCategoryRecord = selectedCategories.map(categoryId => ({
             agentId: userId,
