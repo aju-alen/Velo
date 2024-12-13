@@ -26,7 +26,7 @@ export const addUserAddress = async (req, res, next) => {
                 userId: userId
             }
         });
-        await prisma.user.update({
+          await prisma.user.update({
             where: {
                 id: userId
             },
@@ -43,7 +43,14 @@ export const addUserAddress = async (req, res, next) => {
 
         await prisma.$disconnect();
         sendWelcomeEmail(newUserData.email, newUserData.name);
-        res.status(200).json({message: "Address added successfully and updated user", data: newUserData});
+        const generateTokenObject = {
+            id: newUserData.id,
+            email: newUserData.email,
+            role: newUserData.role
+        };
+        const token = jwt.sign(generateTokenObject, process.env.JWT_SECRET_KEY);
+        newUserData["token"] = token;
+        res.status(200).json({message: "Address added successfully and updated user", newUserData: newUserData});
 
     }
     catch (err) {

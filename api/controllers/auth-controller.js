@@ -148,6 +148,16 @@ export const bookAgentAppointment = async (req, res, next) => {
                 registerVerificationStatus: "APPOINTMENT_BOOKED"
             }
         })
+        console.log(agentInfo,'agentInfo------');
+
+        const generateTokenObject = {
+            id: agentInfo.id,
+            email: agentInfo.email,
+            role: agentInfo.role
+        };
+        const token = jwt.sign(generateTokenObject, process.env.JWT_SECRET_KEY);
+        agentInfo["token"] = token;
+        
 
         await prisma.$disconnect();
         sendAppoitmentEmail(agentInfo.name, agentInfo.email, appointmentDate, agentId);
@@ -226,7 +236,12 @@ export const loginAccount = async (req, res, next) => {
         if (!passwordMatch) {
             return res.status(400).json({ message: "Password is incorrect" });
         }
-        const token = jwt.sign(accountExists, process.env.JWT_SECRET_KEY);
+        const generateTokenObject = {
+            id: accountExists.id,
+            email: accountExists.email,
+            role: accountExists.role
+        };
+        const token = jwt.sign(generateTokenObject, process.env.JWT_SECRET_KEY);
         accountExists["token"] = token;
         return res.status(200).json({ message: "Login successful", accountExists });
     }
