@@ -32,7 +32,6 @@ export default function TabLayout() {
 
       <Tabs.Screen
         name="home"
-
         options={{
           title: 'Home',
           tabBarIcon: ({ color, focused }) => (
@@ -69,6 +68,26 @@ export default function TabLayout() {
             ),
             href: (accountLoginData.role === "AGENT")? "/adminorderdetail" : null 
           
+          }}
+        />
+        <Tabs.Screen
+          name="superRegisterRequestTab"
+          options={{
+            title: 'Register Request',
+            tabBarIcon: ({ color, focused }) => (
+              <TabBarIcon name={focused ? 'construct' : 'construct-outline'} color={color} />
+            ),
+            href: (accountLoginData.role === "SUPERADMIN")? "/superRegisterRequestTab" : null 
+          }}
+        />
+
+        <Tabs.Screen
+          name="profile"
+          options={{
+            title: 'My Profile',
+            tabBarIcon: ({ color, focused }) => (
+              <TabBarIcon name={focused ? 'construct' : 'construct-outline'} color={color} />
+            ) 
           }}
         />
       

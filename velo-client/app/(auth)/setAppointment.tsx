@@ -9,8 +9,10 @@ import axios from 'axios';
 import { ipURL } from '@/constants/backendUrl';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
+import useLoginAccountStore from '@/store/loginAccountStore';
 
 const SetAppointment = () => {
+  const { setAccountLoginData } = useLoginAccountStore();
   const params = useLocalSearchParams();
   const { accountId } = params;
   const colorScheme = useColorScheme();
@@ -40,6 +42,19 @@ const SetAppointment = () => {
         `${ipURL}/api/auth/book-appointment`,
         postData
       );
+      setAccountLoginData({
+        id: setAppointmentDate.data.agentInfo.id,
+        mobileCode: setAppointmentDate.data.agentInfo.mobileCode,
+        mobileCountry: setAppointmentDate.data.agentInfo.mobileCountry,
+        mobileNumber: setAppointmentDate.data.agentInfo.mobileNumber,
+        name: setAppointmentDate.data.agentInfo.name,
+        password: setAppointmentDate.data.agentInfo.password,
+        registerVerificationStatus: setAppointmentDate.data.agentInfo.registerVerificationStatus,
+        role: setAppointmentDate.data.agentInfo.role,
+        updatedAt: setAppointmentDate.data.agentInfo.updatedAt,
+        token: setAppointmentDate.data.agentInfo.token,
+        modeOfWork: setAppointmentDate.data.agentInfo.modeOfWork? setAppointmentDate.data.agentInfo.modeOfWork : null,
+      })
       await SecureStore.setItemAsync(
         'registerDetail',
         JSON.stringify(setAppointmentDate.data.agentInfo)

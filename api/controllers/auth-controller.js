@@ -4,6 +4,7 @@ import bcrypt from 'bcrypt';
 import { createTransport } from "../utils/emailTransport.js";
 import dotenv from "dotenv";
 import { log } from "console";
+import { get } from 'http';
 dotenv.config();
 
 const prisma = new PrismaClient();
@@ -149,14 +150,31 @@ export const bookAgentAppointment = async (req, res, next) => {
             }
         })
         console.log(agentInfo,'agentInfo------');
-
+        
+        const getAgentInfo = await prisma.agent.findUnique({
+            where:{
+                id: agentId
+            },
+            select:{
+                leadsOrganisation:{
+                    select:{
+                        modeOfWork:true
+                    }
+                }
+            }
+        });
         const generateTokenObject = {
             id: agentInfo.id,
             email: agentInfo.email,
-            role: agentInfo.role
+            role: agentInfo.role,
+            modeOfWork: getAgentInfo.leadsOrganisation.modeOfWork
         };
         const token = jwt.sign(generateTokenObject, process.env.JWT_SECRET_KEY);
+
         agentInfo["token"] = token;
+        if (getAgentInfo?.leadsOrganisation?.modeOfWork) {
+            agentInfo["modeOfWork"] = getAgentInfo.leadsOrganisation.modeOfWork;
+        }
         
 
         await prisma.$disconnect();
@@ -219,7 +237,7 @@ export const loginAccount = async (req, res, next) => {
             accountExists = await prisma.agent.findFirst({
                 where: {
                     email
-                }
+                },
             });
         }
         if (!accountExists) {
@@ -236,13 +254,34 @@ export const loginAccount = async (req, res, next) => {
         if (!passwordMatch) {
             return res.status(400).json({ message: "Password is incorrect" });
         }
+        let getData;
+        if(accountExists.role === "AGENT" ){
+             getData = await prisma.agent.findUnique({
+                where:{
+                    email
+                },
+                select:{
+                    leadsOrganisation:{
+                        select:{
+                            modeOfWork:true
+                        }
+                    }
+                }
+            });
+        }
+        
         const generateTokenObject = {
             id: accountExists.id,
             email: accountExists.email,
-            role: accountExists.role
+            role: accountExists.role,
+            modeOfWork: getData?.leadsOrganisation?.modeOfWork || null
         };
+
         const token = jwt.sign(generateTokenObject, process.env.JWT_SECRET_KEY);
         accountExists["token"] = token;
+        if (getData?.leadsOrganisation?.modeOfWork) {
+            accountExists["modeOfWork"] = getData.leadsOrganisation.modeOfWork;
+        }
         return res.status(200).json({ message: "Login successful", accountExists });
     }
     catch (error) {

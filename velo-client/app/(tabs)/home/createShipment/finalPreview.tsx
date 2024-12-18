@@ -188,15 +188,15 @@ const FinalPreview = () => {
           </ThemedText>
         </ThemedView>
       </ThemedView>
-      <ThemedView style={styles.buttonContainer}>
         <TouchableOpacity onPress={handleSendShipmentToDb}>
+      <ThemedView style={styles.buttonContainer}>
           {
           laoding? <ActivityIndicator size="small" color="#fff" /> : 
           <ThemedText style={styles.finalPreviewText}>Confirm Shipment</ThemedText>
           }
           
-        </TouchableOpacity>
       </ThemedView>
+        </TouchableOpacity>
     </ScrollView>
   );
 };

@@ -68,9 +68,50 @@ export const getAllAppointmentRequest = async (req, res,next) => {
             }
         });
         await prisma.$disconnect();
-        console.log(allAppointmentRequest,'------');
-        
         return res.status(200).json({ message: "All appointment requests", allAppointmentRequest});
+    }
+    catch(err){
+        console.log(err);
+        next(err);
+    }
+}
+
+export const approveAgentAppointment = async (req, res,next) => {
+    const {agentId} = req.params;
+    try{
+        const organisation = await prisma.organisation.findUnique({
+            where:{
+                organisationLeaderAgentId: agentId
+            },
+            select:{
+                modeOfWork:true
+            }
+        });
+        console.log(organisation);
+        
+        const modeOfWork = organisation.modeOfWork === 'Solo' ? 1 : 5; 
+        const updateOrgApproval = await prisma.organisation.update({
+            where:{
+                organisationLeaderAgentId: agentId
+            },
+            data:{
+                superAdminApproval: true,
+                organisationEmployeesCount: modeOfWork
+            }
+        })
+        const updateAgentApproval = await prisma.agent.update({
+            where:{
+                id: agentId
+            },
+            data:{
+                registerVerificationStatus: "LOGGED_IN",
+                isOrganisationLeader: true,
+                organisationId: updateOrgApproval.id
+            }
+        })
+
+        await prisma.$disconnect();
+        return res.status(200).json({ message: "Appointment approved successfully", updateBool: true });
     }
     catch(err){
         console.log(err);

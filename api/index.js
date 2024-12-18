@@ -12,6 +12,7 @@ import listingRoutes from './routes/listing-route.js';
 import stripeRoutes from './routes/stripe-route.js';
 import riseRoutes from './routes/rise-route.js';
 import shipmentRoutes from './routes/shipment-route.js';
+import agentOrganisationRoutes from './routes/organisation-route.js';
 
 const app = express();
 app.use(cors({
@@ -36,6 +37,7 @@ app.use('/api/category',categoryRoutes);
 app.use('/api/listing',listingRoutes);
 app.use('/api/stripe',stripeRoutes);
 app.use('/api/shipment',shipmentRoutes);
+app.use('/api/organisation',agentOrganisationRoutes);
 
 app.use('/api/rise',riseRoutes)
 

@@ -15,11 +15,28 @@ interface AccountLoginData {
     role: string;
     updatedAt: string;
     token?: string;
+    modeOfWork?: string;
+}
+
+interface UserLoginData {
+    email: string;
+    firstTimeLogin: boolean;
+    id: string;
+    mobileCode: string;
+    mobileCountry: string;
+    mobileNumber: string;
+    name: string;
+    password: string;
+    registerVerificationStatus: string;
+    role: string;
+    token?: string;
 }
 
 interface LoginAccountState {
     accountLoginData: AccountLoginData;
+    userLoginData: UserLoginData;
     setAccountLoginData: (data: Partial<AccountLoginData>) => void;
+    setUserLoginData: (data: Partial<UserLoginData>) => void;
     resetAccountLoginData: () => void;
 }
 
@@ -42,7 +59,28 @@ const useLoginAccountStore = create<LoginAccountState>()(
                 role: "",
                 updatedAt: "",
                 token: "",
+                modeOfWork: "",
             },
+            userLoginData: {
+                email: "",
+                firstTimeLogin: true,
+                id: "",
+                mobileCode: "",
+                mobileCountry: "",
+                mobileNumber: "",
+                name: "",
+                password: "",
+                registerVerificationStatus: "",
+                role: "",
+                token: "",
+            },
+            setUserLoginData: (data) =>
+                set((state) => ({
+                    userLoginData: {
+                        ...state.userLoginData,
+                        ...data
+                    }
+                })),
             setAccountLoginData: (data) =>
                 set((state) => ({
                     accountLoginData: {

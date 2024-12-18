@@ -11,11 +11,12 @@ console.log('Inside middleware');
     jwt.verify(token,process.env.JWT_SECRET_KEY,async(err,payload)=>{
        
         if(err) return ResizeObserverSize.status(403).send("Token is not valid");
-        console.log(payload);
+        console.log(payload,'jwt----payload');
         req.verifyUserId = payload.id;
         req.verifyEmail = payload.email;
         req.verifyRole = payload.role;
         req.verifyUserStatus = payload.registerVerificationStatus
+        req.verifyModeOfWork = payload.modeOfWork?payload.modeOfWork:null
         next()
     });
 }

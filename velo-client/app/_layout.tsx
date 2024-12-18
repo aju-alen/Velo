@@ -8,6 +8,7 @@ import 'react-native-reanimated';
 import { PaperProvider } from 'react-native-paper';
 import StripeProviderWrapper from '@/components/StripeProviderWrapper';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import useDefaultTheme from '@/store/themeStore';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();

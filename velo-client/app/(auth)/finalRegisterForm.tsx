@@ -6,7 +6,7 @@ import { verticalScale, horizontalScale, moderateScale } from '@/constants/metri
 import CustomButton from '@/components/CustomButton';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
-import { Chip, Divider } from 'react-native-paper';
+import { Chip, Divider,RadioButton } from 'react-native-paper';
 import { Picker } from '@react-native-picker/picker';
 import axios from 'axios';
 import { ipURL } from '@/constants/backendUrl';
@@ -31,6 +31,14 @@ const FinalRegisterForm = () => {
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [loading,setLoading] = useState(true)
   const [buttonDisable, setButtonDisable] = useState(false)
+  const [modeOfWork, setModeOfWork] = useState('')
+
+  const [organisationName, setOrganisationName] = useState('')
+  const [organisationAddress, setOrganisationAddress] = useState('')
+  const [organisationWebsiteUrl, setOrganisationWebsiteUrl] = useState('')
+
+  console.log(modeOfWork, 'modeOfWork--____-----');
+  
 
   // ... keeping all the existing useEffect and handlers ...
   
@@ -78,17 +86,30 @@ const FinalRegisterForm = () => {
         const response = await axios.post(`${ipURL}/api/address/create-user-address`, formData)
 
         setAccountLoginData({
-          ...accountLoginData,
-          role: accountRole
+          id: response.data.newUserData.id,
+          mobileCode: response.data.newUserData.mobileCode,
+          mobileCountry: response.data.newUserData.mobileCountry,
+          mobileNumber: response.data.newUserData.mobileNumber,
+          name: response.data.newUserData.name,
+          password: response.data.newUserData.password,
+          registerVerificationStatus: response.data.newUserData.registerVerificationStatus,
+          role: response.data.newUserData.role,
+          updatedAt: response.data.newUserData.updatedAt,
+          token: response.data.newUserData.token,
+          modeOfWork: response.data.newUserData.modeOfWork? response.data.newUserData.modeOfWork : null,
         })
 
-        await SecureStore.setItemAsync('registerDetail', JSON.stringify(response.data.data))
+        await SecureStore.setItemAsync('registerDetail', JSON.stringify(response.data.newUserData))
         router.replace('/(tabs)/home')
       } else if (accountRole === "AGENT") {
         const formData = {
           userId: accountId,
           selectedCountries,
-          selectedCategories
+          selectedCategories,
+          modeOfWork,
+          organisationName,
+          organisationAddress,
+          organisationWebsiteUrl,
         }
         const response = await axios.post(`${ipURL}/api/address/create-agent-address`, formData)
         router.push({ pathname: '/(auth)/setAppointment', params: { accountId } })
@@ -96,6 +117,7 @@ const FinalRegisterForm = () => {
       }
     } catch (e) {
       console.log(e, 'error--');
+      setButtonDisable(false)
     }
   }
 
@@ -287,6 +309,80 @@ const FinalRegisterForm = () => {
                     ))}
                   </ThemedView>
                 </ThemedView>
+
+                <ThemedView style={styles.sectionContainer}>
+                  <ThemedText type='default' style={styles.sectionTitle}>Mode of work</ThemedText>
+                  <Divider style={styles.divider} />
+                  <ThemedView style={styles.rowContainer}>
+                    <RadioButton
+                      value="Solo"
+                      status={modeOfWork === 'Solo' ? 'checked' : 'unchecked'}
+                      onPress={() => setModeOfWork('Solo')}
+                    />
+                    <ThemedText>Solo</ThemedText>
+
+                    <RadioButton
+                      value="Organisation"
+                      status={modeOfWork === 'Organisation' ? 'checked' : 'unchecked'}
+                      onPress={() => setModeOfWork('Organisation')}  
+                    />
+                    <ThemedText>Organisation</ThemedText>
+
+                 </ThemedView>
+                </ThemedView>
+               {modeOfWork === 'Organisation' && <ThemedView style={styles.sectionContainer}>
+
+                <ThemedView style={{ marginBottom: verticalScale(6) }}>
+                <ThemedText type='default' style={styles.textInputHeading}>Organisation Name</ThemedText>
+                <ThemedView style={styles.textInputBox}>
+                  <TextInput
+                    placeholder="Enter Organisation Name"
+                    placeholderTextColor="gray"
+                    value={organisationName}
+                    onChangeText={setOrganisationName}
+                    keyboardType='default'
+                    autoComplete='name'
+                    keyboardAppearance='dark'
+                    returnKeyType='next'
+                    style={styles.textInputText}
+                  />
+                </ThemedView>
+              </ThemedView>
+
+              <ThemedView style={{ marginBottom: verticalScale(6) }}>
+                <ThemedText type='default' style={styles.textInputHeading}>Organisation Address 1</ThemedText>
+                <ThemedView style={styles.textInputBox}>
+                  <TextInput
+                    placeholder="Enter Organisation Address 1"
+                    placeholderTextColor="gray"
+                    value={organisationAddress}
+                    onChangeText={setOrganisationAddress}
+                    keyboardType='default'
+                    autoComplete='name'
+                    keyboardAppearance='dark'
+                    returnKeyType='next'
+                    style={styles.textInputText}
+                  />
+                </ThemedView>
+              </ThemedView>
+
+              <ThemedView style={{ marginBottom: verticalScale(6) }}>
+                <ThemedText type='default' style={styles.textInputHeading}>Organisation Website URL</ThemedText>
+                <ThemedView style={styles.textInputBox}>
+                  <TextInput
+                    placeholder="Enter Organisation Website URL"
+                    placeholderTextColor="gray"
+                    value={organisationWebsiteUrl}
+                    onChangeText={setOrganisationWebsiteUrl}
+                    keyboardType='default'
+                    autoComplete='name'
+                    keyboardAppearance='dark'
+                    returnKeyType='next'
+                    style={styles.textInputText}
+                  />
+                </ThemedView>
+              </ThemedView>
+                </ThemedView>}
               </ThemedView>
             )}
 
@@ -342,7 +438,7 @@ const styles = StyleSheet.create({
   },
   rowContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: verticalScale(16),
   },
   halfWidth: {

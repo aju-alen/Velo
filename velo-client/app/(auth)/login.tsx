@@ -47,7 +47,8 @@ const Login = () => {
         registerVerificationStatus: checkIfAlreadyRegistered.data.accountExists.registerVerificationStatus,
         role: checkIfAlreadyRegistered.data.accountExists.role,
         updatedAt: checkIfAlreadyRegistered.data.accountExists.updatedAt,
-        token: checkIfAlreadyRegistered.data.accountExists.token
+        token: checkIfAlreadyRegistered.data.accountExists.token,
+        modeOfWork: checkIfAlreadyRegistered.data.accountExists.modeOfWork? checkIfAlreadyRegistered.data.accountExists.modeOfWork : null,
       })
       
       if (checkIfAlreadyRegistered.data.accountExists.registerVerificationStatus === "PARTIAL" && checkIfAlreadyRegistered.data.accountExists.role === "AGENT") {

@@ -76,7 +76,7 @@ const sendWelcomeEmail = async (email, name) => {
         </div>
         <div>
             <p>welcome ${name},</p>
-            <p>Welcome to velo. Ship anywhere with care.</p>
+            <p>Welcome to Velo. Ship anywhere with care.</p>
             <br>
             <p>The Velo Team</p>
             <br>
@@ -141,7 +141,7 @@ export const addAgentAddress = async (req, res, next) => {
                 organisationAddress,
                 organisationWebsiteUrl,
                 modeOfWork,
-                organisationLeaderId:userId
+                organisationLeaderAgentId:userId,
             }
         });
         

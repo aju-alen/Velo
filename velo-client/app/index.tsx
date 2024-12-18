@@ -54,13 +54,15 @@ const RootIndex = () => {
       else if(userData.registerVerificationStatus === 'APPOINTMENT_BOOKED' && userData.role === 'AGENT'){
         router.replace('/(tabs)/home')
       }
+      else if(userData.registerVerificationStatus === 'LOGGED_IN' && userData.role === 'AGENT'){
+        router.replace('/(tabs)/home')
+      }
       else if(userData.registerVerificationStatus === 'LOGGED_IN' && userData.role === 'USER'){
         router.replace('/(tabs)/home')
       }
-      
-     
-
-      
+      else if(userData.registerVerificationStatus === 'SUPERADMINLOGGEDIN' && userData.role === 'SUPERADMIN'){
+        router.replace('/(tabs)/home')
+      }      
     }
 
     checkUser();

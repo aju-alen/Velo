@@ -58,50 +58,56 @@ model SuperAdmin{
 }
 
 model Organisation {
-  id                        String   @id @default(cuid())
-  organisationName          String?
-  organisationAddress       String?
-  organisationWebsiteUrl    String?
-  modeOfWork                String
-  superAdminApproval        Boolean  @default(false)
+  id                           String   @id @default(cuid())
+  organisationName             String?
+  organisationAddress          String?
+  organisationWebsiteUrl       String?
+  modeOfWork                   String
+  superAdminApproval           Boolean  @default(false)
+  organisationEmployeesCount   Int?     @default(0)
 
-  organisationLeaderId      String? @unique // Foreign key for the leader
-  organisationLeader        Agent?   @relation("OrganisationLeader", fields: [organisationLeaderId], references: [id])
+  // Leader relation (existing)
+  organisationLeaderAgentId    String?   @unique // Foreign key for the leader
+  organisationLeader           Agent?    @relation("OrganisationLeader", fields: [organisationLeaderAgentId], references: [id], onDelete: Cascade)
 
-  organisationEmployees     Agent[]  @relation("OrganisationEmployees")  // Many-to-one relationship
+  // Many-to-One relationship: Organisation -> Agents
+  agents                       Agent[]   @relation("OrganisationAgents")
 }
 
 model Agent {
-  id                        String     @id @default(cuid())
-  name                      String
-  email                     String     @unique
-  password                  String
-  role                      Role
-  mobileCode                String
-  mobileCountry             String
-  mobileNumber              String
-  firstTimeLogin            Boolean    @default(true)
-  registerVerificationStatus String     @default("PARTIAL")
-  appointmentDate           DateTime?
-  verificationToken         String?
+  id                           String     @id @default(cuid())
+  name                         String
+  email                        String     @unique
+  password                     String
+  role                         Role
+  mobileCode                   String
+  mobileCountry                String
+  mobileNumber                 String
+  firstTimeLogin               Boolean    @default(true)
+  registerVerificationStatus   String     @default("PARTIAL")
+  appointmentDate              DateTime?
+  verificationToken            String?
+  isOrganisationLeader           Boolean    @default(false)
 
-  updatedAt                 DateTime   @updatedAt
-  createdAt                 DateTime   @default(now())
+  updatedAt                    DateTime   @updatedAt
+  createdAt                    DateTime   @default(now())
 
-  // Define the many-to-many relationships
-  agentCountries            AgentCountry[]
-  agentCategories           AccountCtegory[]
-  listings                  Listing[]
-  assignedShipments         AgentShipment[] @relation("shipmentAcceptedAgent")
-  pickedShipments           AgentShipment[] @relation("ShipmentPickedAgent")
-  deliveredShipments        AgentShipment[] @relation("ShipmentDeliverAgent")
+  // Many-to-One relationship: Agent -> Organisation
+  organisationId               String?    
+  organisation                 Organisation? @relation("OrganisationAgents", fields: [organisationId], references: [id], onDelete: SetNull)
 
-  // Define relationships with Organisation
-  worksForOrganisationId    String?        // Foreign key for organisation
-  worksForOrganisation      Organisation?  @relation("OrganisationEmployees", fields: [worksForOrganisationId], references: [id])
+  // Other relations
+  agentCountries               AgentCountry[]
+  agentCategories              AccountCtegory[]
+  listings                     Listing[]
+  assignedShipments            AgentShipment[] @relation("shipmentAcceptedAgent")
+  pickedShipments              AgentShipment[] @relation("ShipmentPickedAgent")
+  deliveredShipments           AgentShipment[] @relation("ShipmentDeliverAgent")
 
-  leadsOrganisation         Organisation?  @relation("OrganisationLeader")
+  // Leader relation
+  leadsOrganisation            Organisation? @relation("OrganisationLeader")
 }
+
 
 
 model Country {
@@ -310,6 +316,7 @@ enum Role {
   AGENT
   USER
   SUPERADMIN
+  SUB_AGENT
 }
 enum Condition {
   NEW
