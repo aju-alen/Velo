@@ -127,14 +127,13 @@ const CreateShipmentHome = () => {
       let user = await SecureStore.getItemAsync('registerDetail')
       if (!user) return
       const userData = JSON.parse(user)
-      // console.log(userData, 'userData------');
 
-      
-      setUserSecureStorage(userData)
-      
+      setUserSecureStorage(userData)      
     }
     checkUser()
   }, [])
+  console.log(userSecureStorage, 'userSecureStorage------');
+  
 
   
 
@@ -142,6 +141,7 @@ const CreateShipmentHome = () => {
     const getUserAddress = async () => {
       const userAddress = await axios.get(`${ipURL}/api/address/get-user-address/${userSecureStorage['id']}`)
       setUserAddress(userAddress.data.data[0])
+
       console.log(userAddress.data.data[0], 'userAddress.data.data[0]------');
       
       setAccountAddressData({
@@ -154,7 +154,7 @@ const CreateShipmentHome = () => {
         country: userAddress.data.data[0].country
       })
     }
-    if (checked === 'document' || checked === 'package') {
+    if (checked === 'DOCUMENT' || checked === 'PACKAGE') {
       getUserAddress();
     }
   }, [checked])
@@ -312,21 +312,21 @@ const CreateShipmentHome = () => {
             <TouchableOpacity
               style={[
                 styles.shippingTypeOption,
-                checked === 'document' && styles.shippingTypeSelected
+                checked === 'DOCUMENT' && styles.shippingTypeSelected
               ]}
               onPress={() => {
-                setChecked('document')
-                setItemType('document')
+                setChecked('DOCUMENT')
+                setItemType('DOCUMENT')
                 resetShipmentData()
 
               }}
             >
               <RadioButton
-                value="document"
-                status={checked === 'document' ? 'checked' : 'unchecked'}
+                value="DOCUMENT"
+                status={checked === 'DOCUMENT' ? 'checked' : 'unchecked'}
                 onPress={() => {
-                  setChecked('document')
-                  setItemType('document')
+                  setChecked('DOCUMENT')
+                  setItemType('DOCUMENT')
                   resetShipmentData()
 
                 }}
@@ -337,21 +337,21 @@ const CreateShipmentHome = () => {
             <TouchableOpacity
               style={[
                 styles.shippingTypeOption,
-                checked === 'package' && styles.shippingTypeSelected
+                checked === 'PACKAGE' && styles.shippingTypeSelected
               ]}
               onPress={() => {
-                setChecked('package')
-                setItemType('package')
+                setChecked('PACKAGE')
+                setItemType('PACKAGE')
                 resetShipmentData()
 
               }}
             >
               <RadioButton
-                value="package"
-                status={checked === 'package' ? 'checked' : 'unchecked'}
+                value="PACKAGE"
+                status={checked === 'PACKAGE' ? 'checked' : 'unchecked'}
                 onPress={() => {
-                  setChecked('package')
-                  setItemType('package')
+                  setChecked('PACKAGE')
+                  setItemType('PACKAGE')
                   resetShipmentData()
 
                 }}

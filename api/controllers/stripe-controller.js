@@ -23,8 +23,8 @@ export const getKeys = async (req, res, next) => {
 export const createPaymentIntent = async (req, res, next) => {
     console.log(req.body, 'req.body');
     
-    const { amount,accountId,addressLineOne,addressCity, addressState,addressCountry,addressName,shipmentId,email} = req.body;
-    console.log(amount, typeof (amount), 'amount------');
+    const { amount,accountId,addressLineOne,addressCity, addressState,addressName,shipmentId,email} = req.body;
+    console.log(Number(amount), typeof (Number(amount)), 'amount------');
 
 
     try {
@@ -34,7 +34,8 @@ export const createPaymentIntent = async (req, res, next) => {
             { apiVersion: '2020-08-27' }
         );
         const paymentIntent = await stripe.paymentIntents.create({
-            amount: amount * 100,
+            // amount: (amount).toFixed(2),
+            amount: (Number(amount) * 100).toFixed(0),
             currency: 'aed',
             customer: customer.id,
             shipping: {
@@ -105,13 +106,10 @@ export const webhook = async (req, res, next) => {
                             shipmentStatus:"ORDER_PLACED",
                         }
                     });
-                    await prisma.agentShipment.create({
-                        data:{
-                            shipmentId: chargeUpdated.metadata.shipmentId,
-                            userId: chargeUpdated.metadata.accountId,
-                        }
-                    })
-                    await prisma.$disconnect();
+                    console.log(chargeUpdated.metadata.shipmentId , 'chargeUpdated.metadata.shipmentId');
+                    
+                await prisma.$disconnect();
+
 
                     
                     sendSuccessPaymentEmail(chargeUpdated.metadata.email,chargeUpdated.amount/100,chargeUpdated.currency,chargeUpdated.receipt_url);

@@ -35,6 +35,8 @@ export default function MarketLayout() {
             <Stack.Screen name='finalPreview' options={{ headerShown: true,title:'Shipment Preview'}} />
             <Stack.Screen name='payment' options={{title:'Payment Sumamry',gestureEnabled:false }} />
             <Stack.Screen name='paymentSuccess' options={{ headerShown: true,gestureEnabled:false}} />
+            <Stack.Screen name='viewShippingOptions' options={{ headerShown: true,title:"Shipping Options",gestureEnabled:false}} />
+            <Stack.Screen name='open-market-confrim' options={{ headerShown: true,title:"Shipping Confirmed",gestureEnabled:false}} />
         </Stack>
     );
 }

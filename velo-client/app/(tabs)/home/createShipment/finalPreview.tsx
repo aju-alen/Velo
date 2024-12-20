@@ -20,15 +20,20 @@ const FinalPreview = () => {
     accountAddressData,
     deliveryServices,
     itemType,
+    finalShipmentData
   } = useShipmentStore();
   const { accountLoginData } = useLoginAccountStore();
   const [laoding, setLoading] = useState(false);
-  console.log(savedAddressData,'savedAddressData');
-  console.log(accountAddressData,'accountAddressData');
+
+  
   
   
   const handleSendShipmentToDb = async() => {
+    console.log('insideeeee');
+    
     try {
+      console.log(finalShipmentData,'finalShipmentData---in previewwwwwww');
+      
       setLoading(true);
       const formData = {
         userId: accountLoginData.id,
@@ -68,16 +73,28 @@ const FinalPreview = () => {
         pickupTimeTo: deliveryServices.deliveryPickupTimeTo,
         pickupInstructions: deliveryServices.pickupInstruction,
         pickupSpecialInstructions: deliveryServices.pickupSpecialInstruction,
+        openMarketPrice: finalShipmentData.shippingMarket === 'OPEN_MARKET' ? finalShipmentData.totalPrice : 0,
 
         packageDescription: packageDescription,
+        shippingMarket:finalShipmentData.shippingMarket,
 
+        assignedOrganisationId: finalShipmentData.organisationId,
+        shipmentType:itemType,
+        shipmentStatus: finalShipmentData.shippingMarket === 'OPEN_MARKET' ? 'ORDER_IN_MARKET' : "PAYMENT_PENDING" ,
       }
+
+      console.log(formData,'formData----in final preview');
+      
       const sendNewShipment = await axiosInstance.post(`${ipURL}/api/shipment/create-new-shipment`, formData);
       console.log(sendNewShipment.data,'______________________');
       
       setLoading(false);
+      if(finalShipmentData.shippingMarket === 'OPEN_MARKET'){
+        router.push({pathname:'/(tabs)/home/createShipment/open-market-confrim'});
+      }
+      else if(finalShipmentData.shippingMarket === 'CLOSED_MARKET'){
       router.push({pathname:'/(tabs)/home/createShipment/payment',params:{shipmentId:sendNewShipment.data.shipmentId}});
-
+      }
     }
     catch (error) {
       setLoading(false);
@@ -137,7 +154,7 @@ const FinalPreview = () => {
           <ThemedText style={styles.cardTitle}>Package Details</ThemedText>
           <Divider style={styles.cardDivider} />
           <ThemedText style={styles.detailText}>{packageDetail.packageName}</ThemedText>
-          {itemType === 'package' && <ThemedText style={styles.detailText}>
+          {itemType === 'PACKAGE' && <ThemedText style={styles.detailText}>
             Dimensions: {packageDetail.length} x {packageDetail.width} x {packageDetail.height} cm
           </ThemedText>}
           <ThemedText style={styles.detailText}>

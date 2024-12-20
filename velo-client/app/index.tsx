@@ -37,6 +37,8 @@ const RootIndex = () => {
   useEffect(() => {
     const checkUser = async () => {
       let user = await SecureStore.getItemAsync('registerDetail')
+      console.log(JSON.parse(user),'parsed user detail');
+      
       setAccountLoginData(JSON.parse(user))
       
       if(!user){
@@ -61,6 +63,9 @@ const RootIndex = () => {
         router.replace('/(tabs)/home')
       }
       else if(userData.registerVerificationStatus === 'SUPERADMINLOGGEDIN' && userData.role === 'SUPERADMIN'){
+        router.replace('/(tabs)/home')
+      }      
+      else if(userData.registerVerificationStatus === 'LOGGED_IN' && userData.role === 'SUB_AGENT'){
         router.replace('/(tabs)/home')
       }      
     }

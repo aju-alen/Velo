@@ -315,28 +315,30 @@ const FinalRegisterForm = () => {
                   <Divider style={styles.divider} />
                   <ThemedView style={styles.rowContainer}>
                     <RadioButton
-                      value="Solo"
-                      status={modeOfWork === 'Solo' ? 'checked' : 'unchecked'}
-                      onPress={() => setModeOfWork('Solo')}
+                      value="SOLO"
+                      status={modeOfWork === 'SOLO' ? 'checked' : 'unchecked'}
+                      onPress={() => setModeOfWork('SOLO')}
                     />
-                    <ThemedText>Solo</ThemedText>
+                    <ThemedText>SOLO</ThemedText>
 
                     <RadioButton
-                      value="Organisation"
-                      status={modeOfWork === 'Organisation' ? 'checked' : 'unchecked'}
-                      onPress={() => setModeOfWork('Organisation')}  
+                      value="ORGANISATION"
+                      status={modeOfWork === 'ORGANISATION' ? 'checked' : 'unchecked'}
+                      onPress={() => setModeOfWork('ORGANISATION')}  
                     />
                     <ThemedText>Organisation</ThemedText>
 
                  </ThemedView>
                 </ThemedView>
-               {modeOfWork === 'Organisation' && <ThemedView style={styles.sectionContainer}>
+                <ThemedView style={styles.sectionContainer}>
 
                 <ThemedView style={{ marginBottom: verticalScale(6) }}>
-                <ThemedText type='default' style={styles.textInputHeading}>Organisation Name</ThemedText>
+                <ThemedText type='default' style={styles.textInputHeading}>
+                  Organisation Name
+                  </ThemedText>
                 <ThemedView style={styles.textInputBox}>
                   <TextInput
-                    placeholder="Enter Organisation Name"
+                    placeholder={modeOfWork === "SOLO"? "Create a Velo company name" : "Enter Organisation Name"}
                     placeholderTextColor="gray"
                     value={organisationName}
                     onChangeText={setOrganisationName}
@@ -353,7 +355,7 @@ const FinalRegisterForm = () => {
                 <ThemedText type='default' style={styles.textInputHeading}>Organisation Address 1</ThemedText>
                 <ThemedView style={styles.textInputBox}>
                   <TextInput
-                    placeholder="Enter Organisation Address 1"
+                    placeholder={modeOfWork === "SOLO"? "Input your address" :"Enter Organisation Address "}
                     placeholderTextColor="gray"
                     value={organisationAddress}
                     onChangeText={setOrganisationAddress}
@@ -370,7 +372,7 @@ const FinalRegisterForm = () => {
                 <ThemedText type='default' style={styles.textInputHeading}>Organisation Website URL</ThemedText>
                 <ThemedView style={styles.textInputBox}>
                   <TextInput
-                    placeholder="Enter Organisation Website URL"
+                    placeholder={modeOfWork === "SOLO"? "Enter your website URL" :"Enter Organisation Website URL"}
                     placeholderTextColor="gray"
                     value={organisationWebsiteUrl}
                     onChangeText={setOrganisationWebsiteUrl}
@@ -382,7 +384,7 @@ const FinalRegisterForm = () => {
                   />
                 </ThemedView>
               </ThemedView>
-                </ThemedView>}
+                </ThemedView>
               </ThemedView>
             )}
 

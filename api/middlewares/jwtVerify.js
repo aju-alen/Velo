@@ -9,6 +9,7 @@ console.log('Inside middleware');
     if (!token) return res.status(401).send("You are not authenticated!");
 
     jwt.verify(token,process.env.JWT_SECRET_KEY,async(err,payload)=>{
+       console.log(payload,'jwt----payload');
        
         if(err) return ResizeObserverSize.status(403).send("Token is not valid");
         console.log(payload,'jwt----payload');
@@ -17,6 +18,7 @@ console.log('Inside middleware');
         req.verifyRole = payload.role;
         req.verifyUserStatus = payload.registerVerificationStatus
         req.verifyModeOfWork = payload.modeOfWork?payload.modeOfWork:null
+        req.verifyOrganisationId = payload.organisationId?payload.organisationId:null
         next()
     });
 }

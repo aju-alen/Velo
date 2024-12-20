@@ -90,14 +90,14 @@ const SelectPackage = ({ getPackageDetail, onButtonclick, itemType }) => {
     <ThemedView style={styles.container}>
       <ThemedView style={styles.card}>
         <ThemedView style={styles.titleContainer}>
-          <ThemedText style={styles.title}>{itemType === 'document' ? 'Document' : 'Package'} Details</ThemedText>
+          <ThemedText style={styles.title}>{itemType === 'DOCUMENT' ? 'Document' : 'Package'} Details</ThemedText>
           <ThemedView style={styles.titleUnderline} />
         </ThemedView>
 
-        <ThemedText style={styles.title}>{itemType === 'document' ? '' : "Package Type"}</ThemedText>
+        <ThemedText style={styles.title}>{itemType === 'DOCUMENT' ? '' : "Package Type"}</ThemedText>
 
         {/* Pacakge type when checkbox is checked package */}
-        {itemType === 'package' &&
+        {itemType === 'PACKAGE' &&
           <>
             <ThemedView style={styles.selectPackageContainer}>
               <TouchableOpacity onPress={() => setOpenPackageModal(true)}>
@@ -223,7 +223,7 @@ const SelectPackage = ({ getPackageDetail, onButtonclick, itemType }) => {
 
         {/* document type when checkbox is checked document */}
 
-        {itemType === 'document' &&
+        {itemType === 'DOCUMENT' &&
           <ThemedView style={styles.numberOfDocumentsContainer}>
             <ThemedText style={styles.title}>{'Number of document(s)'}</ThemedText>
             <TextInput

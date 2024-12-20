@@ -81,7 +81,7 @@ export const register = async (req, res, next) => {
             //         mobileCountry: country,
             //     }
             // });
-            return res.status(400).json({ message: "Invalid role" });
+            // return res.status(400).json({ message: "Invalid role" });
         }
         else {
             return res.status(400).json({ message: "Invalid role" });
@@ -167,7 +167,8 @@ export const bookAgentAppointment = async (req, res, next) => {
             id: agentInfo.id,
             email: agentInfo.email,
             role: agentInfo.role,
-            modeOfWork: getAgentInfo.leadsOrganisation.modeOfWork
+            modeOfWork: getAgentInfo.leadsOrganisation.modeOfWork,
+            organisationId: agentInfo.organisationId
         };
         const token = jwt.sign(generateTokenObject, process.env.JWT_SECRET_KEY);
 
@@ -261,6 +262,7 @@ export const loginAccount = async (req, res, next) => {
                     email
                 },
                 select:{
+                    organisationId:true,
                     leadsOrganisation:{
                         select:{
                             modeOfWork:true
@@ -274,8 +276,11 @@ export const loginAccount = async (req, res, next) => {
             id: accountExists.id,
             email: accountExists.email,
             role: accountExists.role,
-            modeOfWork: getData?.leadsOrganisation?.modeOfWork || null
+            modeOfWork: getData?.leadsOrganisation?.modeOfWork || null,
+            organisationId: getData?.organisationId || ''
         };
+        console.log(generateTokenObject, 'generateTokenObject');
+        
 
         const token = jwt.sign(generateTokenObject, process.env.JWT_SECRET_KEY);
         accountExists["token"] = token;

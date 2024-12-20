@@ -66,5 +66,68 @@ export const signupSubAgent = async (req, res, next) => {
   }
 }
 
+export const updatePricing = async (req, res, next) => {
+  const {
+    documentPricePerPiece,
+    packagePricePerKg,
+    packagePricePerPiece,
+    shipmentTimeline,
+  } =req.body;
+  console.log(req.body,'-------------------save pricing');
+  
+  try{
+   const updatePricing = await prisma.organisation.update({
+      where:{
+        organisationLeaderAgentId: req.verifyUserId,
+      },
+      data:{
+        documentPricePerPiece: Number(documentPricePerPiece),
+        packagePricePerKg: Number(packagePricePerKg),
+        packagePricePerPiece: Number(packagePricePerPiece),
+        deliveryTimeline : Number(shipmentTimeline),
+      }
+    });
+    await prisma.$disconnect();
+    res.status(200).json({message:"Pricing updated successfully"});
+  }
+  catch (err) {
+    console.log(err);
+    next(err);
+  }
+}
+
+export const getPricingData = async (req, res, next) => {
+  try{
+    const pricingData = await prisma.organisation.findUnique({
+      where:{
+        organisationLeaderAgentId: req.verifyUserId
+      },
+      select:{
+        documentPricePerPiece: true,
+        packagePricePerKg: true,
+        packagePricePerPiece: true,
+        deliveryTimeline: true,
+      }
+    });
+    await prisma.$disconnect();
+    res.status(200).json(pricingData);
+  }
+  catch (err) {
+    console.log(err);
+    next(err);
+  }
+}
+
+export const getAllOrganisationData = async (req, res, next) => {
+  try{
+    const allOrganisationData = await prisma.organisation.findMany();
+    await prisma.$disconnect();
+    res.status(200).json(allOrganisationData)
+  }
+  catch (err) {
+    console.log(err);
+    next(err);
+  }
+}
 
 

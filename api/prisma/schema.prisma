@@ -37,7 +37,7 @@ model User {
   savedAddresses              SavedAddress[]
   shipments                   Shipment[]
 
-  agentShipmentId AgentShipment?
+// agentShipments AgentShipment[]
 
 }
 
@@ -64,7 +64,12 @@ model Organisation {
   organisationWebsiteUrl       String?
   modeOfWork                   String
   superAdminApproval           Boolean  @default(false)
-  organisationEmployeesCount   Int?     @default(0)
+  organisationEmployeesCount   Int     @default(0)
+  documentPricePerPiece          Float   @default(0)
+  packagePricePerKg            Float   @default(0)
+  packagePricePerPiece         Float   @default(0)
+  //deliveryTimeline is based on days
+  deliveryTimeline            Int     @default(0)
 
   // Leader relation (existing)
   organisationLeaderAgentId    String?   @unique // Foreign key for the leader
@@ -72,6 +77,7 @@ model Organisation {
 
   // Many-to-One relationship: Organisation -> Agents
   agents                       Agent[]   @relation("OrganisationAgents")
+  shipments                    Shipment[]
 }
 
 model Agent {
@@ -100,9 +106,9 @@ model Agent {
   agentCountries               AgentCountry[]
   agentCategories              AccountCtegory[]
   listings                     Listing[]
-  assignedShipments            AgentShipment[] @relation("shipmentAcceptedAgent")
-  pickedShipments              AgentShipment[] @relation("ShipmentPickedAgent")
-  deliveredShipments           AgentShipment[] @relation("ShipmentDeliverAgent")
+  // assignedShipments            AgentShipment[] @relation("shipmentAcceptedAgent")
+  // pickedShipments              AgentShipment[] @relation("ShipmentPickedAgent")
+  // deliveredShipments           AgentShipment[] @relation("ShipmentDeliverAgent")
 
   // Leader relation
   leadsOrganisation            Organisation? @relation("OrganisationLeader")
@@ -264,6 +270,7 @@ model Shipment {
   packageHeight String
   packageWeight String
   packagePieces String
+  openMarketPrice Float @default(0)
 
   verbalNotificationService Boolean
   adultSignatureService Boolean
@@ -281,33 +288,38 @@ model Shipment {
   recieptUrl String?
   stripeId String?
   paymentCurrency String?
-  shipmentStatus ShipmentStatus @default(PAYMENT_PENDING)
+  shipmentStatus ShipmentStatus
+  assignedOrganisationId String?
+  shipmentType ShipmentType
+
+  shippingMarket ShippingMarket
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   receiverCountry Country @relation(fields: [receiverCountryId], references: [id])
+  organisationId Organisation? @relation(fields: [assignedOrganisationId], references: [id])
 
-  agentShipment AgentShipment?
+  // agentShipment AgentShipment?
 }
 
-model AgentShipment {
-  id String @id @default(cuid())
-  shipmentId String @unique
-  userId String @unique
-  shipmentAcceptedAssignedAgentId String?
-  shipmentPickedAgentId String?
-  shipmentDeliveryAgentId String?
+// model AgentShipment {
+//   id String @id @default(cuid())
+//   shipmentId String @unique
+//   userId String 
+//   shipmentAcceptedAssignedAgentId String?
+//   shipmentPickedAgentId String?
+//   shipmentDeliveryAgentId String?
 
   
-  agent Agent? @relation("shipmentAcceptedAgent", fields: [shipmentAcceptedAssignedAgentId], references: [id], onDelete: Cascade)
+//   agent Agent? @relation("shipmentAcceptedAgent", fields: [shipmentAcceptedAssignedAgentId], references: [id], onDelete: Cascade)
 
-  shipmentPickedAgent Agent? @relation("ShipmentPickedAgent", fields: [shipmentPickedAgentId], references: [id], onDelete: Cascade)
+//   shipmentPickedAgent Agent? @relation("ShipmentPickedAgent", fields: [shipmentPickedAgentId], references: [id], onDelete: Cascade)
   
-  shipmentDeliverAgent Agent? @relation("ShipmentDeliverAgent", fields: [shipmentDeliveryAgentId], references: [id], onDelete: Cascade)
+//   shipmentDeliverAgent Agent? @relation("ShipmentDeliverAgent", fields: [shipmentDeliveryAgentId], references: [id], onDelete: Cascade)
 
-  // Owns the relation
-  shipment Shipment @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
+//   // Owns the relation
+//   shipment Shipment @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+//   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+// }
 
 
   
@@ -325,10 +337,21 @@ enum Condition {
 
 enum ShipmentStatus {
   PAYMENT_PENDING
+  ORDER_IN_MARKET
   ORDER_PLACED
   ORDER_CONFIRMED
   SHIPMENT_PICKED
   IN_TRANSIT
   OUT_FOR_DELIVERY
   DELIVERED
+  }
+
+  enum ShipmentType {
+    DOCUMENT
+    PACKAGE
+  }
+
+  enum ShippingMarket {
+    OPEN_MARKET
+    CLOSED_MARKET
   }

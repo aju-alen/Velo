@@ -7,14 +7,15 @@ import { ipURL } from '@/constants/backendUrl';
 import { router } from 'expo-router';
 import axiosInstance from '@/constants/axiosHeader';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import useLoginAccountStore from '@/store/loginAccountStore';
 
 const cardData = [
   {
-    title: 'Pending Shipent',
+    title: 'Open Market',
     status: 'pending',
   },
   {
-    title: 'Accepted Shipment',
+    title: 'Assigned Shipment',
     status: 'accepted'
   },
   {
@@ -25,21 +26,24 @@ const cardData = [
 
 const AdminOrderDetailMain = () => {
   const colorScheme = useColorScheme();
+  const {accountLoginData} = useLoginAccountStore();
   const [pendingOrders, setPendingOrders] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const [orderStatus, setOrderStatus] = useState('pending');
 
   const getAdminPendingOrders = async () => {
     try {
-      console.log('------__________-----------');
+      console.log('------__________-----------',pendingOrders);
+      console.log(accountLoginData,'accountLoginData');
+      
       
       setRefreshing(true);
       if(orderStatus === 'pending') {
-        const response = await axiosInstance.get(`/api/shipment/agent/get-all-pending-shipments`);
+        const response = await axiosInstance.get(`/api/shipment/agent/get-all-open-market-shipments`);
         setPendingOrders(response.data);
       }
       if(orderStatus === 'accepted') {
-        const response = await axiosInstance.get(`/api/shipment/agent/get-all-accepted-shipments`);
+        const response = await axiosInstance.get(`/api/shipment/agent/get-all-accepted-shipments/${accountLoginData.id}`);
         setPendingOrders(response.data);
       }
       
@@ -94,6 +98,18 @@ const AdminOrderDetailMain = () => {
             </ThemedText>
           </ThemedView>
         </ThemedView>
+
+        <ThemedView style={styles.locationContainer}>
+          <ThemedView style={styles.locationIcon}>
+            <Ionicons name="cash" size={24} color="#4A4A4A" />
+          </ThemedView>
+          <ThemedView style={styles.locationDetails}>
+            <ThemedText style={styles.locationTitle}> {item.shippingMarket === "OPEN_MARKET" ? "SUGGESTED AMOUNT" : "PAID AMOUNT"}</ThemedText>
+            <ThemedText style={styles.locationText}>
+              {item.shippingMarket === "OPEN_MARKET" ? item.openMarketPrice : item.paymentAmount}
+            </ThemedText>
+          </ThemedView>
+        </ThemedView>
       </ThemedView>
     </TouchableOpacity>
   );
@@ -109,6 +125,7 @@ const AdminOrderDetailMain = () => {
 
   return (
     <ThemedView style={styles.container}>
+     {accountLoginData.registerVerificationStatus === "LOGGED_IN"? <ThemedView >
       <ThemedView style={styles.headerContainer}>
         <ThemedText style={styles.pageTitle}>Pending Shipments</ThemedText>
       </ThemedView>
@@ -159,6 +176,17 @@ const AdminOrderDetailMain = () => {
           </ThemedText>
         </ThemedView>
       )}
+      </ThemedView> :
+      <ThemedView style={{
+        flex:1,
+        justifyContent:'center',
+        alignItems:'center'
+        }}>
+        <ThemedText>
+          You are not verified
+        </ThemedText>
+        </ThemedView>
+      }
     </ThemedView>
   );
 };

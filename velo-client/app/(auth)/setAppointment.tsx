@@ -54,6 +54,7 @@ const SetAppointment = () => {
         updatedAt: setAppointmentDate.data.agentInfo.updatedAt,
         token: setAppointmentDate.data.agentInfo.token,
         modeOfWork: setAppointmentDate.data.agentInfo.modeOfWork? setAppointmentDate.data.agentInfo.modeOfWork : null,
+        organisationId: setAppointmentDate.data.agentInfo.organisationId? setAppointmentDate.data.agentInfo.organisationId : '',
       })
       await SecureStore.setItemAsync(
         'registerDetail',

@@ -42,7 +42,7 @@ const ShipmentSchedulePickup = () => {
     return
   }
 
-  router.replace('/(tabs)/home/createShipment/finalPreview')
+  router.replace('/(tabs)/home/createShipment/viewShippingOptions')
 }
   
 
@@ -142,7 +142,7 @@ const ShipmentSchedulePickup = () => {
         </ThemedView>
 
         {/* Weight Section ONLY FOR PACKAGE TYPE*/}
-        {itemType === 'package' &&<ThemedView style={styles.sectionContainer}>
+        {itemType === 'PACKAGE' &&<ThemedView style={styles.sectionContainer}>
           <ThemedText style={styles.sectionTitle}>Weight (kg)</ThemedText>
           <View style={styles.weightCard}>
             <ThemedText style={styles.weightLabel}>Total Weight</ThemedText>
@@ -151,7 +151,7 @@ const ShipmentSchedulePickup = () => {
         </ThemedView>}
 
         {/* Num of pieces Section ONLY FOR DOCUMENT TYPE*/}
-        {itemType === 'document' &&<ThemedView style={styles.sectionContainer}>
+        {itemType === 'DOCUMENT' &&<ThemedView style={styles.sectionContainer}>
           <ThemedText style={styles.sectionTitle}>Number of pieces</ThemedText>
           <View style={styles.weightCard}>
             <ThemedText style={styles.weightLabel}>Total Pieces</ThemedText>
@@ -204,7 +204,7 @@ const ShipmentSchedulePickup = () => {
               }
             >
               <ThemedText style={styles.finalPreviewText}>
-                Preview Final Changes
+                View Shipping Options
               </ThemedText>
             </TouchableOpacity>
           </ThemedView>

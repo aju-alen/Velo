@@ -4,7 +4,6 @@ import { Ionicons } from '@expo/vector-icons'
 import { ThemedView } from '@/components/ThemedView'
 import { ThemedText } from '@/components/ThemedText'
 import { useLocalSearchParams, useRouter } from 'expo-router'
-import axios from 'axios'
 import { ipURL } from '@/constants/backendUrl'
 import axiosInstance from '@/constants/axiosHeader'
 
@@ -24,7 +23,8 @@ const SingleOrder = () => {
             console.log(err);
         }
     }
-
+    console.log(orderData, 'orderData-- in single order');
+    
     useEffect(() => {
         getAdminSingleOrderData();
     }, [])
@@ -151,21 +151,20 @@ const SingleOrder = () => {
 
                 <ThemedView style={styles.sectionContainer}>
                     <ThemedText style={styles.sectionTitle}>Payment Details</ThemedText>
-                    {renderDetailRow('card-outline', 'Amount', `${orderData.paymentAmount} ${orderData.paymentCurrency.toUpperCase()}`)}
+                    {renderDetailRow('card-outline', 'Amount', `${orderData.shippingMarket === 'OPEN_MARKET' ? orderData.openMarketPrice : orderData.paymentAmount} `)}
                     {renderDetailRow('checkmark-circle-outline', 'Payment Status',
-                        orderData.paymentSuccess ? 'Successful' : 'Failed'
+                        orderData.paymentSuccess ? 'Successful' : 'Pending'
                     )}
                 </ThemedView>
-              {orderData.shipmentStatus === 'ORDER_PLACED'?  <TouchableOpacity style={styles.acceptOrderButton} onPress={handleAcceptShipment}>
+
+                     <TouchableOpacity style={styles.acceptOrderButton} 
+                     onPress={handleAcceptShipment}
+                     >
                     {loading?(
                         <ActivityIndicator size="small" color="#fff" />
                     ):
                     <ThemedText>Accept Shipment</ThemedText>}
-                </TouchableOpacity> :
-                <TouchableOpacity style={styles.acceptOrderButton} onPress={()=>router.push('/(tabs)/adminorderdetail/adminUpdateShipment/adminUpdateStatus')}>
-                    <ThemedText>Update Shipping Status</ThemedText>
-                </TouchableOpacity>
-                }
+                </TouchableOpacity> 
             </ScrollView>
         </ThemedView>
     )

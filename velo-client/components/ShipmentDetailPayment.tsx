@@ -25,9 +25,9 @@ const ShipmentDetailPayment = ({onGetData,onButtonclick,itemType}) => {
     <ThemedView style={styles.container}>
       <ThemedView style={styles.card}>
         <ThemedView style={styles.section}>
-          <ThemedText style={styles.label}>{itemType === 'document' ? "Document": "Package"} Description</ThemedText>
+          <ThemedText style={styles.label}>{itemType === 'DOCUMENT' ? "Document": "Package"} Description</ThemedText>
           <ThemedText style={styles.subtitle}>
-            Please provide details about the document you're sending {itemType === 'document' && '(Identity documents should be clearly described.)'}
+            Please provide details about the document you're sending {itemType === 'DOCUMENT' && '(Identity documents should be clearly described.)'}
           </ThemedText>
           
           <TextInput

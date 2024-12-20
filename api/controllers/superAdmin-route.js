@@ -89,7 +89,7 @@ export const approveAgentAppointment = async (req, res,next) => {
         });
         console.log(organisation);
         
-        const modeOfWork = organisation.modeOfWork === 'Solo' ? 1 : 5; 
+        const modeOfWork = organisation.modeOfWork === 'SOLO' ? 1 : 5; 
         const updateOrgApproval = await prisma.organisation.update({
             where:{
                 organisationLeaderAgentId: agentId

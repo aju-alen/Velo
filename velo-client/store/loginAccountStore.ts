@@ -16,6 +16,7 @@ interface AccountLoginData {
     updatedAt: string;
     token?: string;
     modeOfWork?: string;
+    organisationId?: string;
 }
 
 interface UserLoginData {
@@ -60,6 +61,7 @@ const useLoginAccountStore = create<LoginAccountState>()(
                 updatedAt: "",
                 token: "",
                 modeOfWork: "",
+                organisationId: "",
             },
             userLoginData: {
                 email: "",
@@ -103,6 +105,10 @@ const useLoginAccountStore = create<LoginAccountState>()(
                         registerVerificationStatus: "",
                         role: "",
                         updatedAt: "",
+                        token: "",
+                        modeOfWork: "",
+                        organisationId: "",
+                        
                     }
                 })),
         }),

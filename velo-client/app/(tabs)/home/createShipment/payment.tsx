@@ -1,35 +1,47 @@
-import React, { useEffect, useState } from 'react'
-import {  StyleSheet, TouchableOpacity, Alert } from 'react-native'
-import { ThemedView } from '@/components/ThemedView'
-import { ThemedText } from '@/components/ThemedText'
-import { useStripe } from '@stripe/stripe-react-native'
-import { MaterialIcons } from '@expo/vector-icons'
-import { Divider } from 'react-native-paper'
-import { router,useLocalSearchParams } from 'expo-router'
-import { moderateScale,verticalScale,horizontalScale } from '@/constants/metrics'
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { ThemedView } from '@/components/ThemedView';
+import { ThemedText } from '@/components/ThemedText';
+import { useStripe } from '@stripe/stripe-react-native';
+import { MaterialIcons } from '@expo/vector-icons';
+import { Divider } from 'react-native-paper';
+import { router, useLocalSearchParams } from 'expo-router';
+import { moderateScale, verticalScale, horizontalScale } from '@/constants/metrics';
 
 // Store imports
-import useShipmentStore from '@/store/shipmentStore'
-import useLoginAccountStore from '@/store/loginAccountStore'
-import pricing from '@/constants/temPricing'
-import { ipURL } from '@/constants/backendUrl'
+import useShipmentStore from '@/store/shipmentStore';
+import useLoginAccountStore from '@/store/loginAccountStore';
+
+import { ipURL } from '@/constants/backendUrl';
+import axiosInstance from '@/constants/axiosHeader';
+
+interface TotalAmount {
+  totalAmount: number;
+  baseAmount: number;
+  collectionPrice: number;
+  servicesPrice: number;
+}
 
 const Payment = () => {
-  const {shipmentId} = useLocalSearchParams()
-  console.log(shipmentId,'payment___________');
-  
-  const { 
-    savedAddressData, 
-    cummilativeExpence, 
-    setSavedAddressData, 
-    resetShipmentData, 
+  const { shipmentId } = useLocalSearchParams();
+  console.log(shipmentId, 'payment___________');
+
+  const {
+    savedAddressData,
+    cummilativeExpence,
+    setSavedAddressData,
+    resetShipmentData,
     packageDetail,
-    accountAddressData
+    accountAddressData,
+    finalShipmentData,
   } = useShipmentStore();
   const { accountLoginData } = useLoginAccountStore();
 
+  console.log(finalShipmentData, 'finalShipmentData--in--payment');
+
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
   const [loading, setLoading] = useState(false);
+  const [getTotalAmount, setGetTotalAmount] = useState<TotalAmount | null>(null);
 
   // Date calculation logic
   const originalDate = new Date(savedAddressData.shipmentDate);
@@ -50,15 +62,16 @@ const Payment = () => {
   });
 
   // Total amount calculation
-  const totalAmount = 
-    pricing.transport + 
-    pricing.fuel + 
-    cummilativeExpence.adultSignature + 
-    cummilativeExpence.directSignature + 
-    cummilativeExpence.verbalNotification +
-    18 * Number(packageDetail.weight);
+  const totalAmount =
+    finalShipmentData.basePrice +
+    finalShipmentData.collectionPrice +
+    cummilativeExpence.adultSignature +
+    cummilativeExpence.directSignature +
+    cummilativeExpence.verbalNotification;
 
   // Payment sheet initialization
+  console.log(getTotalAmount?.totalAmount, 'totalAmount--in--payment');
+  
   const fetchPaymentSheetParams = async () => {
     const response = await fetch(`${ipURL}/api/stripe/create-payment-intent`, {
       method: 'POST',
@@ -66,18 +79,16 @@ const Payment = () => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        amount: totalAmount,
+        amount: (getTotalAmount?.totalAmount).toFixed(2) || 0, // Ensure it defaults to 0 if null
         currency: 'aed',
         accountId: accountLoginData.id,
-        addressLineOne:accountAddressData.addressOne,
-        addressCity:accountAddressData.city,
-        addressState:accountAddressData.state,
-        addressCountry:accountAddressData.countryCode,
-        addressName:accountAddressData.userName,
-        shipmentId:shipmentId,
-        email:accountLoginData.email,
-
-
+        addressLineOne: accountAddressData.addressOne,
+        addressCity: accountAddressData.city,
+        addressState: accountAddressData.state,
+        addressCountry: accountAddressData.countryCode,
+        addressName: accountAddressData.userName,
+        shipmentId: shipmentId,
+        email: accountLoginData.email,
       }),
     });
     return await response.json();
@@ -91,7 +102,7 @@ const Payment = () => {
     } = await fetchPaymentSheetParams();
 
     const { error } = await initPaymentSheet({
-      merchantDisplayName: "Velo",
+      merchantDisplayName: 'Velo',
       customerId: customer,
       customerEphemeralKeySecret: ephemeralKey,
       paymentIntentClientSecret: paymentIntent,
@@ -104,7 +115,7 @@ const Payment = () => {
       },
       returnURL: 'myapp://home',
     });
-    
+
     if (!error) {
       setLoading(true);
     }
@@ -117,38 +128,68 @@ const Payment = () => {
       Alert.alert(`Error code: ${error.code}`, error.message);
     } else {
       resetShipmentData();
-      router.replace({ pathname: '/(tabs)/home/createShipment/paymentSuccess', params: { totalAmount } })
+      router.replace({ pathname: '/(tabs)/home/createShipment/paymentSuccess', params: { totalAmount } });
     }
   };
 
   useEffect(() => {
-    initializePaymentSheet();
-  }, []);
+    // Call getTotalAmountDB when the component mounts or shipmentId changes
+    const getTotalAmountDB = async () => {
+      try {
+        const response = await axiosInstance.get(
+          `${ipURL}/api/shipment/getTotalAmount/${finalShipmentData.organisationId}/${shipmentId}`
+        );
+        console.log(response.data, 'response.data--getTotalAmountDB');
+        setGetTotalAmount(response.data.priceBreakdown); // Update state with the fetched data
+      } catch (error) {
+        console.error('Error fetching total amount:', error);
+      }
+    };
+
+    getTotalAmountDB();
+  }, []); // Fetch when shipmentId or finalShipmentData change
+
+  // Run initializePaymentSheet only when getTotalAmount is updated
+  useEffect(() => {
+    if (getTotalAmount && getTotalAmount.totalAmount) { // Ensure totalAmount is available
+      initializePaymentSheet();
+    }
+  }, [getTotalAmount]); // This effect depends on getTotalAmount state
 
   // Summary Row Component
-  const SummaryRow = ({ label, amount, isTotal } : { 
-    label: string, 
-    amount: number, 
-    isTotal?: boolean 
+  const SummaryRow = ({
+    label,
+    amount,
+    isTotal,
+  }: {
+    label: string;
+    amount: number;
+    isTotal?: boolean;
   }) => (
-    <ThemedView style={[
-      styles.summaryRowContainer,
-      isTotal && styles.totalRow
-    ]}>
-      <ThemedText style={[
-        styles.summaryText,
-        isTotal && styles.totalText
-      ]}>
+    <ThemedView
+      style={[styles.summaryRowContainer, isTotal && styles.totalRow]}
+    >
+      <ThemedText
+        style={[styles.summaryText, isTotal && styles.totalText]}
+      >
         {label}
       </ThemedText>
-      <ThemedText style={[
-        styles.summaryText,
-        isTotal && styles.totalText
-      ]}>
+      <ThemedText
+        style={[styles.summaryText, isTotal && styles.totalText]}
+      >
         AED {amount}
       </ThemedText>
     </ThemedView>
   );
+
+  // Show a loading message until getTotalAmount is available
+  if (!getTotalAmount) {
+    return (
+      <ThemedView style={styles.container}>
+        <ThemedText>Loading payment information...</ThemedText>
+      </ThemedView>
+    );
+  }
 
   return (
     <ThemedView style={styles.container}>
@@ -158,29 +199,19 @@ const Payment = () => {
           <ThemedText style={styles.headerTitle}>Payment Summary</ThemedText>
           <MaterialIcons name="payment" size={24} color="#FFAC1C" />
         </ThemedView>
-        
-        <ThemedView style={styles.deliveryInfoContainer}>
-          <MaterialIcons name="local-shipping" size={20} color="#FFAC1C" />
-          <ThemedText style={styles.deliveryDate}>
-            Delivery by {stringDate}
-          </ThemedText>
-        </ThemedView>
       </ThemedView>
 
       {/* Summary Container with Elevated Card Design */}
       <ThemedView style={styles.summaryContainer}>
-        <SummaryRow label="Transportation Charges" amount={pricing.transport} />
-        <SummaryRow label="Fuel Charge" amount={pricing.fuel} />
-        <SummaryRow label="Weight Charges" amount={18 * Number(packageDetail.weight)} />
-        <SummaryRow label="Adult Signature" amount={cummilativeExpence.adultSignature} />
-        <SummaryRow label="Direct Signature" amount={cummilativeExpence.directSignature} />
-        <SummaryRow label="Verbal Notification" amount={cummilativeExpence.verbalNotification} />
-        
+        <SummaryRow label="Base Price" amount={getTotalAmount.baseAmount} />
+        <SummaryRow label="Collection Price" amount={getTotalAmount.collectionPrice} />
+        <SummaryRow label="Services Price" amount={getTotalAmount.servicesPrice} />
+
         <Divider style={styles.divider} />
-        
-        <SummaryRow 
-          label="Total Amount" 
-          amount={totalAmount} 
+
+        <SummaryRow
+          label="Total Amount"
+          amount={getTotalAmount.totalAmount}
           isTotal={true}
         />
       </ThemedView>
@@ -189,7 +220,7 @@ const Payment = () => {
       <TouchableOpacity
         style={[
           styles.paymentButton,
-          loading ? styles.paymentButtonActive : styles.paymentButtonDisabled
+          loading ? styles.paymentButtonActive : styles.paymentButtonDisabled,
         ]}
         onPress={openPaymentSheet}
         disabled={!loading}
@@ -227,17 +258,6 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: moderateScale(24),
     fontWeight: '600',
-  },
-  deliveryInfoContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-
-    padding: moderateScale(12),
-    borderRadius: moderateScale(8),
-  },
-  deliveryDate: {
-    marginLeft: horizontalScale(8),
-    fontSize: moderateScale(14),
   },
   summaryContainer: {
     borderRadius: moderateScale(12),
@@ -280,8 +300,7 @@ const styles = StyleSheet.create({
   paymentButtonActive: {
     backgroundColor: '#FFAC1C',
   },
-  paymentButtonDisabled: {
-  },
+  paymentButtonDisabled: {},
   paymentButtonText: {
     fontSize: moderateScale(16),
     fontWeight: '600',

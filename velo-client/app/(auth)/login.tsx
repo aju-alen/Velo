@@ -49,6 +49,7 @@ const Login = () => {
         updatedAt: checkIfAlreadyRegistered.data.accountExists.updatedAt,
         token: checkIfAlreadyRegistered.data.accountExists.token,
         modeOfWork: checkIfAlreadyRegistered.data.accountExists.modeOfWork? checkIfAlreadyRegistered.data.accountExists.modeOfWork : null,
+        organisationId: checkIfAlreadyRegistered.data.accountExists.organisationId? checkIfAlreadyRegistered.data.accountExists.organisationId : '',
       })
       
       if (checkIfAlreadyRegistered.data.accountExists.registerVerificationStatus === "PARTIAL" && checkIfAlreadyRegistered.data.accountExists.role === "AGENT") {
@@ -72,6 +73,10 @@ const Login = () => {
         router.replace('/(tabs)/home')
       }
       else if (checkIfAlreadyRegistered.data.accountExists.registerVerificationStatus === "SUPERADMINLOGGEDIN" && checkIfAlreadyRegistered.data.accountExists.role === "SUPERADMIN" ) {
+        await SecureStore.setItemAsync('registerDetail', JSON.stringify(checkIfAlreadyRegistered.data.accountExists))
+        router.replace('/(tabs)/home')
+      }
+      else if (checkIfAlreadyRegistered.data.accountExists.registerVerificationStatus === "LOGGED_IN" && checkIfAlreadyRegistered.data.accountExists.role === "SUB_AGENT" ) {
         await SecureStore.setItemAsync('registerDetail', JSON.stringify(checkIfAlreadyRegistered.data.accountExists))
         router.replace('/(tabs)/home')
       }

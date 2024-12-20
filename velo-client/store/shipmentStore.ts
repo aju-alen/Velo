@@ -62,6 +62,14 @@ interface CummilativeExpence {
   verbalNotification: number
 }
 
+interface FinalShipmentData {
+  totalPrice: number
+  organisationId: string
+  basePrice: number
+  collectionPrice: number
+  shippingMarket: string
+}
+
 // Define the store state interface
 interface ShipmentState {
   savedAddressData: SavedAddressData
@@ -70,9 +78,11 @@ interface ShipmentState {
   accountAddressData: AccountAddressData
   deliveryServices: DeliveryServices
   cummilativeExpence: CummilativeExpence
+  finalShipmentData:FinalShipmentData
   itemType: string
   createShipment: Boolean
   editData: Boolean
+  setFinalShipmentData: (data: Partial<FinalShipmentData>) => void
   setEditData: (data: Boolean) => void
   setCreateShipment: (data: Boolean) => void
   setSavedAddressData: (data: Partial<SavedAddressData>) => void
@@ -154,8 +164,20 @@ const useShipmentStore = create<ShipmentState>((set) => ({
     directSignature: 0,
     verbalNotification: 0,
   },
-
-  // Actions
+  finalShipmentData:{
+    totalPrice:0,
+    organisationId:'',
+    basePrice:0,
+    collectionPrice:0,
+    shippingMarket:''
+  },
+  setFinalShipmentData: (data) =>
+    set((state) => ({
+      finalShipmentData: {
+        ...state.finalShipmentData,
+        ...data
+      }
+    })),
   setSavedAddressData: (data) => 
     set((state) => ({
       savedAddressData: {

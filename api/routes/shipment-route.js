@@ -1,14 +1,16 @@
 import express from "express";
 const router = express.Router()
-import { createNewShipment, getAllPaidShipments, getAllPendingShipments, getSinglePendingShipments, agentUpdateShipmentStatus,getAllAcceptedShipments } from "../controllers/shipment-controller.js";
+import { createNewShipment, getAllPaidShipments, getAllOpenMarketShipments, getSinglePendingShipments, agentUpdateShipmentStatus,getAllAcceptedShipments,getTotalAmount } from "../controllers/shipment-controller.js";
 import { verifyToken } from "../middlewares/jwtVerify.js";
 
 
 
 router.post('/create-new-shipment', verifyToken, createNewShipment);
 
-router.get('/agent/get-all-pending-shipments', verifyToken, getAllPendingShipments); //get all pending shipments data for agents 
-router.get('/agent/get-all-accepted-shipments', verifyToken, getAllAcceptedShipments); //get all pending shipments data for agents 
+router.get('/agent/get-all-open-market-shipments', verifyToken, getAllOpenMarketShipments); //get all pending shipments data for agents 
+router.get('/agent/get-all-accepted-shipments/:organisationId', verifyToken, getAllAcceptedShipments); //get all pending shipments data for agents 
+
+router.get('/getTotalAmount/:organisationId/:shipmentId',verifyToken, getTotalAmount); //get total amount of single shipment
 
 router.get('/agent/get-single-pending-shipments/:singleShipmentId', verifyToken, getSinglePendingShipments); //get single pending shipments data for agents 
 
