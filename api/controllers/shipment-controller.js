@@ -180,6 +180,26 @@ export const getSinglePendingShipments = async (req, res, next) => {
 
 }
 
+export const getSingleUserShipments = async (req, res, next) => {
+    const {singleShipmentId} = req.params;
+
+    try{
+        if (req.verifyRole !== "USER") return res.status(403).send("You are not authorized to view single user shipments"); 
+        const singleUserShipments = await prisma.shipment.findUnique({
+            where:{
+                userId:req.verifyUserId,
+                id:singleShipmentId
+            }
+        });
+        await prisma.$disconnect();
+        return res.status(200).json(singleUserShipments);
+    }
+    catch(err){
+        console.log(err);
+        next(err);
+    }
+}
+
 export const agentUpdateShipmentStatus = async (req, res, next) => {
     const { shipmentId } = req.params;
     try{
@@ -189,9 +209,9 @@ export const agentUpdateShipmentStatus = async (req, res, next) => {
                 id: shipmentId
             },
             data:{
-                shipmentStatus:"ORDER_CONFIRMED",
-                orderPlacedAssignedAgentId:req.verifyUserId
-
+                shipmentStatus:"PAYMENT_PENDING",
+                assignedOrganisationId:req.verifyOrganisationId,
+                shippingMarket:"CLOSED_MARKET",
             }
         });
         await prisma.$disconnect();
@@ -222,6 +242,8 @@ export const getTotalAmount = async (req, res, next) => {
               verbalNotificationService: true,
               adultSignatureService: true,
               directSignatureService: true,
+              customPrice: true,
+              openMarketPrice: true,
 
               assignedOrganisationId: true,
               organisationId: { 
@@ -245,7 +267,20 @@ export const getTotalAmount = async (req, res, next) => {
         let baseAmount = 0;
         let collectionPrice = 0;
         let servicesPrice = 0;
-        if(shipment.shipmentType === "DOCUMENT"){
+          
+        if(shipment.customPrice){
+
+            baseAmount = shipment.openMarketPrice;
+            console.log(`baseAmount: ${baseAmount}`);
+            
+            
+            collectionPrice = baseAmount * 0.1;
+            servicesPrice = (shipment.verbalNotificationService? 10 : 0) +
+                                 (shipment.adultSignatureService? 20 : 0) +
+                                 (shipment.directSignatureService? 20 : 0);
+            totalAmount = baseAmount + collectionPrice + servicesPrice;
+        }
+        else if(shipment.shipmentType === "DOCUMENT" && !shipment.customPrice ){
            baseAmount = (shipment.organisationId.documentPricePerPiece * shipment.packagePieces)
            
             collectionPrice = baseAmount * 0.1
@@ -257,7 +292,7 @@ export const getTotalAmount = async (req, res, next) => {
 
             totalAmount = baseAmount + collectionPrice + servicesPrice;
         }
-        else if(shipment.shipmentType === "PACKAGE"){
+        else if(shipment.shipmentType === "PACKAGE" && !shipment.customPrice){
             baseAmount = (shipment.organisationId.packagePricePerKg * shipment.packageWeight) + (shipment.organisationId.packagePricePerPiece * shipment.packagePieces);
             collectionPrice = baseAmount * 0.1
             servicesPrice = (shipment.verbalNotificationService? 10 : 0) +

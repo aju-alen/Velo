@@ -293,6 +293,7 @@ model Shipment {
   shipmentType ShipmentType
 
   shippingMarket ShippingMarket
+  customPrice Boolean @default(false)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   receiverCountry Country @relation(fields: [receiverCountryId], references: [id])

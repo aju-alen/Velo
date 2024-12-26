@@ -15,6 +15,7 @@ import axios from 'axios';
 import { ipURL } from '@/constants/backendUrl';
 import useLoginAccountStore from '@/store/loginAccountStore';
 import axiosInstance from '@/constants/axiosHeader';
+import { router } from 'expo-router';
 
 const { width } = Dimensions.get('window');
 
@@ -59,6 +60,7 @@ const OrderHistoryMainPage = () => {
       key={order.id} 
       style={styles.card}
       activeOpacity={0.7}
+      onPress={() => router.push( `/shippinghistory/${order.id}` )}
     >
       {/* Card Header */}
       <ThemedView style={styles.cardHeader}>

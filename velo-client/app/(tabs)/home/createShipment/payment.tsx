@@ -71,7 +71,7 @@ const Payment = () => {
 
   // Payment sheet initialization
   console.log(getTotalAmount?.totalAmount, 'totalAmount--in--payment');
-  
+
   const fetchPaymentSheetParams = async () => {
     const response = await fetch(`${ipURL}/api/stripe/create-payment-intent`, {
       method: 'POST',

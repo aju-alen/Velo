@@ -10,8 +10,7 @@ export default function HomeLayout() {
     return (
         <Stack>
             <Stack.Screen name='orderHistoryMainPage' options={{ headerShown: false, gestureEnabled:false }}/>
-            
-
+            <Stack.Screen name='[singleOrderUser]' options={{ headerShown: true, gestureEnabled:false }}/>
         </Stack>
     );
 }

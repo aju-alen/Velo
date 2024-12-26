@@ -6,35 +6,43 @@ import { ThemedText } from '@/components/ThemedText'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { ipURL } from '@/constants/backendUrl'
 import axiosInstance from '@/constants/axiosHeader'
+import useShipmentStore from '@/store/shipmentStore'
 
-const SingleOrder = () => {
+const SingleOrderUser = () => {
+    const {finalShipmentData, setFinalShipmentData} = useShipmentStore();
     const router = useRouter();
-    const { singleOrder } = useLocalSearchParams();
+    const { singleOrderUser } = useLocalSearchParams();
     const [orderData, setOrderData] = useState<any>(null);
     const [loading, setLoading] = useState(false);
 
     const getAdminSingleOrderData = async () => {
         try {
-            const response = await axiosInstance.get(`${ipURL}/api/shipment/agent/get-single-pending-shipments/${singleOrder}`);
+            const response = await axiosInstance.get(`${ipURL}/api/shipment/user/get-single-shipment/${singleOrderUser}`);
             setOrderData(response.data);
+            setFinalShipmentData({
+                totalPrice: response.data.customPrice? response.data.openMarketPrice : null,
+                organisationId:response.data.assignedOrganisationId,
+                basePrice:0,
+                collectionPrice:0,
+                shippingMarket:response.data.shippingMarket
+            })
 
         } catch (err) {
             console.log(err);
         }
     }
-    console.log(orderData, 'orderData-- in single order');
+    console.log(orderData, 'orderData-- in single order USERRRRR');
     
     useEffect(() => {
         getAdminSingleOrderData();
     }, [])
 
-    const handleAcceptShipment = async () => {
+    const handleProceedToPayment = async (shippingId) => {
         try {
             setLoading(true);
-            const response = await axiosInstance.put(`${ipURL}/api/shipment/agent-update-shipment-status-open-market/${singleOrder}`, );
-            console.log(response.data);
+            router.push({pathname:'/(tabs)/home/createShipment/payment',params:{shipmentId:shippingId}});
             setLoading(false);
-            router.push('/(tabs)/adminorderdetail/adminOrderDetailMain');
+            
         }
         catch (err) {
             console.log(err);
@@ -151,20 +159,20 @@ const SingleOrder = () => {
 
                 <ThemedView style={styles.sectionContainer}>
                     <ThemedText style={styles.sectionTitle}>Payment Details</ThemedText>
-                    {renderDetailRow('card-outline', 'Amount', `${orderData.shippingMarket === 'OPEN_MARKET' ? orderData.openMarketPrice : orderData.paymentAmount} `)}
+                    {renderDetailRow('card-outline', 'Amount', `${orderData.shipmentStatus === 'PAYMENT_PENDING' ? orderData.openMarketPrice : orderData.paymentAmount} `)}
                     {renderDetailRow('checkmark-circle-outline', 'Payment Status',
                         orderData.paymentSuccess ? 'Successful' : 'Pending'
                     )}
                 </ThemedView>
 
-                {orderData.shipmentStatus === 'ORDER_IN_MARKET' &&
+                {orderData.shipmentStatus === 'PAYMENT_PENDING' &&
                     <TouchableOpacity style={styles.acceptOrderButton}
-                        onPress={handleAcceptShipment}
+                        onPress={()=>handleProceedToPayment(orderData.id)}
                     >
                         {loading ? (
                             <ActivityIndicator size="small" color="#fff" />
                         ) :
-                            <ThemedText>Accept Shipment</ThemedText>}
+                            <ThemedText>Proceed to Payment </ThemedText>}
                     </TouchableOpacity>
                 }
             </ScrollView>
@@ -287,4 +295,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default SingleOrder;
+export default SingleOrderUser;
