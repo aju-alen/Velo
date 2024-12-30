@@ -70,6 +70,11 @@ interface FinalShipmentData {
   shippingMarket: string
 }
 
+interface AgentShipmentData{
+  shipmentStatus: string
+  shipmentId: string
+}
+
 // Define the store state interface
 interface ShipmentState {
   savedAddressData: SavedAddressData
@@ -79,10 +84,12 @@ interface ShipmentState {
   deliveryServices: DeliveryServices
   cummilativeExpence: CummilativeExpence
   finalShipmentData:FinalShipmentData
+  agentShipmentData:AgentShipmentData
   itemType: string
   createShipment: Boolean
   editData: Boolean
   setFinalShipmentData: (data: Partial<FinalShipmentData>) => void
+  setAgentShipmentData: (data: Partial<AgentShipmentData>) => void
   setEditData: (data: Boolean) => void
   setCreateShipment: (data: Boolean) => void
   setSavedAddressData: (data: Partial<SavedAddressData>) => void
@@ -171,6 +178,10 @@ const useShipmentStore = create<ShipmentState>((set) => ({
     collectionPrice:0,
     shippingMarket:''
   },
+  agentShipmentData:{
+    shipmentStatus:'',
+    shipmentId:''
+  },
   setFinalShipmentData: (data) =>
     set((state) => ({
       finalShipmentData: {
@@ -236,6 +247,14 @@ const useShipmentStore = create<ShipmentState>((set) => ({
     setEditData: (data)=>
       set(()=>({
         editData:data
+      })),
+
+      setAgentShipmentData: (data) =>
+      set((state) => ({
+        agentShipmentData: {
+          ...state.agentShipmentData,
+          ...data
+        }
       })),
 
 

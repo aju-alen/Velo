@@ -36,6 +36,7 @@ model User {
 
   savedAddresses              SavedAddress[]
   shipments                   Shipment[]
+  completedShipments          CompletedShipment[]
 
 // agentShipments AgentShipment[]
 
@@ -78,6 +79,7 @@ model Organisation {
   // Many-to-One relationship: Organisation -> Agents
   agents                       Agent[]   @relation("OrganisationAgents")
   shipments                    Shipment[]
+  completedShipments           CompletedShipment[]
 }
 
 model Agent {
@@ -112,6 +114,8 @@ model Agent {
 
   // Leader relation
   leadsOrganisation            Organisation? @relation("OrganisationLeader")
+  pickedShipments              Shipment[]
+  deliveredShipments           CompletedShipment[]
 }
 
 
@@ -135,6 +139,7 @@ model Country {
   addresses      UserAddress[]
   savedAddresses SavedAddress[]
   shipments      Shipment[]
+  completedShipments CompletedShipment[]
 
 }
 
@@ -295,9 +300,98 @@ model Shipment {
   shippingMarket ShippingMarket
   customPrice Boolean @default(false)
 
+  awsAgentShipmentPickedUrl String?
+  awsAgentShipmentDroppedUrl String?
+  awsAgentInTransitStartUrl String?
+  awsAgentInTransitEndUrl String?
+  awsAgentOutForDeliveryUrl String?
+  awsAgentDeliveredUrl String?
+  pickUpAgentId String?
+
+  imageStatus ImageStatus @default(APPROVED)
+
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   receiverCountry Country @relation(fields: [receiverCountryId], references: [id])
   organisationId Organisation? @relation(fields: [assignedOrganisationId], references: [id])
+
+  pickUpAgent Agent? @relation(fields: [pickUpAgentId], references: [id] )
+
+  // agentShipment AgentShipment?
+}
+
+model CompletedShipment {
+  id String @id 
+  userId String
+  shipmentId String?
+
+  senderName String
+  senderAddressOne String
+  senderAddressTwo String
+  senderCity String
+  senderState String
+  senderEmail String
+  senderMobileNumber String
+
+  shipmentDate DateTime
+  deliveryDate DateTime
+
+  receiverName String
+  receiverAddressOne String
+  receiverAddressTwo String
+  receiverCity String
+  receiverState String
+  receiverEmail String
+  receiverMobileNumber String
+  receiverCountryId Int
+  receiverCountryCode String
+  receiverResidentAddress Boolean
+  receiverZipCode String
+
+  packageLength String
+  packageWidth  String
+  packageHeight String
+  packageWeight String
+  packagePieces String
+  openMarketPrice Float @default(0)
+
+  verbalNotificationService Boolean
+  adultSignatureService Boolean
+  directSignatureService Boolean
+  pickupTimeFrom String
+  pickupTimeTo String
+  pickupInstructions String
+  pickupSpecialInstructions String
+
+  packageDescription String
+
+  paymentSuccess Boolean @default(false)
+  paymentAmount Float @default(0)
+  customerId String?
+  recieptUrl String?
+  stripeId String?
+  paymentCurrency String?
+  shipmentStatus ShipmentStatus
+  assignedOrganisationId String?
+  shipmentType ShipmentType
+
+  shippingMarket ShippingMarket
+  customPrice Boolean @default(false)
+
+  awsAgentShipmentPickedUrl String?
+  awsAgentShipmentDroppedUrl String?
+  awsAgentInTransitStartUrl String?
+  awsAgentInTransitEndUrl String?
+  awsAgentOutForDeliveryUrl String?
+  awsAgentDeliveredUrl String?
+  pickUpAgentId String?
+
+  imageStatus ImageStatus @default(APPROVED)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  receiverCountry Country @relation(fields: [receiverCountryId], references: [id])
+  organisationId Organisation? @relation(fields: [assignedOrganisationId], references: [id])
+
+  pickUpAgent Agent? @relation(fields: [pickUpAgentId], references: [id] )
 
   // agentShipment AgentShipment?
 }
@@ -342,7 +436,9 @@ enum ShipmentStatus {
   ORDER_PLACED
   ORDER_CONFIRMED
   SHIPMENT_PICKED
-  IN_TRANSIT
+  SHIPMENT_DROPPED
+  IN_TRANSIT_START
+  IN_TRANSIT_END
   OUT_FOR_DELIVERY
   DELIVERED
   }
@@ -355,4 +451,9 @@ enum ShipmentStatus {
   enum ShippingMarket {
     OPEN_MARKET
     CLOSED_MARKET
+  }
+
+  enum ImageStatus {
+    APPROVED
+    REJECTED
   }

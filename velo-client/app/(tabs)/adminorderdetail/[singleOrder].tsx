@@ -6,8 +6,10 @@ import { ThemedText } from '@/components/ThemedText'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { ipURL } from '@/constants/backendUrl'
 import axiosInstance from '@/constants/axiosHeader'
+import useShipmentStore from '@/store/shipmentStore'
 
 const SingleOrder = () => {
+    const {setAgentShipmentData} = useShipmentStore();
     const router = useRouter();
     const { singleOrder } = useLocalSearchParams();
     const [orderData, setOrderData] = useState<any>(null);
@@ -16,6 +18,11 @@ const SingleOrder = () => {
     const getAdminSingleOrderData = async () => {
         try {
             const response = await axiosInstance.get(`${ipURL}/api/shipment/agent/get-single-pending-shipments/${singleOrder}`);
+            console.log(response.data,'response.data');
+            setAgentShipmentData({
+                shipmentStatus: response.data.shipmentStatus,
+                shipmentId: response.data.id
+            })
             setOrderData(response.data);
 
         } catch (err) {
@@ -32,6 +39,20 @@ const SingleOrder = () => {
         try {
             setLoading(true);
             const response = await axiosInstance.put(`${ipURL}/api/shipment/agent-update-shipment-status-open-market/${singleOrder}`, );
+            console.log(response.data);
+            setLoading(false);
+            router.push('/(tabs)/adminorderdetail/adminOrderDetailMain');
+        }
+        catch (err) {
+            console.log(err);
+            setLoading(false);
+        }
+    }
+
+    const handleReadyForPickup = async () => {
+        try {
+            setLoading(true);
+            const response = await axiosInstance.put(`${ipURL}/api/shipment/agent-update-shipment-status-ready-for-pickup/${singleOrder}`, );
             console.log(response.data);
             setLoading(false);
             router.push('/(tabs)/adminorderdetail/adminOrderDetailMain');
@@ -167,6 +188,28 @@ const SingleOrder = () => {
                             <ThemedText>Accept Shipment</ThemedText>}
                     </TouchableOpacity>
                 }
+                {orderData.shipmentStatus === 'ORDER_PLACED' &&
+                    <TouchableOpacity style={styles.acceptOrderButton}
+                        onPress={handleReadyForPickup}
+                    >
+                        {loading ? (
+                            <ActivityIndicator size="small" color="#fff" />
+                        ) :
+                            <ThemedText>Ready For Pickup</ThemedText>}
+                    </TouchableOpacity>
+                }
+                {orderData.shipmentStatus !== 'ORDER_PLACED' && orderData.shipmentStatus !== "ORDER_IN_MARKET" &&
+    <TouchableOpacity style={styles.acceptOrderButton}
+        onPress={() => router.push('/adminorderdetail/adminUpdateShipment/adminUpdateStatus')}
+    >
+        {loading ? (
+            <ActivityIndicator size="small" color="#fff" />
+        ) : (
+            <ThemedText>Update Status</ThemedText>
+        )}
+    </TouchableOpacity>
+}
+
             </ScrollView>
         </ThemedView>
     )

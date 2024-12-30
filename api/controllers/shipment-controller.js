@@ -223,6 +223,86 @@ export const agentUpdateShipmentStatus = async (req, res, next) => {
     }
 }
 
+export const agentUpdateReadyPickupStatus = async (req, res, next) => {
+    const { shipmentId } = req.params;
+    try{
+        if (req.verifyRole !== "AGENT") return res.status(403).send("You are not authorized to update shipment status");
+        const updateShipment = await prisma.shipment.update({
+            where: {
+                id: shipmentId
+            },
+            data:{
+                shipmentStatus:"ORDER_CONFIRMED",
+            }
+        });
+        await prisma.$disconnect();
+        return res.status(200).json({ message: "Shipment status updated successfully" });
+    }
+    catch(err){
+        console.log(err);
+        next(err);
+    }
+}
+
+export const agentUpdatePickedUpStatus = async (req, res, next) => {
+    console.log(req.body, 'req.body in pick up');
+    console.log(req.params, 'req.params in pick up');
+    const { shipmentStatus, imageUrl, status } = req.body;
+
+    try {
+        const statusKeyMap = {
+
+            SHIPMENT_PICKED:"awsAgentShipmentPickedUrl",
+            SHIPMENT_DROPPED:"awsAgentShipmentDroppedUrl",
+            IN_TRANSIT_START:"awsAgentInTransitStartUrl",
+            IN_TRANSIT_END:"awsAgentInTransitEndUrl",
+            OUT_FOR_DELIVERY:"awsAgentOutForDeliveryUrl",
+            DELIVERED:"awsAgentDeliveredUrl",
+        };
+
+        const dynamicKey = statusKeyMap[shipmentStatus];
+
+        if (!dynamicKey) {
+            return res.status(400).json({ message: 'Invalid shipment status' });
+        }
+
+        const dynamicData = { [dynamicKey]: imageUrl };
+
+        const updateShipment = await prisma.shipment.update({
+            where: {
+                id: req.params.shipmentId,
+            },
+            data: {
+                shipmentStatus,
+                imageStatus: status,
+                pickUpAgentId: req.verifyUserId,
+                ...dynamicData, // Spread the dynamic data
+            },
+        });
+
+        if(shipmentStatus === "DELIVERED"){
+            await prisma.completedShipment.create({
+                data: {
+                  ...updateShipment,
+                  id: req.params.shipmentId,
+                },
+              });
+          
+              // Delete from Shipment table
+              await prisma.shipment.delete({
+                where: { id: req.params.shipmentId },
+              });
+        }
+
+        res.status(200).json({ message: 'Shipment status updated successfully' });
+    } catch (err) {
+        console.error(err);
+        next(err);
+    }
+};
+
+
+
 export const getTotalAmount = async (req, res, next) => {
     const { organisationId, shipmentId } = req.params;
     console.log(organisationId, shipmentId);

@@ -31,7 +31,7 @@ export const postProfileImageS3 = async (req, res, next) => {
     const params = {
         Bucket: process.env.S3_BUCKET_NAME,
         // Key: `${id}/verificationfiles/${file.originalname}`, // File name you want to save in S3
-        Key: `${id}-${name}/verificationfiles/verification.pdf`, // File name you want to save in S3
+        Key: `Account_verifiaction/${id}-${name}/verificationfiles/verification.pdf`, // File name you want to save in S3
         Body: file.buffer,
         ContentType: file.mimetype,
     };
@@ -54,3 +54,42 @@ export const postProfileImageS3 = async (req, res, next) => {
         res.status(500).json({ error: 'Error uploading file' });
     }
 };
+
+export const postUpdateShipmentS3 = async (req, res, next) => {
+
+    const { shipmentStatus,shipmentId,AgentStatus } = req.body;
+    console.log(req.body, 'req.body---');
+
+    const file = req.file;
+    console.log(file, 'file---');
+    
+    if (!file) {
+        return res.status(400).json({ error: 'No file uploaded' });
+    }  
+    
+    try {
+
+        const params = {
+            Bucket: process.env.S3_BUCKET_NAME,
+            // Key: `${id}/verificationfiles/${file.originalname}`, // File name you want to save in S3
+            Key: `Shipment_Status/${req.verifyOrganisationId}/${req.verifyUserId}/${shipmentId}/${shipmentStatus}/${AgentStatus}/image.jpg`, 
+            Body: file.buffer,
+            ContentType: file.mimetype,
+        };
+        const uploadResult = await new Upload({
+            client: s3,
+            params,
+        }).done();
+
+        console.log(uploadResult);
+
+        // Get the location of the uploaded file
+        const fileLocation = uploadResult.Location;
+
+        // Send response with the uploaded file location
+        res.status(200).json({ message: 'File uploaded successfully', data: fileLocation });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Error uploading file' });
+    }
+}

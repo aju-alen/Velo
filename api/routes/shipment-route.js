@@ -1,6 +1,6 @@
 import express from "express";
 const router = express.Router()
-import { createNewShipment, getAllPaidShipments, getAllOpenMarketShipments, getSinglePendingShipments, agentUpdateShipmentStatus,getAllAcceptedShipments,getTotalAmount,getSingleUserShipments } from "../controllers/shipment-controller.js";
+import { createNewShipment, getAllPaidShipments, getAllOpenMarketShipments, getSinglePendingShipments, agentUpdateShipmentStatus,getAllAcceptedShipments,getTotalAmount,getSingleUserShipments,agentUpdateReadyPickupStatus,agentUpdatePickedUpStatus } from "../controllers/shipment-controller.js";
 import { verifyToken } from "../middlewares/jwtVerify.js";
 
 
@@ -18,6 +18,10 @@ router.get('/user/get-single-shipment/:singleShipmentId', verifyToken, getSingle
 router.get('/get-all-paid-shipments/:userId',verifyToken, getAllPaidShipments); //get all paid shipments of single user
 
 router.put('/agent-update-shipment-status-open-market/:shipmentId',verifyToken, agentUpdateShipmentStatus); //update shipment status by agent for open market shipments
+
+router.put('/agent-update-shipment-status-ready-for-pickup/:shipmentId',verifyToken, agentUpdateReadyPickupStatus); //update shipment status by agent for open market shipments
+
+router.put('/agent-update-shipment-status-picked-up/:shipmentId',verifyToken, agentUpdatePickedUpStatus); //update shipment status by agent for open market shipments
 
 
 export default router;
