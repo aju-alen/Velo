@@ -31,7 +31,7 @@ export const postProfileImageS3 = async (req, res, next) => {
     const params = {
         Bucket: process.env.S3_BUCKET_NAME,
         // Key: `${id}/verificationfiles/${file.originalname}`, // File name you want to save in S3
-        Key: `Account_verifiaction/${id}-${name}/verificationfiles/verification.pdf`, // File name you want to save in S3
+        Key: `Account_verification/${id}-${name}/verificationfiles/verification.pdf`, // File name you want to save in S3
         Body: file.buffer,
         ContentType: file.mimetype,
     };
