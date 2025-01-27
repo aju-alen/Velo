@@ -21,6 +21,7 @@ app.use(cors({
         "http://localhost:8081",
         "http://localhost:19000",
         "http://10.65.4.65:19006",
+        "http://localhost:5173",
 
     ],
 })); 

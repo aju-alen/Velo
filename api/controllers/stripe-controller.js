@@ -130,6 +130,59 @@ export const webhook = async (req, res, next) => {
     }
 }
 
+export const stripeAccountLink = async (req, res, next) => {
+    try {
+        const { account } = req.body;
+    
+        const accountLink = await stripe.accountLinks.create({
+          account: account,
+          return_url: `${req.headers.origin}/return/${account}`,
+          refresh_url: `${req.headers.origin}/refresh/${account}`,
+          type: "account_onboarding",
+        });
+    
+        res.json(accountLink);
+      } catch (error) {
+        console.error(
+          "An error occurred when calling the Stripe API to create an account link:",
+          error
+        );
+        res.status(500);
+        res.send({ error: error.message });
+      }
+}
+
+export const stripteCreateAccount = async (req, res, next) => {
+    try {
+        const account = await stripe.accounts.create({
+            country: 'AE',
+  email: 'jenny.rosen@example.com',
+  controller: {
+    fees: {
+      payer: 'account',
+    },
+    losses: {
+      payments: 'stripe',
+    },
+    stripe_dashboard: {
+      type: 'full',
+    },
+  },
+        });
+    
+        res.json({
+          account: account.id,
+        });
+      } catch (error) {
+        console.error(
+          "An error occurred when calling the Stripe API to create an account",
+          error
+        );
+        res.status(500);
+        res.send({ error: error.message });
+      }
+}
+
 //Success Payment Email function.
 
 const sendSuccessPaymentEmail = async (email,price,currency,url) => {

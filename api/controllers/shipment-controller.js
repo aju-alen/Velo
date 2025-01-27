@@ -67,7 +67,7 @@ export const createNewShipment = async (req, res, next) => {
                 receiverState,
                 receiverEmail,
                 receiverMobileNumber,
-                receiverCountryId,
+                receiverCountryId : Number(receiverCountryId),
                 receiverCountryCode,
                 receiverResidentAddress,
                 receiverZipCode,
