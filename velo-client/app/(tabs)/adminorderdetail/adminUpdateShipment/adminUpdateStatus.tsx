@@ -9,6 +9,7 @@ import useShipmentStore from '@/store/shipmentStore';
 import useLoginAccountStore from '@/store/loginAccountStore';
 import axiosInstance from '@/constants/axiosHeader';
 import { Picker } from '@react-native-picker/picker';
+import { router } from 'expo-router';
 
 // Enum to match Prisma model
 enum ShipmentStatus {
@@ -145,6 +146,7 @@ const AdminUpdateStatus = () => {
         setImageUrl(uploadedImageURL);
         console.log('Image uploaded successfully:', uploadedImageURL);
         await updateShipmentStatus(uploadedImageURL, approvalStatus,selectedStatus);
+        router.push('/(tabs)/home')
       } else {
         console.log('Failed to upload image');
       }

@@ -33,7 +33,7 @@ export default function RootLayout() {
   }
 
   return (
-      <StripeProviderWrapper>
+     
     <PaperProvider>
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
@@ -44,6 +44,5 @@ export default function RootLayout() {
       </Stack>
     </ThemeProvider>
     </PaperProvider>
-    </StripeProviderWrapper>
   );
 }

@@ -14,6 +14,7 @@ import useLoginAccountStore from '@/store/loginAccountStore';
 
 import { ipURL } from '@/constants/backendUrl';
 import axiosInstance from '@/constants/axiosHeader';
+import StripeProviderWrapper from '@/components/StripeProviderWrapper';
 
 interface TotalAmount {
   totalAmount: number;
@@ -192,6 +193,7 @@ const Payment = () => {
   }
 
   return (
+    <StripeProviderWrapper>
     <ThemedView style={styles.container}>
       {/* Redesigned Header */}
       <ThemedView style={styles.headerContainer}>
@@ -231,6 +233,7 @@ const Payment = () => {
         {loading && <MaterialIcons name="arrow-forward" size={20} color="#000" />}
       </TouchableOpacity>
     </ThemedView>
+    </StripeProviderWrapper>
   );
 };
 
