@@ -8,6 +8,7 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { verticalScale,horizontalScale,moderateScale } from '@/constants/metrics';
 import * as SecureStore from 'expo-secure-store';
 import useLoginAccountStore from '@/store/loginAccountStore';
+import { getAuth, signOut } from '@react-native-firebase/auth';
 
 const RootIndex = () => {
   const {setAccountLoginData} = useLoginAccountStore()
@@ -54,19 +55,19 @@ const RootIndex = () => {
         router.replace('/(auth)/finalRegisterForm')
       }
       else if(userData.registerVerificationStatus === 'APPOINTMENT_BOOKED' && userData.role === 'AGENT'){
-        router.replace('/(tabs)/home')
+        router.replace('/(tabs)/home/homeMainPage')
       }
       else if(userData.registerVerificationStatus === 'LOGGED_IN' && userData.role === 'AGENT'){
-        router.replace('/(tabs)/home')
+        router.replace('/(tabs)/home/homeMainPage')
       }
       else if(userData.registerVerificationStatus === 'LOGGED_IN' && userData.role === 'USER'){
-        router.replace('/(tabs)/home')
+        router.replace('/(tabs)/home/homeMainPage')
       }
       else if(userData.registerVerificationStatus === 'SUPERADMINLOGGEDIN' && userData.role === 'SUPERADMIN'){
-        router.replace('/(tabs)/home')
+        router.replace('/(tabs)/home/homeMainPage')
       }      
       else if(userData.registerVerificationStatus === 'LOGGED_IN' && userData.role === 'SUB_AGENT'){
-        router.replace('/(tabs)/home')
+        router.replace('/(tabs)/home/homeMainPage')
       }      
     }
 
@@ -111,7 +112,11 @@ const RootIndex = () => {
             Already have an account? <ThemedText type='link' style={{ color: '#FFAC1C' }} onPress={() => router.replace('/(auth)/login')}>Sign In</ThemedText>
           </ThemedText>
         </ThemedView>
+
+
+        
       </ThemedView>
+      
     
   );
 }

@@ -90,7 +90,7 @@ const SingleListing = () => {
 
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         <ThemedView style={styles.imageContainer}>
-          <MaterialIcons name="directions-car" size={80} color="#FFAC1C" />
+          <Image source={{uri:listing.imageUrl}} style={styles.image} />
         </ThemedView>
 
         <ThemedView style={styles.contentContainer}>
@@ -260,5 +260,10 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(16),
     color: '#FFAC1C',
     marginTop: verticalScale(4),
+  },
+  image: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
   },
 })

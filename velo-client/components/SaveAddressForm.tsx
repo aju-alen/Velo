@@ -44,15 +44,22 @@ console.log(savedAddressData,'savedAddressData------______');
 
   useEffect(() => {
     if (areas.length > 0) return; // Prevent refetch
-    fetch("https://restcountries.com/v2/all")
+    fetch("https://restcountries.com/v3.1/all/?fields=cca2,name,idd,flag")
       .then(response => response.json())
       .then(data => {
-        const areaData = data.map(item => ({
-          code: item.alpha2Code,
-          item: item.name,
-          callingCode: `+${item.callingCodes[0]}`,
-          flag: `https://flagsapi.com/${item.alpha2Code}/flat/64.png`,
-        }));
+        
+        const areaData = data.map(item =>{
+          console.log(item,'item----');
+          
+          return ({
+            code: item.cca2,
+            item: item.name.common,
+            callingCode: `${item.idd.root}`,
+            flag: `https://flagsapi.com/${item.cca2}/flat/64.png`,
+          })
+        })
+          
+
         setAreas(areaData);
         console.log('areaData:', areaData);
         

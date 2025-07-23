@@ -11,6 +11,8 @@ import CustomButton from '@/components/CustomButton'
 import {Picker} from '@react-native-picker/picker';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import axiosInstance from '@/constants/axiosHeader'
+import * as ImagePicker from 'expo-image-picker'
+import { Image, ActivityIndicator, View } from 'react-native'
 
 const CreateListing = () => {
   const colorScheme = useColorScheme()
@@ -28,7 +30,12 @@ const CreateListing = () => {
     listingPrice: '',
     listingCategoryId: '',
     condition: '',
+    imageUrl: '', // Add imageUrl to form data
   })
+
+  // Image picker state
+  const [image, setImage] = useState(null)
+  const [uploading, setUploading] = useState(false)
 
   // Error state
   const [errors, setErrors] = useState({
@@ -92,13 +99,77 @@ const CreateListing = () => {
     return isValid
   }
 
+  const pickImage = async () => {
+    // Ask for permission
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
+    if (status !== 'granted') {
+      alert('Sorry, we need camera roll permissions to make this work!')
+      return
+    }
+    // Pick image
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    })
+    if (!result.canceled) {
+      setImage(result.assets[0].uri)
+    }
+  }
+
+  const uploadImageToS3 = async () => {
+    if (!image) return null
+    setUploading(true)
+    const uriParts = image.split('.')
+    const fileType = uriParts[uriParts.length - 1]
+    const formData: any = new FormData()
+    formData.append('document1', {
+      uri: image,
+      name: `listing-image.${fileType}`,
+      type: `image/${fileType}`,
+    } as any)
+    // You can add more fields if your backend expects them
+    formData.append('id', String(accountId))
+    formData.append('name', 'listing-image')
+    try {
+      const response = await fetch(`${ipURL}/api/s3/upload-to-aws`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        body: formData,
+      })
+      const data = await response.json()
+      console.log(data,"data of the image");
+      
+      setUploading(false)
+      if (data.data) {
+        return data.data // S3 URL
+      } else {
+        alert('Image upload failed')
+        return null
+      }
+    } catch (error) {
+      setUploading(false)
+      alert('Image upload error')
+      return null
+    }
+  }
+
   const handleSubmit = async () => {
     if (validateForm()) {
+      let imageUrl = formData.imageUrl
+      if (image && !imageUrl) {
+        imageUrl = await uploadImageToS3()
+        if (!imageUrl) return // Stop if upload failed
+      }
       try {
         const listingData = {
           ...formData,
           listingPrice: parseFloat(formData.listingPrice),
           accountId: accountId,
+          imageUrl,
         }
         console.log(listingData,'listingData');
         
@@ -176,6 +247,20 @@ const CreateListing = () => {
                 keyboardType="numeric"
               />
               {errors.listingPrice ? <ThemedText style={styles.errorText}>{errors.listingPrice}</ThemedText> : null}
+            </ThemedView>
+
+            {/* Image Picker */}
+            <ThemedView style={styles.inputContainer}>
+              <ThemedText style={styles.label}>Image</ThemedText>
+              <TouchableOpacity onPress={pickImage} style={{ marginBottom: 10 }}>
+                <ThemedText style={{ color: '#007AFF' }}>{image ? 'Change Image' : 'Pick an Image'}</ThemedText>
+              </TouchableOpacity>
+              {image && (
+                <View style={{ alignItems: 'center', marginBottom: 10 }}>
+                  <Image source={{ uri: image }} style={{ width: 120, height: 120, borderRadius: 8 }} />
+                </View>
+              )}
+              {uploading && <ActivityIndicator size="small" color="#007AFF" />}
             </ThemedView>
 
             {/* Category Dropdown */}

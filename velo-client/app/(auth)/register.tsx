@@ -7,6 +7,8 @@ import CustomButton from '@/components/CustomButton';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import axios from 'axios';
+import { ipURL } from '@/constants/backendUrl';
 
 
 const Register = () => {
@@ -27,6 +29,9 @@ const Register = () => {
     password: '',
     reEnterPassword: ''
   })
+  
+  // Add loading state for email verification
+  const [emailVerifying, setEmailVerifying] = useState(false)
 
   // Validation functions
   const validateEmail = (email) => {
@@ -36,6 +41,32 @@ const Register = () => {
 
   const validatePassword = (password) => {
     return password.length >= 8
+  }
+
+  // Email verification function
+  const checkEmailExists = async (emailToCheck) => {
+    if (!emailToCheck || !validateEmail(emailToCheck)) {
+      setErrors(prev => ({...prev, email: 'Please enter a valid email'}))
+      return
+    }
+    
+    setEmailVerifying(true)
+    try {
+      const response = await axios.get(`${ipURL}/api/auth/check-email`, {
+        params: { email: emailToCheck }
+      })
+      
+      if (response.data.exists) {
+        setErrors(prev => ({...prev, email: 'This email is already registered. Please use a different email or login.'}))
+      } else {
+        setErrors(prev => ({...prev, email: ''}))
+      }
+    } catch (error) {
+      console.error('Error checking email:', error)
+      // Don't show error to user for API failures, just log it
+    } finally {
+      setEmailVerifying(false)
+    }
   }
 
   const validateForm = () => {
@@ -75,6 +106,18 @@ const Register = () => {
     return isValid
   }
   
+  // Check if form is valid and ready to submit
+  const isFormValid = () => {
+    return (
+      name.trim().length >= 2 &&
+      validateEmail(email) &&
+      validatePassword(password) &&
+      password === reEnterPassword &&
+      Object.values(errors).every(error => error === '') &&
+      !emailVerifying
+    )
+  }
+
   const handleRegister = async () => {
     if (validateForm()) {
       setButtonLoading(true)
@@ -126,10 +169,12 @@ const Register = () => {
                   setEmail(text)
                   setErrors(prev => ({...prev, email: ''}))
                 }}
+                onBlur={() => checkEmailExists(email)}
                 error={errors.email}
                 autoCapitalize='none'
                 keyboardType='email-address'
                 autoComplete='email'
+                loading={emailVerifying}
               />
 
               <InputField
@@ -138,7 +183,22 @@ const Register = () => {
                 value={password}
                 onChangeText={(text) => {
                   setPassword(text)
-                  setErrors(prev => ({...prev, password: ''}))
+                  if (text && text.length < 8) {
+                    setErrors(prev => ({...prev, password: 'Password must be at least 8 characters'}))
+                  } else {
+                    setErrors(prev => ({...prev, password: ''}))
+                  }
+                  // Also check password confirmation
+                  if (reEnterPassword && text !== reEnterPassword) {
+                    setErrors(prev => ({...prev, reEnterPassword: 'Passwords do not match'}))
+                  } else if (reEnterPassword) {
+                    setErrors(prev => ({...prev, reEnterPassword: ''}))
+                  }
+                }}
+                onBlur={() => {
+                  if (password && password.length < 8) {
+                    setErrors(prev => ({...prev, password: 'Password must be at least 8 characters'}))
+                  }
                 }}
                 error={errors.password}
                 secureTextEntry
@@ -150,7 +210,16 @@ const Register = () => {
                 value={reEnterPassword}
                 onChangeText={(text) => {
                   setreEnterPassword(text)
-                  setErrors(prev => ({...prev, reEnterPassword: ''}))
+                  if (text && password !== text) {
+                    setErrors(prev => ({...prev, reEnterPassword: 'Passwords do not match'}))
+                  } else {
+                    setErrors(prev => ({...prev, reEnterPassword: ''}))
+                  }
+                }}
+                onBlur={() => {
+                  if (reEnterPassword && password !== reEnterPassword) {
+                    setErrors(prev => ({...prev, reEnterPassword: 'Passwords do not match'}))
+                  }
                 }}
                 error={errors.reEnterPassword}
                 secureTextEntry
@@ -158,7 +227,7 @@ const Register = () => {
 
               <ThemedView style={styles.buttonWrapper}>
                 <CustomButton 
-                  disableButton={buttonLoading}
+                  disableButton={buttonLoading || !isFormValid()}
                   buttonText='Register'
                   handlePress={handleRegister}
                 />
@@ -172,9 +241,14 @@ const Register = () => {
 };
 
 // Enhanced Input Field Component with error handling
-const InputField = ({ label, error, ...props }) => (
+const InputField = ({ label, error, loading = false, ...props }) => (
   <ThemedView style={styles.inputContainer}>
-    <ThemedText type='default' style={styles.inputLabel}>{label}</ThemedText>
+    <ThemedView style={styles.labelContainer}>
+      <ThemedText type='default' style={styles.inputLabel}>{label}</ThemedText>
+      {loading && (
+        <ThemedText style={styles.loadingText}>Checking...</ThemedText>
+      )}
+    </ThemedView>
     <ThemedView style={[
       styles.inputWrapper,{borderColor: useColorScheme() === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)'},
       error && styles.inputWrapperError
@@ -253,6 +327,17 @@ buttonWrapper: {
   marginTop: verticalScale(32),
   alignItems: 'center',
   paddingBottom: verticalScale(20),
+},
+labelContainer: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  marginBottom: verticalScale(8),
+},
+loadingText: {
+  fontSize: moderateScale(12),
+  color: '#4CAF50',
+  fontStyle: 'italic',
 },
 });
 

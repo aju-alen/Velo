@@ -10,8 +10,9 @@ import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { router } from 'expo-router'
 
 const ShippingOptions = () => {
-  const { savedAddressData, packageDetail, accountAddressData } = useShipmentStore()
+  const { savedAddressData, packageDetail, accountAddressData, itemType } = useShipmentStore()
   const { accountLoginData } = useLoginAccountStore()
+  console.log(itemType,"itemType");
 
   const renderAddressBlock = (title, data, icon) => (
     <ThemedView style={styles.addressContainer}>
@@ -51,9 +52,9 @@ const ShippingOptions = () => {
             <ThemedText style={styles.packageNameText}>
               {packageDetail.packageName}
             </ThemedText>
-            <ThemedText style={styles.packageMetaText}>
+           {itemType === "PACKAGE" && <ThemedText style={styles.packageMetaText}>
               {`Dimensions: ${packageDetail.length} × ${packageDetail.width} × ${packageDetail.height} cm`}
-            </ThemedText>
+            </ThemedText>}
             <ThemedText style={styles.packageMetaText}>
               {`${packageDetail.numberOfPieces} Piece(s) • ${packageDetail.weight} kg`}
             </ThemedText>

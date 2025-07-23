@@ -46,16 +46,16 @@ const MarketHome = () => {
   );
 
   const formatPrice = (price) => {
-    return `$${price.toLocaleString()}`
+    return `AED ${price.toLocaleString()}`
   }
 
   const handleButtonPress = () => {
-    if (accountDetails.registerVerificationStatus === 'LOGGED_IN') {
+    if (accountDetails.registerVerificationStatus === 'APPOINTMENT_BOOKED') {
       Alert.alert(
         'Action Disabled',
         'The button has been disabled until you have been verified by the admin team.'
       );
-    } else {
+    } else if(accountDetails.registerVerificationStatus === 'LOGGED_IN'){
       const accountId = accountDetails.id;
       router.push({pathname:'/(tabs)/market/createListing', params:{accountId}});
     }
@@ -78,7 +78,7 @@ const MarketHome = () => {
       >
         <ThemedView style={[styles.card,{elevation:colorScheme === 'dark'? 8 :2}]}>
           <ThemedView style={styles.imageContainer}>
-            <MaterialIcons name="directions-car" size={40} color="#FFAC1C" />
+            <Image source={{uri:item.imageUrl}} style={styles.image} />
           </ThemedView>
 
           <ThemedView style={styles.contentContainer}>
@@ -116,6 +116,8 @@ const MarketHome = () => {
       </TouchableOpacity>
     )
   }
+  console.log(accountDetails,"accountDetails");
+  
 
   return (
     <ThemedView style={styles.container}>
@@ -233,6 +235,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: horizontalScale(12),
+  },
+  image: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
   },
   contentContainer: {
     flex: 1,

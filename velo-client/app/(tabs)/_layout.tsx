@@ -53,7 +53,7 @@ export default function TabLayout() {
         options={{
           title: 'History',
           tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'construct' : 'construct-outline'} color={color} />
+            <TabBarIcon name={focused ? 'newspaper' : 'newspaper-outline'} color={color} />
           ),
           href: (accountLoginData.role === "USER")? "/shippinghistory" : null 
         }}
@@ -86,7 +86,7 @@ export default function TabLayout() {
           options={{
             title: 'My Profile',
             tabBarIcon: ({ color, focused }) => (
-              <TabBarIcon name={focused ? 'construct' : 'construct-outline'} color={color} />
+              <TabBarIcon name={focused ? 'person-circle' : 'person-circle-outline'} color={color} />
             ) 
           }}
         />

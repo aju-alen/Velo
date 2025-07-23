@@ -9,14 +9,15 @@ export const postListing = async (req, res, next) => {
   
     try {
         if(req.verifyRole !== "AGENT") return res.status(403).send("You are not authorized to create a listing");
-        const {listingTitle, listingDescription, listingPrice, listingCategoryId,accountId} = req.body;
+        const {listingTitle, listingDescription, listingPrice, listingCategoryId,accountId,imageUrl} = req.body;
         const listing = await prisma.listing.create({
             data: {
                 title: listingTitle,
                 description: listingDescription,
                 price: listingPrice,
                 categoryId: listingCategoryId,
-                agentId: accountId
+                agentId: accountId,
+                imageUrl
             }
         });
         await prisma.$disconnect();

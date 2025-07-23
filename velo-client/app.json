@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "Velo",
-    "slug": "velo-client",
+    "name": "Velo International Shipping",
+    "slug": "velo-international-shipping",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/logo.png",
-    "scheme": "myapp",
+    "scheme": "velo-international-shipping",
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/images/logo.png",
@@ -13,14 +13,36 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
+      "googleServicesFile": "./GoogleService-Info-velo.plist",
       "config": {
         "usesNonExemptEncryption": false
       },
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.velo-client"
+      "bundleIdentifier": "com.rise.velointernationalshipping",
+      "splash": {
+        "image": "./assets/images/logo.png",
+        "resizeMode": "contain",
+        "backgroundColor": "#000000",
+        "dark": {
+          "image": "./assets/images/logo.png",
+          "resizeMode": "contain",
+          "backgroundColor": "#000000"
+        }
+      },
+      "buildNumber": "1"
     },
     "android": {
-      "package": "com.anonymous.veloclient"
+      "googleServicesFile": "./google-services-velo.json",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/logo.png",
+        "backgroundColor": "#000000"
+      },
+      "package": "com.rise.velointernationalshipping",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -28,6 +50,16 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
+      "@react-native-firebase/app",
+      "@react-native-firebase/auth",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "useFrameworks": "static"
+          }
+        }
+      ],
       "expo-router",
       [
         "expo-secure-store",
@@ -51,11 +83,15 @@
       ]
     ],
     "experiments": {
-      "typedRoutes": true
+      "typedRoutes": true,
+      "tsconfigPaths": true
     },
     "extra": {
+      "router": {
+        "origin": false
+      },
       "eas": {
-        "projectId": "51819abe-890f-4d20-800d-6a2acbb4e774"
+        "projectId": "81570b4a-bd9f-4abb-9d6e-64b80544cbee"
       }
     }
   }

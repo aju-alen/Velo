@@ -1,4 +1,4 @@
-import { StyleSheet, TextInput, TouchableOpacity, Modal, Image, TouchableWithoutFeedback, FlatList, Keyboard, ActivityIndicator } from 'react-native'
+import { StyleSheet, TextInput, TouchableOpacity, Modal, Image, TouchableWithoutFeedback, FlatList, Keyboard, ActivityIndicator, Alert } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { ThemedView } from '@/components/ThemedView'
 import { ThemedText } from '@/components/ThemedText'
@@ -9,6 +9,9 @@ import * as SecureStore from 'expo-secure-store'
 import { useColorScheme } from '@/hooks/useColorScheme'
 import axios from 'axios'
 import { ipURL } from '@/constants/backendUrl'
+import { getAuth, onAuthStateChanged, signInWithPhoneNumber, signOut  } from '@react-native-firebase/auth';
+import { OtpInput } from 'react-native-otp-entry';
+import CountryPicker, { Country, CountryCode } from 'react-native-country-picker-modal';
 
 export type selectedArea = {
   code: string,
@@ -17,238 +20,243 @@ export type selectedArea = {
   flag: string
 }
 
+
 const MobileInput = () => {
   const colorScheme = useColorScheme()
-  const [areas, setAreas] = useState([])
-  const [mobile, setMobile] = useState('')
-  const [selectedArea, setSelectedArea] = useState<selectedArea | null>(null)
-  const [modalVisible, setModalVisible] = useState(false)
-  const [finalModalVisible, setFinalModalVisible] = useState(false)
   const [tempRegister, setTempRegister] = useState({})
   const [isLoading, setIsLoading] = useState(false)
+  const [mobile, setMobile] = useState('')
+  const [confirm, setConfirm] = useState(null)
+  const [otp, setOtp] = useState('')
+  const [errorMessage, setErrorMessage] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [selectedCountry, setSelectedCountry] = useState<Country>({
+    callingCode: ['971'],
+    cca2: 'AE',
+    currency: ['AED'],
+    flag: 'flag-ae',
+    name: 'United Arab Emirates',
+    region: 'Asia',
+    subregion: 'Western Asia',
+  })
+  const [showCountryPicker, setShowCountryPicker] = useState(false)
 
-  useEffect(() => {
-    const fetchTempRegister = async () => {
-      let result = await SecureStore.getItemAsync('tempRegister')
-      setTempRegister(JSON.parse(result))
+  function handleAuthStateChanged(user) {
+    if (user) {
+      console.log(user, 'user------');
+      
+      // Some Android devices can automatically process the verification code (OTP) message, and the user would NOT need to enter the code.
+      // Actually, if he/she tries to enter it, he/she will get an error message because the code was already used in the background.
+      // In this function, make sure you hide the component(s) for entering the code and/or navigate away from this screen.
+      // It is also recommended to display a message to the user informing him/her that he/she has successfully logged in.
+      alert('User Phone Number Verified')
+      
     }
-    fetchTempRegister()
-  }, [])
+  }
 
-  const handleConfirm = () => {
+  
+
+
+  // confirm the code
+  async function confirmCode() { 
+    try {
+      setLoading(true)
+      await confirm.confirm(otp);
+      // Handle successful verification`
+      const tempRegisterData = {...tempRegister, mobile:mobile, code:selectedCountry.callingCode[0], country:selectedCountry.cca2}
+      const saveUserToDB = await axios.post(`${ipURL}/api/auth/register`, tempRegisterData);
+      console.log(saveUserToDB.data, 'saveUserToDB------');
+      
+      await SecureStore.deleteItemAsync('tempRegister'); 
+      await SecureStore.deleteItemAsync('tempMobile');
+      await SecureStore.setItemAsync('registerDetail', JSON.stringify(saveUserToDB.data.userDetails));
+      if (tempRegister.role === 'AGENT') {
+        router.replace('/(auth)/verifyAgent');
+      } else {
+        router.replace('/(auth)/finalRegisterForm');
+      }
+      console.log('OTP Verified Successfully');
+      setErrorMessage('')
+    } catch (error) {
+      setErrorMessage('Invalid OTP. Please try again.');
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function handleSignInWithPhoneNumber() {
     if (!mobile) {
       alert('Please enter a valid mobile number')
       return
     }
-    setFinalModalVisible(true)
-  }
-
-  const handleSubmit = async () => {
-    setIsLoading(true)
+    console.log(tempRegister, 'tempRegister------');
     try {
-      const checkIfAlreadyRegistered = await axios.get(
-        `${ipURL}/api/auth/check-registered-account/${selectedArea?.callingCode}/${mobile}`
-      )
-      
-      if (checkIfAlreadyRegistered.data.accountExists) {
-        alert('Account already exists. Please Login')
-        router.push('/(auth)/login')
+      setIsLoading(true)
+      const phoneNumber = `+${selectedCountry.callingCode[0]}${mobile}`;
+      console.log(phoneNumber, 'phoneNumber------');
+
+      //check if mobile number is already registered
+      const checkMobileNumber = await axios.get(`${ipURL}/api/auth/check-mobile-number?mobile=${mobile}`);
+      if(checkMobileNumber.data.continue === false){
+        alert('Mobile number already registered. Please try again with different mobile number.');
+        setIsLoading(false)
         return
       }
 
-      const mobileNumber = (selectedArea?.callingCode + mobile).replace("+", "")
-      const resp = await axios.post(`https://api.smsala.com/api/Verify`, {
-        "api_id":"API913750181010",
-        "api_password": "Syndicate1#",
-        "brand": "EssayScam",
-        "phonenumber": mobileNumber,
-        "sender_id": "EssayScam",
-      })
-
-      await SecureStore.setItemAsync('tempMobile', JSON.stringify({
-        mobile: mobile,
-        code: selectedArea?.callingCode,
-        country: selectedArea?.code
-      }))
-
-      router.replace({
-        pathname: "/otpInput",
-        params: {
-          verfication_id: resp.data.verfication_id
-        }
-      })
+      const confirmation = await signInWithPhoneNumber(getAuth(), phoneNumber);
+      console.log(confirmation, 'confirmation------');
       
-      setFinalModalVisible(false)
-    } catch (e) {
-      console.error(e)
-      alert('Something went wrong. Please try again.')
+      setConfirm(confirmation);
+    } catch (error) {
+      console.error('Error sending OTP:', error);
+      alert('Error sending verification code. Please try again with different mobile number.');
     } finally {
       setIsLoading(false)
     }
   }
 
-  const handleGoToChooseRole = () => {
-    setFinalModalVisible(false)
-    router.push('/(auth)/chooseRole')
+  const handleOtpChange = (otpValue) => {
+    setOtp(otpValue)
+    console.log(otpValue);
   }
 
   useEffect(() => {
-    fetch("https://restcountries.com/v2/all")
-      .then(response => response.json())
-      .then(data => {
-        let areaData = data.map((item) => ({
-          code: item.alpha2Code,
-          item: item.name,
-          callingCode: `+${item.callingCodes[0]}`,
-          flag: `https://flagsapi.com/${item.alpha2Code}/flat/64.png`
-        }))
-        setAreas(areaData)
-        
-        if (areaData.length > 0) {
-          let defaultData = areaData.filter((a: any) => a.code == "AE")
-          if (defaultData.length > 0) {
-            setSelectedArea(defaultData[0])
-          }
-        }
-      })
-      .catch(error => {
-        console.error('Error fetching country data:', error)
-        alert('Failed to load country data')
-      })
-  }, [])
+    const subscriber = onAuthStateChanged(getAuth(), handleAuthStateChanged);
+    return subscriber; // unsubscribe on unmount
+  }, []);
 
-  const renderAreaItem = ({ item }) => (
-    <TouchableOpacity
-      style={styles.countryListItem}
-      onPress={() => {
-        setSelectedArea(item)
-        setModalVisible(false)
-      }}
-    >
-      <Image
-        source={{ uri: item.flag }}
-        style={styles.countryFlag}
-      />
-      <ThemedText style={[styles.countryName, { color: "#fff" }]}>{item.item}</ThemedText>
-    </TouchableOpacity>
-  )
+  useEffect(() => {
+    getTempRegiisterData()
+  },[])
 
-  const renderAreasCodesModal = () => (
-    <Modal
-      animationType="slide"
-      transparent={true}
-      visible={modalVisible}
-    >
-      <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
-        <ThemedView style={styles.modalOverlay}>
-          <ThemedView style={styles.modalContent}>
-            <FlatList
-              data={areas}
-              renderItem={renderAreaItem}
-              keyExtractor={(item) => item.code}
-              style={styles.countryList}
-            />
+  const getTempRegiisterData = async () => {
+    const tempRegister = await SecureStore.getItemAsync('tempRegister')
+    if(tempRegister){
+      setTempRegister(JSON.parse(tempRegister))
+    }
+  }
+
+
+  // Show OTP input when confirmation is available
+  if (confirm) {
+    return (
+      <ThemedView style={styles.container}>
+        <ThemedView style={styles.headerContainer}>
+          <ThemedView style={styles.iconContainer}>
+            <ThemedText style={styles.icon}>🔐</ThemedText>
           </ThemedView>
+          <ThemedText type='subtitle' style={styles.title}>
+            Verify Your Number
+          </ThemedText>
+          <ThemedText type='default' style={styles.subtitle}>
+            We've sent a 6-digit verification code to +{selectedCountry.callingCode[0]}{mobile}
+          </ThemedText>
         </ThemedView>
-      </TouchableWithoutFeedback>
-    </Modal>
-  )
 
-  const ConfirmationModal = () => (
-    <Modal animationType="slide" transparent={true} visible={finalModalVisible}>
-      <ThemedView style={styles.overlay}>
-        <ThemedView style={styles.modalContainer}>
-          {/* Header Section */}
-          <ThemedView style={styles.header}>
-            <ThemedText type="title" style={styles.title}>
-              Confirm Your Details
-            </ThemedText>
-            <ThemedText type="subtitle" style={styles.subtitle}>
-              Please review and confirm your information.
-            </ThemedText>
-          </ThemedView>
-  
-          {/* Details Section */}
-          <ThemedView style={styles.detailsContainer}>
-            <DetailItem label="Phone Number" value={`${selectedArea?.callingCode} ${mobile}`} />
-            <DetailItem label="Name" value={tempRegister?.name} />
-            <DetailItem label="Email" value={tempRegister?.email} />
-            <DetailItem label="Role" value={tempRegister?.role} />
-          </ThemedView>
-  
-          {/* Action Buttons Section */}
-          <ThemedView style={styles.actionContainer}>
-            <CustomButton
-              buttonText='Confirm'
-              handlePress={handleSubmit}
-              disableButton={false}
-            />
-            <TouchableOpacity onPress={handleGoToChooseRole} style={styles.editLink}>
-              <ThemedText type="link" style={styles.editText}>
-                Edit Details
-              </ThemedText>
-            </TouchableOpacity>
-          </ThemedView>
+        <ThemedView style={styles.otpContainer}>
+          <ThemedText style={styles.otpLabel}>Enter verification code</ThemedText>
+          <OtpInput
+            numberOfDigits={6}
+            onTextChange={handleOtpChange}
+            focusColor="#FFAC1C"
+            focusStickBlinkingDuration={400}
+            theme={{
+              pinCodeContainerStyle: {
+                backgroundColor: '#f9f9f9',
+                width: horizontalScale(48),
+                height: verticalScale(48),
+                borderRadius: 12,
+                borderWidth: 1,
+                borderColor: '#d3d3d3',
+              },
+            }}
+          />
         </ThemedView>
+
+        {errorMessage ? <ThemedText style={styles.errorText}>{errorMessage}</ThemedText> : null}
+
+        <CustomButton
+          disableButton={loading}
+          buttonText='Verify Number'
+          handlePress={confirmCode}
+        />
+
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={() => {
+            setConfirm(null)
+            setOtp('')
+            setErrorMessage('')
+          }}
+        >
+          <ThemedText style={styles.backText}>← Back to Mobile Input</ThemedText>
+        </TouchableOpacity>
       </ThemedView>
-    </Modal>
-  );
-
-  const DetailItem = ({ label, value }) => (
-    <ThemedView style={styles.detailItem}>
-      <ThemedText type='default' style={styles.detailLabel}>{label}</ThemedText>
-      <ThemedText type='subtitle' style={styles.detailValue}>{value}</ThemedText>
-    </ThemedView>
-  )
+    )
+  }
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <ThemedView style={styles.container}>
         <ThemedView style={styles.headerContainer}>
+          <ThemedView style={styles.iconContainer}>
+            <ThemedText style={styles.icon}>📱</ThemedText>
+          </ThemedView>
           <ThemedText type='subtitle' style={styles.title}>
             Enter Your Mobile Number
           </ThemedText>
           <ThemedText type='default' style={styles.subtitle}>
-            We will send you a verification code
+            We will send you a verification code to verify your number
           </ThemedText>
         </ThemedView>
 
         <ThemedView style={styles.inputContainer}>
-          <TouchableOpacity 
-            style={styles.countryCodeButton} 
-            onPress={() => setModalVisible(true)}
+          <TouchableOpacity
+            style={styles.countryPickerButton}
+            onPress={() => setShowCountryPicker(true)}
           >
-            <Image
-              source={{ uri: selectedArea?.flag }}
-              style={styles.selectedFlag}
-            />
-            <ThemedText style={[
-              styles.countryCode,
-              { color: colorScheme === 'dark' ? '#fff' : '#000' }
-            ]}>
-              {selectedArea?.callingCode}
+            <ThemedText style={styles.countryCodeText}>
+              +{selectedCountry.callingCode[0]}
             </ThemedText>
+            <ThemedText style={styles.dropdownIcon}>▼</ThemedText>
           </TouchableOpacity>
-
           <TextInput
             style={styles.input}
             value={mobile}
+            keyboardType='number-pad'
             onChangeText={setMobile}
-            placeholder='Mobile Number'
-            placeholderTextColor='grey'
-            keyboardType='numeric'
+            placeholder='Enter mobile number'
+            placeholderTextColor='#999'
             maxLength={12}
           />
         </ThemedView>
 
-        <CustomButton
-          buttonText='Continue'
-          handlePress={handleConfirm}
-          disabled={!mobile}
+        <ThemedView style={styles.infoContainer}>
+          <ThemedText style={styles.infoText}>
+            By continuing, you agree to our Terms of Service and Privacy Policy
+          </ThemedText>
+        </ThemedView>
+
+        <CountryPicker
+          visible={showCountryPicker}
+          onSelect={(country: Country) => {
+            setSelectedCountry(country)
+            setShowCountryPicker(false)
+          }}
+          onClose={() => setShowCountryPicker(false)}
+          withFilter
+          withFlag
+          withCallingCode
+          withEmoji
+          withModal
+          countryCode={selectedCountry.cca2 as CountryCode}
         />
 
-        {renderAreasCodesModal()}
-        <ConfirmationModal />
+        <CustomButton
+          buttonText='Continue'
+          handlePress={handleSignInWithPhoneNumber}
+          disableButton={isLoading}
+        />
       </ThemedView>
     </TouchableWithoutFeedback>
   )
@@ -265,6 +273,7 @@ const styles = StyleSheet.create({
   headerContainer: {
     alignItems: 'center',
     marginBottom: verticalScale(40),
+    width: '100%',
   },
   overlay: {
     flex: 1,
@@ -274,7 +283,6 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     width: '90%',
-
     borderRadius: 12,
     padding: 20,
     alignItems: 'center',
@@ -285,13 +293,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    fontSize: 20,
+    fontSize: moderateScale(24),
     fontWeight: 'bold',
+    marginBottom: verticalScale(8),
+    textAlign: 'center',
   },
   subtitle: {
-    fontSize: 14,
-
+    fontSize: moderateScale(16),
     textAlign: 'center',
+    color: '#666',
+    lineHeight: moderateScale(22),
   },
   detailsContainer: {
     width: '100%',
@@ -305,7 +316,6 @@ const styles = StyleSheet.create({
     width: '100%',
     paddingVertical: 12,
     borderRadius: 8,
-
   },
   editLink: {
     marginTop: 10,
@@ -317,14 +327,23 @@ const styles = StyleSheet.create({
   
   inputContainer: {
     flexDirection: 'row',
-    borderColor: 'grey',
-    borderWidth: moderateScale(1),
-    borderRadius: moderateScale(12),
+    borderColor: '#E0E0E0',
+    borderWidth: moderateScale(1.5),
+    borderRadius: moderateScale(16),
     width: "100%",
-    height: verticalScale(58),
+    height: verticalScale(60),
     alignItems: 'center',
     marginBottom: verticalScale(30),
-    paddingHorizontal: horizontalScale(15),
+    paddingHorizontal: horizontalScale(20),
+    backgroundColor: '#FAFAFA',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   countryCodeButton: {
     flexDirection: 'row',
@@ -343,11 +362,13 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(16),
     fontWeight: '500',
   },
+ 
   input: {
     flex: 1,
-    marginLeft: horizontalScale(15),
+    marginLeft: horizontalScale(20),
     fontSize: moderateScale(16),
-    color: 'grey',
+    color: '#333',
+    fontWeight: '400',
   },
   modalOverlay: {
     flex: 1,
@@ -413,8 +434,84 @@ const styles = StyleSheet.create({
   actionButtons: {
     paddingVertical: verticalScale(20),
   },
-  
-  
+  otpContainer: {
+    width: '100%',
+    marginBottom: verticalScale(30),
+    alignItems: 'center',
+  },
+  errorText: {
+    color: '#FF4D4D',
+    fontSize: moderateScale(14),
+    marginBottom: verticalScale(15),
+    textAlign: 'center',
+    fontWeight: '500',
+  },
+  backButton: {
+    marginTop: verticalScale(20),
+    paddingVertical: verticalScale(10),
+  },
+  backText: {
+    color: '#FFAC1C',
+    fontSize: moderateScale(16),
+    fontWeight: '500',
+  },
+  countryPickerButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingRight: horizontalScale(15),
+    borderRightWidth: 1,
+    borderRightColor: '#E0E0E0',
+    paddingVertical: verticalScale(10),
+  },
+  countryCodeText: {
+    fontSize: moderateScale(18),
+    fontWeight: '600',
+    color: '#333',
+  },
+  dropdownIcon: {
+    fontSize: moderateScale(12),
+    marginLeft: horizontalScale(8),
+    color: '#666',
+  },
+  iconContainer: {
+    marginBottom: verticalScale(15),
+    width: horizontalScale(80),
+    height: verticalScale(80),
+    borderRadius: moderateScale(40),
+    backgroundColor: '#FFF3E0',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  icon: {
+    fontSize: moderateScale(40),
+  },
+  infoContainer: {
+    width: '100%',
+    alignItems: 'center',
+    marginTop: verticalScale(20),
+    marginBottom: verticalScale(30),
+  },
+  infoText: {
+    fontSize: moderateScale(12),
+    color: '#999',
+    textAlign: 'center',
+    lineHeight: moderateScale(18),
+  },
+  otpLabel: {
+    fontSize: moderateScale(16),
+    fontWeight: '500',
+    marginBottom: verticalScale(15),
+    textAlign: 'center',
+    color: '#333',
+  },
 })
 
 export default MobileInput

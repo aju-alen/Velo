@@ -1,11 +1,11 @@
 {
   "build": {
     "preview": {
-      "android": {
-        "buildType": "apk"
-      },
       "ios": {
         "simulator": true
+      },
+      "android": {
+        "buildType": "apk"
       }
     },
     "preview2": {
@@ -19,6 +19,34 @@
     "preview4": {
       "distribution": "internal"
     },
-    "production": {}
+    "production": {
+      "ios": {
+        "image": "macos-sequoia-15.3-xcode-16.2",
+        "autoIncrement": true
+      },
+      "android": {
+        "buildType": "app-bundle"
+      }
+    },
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal"
+    }
+  },
+  "submit": {
+    "production": {
+      "android": {
+        // "serviceAccountKeyPath": "",
+        "track": "internal"
+      },
+      "ios": {
+        "appleId": "rightintellectual@gmail.com",
+        "ascAppId": "6748440881",
+        "appleTeamId": "46LHZT8BN9"
+      }
+    }
+  },
+  "cli": {
+    "appVersionSource": "local"
   }
 }

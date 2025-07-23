@@ -31,7 +31,7 @@ const FinalRegisterForm = () => {
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [loading,setLoading] = useState(true)
   const [buttonDisable, setButtonDisable] = useState(false)
-  const [modeOfWork, setModeOfWork] = useState('')
+  const [modeOfWork, setModeOfWork] = useState('SOLO')
 
   const [organisationName, setOrganisationName] = useState('')
   const [organisationAddress, setOrganisationAddress] = useState('')
@@ -100,7 +100,7 @@ const FinalRegisterForm = () => {
         })
 
         await SecureStore.setItemAsync('registerDetail', JSON.stringify(response.data.newUserData))
-        router.replace('/(tabs)/home')
+        router.replace('/(tabs)/home' as any)
       } else if (accountRole === "AGENT") {
         const formData = {
           userId: accountId,
@@ -150,7 +150,10 @@ const FinalRegisterForm = () => {
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           
-          <ScrollView showsVerticalScrollIndicator={false}>
+          <ScrollView 
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: verticalScale(100) }}
+          >
             <ThemedText type='logoText' style={styles.logoText}>Velo</ThemedText>
             <ThemedText type='subtitle' style={styles.subheading}>Final Steps</ThemedText>
             
@@ -244,26 +247,23 @@ const FinalRegisterForm = () => {
                 </ThemedView>
               </ThemedView>
 
-              {/* Password Input */}
+              {/* Country Input */}
               <ThemedView style={styles.chooseCountry}>
                 <ThemedText type='default' style={styles.textInputHeading}>Country</ThemedText>
                 <Picker
                   selectedValue={country}
                   onValueChange={(itemValue, itemIndex) => {
                     console.log(itemValue, '--itemValue');
-
                     setCountry(itemValue)
-                  }
-                  }
+                  }}
                   style={{ ...styles.picker, color: colorScheme === 'dark' ? 'white' : 'black' }}
-                  >
+                >
                   <Picker.Item color='red' label="--Select--" />
-                  {
-                    countryList.map((item, index) => {
-                      return (
-                        <Picker.Item color={colorScheme==='dark' ? 'white ' :'black'} key={index} label={item.name} value={item.id} />
-                      )
-                    })}
+                  {countryList.map((item, index) => {
+                    return (
+                      <Picker.Item color={colorScheme==='dark' ? 'white ' :'black'} key={index} label={item.name} value={item.id} />
+                    )
+                  })}
                 </Picker>
               </ThemedView>
             </>}
@@ -314,21 +314,27 @@ const FinalRegisterForm = () => {
                   <ThemedText type='default' style={styles.sectionTitle}>Mode of work</ThemedText>
                   <Divider style={styles.divider} />
                   <ThemedView style={styles.rowContainer}>
-                    <RadioButton
-                      value="SOLO"
-                      status={modeOfWork === 'SOLO' ? 'checked' : 'unchecked'}
-                      onPress={() => setModeOfWork('SOLO')}
-                    />
-                    <ThemedText>SOLO</ThemedText>
-
-                    <RadioButton
-                      value="ORGANISATION"
-                      status={modeOfWork === 'ORGANISATION' ? 'checked' : 'unchecked'}
-                      onPress={() => setModeOfWork('ORGANISATION')}  
-                    />
-                    <ThemedText>Organisation</ThemedText>
-
-                 </ThemedView>
+                    <TouchableWithoutFeedback onPress={() => setModeOfWork('SOLO')}>
+                      <ThemedView style={{flexDirection: 'row', alignItems: 'center'}}>
+                        <RadioButton
+                          value="SOLO"
+                          status={modeOfWork === 'SOLO' ? 'checked' : 'unchecked'}
+                          onPress={() => setModeOfWork('SOLO')}
+                        />
+                        <ThemedText>SOLO</ThemedText>
+                      </ThemedView>
+                    </TouchableWithoutFeedback>
+                    <TouchableWithoutFeedback onPress={() => setModeOfWork('ORGANISATION')}>
+                      <ThemedView style={{flexDirection: 'row', alignItems: 'center'}}>
+                        <RadioButton
+                          value="ORGANISATION"
+                          status={modeOfWork === 'ORGANISATION' ? 'checked' : 'unchecked'}
+                          onPress={() => setModeOfWork('ORGANISATION')}
+                        />
+                        <ThemedText>Organisation</ThemedText>
+                      </ThemedView>
+                    </TouchableWithoutFeedback>
+                  </ThemedView>
                 </ThemedView>
                 <ThemedView style={styles.sectionContainer}>
 
@@ -483,10 +489,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#4CAF50',
   },
   buttonContainer: {
-    marginVertical: verticalScale(24),
+    marginTop: verticalScale(40),
+    marginBottom: verticalScale(40),
     flexDirection: 'row',
     justifyContent: 'center',
-    
+    paddingHorizontal: horizontalScale(20),
   },
   textInputHeading: {
     marginBottom: verticalScale(8),
@@ -503,6 +510,7 @@ const styles = StyleSheet.create({
   chooseCountry: {
     borderColor: 'gray',
     borderRadius: moderateScale(5),
+    marginBottom: verticalScale(20),
   },
 
   textInputText: {

@@ -189,31 +189,61 @@ export const bookAgentAppointment = async (req, res, next) => {
 }
 
 const sendAppoitmentEmail = async (name, email, date, agentId) => {
-
-   
     const mailOptions = {
         from: process.env.EMAIL,
         to: email,
         subject: 'Your appointment has been booked',
-        text: `
-        Hi ${name},
-
-        Your appointment has been booked successfully for ${date}.
-        `}
+        html: `
+        <div style="font-family: Arial, sans-serif; background: #f9f9f9; padding: 32px;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+            <tr>
+              <td style="padding: 32px 32px 16px 32px;">
+                <h2 style="color: #FFAC1C; margin-bottom: 12px;">Hi ${name},</h2>
+                <p style="font-size: 16px; color: #333; margin-bottom: 24px;">Your appointment has been <b>successfully booked</b> for:</p>
+                <div style="background: #f1f7ff; border-radius: 6px; padding: 18px 24px; margin-bottom: 24px;">
+                  <p style="font-size: 18px; color: #FFAC1C; margin: 0 0 8px 0;"><b>Appointment Date:</b> ${date}</p>
+                  <p style="font-size: 16px; color: #555; margin: 0;"><b>Agent ID:</b> ${agentId}</p>
+                </div>
+                <p style="font-size: 15px; color: #555;">If you have any questions, feel free to reply to this email.</p>
+                <p style="margin-top: 32px; color: #888; font-size: 13px;">Best regards,<br/>The Velo Team</p>
+              </td>
+            </tr>
+          </table>
+        </div>
+        `
+    };
     const mailOptionsOne = {
         from: process.env.EMAIL,
         to: process.env.EMAIL,
         subject: 'Agent appointment booked',
-        text: `
-        Hello,
-
-        An appointment has been booked for 
-        Name - ${name} 
-        Appointment Date - ${date}
-        AgentId - ${agentId}
-        `}
-
-
+        html: `
+        <div style="font-family: Arial, sans-serif; background: #f9f9f9; padding: 32px;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+            <tr>
+              <td style="padding: 32px 32px 16px 32px;">
+                <h2 style="color: #FFAC1C; margin-bottom: 12px;">Agent Appointment Booked</h2>
+                <p style="font-size: 16px; color: #333; margin-bottom: 24px;">An appointment has been booked with the following details:</p>
+                <table width="100%" cellpadding="0" cellspacing="0" style="background: #f1f7ff; border-radius: 6px; padding: 18px 24px; margin-bottom: 24px;">
+                  <tr>
+                    <td style="font-size: 16px; color: #555; padding: 8px 0;"><b>Name:</b></td>
+                    <td style="font-size: 16px; color: #FFAC1C; padding: 8px 0;">${name}</td>
+                  </tr>
+                  <tr>
+                    <td style="font-size: 16px; color: #555; padding: 8px 0;"><b>Appointment Date:</b></td>
+                    <td style="font-size: 16px; color: #FFAC1C; padding: 8px 0;">${date}</td>
+                  </tr>
+                  <tr>
+                    <td style="font-size: 16px; color: #555; padding: 8px 0;"><b>Agent ID:</b></td>
+                    <td style="font-size: 16px; color: #FFAC1C; padding: 8px 0;">${agentId}</td>
+                  </tr>
+                </table>
+                <p style="margin-top: 32px; color: #888; font-size: 13px;">Velo Admin Notification</p>
+              </td>
+            </tr>
+          </table>
+        </div>
+        `
+    };
     //send the mail
     try {
         const sendEmailToAdmin = await createTransport.sendMail(mailOptions);
@@ -292,5 +322,58 @@ export const loginAccount = async (req, res, next) => {
     catch (error) {
         console.log(error);
         next(error);
+    }
+}
+
+export const checkMobileNumber = async (req, res, next) => {
+    const { mobile } = req.query;
+    console.log(mobile, 'mobile');
+    const mobileNumber = await prisma.user.findFirst({
+        where: {
+            mobileNumber: mobile
+        }
+    });
+    if(mobileNumber){
+        return res.status(400).json({ message: "Mobile number already registered",continue:false });
+    }
+    return res.status(200).json({ message: "Mobile number not registered",continue:true });
+}
+
+export const checkEmailExists = async (req, res, next) => {
+    const { email } = req.query;
+    console.log(email, 'email to check');
+    
+    try {
+        // Check in user table
+        const userExists = await prisma.user.findUnique({
+            where: { email: email.toLowerCase() }
+        });
+
+        if (userExists) {
+            return res.status(200).json({ exists: true, message: "Email already registered" });
+        }
+
+        // Check in agent table
+        const agentExists = await prisma.agent.findUnique({
+            where: { email: email.toLowerCase() }
+        });
+
+        if (agentExists) {
+            return res.status(200).json({ exists: true, message: "Email already registered" });
+        }
+
+        // Check in superAdmin table
+        const superAdminExists = await prisma.superAdmin.findUnique({
+            where: { email: email.toLowerCase() }
+        });
+
+        if (superAdminExists) {
+            return res.status(200).json({ exists: true, message: "Email already registered" });
+        }
+
+        return res.status(200).json({ exists: false, message: "Email is available" });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: "Error checking email", error: error.message });
     }
 }

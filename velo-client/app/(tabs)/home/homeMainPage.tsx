@@ -13,6 +13,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import useLoginAccountStore from '@/store/loginAccountStore';
 import useShipmentStore from '@/store/shipmentStore';
 import axiosInstance, { setAuthorizationHeader } from '@/constants/axiosHeader';
+import { signOut, getAuth } from '@react-native-firebase/auth';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = (width - horizontalScale(40) - horizontalScale(32)) / 3;
@@ -44,6 +45,11 @@ const HomeMainPage = () => {
   const handleLogout = async () => {
     try{
       await SecureStore.deleteItemAsync('registerDetail');
+      try {
+        await signOut(getAuth());
+      } catch (e) {
+        
+      }
       resetAccountLoginData();
       router.replace('/(auth)/login');
     }
@@ -57,7 +63,7 @@ const HomeMainPage = () => {
     const catId = item.id;
     
     // Generate different gradient colors based on index
-    const gradientColors = getGradientColors(9);
+    const gradientColors = getGradientColors(9) as [string, string];
     
     return (
       <TouchableOpacity 
@@ -66,7 +72,7 @@ const HomeMainPage = () => {
       >
         <ThemedView style={styles.marketplaceCardContainer}>
           <LinearGradient
-            colors={gradientColors}
+            colors={gradientColors as [string, string]}
             style={styles.cardGradient}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
@@ -136,7 +142,7 @@ const HomeMainPage = () => {
        {accountLoginData.role === "USER" && <ThemedView style={styles.createShipmentContainer}>
 
           <LinearGradient
-            colors={getGradientColors(9)}
+            colors={getGradientColors(9) as [string, string]}
             style={styles.cardGradient}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}

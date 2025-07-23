@@ -26,15 +26,27 @@ export const postProfileImageS3 = async (req, res, next) => {
     }
 
     console.log(file, 'file---');  // Log the uploaded file
-
+    let params;
     // Define parameters for S3 upload
-    const params = {
+    if(file.mimetype === 'application/pdf'){
+    params = {
         Bucket: process.env.S3_BUCKET_NAME,
         // Key: `${id}/verificationfiles/${file.originalname}`, // File name you want to save in S3
         Key: `Account_verification/${id}-${name}/verificationfiles/verification.pdf`, // File name you want to save in S3
         Body: file.buffer,
         ContentType: file.mimetype,
     };
+    }else{
+        params = {
+            Bucket: process.env.S3_BUCKET_NAME,
+            // Key: `${id}/verificationfiles/${file.originalname}`, // File name you want to save in S3
+            Key: `Market_listing/${id}-${name}/${file.originalname}`, // File name you want to save in S3
+            Body: file.buffer,
+            ContentType: file.mimetype,
+        };  
+    }
+    // Define parameters for S3 upload
+    
 
     try {
         const uploadResult = await new Upload({
