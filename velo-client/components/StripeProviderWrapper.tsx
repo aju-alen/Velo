@@ -28,7 +28,6 @@ const StripeProviderWrapper = ({ children }) => {
   return (
     <StripeProvider
       publishableKey={publishableKey}
-       stripeAccountId='acct_1Qd2baFSt8CaQXX7'
     >
       {children}
     </StripeProvider>

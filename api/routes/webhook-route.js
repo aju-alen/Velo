@@ -1,9 +1,8 @@
 import express from "express";
 const router = express.Router();
-import {getKeys,createPaymentIntent,webhook} from '../controllers/stripe-controller.js'
+import {webhook} from '../controllers/webhook-controller.js'
 import { verifyToken } from "../middlewares/jwtVerify.js";
-router.get('/get-keys',getKeys)
-router.post('/create-payment-intent',createPaymentIntent)
+
 router.post(
     "/webhook",
     express.raw({ type: "application/json" }),

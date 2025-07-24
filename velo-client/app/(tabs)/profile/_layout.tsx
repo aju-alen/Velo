@@ -16,7 +16,7 @@ export default function ProfileLayout() {
                 name="settings-outline"
                 size={24}
                 color={colorScheme === 'dark'? '#fff' : '#000' }
-                onPress={()=>router.push('/(tabs)/profile/settings')}
+                onPress={()=>router.push('/(tabs)/profile/settings/settingsHome')}
                 />
             )
             }}/>

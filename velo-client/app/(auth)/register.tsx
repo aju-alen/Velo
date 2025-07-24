@@ -127,7 +127,7 @@ const Register = () => {
         password,
         role
       }))
-      router.replace('/mobileInput')
+      router.replace('/(auth)/mobileInput')
       setButtonLoading(false)
     }
   }
@@ -227,7 +227,7 @@ const Register = () => {
 
               <ThemedView style={styles.buttonWrapper}>
                 <CustomButton 
-                  disableButton={buttonLoading || !isFormValid()}
+                  disableButton={buttonLoading }
                   buttonText='Register'
                   handlePress={handleRegister}
                 />

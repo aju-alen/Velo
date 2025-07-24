@@ -18,9 +18,15 @@ import { ipURL } from '@/constants/backendUrl';
 import * as SecureStore from 'expo-secure-store';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import useLoginAccountStore from '@/store/loginAccountStore';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 
 const Login = () => {
+
+
+const iconColor = useThemeColor({}, 'icon');
+const placeholderColor = useThemeColor({}, 'text'); 
+
   const { setAccountLoginData } = useLoginAccountStore();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -58,11 +64,11 @@ const Login = () => {
       }
       else if(checkIfAlreadyRegistered.data.accountExists.registerVerificationStatus === "APPOINTMENT_BOOKED" && checkIfAlreadyRegistered.data.accountExists.role === "AGENT" ){
         await SecureStore.setItemAsync('registerDetail', JSON.stringify(checkIfAlreadyRegistered.data.accountExists))
-        router.replace('/(tabs)/home')
+        router.replace('/(tabs)/home/homeMainPage')
       }
       else if(checkIfAlreadyRegistered.data.accountExists.registerVerificationStatus === "LOGGED_IN" && checkIfAlreadyRegistered.data.accountExists.role === "AGENT" ){
         await SecureStore.setItemAsync('registerDetail', JSON.stringify(checkIfAlreadyRegistered.data.accountExists))
-        router.replace('/(tabs)/home')
+        router.replace('/(tabs)/home/homeMainPage')
       }
       else if (checkIfAlreadyRegistered.data.accountExists.registerVerificationStatus === "PARTIAL" && checkIfAlreadyRegistered.data.accountExists.role === "USER" ) {
         await SecureStore.setItemAsync('registerDetail', JSON.stringify(checkIfAlreadyRegistered.data.accountExists))
@@ -70,15 +76,15 @@ const Login = () => {
       }
       else if (checkIfAlreadyRegistered.data.accountExists.registerVerificationStatus === "LOGGED_IN" && checkIfAlreadyRegistered.data.accountExists.role === "USER" ) {
         await SecureStore.setItemAsync('registerDetail', JSON.stringify(checkIfAlreadyRegistered.data.accountExists))
-        router.replace('/(tabs)/home')
+        router.replace('/(tabs)/home/homeMainPage')
       }
       else if (checkIfAlreadyRegistered.data.accountExists.registerVerificationStatus === "SUPERADMINLOGGEDIN" && checkIfAlreadyRegistered.data.accountExists.role === "SUPERADMIN" ) {
         await SecureStore.setItemAsync('registerDetail', JSON.stringify(checkIfAlreadyRegistered.data.accountExists))
-        router.replace('/(tabs)/home')
+        router.replace('/(tabs)/home/homeMainPage')
       }
       else if (checkIfAlreadyRegistered.data.accountExists.registerVerificationStatus === "LOGGED_IN" && checkIfAlreadyRegistered.data.accountExists.role === "SUB_AGENT" ) {
         await SecureStore.setItemAsync('registerDetail', JSON.stringify(checkIfAlreadyRegistered.data.accountExists))
-        router.replace('/(tabs)/home')
+        router.replace('/(tabs)/home/homeMainPage')
       }
       else {
         Alert.alert('Error', 'Something went wrong')
@@ -111,13 +117,13 @@ const Login = () => {
                 <MaterialIcons name="email" size={20} color="gray" style={styles.inputIcon} />
                 <TextInput
                   placeholder="Enter your email"
-                  placeholderTextColor="gray"
+                  placeholderTextColor={placeholderColor}
                   value={email}
                   autoCapitalize='none'
                   onChangeText={setEmail}
                   keyboardType='email-address'
                   autoComplete='email'
-                  style={styles.input}
+                  style={[styles.input,{color:placeholderColor}]}
                 />
               </ThemedView>
             </ThemedView>
@@ -128,11 +134,11 @@ const Login = () => {
                 <MaterialIcons name="lock" size={20} color="gray" style={styles.inputIcon} />
                 <TextInput
                   placeholder="Enter your password"
-                  placeholderTextColor="gray"
+                  placeholderTextColor={placeholderColor}
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry={!showPassword}
-                  style={[styles.input, { flex: 1 }]}
+                  style={[styles.input, { flex: 1 ,color:placeholderColor}]}
                 />
                 <TouchableWithoutFeedback onPress={() => setShowPassword(!showPassword)}>
                   <MaterialIcons 

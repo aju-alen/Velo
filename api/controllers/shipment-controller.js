@@ -248,6 +248,8 @@ export const agentUpdatePickedUpStatus = async (req, res, next) => {
     console.log(req.body, 'req.body in pick up');
     console.log(req.params, 'req.params in pick up');
     const { shipmentStatus, imageUrl, status } = req.body;
+    console.log(req.body,'req.body in pick up');
+    
 
     try {
         const statusKeyMap = {

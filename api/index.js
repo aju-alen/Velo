@@ -13,6 +13,7 @@ import stripeRoutes from './routes/stripe-route.js';
 import riseRoutes from './routes/rise-route.js';
 import shipmentRoutes from './routes/shipment-route.js';
 import agentOrganisationRoutes from './routes/organisation-route.js';
+import webhookRoutes from './routes/webhook-route.js';
 
 const app = express();
 app.use(cors({
@@ -26,6 +27,9 @@ app.use(cors({
     ],
 })); 
 app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use('/api/velo-stripe',webhookRoutes)
+
 app.use(bodyParser.json());
 
 app.use('/api/test-routes',superAdminPrivilageRoutes);

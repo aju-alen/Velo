@@ -68,9 +68,22 @@ export const createPaymentIntent = async (req, res, next) => {
     }
 }
 
+const endpointSecret = "whsec_a219c2c88dd666be1bd77588164a2c3bf950a75876b8c1c6abbe09792b6c7069";
 export const webhook = async (req, res, next) => {
     try {
-        const event = req.body;
+      
+        // const event = req.body;
+
+        const sig = req.headers['stripe-signature'];
+
+        let event;
+      
+        try {
+          event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+        } catch (err) {
+          res.status(400).send(`Webhook Error: ${err.message}`);
+          return;
+        }
 
         // Handle the event
         switch (event.type) {
@@ -78,9 +91,6 @@ export const webhook = async (req, res, next) => {
                 const paymentIntent = event.data.object;
                 console.log('PaymentIntent was successful!');
                 
-
-                // Then define and call a method to handle the successful payment intent.
-                // handlePaymentIntentSucceeded(paymentIntent);
                 break;
             case 'charge.succeeded':
                 const chargeSucceeded = event.data.object;

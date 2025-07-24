@@ -377,3 +377,66 @@ export const checkEmailExists = async (req, res, next) => {
         return res.status(500).json({ message: "Error checking email", error: error.message });
     }
 }
+
+export const changePassword = async (req, res) => {
+  const { userId, currentPassword, newPassword } = req.body;
+  try {
+    // Find user (can be agent or user)
+    let user = await prisma.user.findUnique({ where: { id: userId } });
+    let userType = 'user';
+    if (!user) {
+      user = await prisma.agent.findUnique({ where: { id: userId } });
+      userType = 'agent';
+    }
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    // Check current password
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Current password is incorrect' });
+    }
+    // Hash new password and update
+    const hashed = await bcrypt.hash(newPassword, 10);
+    if (userType === 'user') {
+      await prisma.user.update({ where: { id: userId }, data: { password: hashed } });
+    } else {
+      await prisma.agent.update({ where: { id: userId }, data: { password: hashed } });
+    }
+    res.status(200).json({ message: 'Password changed successfully' });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+export const deleteAccount = async (req, res) => {
+  const { userId, password } = req.body;
+  try {
+    // Find user (can be agent or user)
+    let user = await prisma.user.findUnique({ where: { id: userId } });
+    let userType = 'user';
+    if (!user) {
+      user = await prisma.agent.findUnique({ where: { id: userId } });
+      userType = 'agent';
+    }
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    // Check password
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Password is incorrect' });
+    }
+    // Delete user/agent
+    if (userType === 'user') {
+      await prisma.user.delete({ where: { id: userId } });
+    } else {
+      await prisma.agent.delete({ where: { id: userId } });
+    }
+    res.status(200).json({ message: 'Account deleted successfully' });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};

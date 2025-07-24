@@ -10,6 +10,8 @@ import { router } from 'expo-router'
 const ManageTeam = () => {
     const { accountLoginData } = useLoginAccountStore();
     const [manageTeamData, setManageTeamData] = useState(null);
+    console.log(manageTeamData,"manageTeamData");
+    
     
     const getOrganisationData = async () => {
         try {
@@ -85,7 +87,7 @@ const ManageTeam = () => {
                 Number Of Employees: {manageTeamData?.agents.length}
             </ThemedText>
             
-            <TouchableOpacity 
+           {manageTeamData?.superAdminApproval && <TouchableOpacity 
                 style={styles.createEmployeeButton}
                 onPress={() => router.push({ 
                     pathname: '/(tabs)/profile/settings/manageOrg/createNewEmployee', 
@@ -95,7 +97,7 @@ const ManageTeam = () => {
                 <ThemedText style={styles.createEmployeeButtonText}>
                     Create an employee
                 </ThemedText>
-            </TouchableOpacity>
+            </TouchableOpacity>}
             
             <FlatList
                 data={manageTeamData?.agents}

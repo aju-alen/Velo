@@ -30,7 +30,7 @@ const SingleListing = () => {
   }, [singleListing])
 
   const formatPrice = (price) => {
-    return `$${price.toLocaleString()}`
+    return `AED ${price.toLocaleString()}`
   }
 
   const formatDate = (dateString) => {

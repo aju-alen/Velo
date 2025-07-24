@@ -64,7 +64,7 @@ export default function TabLayout() {
           options={{
             title: 'Order',
             tabBarIcon: ({ color, focused }) => (
-              <TabBarIcon name={focused ? 'construct' : 'construct-outline'} color={color} />
+              <TabBarIcon name={focused ? 'newspaper' : 'newspaper-outline'} color={color} />
             ),
             href: (accountLoginData.role === "AGENT")? "/adminorderdetail" : null 
           

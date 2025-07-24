@@ -1,4 +1,4 @@
-import { StyleSheet, TouchableOpacity, Image, View } from 'react-native'
+import { StyleSheet, TouchableOpacity, Image, View, ScrollView, KeyboardAvoidingView, Platform } from 'react-native'
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import React, { useState, useRef, useEffect } from 'react'
 import { ThemedView } from '@/components/ThemedView'
@@ -10,6 +10,7 @@ import useLoginAccountStore from '@/store/loginAccountStore';
 import axiosInstance from '@/constants/axiosHeader';
 import { Picker } from '@react-native-picker/picker';
 import { router } from 'expo-router';
+import { useColorScheme } from '@/hooks/useColorScheme';
 
 // Enum to match Prisma model
 enum ShipmentStatus {
@@ -32,6 +33,11 @@ const AdminUpdateStatus = () => {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<ShipmentStatus>();
   const cameraRef = useRef<any>(null);
+
+  const colorScheme = useColorScheme();
+  const pickerBg = colorScheme === 'dark' ? '#23242A' : '#FFF';
+  const pickerBorder = colorScheme === 'dark' ? '#333' : '#E0E0E0';
+  const pickerText = colorScheme === 'dark' ? '#FFF' : '#222';
 
   // Status options with human-readable labels
   const statusOptions = [
@@ -146,7 +152,7 @@ const AdminUpdateStatus = () => {
         setImageUrl(uploadedImageURL);
         console.log('Image uploaded successfully:', uploadedImageURL);
         await updateShipmentStatus(uploadedImageURL, approvalStatus,selectedStatus);
-        router.push('/(tabs)/home')
+        router.replace('/(tabs)/home/homeMainPage')
       } else {
         console.log('Failed to upload image');
       }
@@ -175,81 +181,103 @@ const AdminUpdateStatus = () => {
   }
 
   return (
-    <ThemedView style={styles.container}>
-      <ThemedText style={styles.title}>Update Status</ThemedText>
-      
-      <View style={styles.pickerContainer}>
-        <Picker
-          selectedValue={selectedStatus}
-          onValueChange={(itemValue) => setSelectedStatus(itemValue as ShipmentStatus)}
-          style={styles.picker}
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={{ flex: 1 }}
+    >
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1, padding: 20 }}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <ThemedText style={styles.title}>Update Status</ThemedText>
+        
+        <ThemedView
+          style={{
+            backgroundColor: pickerBg,
+            borderColor: pickerBorder,
+            borderWidth: 1,
+            borderRadius: 10,
+            minHeight: 48,
+            marginVertical: 12,
+            justifyContent: 'center',
+            width: '100%',
+          }}
         >
-          {statusOptions.map((option) => (
-            <Picker.Item 
-              key={option.value} 
-              label={option.label} 
-              value={option.value}
-            />
-          ))}
-        </Picker>
-      </View>
-
-      <ThemedView style={styles.cameraContainer}>
-        {isPreview && photo ? (
-          <View style={styles.previewContainer}>
-            <Image source={{ uri: photo }} style={styles.preview} />
-            <TouchableOpacity style={styles.retakeButton} onPress={handleRetake}>
-              <ThemedText style={styles.buttonText}>Retake</ThemedText>
-            </TouchableOpacity>
-            {imageUrl && (
-              <View style={styles.uploadSuccess}>
-                <ThemedText style={styles.successText}>Upload Successful!</ThemedText>
-              </View>
-            )}
-          </View>
-        ) : (
-          <CameraView 
-            ref={cameraRef}
-            style={styles.camera} 
-            facing={facing}
+          <Picker
+            selectedValue={selectedStatus}
+            onValueChange={(itemValue) => setSelectedStatus(itemValue as ShipmentStatus)}
+            style={{ color: pickerText, width: '100%' }}
+            dropdownIconColor={pickerText}
           >
-            <ThemedView style={styles.cameraControls}>
-              <TouchableOpacity style={styles.captureButton} onPress={handleCapture}>
-                <View style={styles.captureButtonInner} />
-              </TouchableOpacity>
-              
-              <TouchableOpacity style={styles.flipButton} onPress={toggleCameraFacing}>
-                <ThemedText style={styles.text}>Flip</ThemedText>
-              </TouchableOpacity>
-            </ThemedView>
-          </CameraView>
-        )}
-      </ThemedView>
-      
-      <ThemedView style={styles.buttonContainer}>
-        <TouchableOpacity 
-          style={[
-            styles.button, 
-            styles.approveButton, 
-            (!photo || isUploading) && styles.disabledButton
-          ]} 
-          onPress={() => handleApprove('APPROVED')}
-          disabled={!photo || isUploading}
-        >
-          <ThemedText style={styles.buttonText}>
-            {isUploading ? 'Uploading...' : 'Approve'}
-          </ThemedText>
-        </TouchableOpacity>
+            {statusOptions.map((option) => (
+              <Picker.Item
+                key={option.value}
+                label={option.label}
+                value={option.value}
+                color={pickerText}
+              />
+            ))}
+          </Picker>
+        </ThemedView>
 
-        <TouchableOpacity 
-          style={[styles.button, styles.rejectButton]} 
-          onPress={() => handleApprove('REJECTED')}
-          disabled={isUploading}
-        >
-          <ThemedText style={styles.buttonText}>Reject</ThemedText>
-        </TouchableOpacity>
-      </ThemedView>
-    </ThemedView>
+        <ThemedView style={styles.cameraContainer}>
+          {isPreview && photo ? (
+            <View style={styles.previewContainer}>
+              <Image source={{ uri: photo }} style={styles.preview} />
+              <TouchableOpacity style={styles.retakeButton} onPress={handleRetake}>
+                <ThemedText style={styles.buttonText}>Retake</ThemedText>
+              </TouchableOpacity>
+              {imageUrl && (
+                <View style={styles.uploadSuccess}>
+                  <ThemedText style={styles.successText}>Upload Successful!</ThemedText>
+                </View>
+              )}
+            </View>
+          ) : (
+            <CameraView 
+              ref={cameraRef}
+              style={styles.camera} 
+              facing={facing}
+            >
+              <ThemedView style={styles.cameraControls}>
+                <TouchableOpacity style={styles.captureButton} onPress={handleCapture}>
+                  <View style={styles.captureButtonInner} />
+                </TouchableOpacity>
+                
+                <TouchableOpacity style={styles.flipButton} onPress={toggleCameraFacing}>
+                  <ThemedText style={styles.text}>Flip</ThemedText>
+                </TouchableOpacity>
+              </ThemedView>
+            </CameraView>
+          )}
+        </ThemedView>
+        
+        <ThemedView style={styles.buttonContainer}>
+          <TouchableOpacity 
+            style={[
+              styles.button, 
+              styles.approveButton, 
+              (!photo || isUploading) && styles.disabledButton
+            ]} 
+            onPress={() => handleApprove('APPROVED')}
+            disabled={!photo || isUploading}
+          >
+            <ThemedText style={styles.buttonText}>
+              {isUploading ? 'Uploading...' : 'Approve'}
+            </ThemedText>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={[styles.button, styles.rejectButton]} 
+            onPress={() => handleApprove('REJECTED')}
+            disabled={isUploading}
+          >
+            <ThemedText style={styles.buttonText}>Reject</ThemedText>
+          </TouchableOpacity>
+        </ThemedView>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
