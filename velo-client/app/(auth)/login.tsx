@@ -18,15 +18,10 @@ import { ipURL } from '@/constants/backendUrl';
 import * as SecureStore from 'expo-secure-store';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import useLoginAccountStore from '@/store/loginAccountStore';
-import { useThemeColor } from '@/hooks/useThemeColor';
+
 
 
 const Login = () => {
-
-
-const iconColor = useThemeColor({}, 'icon');
-const placeholderColor = useThemeColor({}, 'text'); 
-
   const { setAccountLoginData } = useLoginAccountStore();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -117,13 +112,13 @@ const placeholderColor = useThemeColor({}, 'text');
                 <MaterialIcons name="email" size={20} color="gray" style={styles.inputIcon} />
                 <TextInput
                   placeholder="Enter your email"
-                  placeholderTextColor={placeholderColor}
+                  placeholderTextColor="gray"
                   value={email}
                   autoCapitalize='none'
                   onChangeText={setEmail}
                   keyboardType='email-address'
                   autoComplete='email'
-                  style={[styles.input,{color:placeholderColor}]}
+                  style={styles.input}
                 />
               </ThemedView>
             </ThemedView>
@@ -134,11 +129,11 @@ const placeholderColor = useThemeColor({}, 'text');
                 <MaterialIcons name="lock" size={20} color="gray" style={styles.inputIcon} />
                 <TextInput
                   placeholder="Enter your password"
-                  placeholderTextColor={placeholderColor}
+                  placeholderTextColor="gray"
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry={!showPassword}
-                  style={[styles.input, { flex: 1 ,color:placeholderColor}]}
+                  style={[styles.input, { flex: 1 }]}
                 />
                 <TouchableWithoutFeedback onPress={() => setShowPassword(!showPassword)}>
                   <MaterialIcons 
