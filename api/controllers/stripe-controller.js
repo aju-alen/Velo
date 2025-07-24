@@ -68,7 +68,6 @@ export const createPaymentIntent = async (req, res, next) => {
     }
 }
 
-const endpointSecret = "whsec_a219c2c88dd666be1bd77588164a2c3bf950a75876b8c1c6abbe09792b6c7069";
 export const webhook = async (req, res, next) => {
     try {
       
