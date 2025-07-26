@@ -19,8 +19,6 @@ import * as SecureStore from 'expo-secure-store';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import useLoginAccountStore from '@/store/loginAccountStore';
 
-
-
 const Login = () => {
   const { setAccountLoginData } = useLoginAccountStore();
   const [email, setEmail] = useState('');

@@ -8,7 +8,6 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { verticalScale,horizontalScale,moderateScale } from '@/constants/metrics';
 import * as SecureStore from 'expo-secure-store';
 import useLoginAccountStore from '@/store/loginAccountStore';
-import { getAuth, signOut } from '@react-native-firebase/auth';
 
 const RootIndex = () => {
   const {setAccountLoginData} = useLoginAccountStore()
@@ -112,11 +111,7 @@ const RootIndex = () => {
             Already have an account? <ThemedText type='link' style={{ color: '#FFAC1C' }} onPress={() => router.replace('/(auth)/login')}>Sign In</ThemedText>
           </ThemedText>
         </ThemedView>
-
-
-        
       </ThemedView>
-      
     
   );
 }

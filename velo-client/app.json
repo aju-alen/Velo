@@ -29,7 +29,7 @@
           "backgroundColor": "#000000"
         }
       },
-      "buildNumber": "3"
+      "buildNumber": "5"
     },
     "android": {
       "googleServicesFile": "./google-services-velo.json",

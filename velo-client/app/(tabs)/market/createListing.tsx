@@ -124,14 +124,15 @@ const CreateListing = () => {
     const uriParts = image.split('.')
     const fileType = uriParts[uriParts.length - 1]
     const formData: any = new FormData()
+    const randomNumber = Math.floor(100000 + Math.random() * 900000)
     formData.append('document1', {
       uri: image,
-      name: `listing-image.${fileType}`,
+      name: `listing-image-${randomNumber}.${fileType}`,
       type: `image/${fileType}`,
     } as any)
     // You can add more fields if your backend expects them
     formData.append('id', String(accountId))
-    formData.append('name', 'listing-image')
+    formData.append('name', '')
     try {
       const response = await fetch(`${ipURL}/api/s3/upload-to-aws`, {
         method: 'POST',
