@@ -36,7 +36,7 @@
   "submit": {
     "production": {
       "android": {
-        // "serviceAccountKeyPath": "",
+        "serviceAccountKeyPath": "velo-intl-service-account.json",
         "track": "internal"
       },
       "ios": {

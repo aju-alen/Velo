@@ -29,7 +29,7 @@
           "backgroundColor": "#000000"
         }
       },
-      "buildNumber": "5"
+      "buildNumber": "6"
     },
     "android": {
       "googleServicesFile": "./google-services-velo.json",
@@ -79,6 +79,14 @@
         "expo-document-picker",
         {
           "iCloudContainerEnvironment": "Production"
+        }
+      ],
+      [
+        "@sentry/react-native/expo",
+        {
+          "url": "https://sentry.io/",
+          "project": "velo-react-native",
+          "organization": "rise-ltd"
         }
       ]
     ],

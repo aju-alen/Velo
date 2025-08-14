@@ -9,11 +9,28 @@ import { PaperProvider } from 'react-native-paper';
 import StripeProviderWrapper from '@/components/StripeProviderWrapper';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import useDefaultTheme from '@/store/themeStore';
+import * as Sentry from '@sentry/react-native';
+
+Sentry.init({
+  dsn: 'https://6c674a7040f065b6c6ea364755723ee4@o4508838422118400.ingest.de.sentry.io/4509823798018128',
+
+  // Adds more context data to events (IP address, cookies, user, etc.)
+  // For more information, visit: https://docs.sentry.io/platforms/react-native/data-management/data-collected/
+  sendDefaultPii: true,
+
+  // Configure Session Replay
+  replaysSessionSampleRate: 0.1,
+  replaysOnErrorSampleRate: 1,
+  integrations: [Sentry.mobileReplayIntegration(), Sentry.feedbackIntegration()],
+
+  // uncomment the line below to enable Spotlight (https://spotlightjs.com)
+  // spotlight: __DEV__,
+});
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
-export default function RootLayout() {
+export default Sentry.wrap(function RootLayout() {
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({
     Montserrat: require('../assets/fonts/Montserrat-Regular.ttf'),
@@ -45,4 +62,4 @@ export default function RootLayout() {
     </ThemeProvider>
     </PaperProvider>
   );
-}
+});
