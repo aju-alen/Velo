@@ -1,7 +1,5 @@
-import { StyleSheet, Text, TouchableOpacity, View, FlatList, Dimensions,ActivityIndicator } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, FlatList, Dimensions, ActivityIndicator, useColorScheme } from 'react-native';
 import React, { useEffect, useState } from 'react';
-import { ThemedView } from '@/components/ThemedView';
-import { ThemedText } from '@/components/ThemedText';
 import CustomButton from '@/components/CustomButton';
 import * as SecureStore from 'expo-secure-store';
 import { horizontalScale, moderateScale, verticalScale } from '@/constants/metrics';
@@ -14,6 +12,7 @@ import useLoginAccountStore from '@/store/loginAccountStore';
 import useShipmentStore from '@/store/shipmentStore';
 import axiosInstance, { setAuthorizationHeader } from '@/constants/axiosHeader';
 import { signOut, getAuth } from '@react-native-firebase/auth';
+import { Colors } from '@/constants/Colors';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = (width - horizontalScale(40) - horizontalScale(32)) / 3;
@@ -26,16 +25,22 @@ const HomeMainPage = () => {
   const [categoryData, setCategoryData] = useState([]);
   const [accountName, setAccountName] = useState('');
   const [loading, setLoading] = useState(true);
+  
+  const colorScheme = useColorScheme() ?? 'light';
+  const themeColors = Colors[colorScheme];
 
   useEffect(() => {
     
     const getCategoryData = async () => {
+      console.log('getCategoryData entered here');
+      
       const getAccountDetails = await SecureStore.getItemAsync('registerDetail');
+      console.log(getAccountDetails,'getAccountDetails----11----');
       
       setAccountName(JSON.parse(getAccountDetails).name);
 
       setAuthorizationHeader(accountLoginData.token);
-      const getCategory = await axiosInstance.get(`/api/category/get-all-categories`);
+      const getCategory = await axios.get(`${ipURL}/api/category/get-all-categories`);
       setCategoryData(getCategory.data);
       setLoading(false);
     };
@@ -70,21 +75,21 @@ const HomeMainPage = () => {
         activeOpacity={0.7} 
         onPress={() => router.push({ pathname:'/(tabs)/market/marketHome', params:{catId}})}
       >
-        <ThemedView style={styles.marketplaceCardContainer}>
+        <View style={[styles.marketplaceCardContainer, { backgroundColor: themeColors.background }]}>
           <LinearGradient
             colors={gradientColors as [string, string]}
             style={styles.cardGradient}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
           >
-            <ThemedView style={styles.iconContainer}>
+            <View style={styles.iconContainer}>
               <MaterialIcons name={item.categoryImgUrl} size={28} color="#FFAC1C" />
-            </ThemedView>
-            <ThemedText style={styles.categoryText} type='catText'>
+            </View>
+            <Text style={[styles.categoryText, { color: themeColors.text }]} type ='catText' >
               {item.name}
-            </ThemedText>
+            </Text>
           </LinearGradient>
-        </ThemedView>
+        </View>
       </TouchableOpacity>
     );
   };
@@ -103,43 +108,43 @@ const HomeMainPage = () => {
   };
 
   const ListHeader = () => (
-    <ThemedView style={styles.header}>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type='subtitle' style={styles.marketplaceTitle}>Marketplace</ThemedText>
-        <ThemedText style={styles.subTitle}>Explore categories</ThemedText>
-      </ThemedView>
+    <View style={[styles.header, { backgroundColor: themeColors.background }]}>
+      <View style={styles.titleContainer}>
+        <Text style={[styles.marketplaceTitle, { color: themeColors.text }]}>Marketplace</Text>
+        <Text style={[styles.subTitle, { color: themeColors.text }]}>Explore categories</Text>
+      </View>
       <TouchableOpacity style={styles.viewAllButton} onPress={()=>router.push({pathname:'/(tabs)/market/marketHome',params:{catId:'undefined'}})}>
-        <ThemedText style={styles.viewAllText}>View All</ThemedText>
+        <Text style={styles.viewAllText}>View All</Text>
         <MaterialIcons name="arrow-forward-ios" size={16} color="#FFAC1C" />
       </TouchableOpacity>
-    </ThemedView>
+    </View>
   );
 
   return (
-    <ThemedView style={styles.container}>
+    <View style={[styles.container, { backgroundColor: themeColors.background }]}>
 
       {loading?
-        <ThemedView style={{flex:1,justifyContent:'center',alignItems:'center'}}>
+        <View style={[styles.loadingContainer, { backgroundColor: themeColors.background }]}>
         <ActivityIndicator size="large" color="gray" />
-        </ThemedView>
+        </View>
       :
       <>
-      <ThemedView style={styles.topBar}>
-        <ThemedView>
-          <ThemedText type='logoText'>Home</ThemedText>
-          <ThemedText style={styles.welcomeText}>Welcome {accountName}</ThemedText>
-        </ThemedView>
+      <View style={[styles.topBar, { backgroundColor: themeColors.background }]}>
+        <View>
+          <Text style={[styles.logoText, { color: '#FFAC1C' }]}>Home</Text>
+          <Text style={[styles.welcomeText, { color: themeColors.text }]}>Welcome {accountName}</Text>
+        </View>
         <TouchableOpacity onPress={handleLogout} style={styles.deleteButton}>
           <MaterialIcons name="logout" size={24} color="#FF6B6B" />
         </TouchableOpacity>
-      </ThemedView>
+      </View>
 
       {/* Create Shipment Section */}
       <TouchableOpacity onPress={()=>{
         setEditData(false)
         router.push('/(tabs)/home/createShipment/createShipmentHome')}} activeOpacity={0.7}>
 
-       {accountLoginData.role === "USER" && <ThemedView style={styles.createShipmentContainer}>
+       {accountLoginData.role === "USER" && <View style={[styles.createShipmentContainer, { backgroundColor: themeColors.background }]}>
 
           <LinearGradient
             colors={getGradientColors(9) as [string, string]}
@@ -148,15 +153,34 @@ const HomeMainPage = () => {
             end={{ x: 1, y: 1 }}
           >
             <MaterialIcons name="local-shipping" size={60} color="#FFAC1C" />
-            <ThemedText style={styles.marketplaceTitle}>Create a Shipment</ThemedText>
-            <ThemedText style={styles.subTitle}>Ship your items with ease</ThemedText>
+            <Text style={[styles.marketplaceTitle, { color: themeColors.text }]}>Create a Shipment</Text>
+            <Text style={[styles.subTitle, { color: themeColors.text }]}>Ship your items with ease</Text>
             </LinearGradient>
-        </ThemedView>}
+        </View>}
+      </TouchableOpacity>
+
+        <TouchableOpacity onPress={()=>{
+        setEditData(false)
+        router.push('/(tabs)/home/createShipment/createShipmentHome')}} activeOpacity={0.7}>
+
+       {accountLoginData.role === "USER" && <View style={[styles.createShipmentContainer, { backgroundColor: themeColors.background }]}>
+
+          <LinearGradient
+            colors={getGradientColors(9) as [string, string]}
+            style={styles.cardGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            <MaterialIcons name="local-shipping" size={60} color="#FFAC1C" />
+            <Text style={[styles.marketplaceTitle, { color: themeColors.text }]}>Create a Shipment</Text>
+            <Text style={[styles.subTitle, { color: themeColors.text }]}>Ship your items with ease</Text>
+            </LinearGradient>
+        </View>}
       </TouchableOpacity>
 
       
       {/* Marketplace Section */}
-      <ThemedView style={styles.marketplaceContainer}>
+      <View style={[styles.marketplaceContainer, { backgroundColor: themeColors.background }]}>
         <FlatList
           ListHeaderComponent={ListHeader}
           style={styles.marketplaceFlatlistContainer}
@@ -168,10 +192,10 @@ const HomeMainPage = () => {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.flatListContent}
         />
-      </ThemedView>
+      </View>
       </>}
 
-    </ThemedView>
+    </View>
   );
 };
 
@@ -183,11 +207,21 @@ const styles = StyleSheet.create({
     paddingTop: verticalScale(60),
     paddingHorizontal: horizontalScale(20),
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   topBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: verticalScale(24),
+  },
+  logoText: {
+    fontSize: moderateScale(40),
+    lineHeight: moderateScale(56),
+    fontWeight: 'bold',
   },
   welcomeText: {
     fontSize: moderateScale(14),
@@ -264,6 +298,7 @@ const styles = StyleSheet.create({
   categoryText: {
     textAlign: 'center',
     fontSize: moderateScale(13),
+    lineHeight: moderateScale(16),
     fontWeight: '500',
   },
   marketplaceFlatlistContainer: {

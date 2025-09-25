@@ -1,20 +1,26 @@
 import React, { useState, useRef } from 'react';
-import { StyleSheet, Text, View, Image, Animated, Easing } from 'react-native';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { StyleSheet, Text, View, Image, Animated, Easing, useColorScheme } from 'react-native';
 import { TouchableOpacity } from 'react-native';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import CustomButton from '@/components/CustomButton';
 import { verticalScale, horizontalScale, moderateScale } from '@/constants/metrics';
 import { router } from 'expo-router';
+import { Colors } from '@/constants/Colors';
 
 const ChooseRole = () => {
   const [role, setRole] = useState('USER');
   const userBlobAnim = useRef(new Animated.Value(1)).current;
   const agentBlobAnim = useRef(new Animated.Value(0)).current;
+  
+  const colorScheme = useColorScheme() ?? 'light';
+  const themeColors = Colors[colorScheme];
 
   const handleContinueRegister = () => {
-    router.replace({ pathname: "/register", params: { role } });
+    if (role === 'GUEST') {
+      router.replace({ pathname: '/(auth)/guestOnboarding' });
+    } else {
+      router.replace({ pathname: "/register", params: { role } });
+    }
   };
 
   const handlePress = (selectedRole) => {
@@ -33,6 +39,18 @@ const ChooseRole = () => {
         useNativeDriver: false,
       }).start();
     } else if (selectedRole === 'AGENT') {
+      Animated.timing(agentBlobAnim, {
+        toValue: 1,
+        duration: 400,
+        easing: Easing.out(Easing.exp),
+        useNativeDriver: false,
+      }).start();
+      Animated.timing(userBlobAnim, {
+        toValue: 0,
+        duration: 400,
+        useNativeDriver: false,
+      }).start();
+    } else if (selectedRole === 'GUEST') {
       Animated.timing(agentBlobAnim, {
         toValue: 1,
         duration: 400,
@@ -71,10 +89,10 @@ const ChooseRole = () => {
           style={styles.reactLogo}
         />
       }>
-      <ThemedView style={styles.container}>
-        <ThemedText type="title" style={styles.title}>Select Role</ThemedText>
+      <View style={[styles.container, { backgroundColor: themeColors.background }]}>
+        <Text style={[styles.title, { color: themeColors.text }]}>Select Role</Text>
 
-        <ThemedView style={styles.cardsContainer}>
+        <View style={styles.cardsContainer}>
           {/* User Role Card */}
           <TouchableOpacity 
             style={[
@@ -84,17 +102,17 @@ const ChooseRole = () => {
             onPress={() => handlePress('USER')}
           >
             <Animated.View style={[styles.blobBackground, blobStyle(userBlobAnim)]} />
-            <ThemedView style={styles.cardContent}>
+            <View style={[styles.cardContent, { backgroundColor: themeColors.background }]}>
            
-              <ThemedView style={styles.textContainer}>
-                <ThemedText type="subtitle" style={styles.roleTitle}>
+              <View style={styles.textContainer}>
+                <Text style={[styles.roleTitle, { color: themeColors.text }]}>
                   I am a Sender
-                </ThemedText>
-                <ThemedText style={styles.roleDescription}>
+                </Text>
+                <Text style={[styles.roleDescription, { color: themeColors.text }]}>
                 Sign up to connect with logistics agents and manage your shipments. Move your goods with ease.
-                </ThemedText>
-              </ThemedView>
-            </ThemedView>
+                </Text>
+              </View>
+            </View>
           </TouchableOpacity>
 
           {/* Agent Role Card */}
@@ -106,22 +124,44 @@ const ChooseRole = () => {
             onPress={() => handlePress('AGENT')}
           >
             <Animated.View style={[styles.blobBackground, blobStyle(agentBlobAnim)]} />
-            <ThemedView style={styles.cardContent}>
+            <View style={[styles.cardContent, { backgroundColor: themeColors.background }]}>
             
-              <ThemedView style={styles.textContainer}>
-                <ThemedText type="subtitle" style={styles.roleTitle}>
+              <View style={styles.textContainer}>
+                <Text style={[styles.roleTitle, { color: themeColors.text }]}>
                   I am an Logistics Agent
-                </ThemedText>
-                <ThemedText style={styles.roleDescription}>
+                </Text>
+                <Text style={[styles.roleDescription, { color: themeColors.text }]}>
                 Log in to coordinate shipments and simplify the delivery process through our digital platform.
-                </ThemedText>
-              </ThemedView>
-            </ThemedView>
+                </Text>
+              </View>
+            </View>
           </TouchableOpacity>
-        </ThemedView>
+
+           {/* Guest Role Card */}
+           <TouchableOpacity 
+            style={[
+              styles.card,
+              role === 'GUEST' && styles.selectedCard
+            ]}
+            onPress={() => handlePress('GUEST')}
+          >
+            <Animated.View style={[styles.blobBackground, blobStyle(agentBlobAnim)]} />
+            <View style={[styles.cardContent, { backgroundColor: themeColors.background }]}>
+            
+              <View style={styles.textContainer}>
+                <Text style={[styles.roleTitle, { color: themeColors.text }]}>
+                  I am a Guest
+                </Text>
+                <Text style={[styles.roleDescription, { color: themeColors.text }]}>
+                Sign up to explore our platform and get a feel for the service.
+                </Text>
+              </View>
+            </View>
+          </TouchableOpacity>
+        </View>
 
         <CustomButton buttonText="Continue" handlePress={handleContinueRegister} />
-      </ThemedView>
+      </View>
     </ParallaxScrollView>
   );
 };
@@ -136,8 +176,10 @@ const styles = StyleSheet.create({
     marginTop: verticalScale(40),
   },
   title: {
-    marginBottom: verticalScale(30),
+    fontSize: moderateScale(32),
+    lineHeight: moderateScale(44),
     fontWeight: 'bold',
+    marginBottom: verticalScale(30),
   },
   cardsContainer: {
     width: '100%',
@@ -177,11 +219,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   roleTitle: {
-    fontWeight: '600',
+    fontSize: moderateScale(20),
+    lineHeight: moderateScale(28),
+    fontWeight: 'bold',
     marginBottom: verticalScale(4),
   },
   roleDescription: {
     fontSize: moderateScale(14),
+    lineHeight: moderateScale(22),
     opacity: 0.8,
   },
   blobBackground: {
