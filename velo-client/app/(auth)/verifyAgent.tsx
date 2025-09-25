@@ -1,15 +1,17 @@
-import { StyleSheet, TouchableOpacity, Animated, View,ActivityIndicator } from 'react-native'
+import { StyleSheet, TouchableOpacity, Animated, View, ActivityIndicator, Text, useColorScheme } from 'react-native'
 import React, { useState, useEffect, useRef } from 'react'
-import { ThemedView } from '@/components/ThemedView'
-import { ThemedText } from '@/components/ThemedText'
 import * as DocumentPicker from 'expo-document-picker'
 import { ipURL } from '@/constants/backendUrl'
 import { Entypo, MaterialCommunityIcons } from '@expo/vector-icons'
 import { moderateScale, verticalScale, horizontalScale } from '@/constants/metrics'
 import * as SecureStore from 'expo-secure-store'
 import { router } from 'expo-router'
+import { Colors } from '@/constants/Colors'
 
 const VerifyAgent = () => {
+  const colorScheme = useColorScheme() ?? 'light';
+  const themeColors = Colors[colorScheme];
+  
   const [doc1, setDoc1] = useState(null)
   const [docUrl, setDocUrl] = useState(null)
   const [userId, setUserId] = useState(null)
@@ -136,16 +138,16 @@ const VerifyAgent = () => {
   })
 
   return (
-    <ThemedView style={styles.container}>
+    <View style={[styles.container, { backgroundColor: themeColors.background }]}>
       <View style={styles.header}>
         <MaterialCommunityIcons 
           name="upload" 
           size={moderateScale(48)} 
           color="#FFAC1C" 
         />
-        <ThemedText type='title' style={styles.title}>
+        <Text style={[styles.title, { color: themeColors.text }]}>
           Verification Process
-        </ThemedText>
+        </Text>
       </View>
 
       <View style={styles.content}>
@@ -154,29 +156,29 @@ const VerifyAgent = () => {
             <View style={styles.successIcon}>
               <Entypo name="check" size={moderateScale(24)} color="#4CAF50" />
             </View>
-            <ThemedText type='default' style={styles.successText}>
+            <Text style={[styles.successText, { color: themeColors.text }]}>
               Document Successfully Uploaded
-            </ThemedText>
-            <ThemedText type='mini' style={styles.verifyText}>
+            </Text>
+            <Text style={[styles.verifyText, { color: themeColors.text }]}>
               We'll verify your document and notify you soon
-            </ThemedText>
+            </Text>
           </View>
         ) : (
           <View style={styles.instructionsContainer}>
-            <ThemedText type='default' style={styles.instructionTitle}>
+            <Text style={[styles.instructionTitle, { color: themeColors.text }]}>
               Document Requirements:
-            </ThemedText>
+            </Text>
             <View style={styles.requirementItem}>
               <Entypo name="dot-single" size={moderateScale(20)} color="#FFAC1C" />
-              <ThemedText type='mini'>National ID or Passport only</ThemedText>
+              <Text style={[styles.requirementText, { color: themeColors.text }]}>National ID or Passport only</Text>
             </View>
             <View style={styles.requirementItem}>
               <Entypo name="dot-single" size={moderateScale(20)} color="#FFAC1C" />
-              <ThemedText type='mini'>PDF format, max 3MB</ThemedText>
+              <Text style={[styles.requirementText, { color: themeColors.text }]}>PDF format, max 3MB</Text>
             </View>
             <View style={styles.requirementItem}>
               <Entypo name="dot-single" size={moderateScale(20)} color="#FFAC1C" />
-              <ThemedText type='mini'>Clear and legible scan</ThemedText>
+              <Text style={[styles.requirementText, { color: themeColors.text }]}>Clear and legible scan</Text>
             </View>
           </View>
         )}
@@ -200,9 +202,9 @@ const VerifyAgent = () => {
               {isUploading ? (
                 <>
                   <ActivityIndicator color="white" style={styles.uploadingIndicator} />
-                  <ThemedText style={styles.uploadButtonText}>
+                  <Text style={styles.uploadButtonText}>
                     Uploading...
-                  </ThemedText>
+                  </Text>
                   <Animated.View 
                     style={[
                       styles.progressBar,
@@ -211,7 +213,7 @@ const VerifyAgent = () => {
                   />
                 </>
               ) : (
-                <ThemedText style={styles.uploadButtonText}>
+                <Text style={styles.uploadButtonText}>
                   {docUrl ? (
                     <>
                       <Entypo name="check" size={moderateScale(16)} color="white" />
@@ -223,16 +225,16 @@ const VerifyAgent = () => {
                       {" "}Upload Document
                     </>
                   )}
-                </ThemedText>
+                </Text>
               )}
             </Animated.View>
           </TouchableOpacity>
         ) : (
           <View style={styles.notEligibleContainer}>
             <MaterialCommunityIcons name="alert-circle-outline" size={moderateScale(24)} color="#FF6B6B" />
-            <ThemedText type='default' style={styles.notEligibleText}>
+            <Text style={[styles.notEligibleText, { color: themeColors.text }]}>
               Contact administrator for upload eligibility
-            </ThemedText>
+            </Text>
           </View>
         )}
       </View>
@@ -251,12 +253,12 @@ const VerifyAgent = () => {
             onPress={() => router.replace('/finalRegisterForm')}
             style={styles.nextButton}
           >
-            <ThemedText style={styles.nextButtonText}>Continue</ThemedText>
+            <Text style={styles.nextButtonText}>Continue</Text>
             <Entypo name="chevron-right" size={moderateScale(20)} color="white" />
           </TouchableOpacity>
         </Animated.View>
       )}
-    </ThemedView>
+    </View>
   )
 }
 
@@ -295,6 +297,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: verticalScale(8),
+  },
+  requirementText: {
+    marginLeft: horizontalScale(8),
+    fontSize: moderateScale(14),
   },
   successContainer: {
     alignItems: 'center',

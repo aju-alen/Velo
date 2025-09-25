@@ -1,17 +1,16 @@
-import { FlatList, StyleSheet, TouchableOpacity, Image, ActivityIndicator, TextInput, Alert } from 'react-native'
+import { FlatList, StyleSheet, TouchableOpacity, Image, ActivityIndicator, TextInput, Alert, View, Text, useColorScheme } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { ThemedView } from '@/components/ThemedView'
-import { ThemedText } from '@/components/ThemedText'
 import { verticalScale, horizontalScale, moderateScale } from '@/constants/metrics'
 import { router, useLocalSearchParams } from 'expo-router'
 import axios from 'axios'
 import { ipURL } from '@/constants/backendUrl'
 import MaterialIcons from '@expo/vector-icons/MaterialIcons'
 import * as SecureStore from 'expo-secure-store'
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { Colors } from '@/constants/Colors';
 
 const MarketHome = () => {
-  const colorScheme = useColorScheme();
+  const colorScheme = useColorScheme() ?? 'light';
+  const themeColors = Colors[colorScheme];
   const [accountDetails, setAccountDetails] = useState(null);
 
   const [getCatIdListing, setGetCatIdListing] = useState([]);
@@ -63,9 +62,9 @@ const MarketHome = () => {
 
   if (loading) {
     return (
-      <ThemedView style={styles.loadingContainer}>
+      <View style={[styles.loadingContainer, { backgroundColor: themeColors.background }]}>
         <ActivityIndicator size="large" color="#FFAC1C" />
-      </ThemedView>
+      </View>
     )
   }
 
@@ -76,43 +75,42 @@ const MarketHome = () => {
         style={styles.cardContainer}
         onPress={() => router.push(`/(tabs)/market/${item.id}`)}
       >
-        <ThemedView style={[styles.card,{elevation:colorScheme === 'dark'? 8 :2}]}>
-          <ThemedView style={styles.imageContainer}>
+        <View style={[styles.card, { backgroundColor: themeColors.background, elevation: colorScheme === 'dark' ? 8 : 2 }]}>
+          <View style={styles.imageContainer}>
             <Image source={{uri:item.imageUrl}} style={styles.image} />
-          </ThemedView>
+          </View>
 
-          <ThemedView style={styles.contentContainer}>
-            <ThemedView style={styles.headerContainer}>
-              <ThemedText type="defaultSemiBold" style={styles.title} numberOfLines={1}>
+          <View style={styles.contentContainer}>
+            <View style={styles.headerContainer}>
+              <Text style={[styles.title, { color: themeColors.text }]} numberOfLines={1}>
                 {item.title}
-              </ThemedText>
-              <ThemedText type="defaultSemiBold" style={styles.price}>
+              </Text>
+              <Text style={[styles.price, { color: '#FFAC1C' }]}>
                 {formatPrice(item.price)}
-              </ThemedText>
-            </ThemedView>
+              </Text>
+            </View>
 
-            <ThemedText
-              type="default"
-              style={styles.description}
+            <Text
+              style={[styles.description, { color: themeColors.text }]}
               numberOfLines={2}
             >
               {item.description}
-            </ThemedText>
+            </Text>
 
-            <ThemedView style={styles.footer}>
-              <ThemedView style={styles.infoTag}>
+            <View style={styles.footer}>
+              <View style={styles.infoTag}>
                 <MaterialIcons name="access-time" size={16} color="#666" />
-                <ThemedText type="mini" style={styles.infoText}>
+                <Text style={[styles.infoText, { color: themeColors.text }]}>
                   {new Date(item.createdAt).toLocaleDateString()}
-                </ThemedText>
-              </ThemedView>
+                </Text>
+              </View>
 
-              <ThemedText type="mini" style={styles.viewButtonText}>
+              <Text style={[styles.viewButtonText, { color: '#FFAC1C' }]}>
                 Condition: {item.condition}
-              </ThemedText>
-            </ThemedView>
-          </ThemedView>
-        </ThemedView>
+              </Text>
+            </View>
+          </View>
+        </View>
       </TouchableOpacity>
     )
   }
@@ -120,25 +118,25 @@ const MarketHome = () => {
   
 
   return (
-    <ThemedView style={styles.container}>
-      <ThemedView style={styles.header}>
-      <ThemedText type='logoText'>Velo</ThemedText>
+    <View style={[styles.container, { backgroundColor: themeColors.background }]}>
+      <View style={[styles.header, { backgroundColor: themeColors.background }]}>
+      <Text style={[styles.logoText, { color: '#FFAC1C' }]}>Velo</Text>
       {accountDetails?.role === "AGENT" && (
         <TouchableOpacity
 
           style={styles.createAdButton}
           onPress={handleButtonPress}
         >
-          <ThemedText style={styles.createAdText}>Create an ad</ThemedText>
+          <Text style={styles.createAdText}>Create an ad</Text>
         </TouchableOpacity>
       )}
-    </ThemedView>
+    </View>
 
-      <ThemedView style={styles.searchContainer}>
+      <View style={[styles.searchContainer, { backgroundColor: themeColors.background }]}>
         <MaterialIcons name="search" size={20} color="#666" style={styles.searchIcon} />
         <TextInput
 
-          style={styles.searchInput}
+          style={[styles.searchInput, { color: themeColors.text }]}
           placeholder="Search listings..."
           value={searchQuery}
           onChangeText={setSearchQuery}
@@ -147,7 +145,7 @@ const MarketHome = () => {
         <TouchableOpacity>
           <MaterialIcons name="filter-list" size={24} color="#666" />
         </TouchableOpacity>
-      </ThemedView>
+      </View>
 
       <FlatList
         data={filteredListings}
@@ -155,9 +153,9 @@ const MarketHome = () => {
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContainer}
         showsVerticalScrollIndicator={false}
-        ItemSeparatorComponent={() => <ThemedView style={styles.separator} />}
+        ItemSeparatorComponent={() => <View style={[styles.separator, { backgroundColor: themeColors.background }]} />}
       />
-    </ThemedView>
+    </View>
   )
 }
 
@@ -180,6 +178,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: verticalScale(16),
   },
+  logoText: {
+    fontSize: moderateScale(40),
+    lineHeight: moderateScale(56),
+    fontWeight: 'bold',
+  },
   createAdButton: {
     backgroundColor: '#FFAC1C',
     paddingHorizontal: horizontalScale(16),
@@ -194,7 +197,6 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-
     borderRadius: moderateScale(12),
     paddingHorizontal: horizontalScale(12),
     marginBottom: verticalScale(20),
@@ -206,7 +208,6 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: moderateScale(16),
-    color: '#666',
     marginRight: horizontalScale(8),
   },
   listContainer: {
@@ -254,16 +255,18 @@ const styles = StyleSheet.create({
   title: {
     flex: 1,
     fontSize: moderateScale(16),
+    lineHeight: moderateScale(22),
+    fontWeight: '600',
     marginRight: horizontalScale(8),
   },
   price: {
-    color: '#FFAC1C',
     fontSize: moderateScale(16),
+    lineHeight: moderateScale(22),
+    fontWeight: '600',
   },
   description: {
-    fontSize: moderateScale(14),
-    color: '#666',
-    lineHeight: moderateScale(20),
+    fontSize: moderateScale(16),
+    lineHeight: moderateScale(22),
     marginBottom: verticalScale(8),
   },
   footer: {
@@ -276,11 +279,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   infoText: {
-    color: '#666',
+    fontSize: moderateScale(12),
+    lineHeight: moderateScale(16),
     marginLeft: horizontalScale(4),
   },
   viewButtonText: {
-    color: '#FFAC1C',
+    fontSize: moderateScale(12),
+    lineHeight: moderateScale(16),
     marginRight: horizontalScale(4),
   },
   separator: {

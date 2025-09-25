@@ -1,17 +1,16 @@
 import React, { useState } from 'react'
-import { StyleSheet, TextInput, ScrollView, Platform, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard } from 'react-native';
-import { ThemedView } from '@/components/ThemedView'
-import { ThemedText } from '@/components/ThemedText'
+import { StyleSheet, TextInput, ScrollView, Platform, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, View, Text, useColorScheme } from 'react-native';
 import { verticalScale, horizontalScale, moderateScale } from '@/constants/metrics'
 import CustomButton from '@/components/CustomButton';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
-import { useColorScheme } from '@/hooks/useColorScheme';
 import axios from 'axios';
 import { ipURL } from '@/constants/backendUrl';
-
+import { Colors } from '@/constants/Colors';
 
 const Register = () => {
+  const colorScheme = useColorScheme() ?? 'light';
+  const themeColors = Colors[colorScheme];
 
   const params = useLocalSearchParams();
   const { role } = params;
@@ -133,21 +132,21 @@ const Register = () => {
   }
 
   return (
-    <ThemedView style={styles.mainContainer}>
+    <View style={[styles.mainContainer, { backgroundColor: themeColors.background }]}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <ScrollView showsVerticalScrollIndicator={false}>
-            <ThemedView style={styles.headerContainer}>
-              <ThemedText type='logoText' style={styles.logoText}>Velo</ThemedText>
-              <ThemedText type='subtitle' style={styles.subheading}>
+            <View style={styles.headerContainer}>
+              <Text style={[styles.logoText, { color: themeColors.text }]}>Velo</Text>
+              <Text style={[styles.subheading, { color: themeColors.text }]}>
                 {role === "USER" ? "User" : "Agent"} Registration
-              </ThemedText>
-            </ThemedView>
+              </Text>
+            </View>
 
-            <ThemedView style={styles.formContainer}>
+            <View style={styles.formContainer}>
               <InputField
                 label="Name"
                 placeholder="Enter Your Name"
@@ -159,6 +158,8 @@ const Register = () => {
                 error={errors.name}
                 autoComplete='name'
                 keyboardType='default'
+                colorScheme={colorScheme}
+                themeColors={themeColors}
               />
 
               <InputField
@@ -175,6 +176,8 @@ const Register = () => {
                 keyboardType='email-address'
                 autoComplete='email'
                 loading={emailVerifying}
+                colorScheme={colorScheme}
+                themeColors={themeColors}
               />
 
               <InputField
@@ -202,6 +205,8 @@ const Register = () => {
                 }}
                 error={errors.password}
                 secureTextEntry
+                colorScheme={colorScheme}
+                themeColors={themeColors}
               />
 
               <InputField
@@ -223,49 +228,51 @@ const Register = () => {
                 }}
                 error={errors.reEnterPassword}
                 secureTextEntry
+                colorScheme={colorScheme}
+                themeColors={themeColors}
               />
 
-              <ThemedView style={styles.buttonWrapper}>
+              <View style={styles.buttonWrapper}>
                 <CustomButton 
                   disableButton={buttonLoading }
                   buttonText='Register'
                   handlePress={handleRegister}
                 />
-              </ThemedView>
-            </ThemedView>
+              </View>
+            </View>
           </ScrollView>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
-    </ThemedView>
+    </View>
   );
 };
 
 // Enhanced Input Field Component with error handling
-const InputField = ({ label, error, loading = false, ...props }) => (
-  <ThemedView style={styles.inputContainer}>
-    <ThemedView style={styles.labelContainer}>
-      <ThemedText type='default' style={styles.inputLabel}>{label}</ThemedText>
+const InputField = ({ label, error, loading = false, colorScheme, themeColors, ...props }) => (
+  <View style={styles.inputContainer}>
+    <View style={styles.labelContainer}>
+      <Text style={[styles.inputLabel, { color: themeColors.text }]}>{label}</Text>
       {loading && (
-        <ThemedText style={styles.loadingText}>Checking...</ThemedText>
+        <Text style={styles.loadingText}>Checking...</Text>
       )}
-    </ThemedView>
-    <ThemedView style={[
-      styles.inputWrapper,{borderColor: useColorScheme() === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)'},
+    </View>
+    <View style={[
+      styles.inputWrapper,
+      { borderColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)' },
       error && styles.inputWrapperError
     ]}>
       <TextInput
         {...props}
         placeholderTextColor="rgba(128, 128, 128, 0.6)"
-        keyboardAppearance='dark'
-        style={styles.input}
+        keyboardAppearance={colorScheme === 'dark' ? 'dark' : 'light'}
+        style={[styles.input, { color: themeColors.text }]}
       />
-    </ThemedView>
+    </View>
     {error ? (
-      <ThemedText style={styles.errorText}>{error}</ThemedText>
+      <Text style={styles.errorText}>{error}</Text>
     ) : null}
-  </ThemedView>
+  </View>
 );
-
 
 const styles = StyleSheet.create({
 mainContainer: {
@@ -299,7 +306,6 @@ input: {
   flex: 1,
   paddingHorizontal: horizontalScale(16),
   fontSize: moderateScale(16),
-  color: '#666',
   height: '100%',
 },
 logoText: {

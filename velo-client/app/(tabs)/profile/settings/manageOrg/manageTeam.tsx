@@ -1,15 +1,16 @@
-import { Alert, StyleSheet, TouchableOpacity } from 'react-native'
+import { Alert, StyleSheet, TouchableOpacity, View, Text, useColorScheme } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { ThemedView } from '@/components/ThemedView'
-import { ThemedText } from '@/components/ThemedText'
 import axiosInstance from '@/constants/axiosHeader'
 import useLoginAccountStore from '@/store/loginAccountStore'
 import { FlatList } from 'react-native'
 import { router } from 'expo-router'
+import { Colors } from '@/constants/Colors';
 
 const ManageTeam = () => {
     const { accountLoginData } = useLoginAccountStore();
     const [manageTeamData, setManageTeamData] = useState(null);
+    const colorScheme = useColorScheme() ?? 'light';
+    const themeColors = Colors[colorScheme];
     console.log(manageTeamData,"manageTeamData");
     
     
@@ -30,62 +31,62 @@ const ManageTeam = () => {
 
     const renderAgentItem = ({item}) => {
         return (
-            <ThemedView style={styles.agentContainer}>
-                <ThemedView style={styles.agentHeader}>
-                    <ThemedText style={styles.agentName}>{item.name}</ThemedText>
-                    <ThemedText style={styles.agentRole}>{item.role}</ThemedText>
-                </ThemedView>
+            <View style={[styles.agentContainer, { backgroundColor: themeColors.background, borderColor: themeColors.text }]}>
+                <View style={[styles.agentHeader, { borderBottomColor: themeColors.text }]}>
+                    <Text style={[styles.agentName, { color: themeColors.text }]}>{item.name}</Text>
+                    <Text style={[styles.agentRole, { color: themeColors.text }]}>{item.role}</Text>
+                </View>
                 
-                <ThemedView style={styles.agentDetails}>
-                    <ThemedView style={styles.detailRow}>
-                        <ThemedText style={styles.detailLabel}>Email:</ThemedText>
-                        <ThemedText>{item.email}</ThemedText>
-                    </ThemedView>
+                <View style={styles.agentDetails}>
+                    <View style={styles.detailRow}>
+                        <Text style={[styles.detailLabel, { color: themeColors.text }]}>Email:</Text>
+                        <Text style={{ color: themeColors.text }}>{item.email}</Text>
+                    </View>
                     
-                    <ThemedView style={styles.detailRow}>
-                        <ThemedText style={styles.detailLabel}>Phone:</ThemedText>
-                        <ThemedText>{item.mobileCode} {item.mobileNumber}</ThemedText>
-                    </ThemedView>
+                    <View style={styles.detailRow}>
+                        <Text style={[styles.detailLabel, { color: themeColors.text }]}>Phone:</Text>
+                        <Text style={{ color: themeColors.text }}>{item.mobileCode} {item.mobileNumber}</Text>
+                    </View>
                     
-                    <ThemedView style={styles.detailRow}>
-                        <ThemedText style={styles.detailLabel}>Country:</ThemedText>
-                        <ThemedText>{item.mobileCountry}</ThemedText>
-                    </ThemedView>
+                    <View style={styles.detailRow}>
+                        <Text style={[styles.detailLabel, { color: themeColors.text }]}>Country:</Text>
+                        <Text style={{ color: themeColors.text }}>{item.mobileCountry}</Text>
+                    </View>
                     
-                    <ThemedView style={styles.detailRow}>
-                        <ThemedText style={styles.detailLabel}>Verification Status:</ThemedText>
-                        <ThemedText>{item.registerVerificationStatus}</ThemedText>
-                    </ThemedView>
+                    <View style={styles.detailRow}>
+                        <Text style={[styles.detailLabel, { color: themeColors.text }]}>Verification Status:</Text>
+                        <Text style={{ color: themeColors.text }}>{item.registerVerificationStatus}</Text>
+                    </View>
                     
-                    <ThemedView style={styles.detailRow}>
-                        <ThemedText style={styles.detailLabel}>First Time Login:</ThemedText>
-                        <ThemedText>{item.firstTimeLogin ? 'Yes' : 'No'}</ThemedText>
-                    </ThemedView>
+                    <View style={styles.detailRow}>
+                        <Text style={[styles.detailLabel, { color: themeColors.text }]}>First Time Login:</Text>
+                        <Text style={{ color: themeColors.text }}>{item.firstTimeLogin ? 'Yes' : 'No'}</Text>
+                    </View>
                     
-                    <ThemedView style={styles.detailRow}>
-                        <ThemedText style={styles.detailLabel}>Appointment Date:</ThemedText>
-                        <ThemedText>
+                    <View style={styles.detailRow}>
+                        <Text style={[styles.detailLabel, { color: themeColors.text }]}>Appointment Date:</Text>
+                        <Text style={{ color: themeColors.text }}>
                             {item.appointmentDate 
                                 ? new Date(item.appointmentDate).toLocaleDateString() 
                                 : 'Not set'}
-                        </ThemedText>
-                    </ThemedView>
+                        </Text>
+                    </View>
                     
-                    <ThemedView style={styles.detailRow}>
-                        <ThemedText style={styles.detailLabel}>Organisation Leader:</ThemedText>
-                        <ThemedText>{item.isOrganisationLeader ? 'Yes' : 'No'}</ThemedText>
-                    </ThemedView>
-                </ThemedView>
-            </ThemedView>
+                    <View style={styles.detailRow}>
+                        <Text style={[styles.detailLabel, { color: themeColors.text }]}>Organisation Leader:</Text>
+                        <Text style={{ color: themeColors.text }}>{item.isOrganisationLeader ? 'Yes' : 'No'}</Text>
+                    </View>
+                </View>
+            </View>
         )
     }
 
     return (
-        <ThemedView style={styles.container}>
-            <ThemedText style={styles.orgName}>{manageTeamData?.organisationName}</ThemedText>
-            <ThemedText style={styles.employeeCount}>
+        <View style={[styles.container, { backgroundColor: themeColors.background }]}>
+            <Text style={[styles.orgName, { color: themeColors.text }]}>{manageTeamData?.organisationName}</Text>
+            <Text style={[styles.employeeCount, { color: themeColors.text }]}>
                 Number Of Employees: {manageTeamData?.agents.length}
-            </ThemedText>
+            </Text>
             
            {manageTeamData?.superAdminApproval && <TouchableOpacity 
                 style={styles.createEmployeeButton}
@@ -94,9 +95,9 @@ const ManageTeam = () => {
                     params: {orgId: manageTeamData.id}  
                 })}
             >
-                <ThemedText style={styles.createEmployeeButtonText}>
+                <Text style={styles.createEmployeeButtonText}>
                     Create an employee
-                </ThemedText>
+                </Text>
             </TouchableOpacity>}
             
             <FlatList
@@ -105,7 +106,7 @@ const ManageTeam = () => {
                 renderItem={renderAgentItem}
                 contentContainerStyle={styles.flatlistContainer}
             />
-        </ThemedView>
+        </View>
     )
 }
 
@@ -138,7 +139,6 @@ const styles = StyleSheet.create({
     },
     agentContainer: {
         borderWidth: 1,
-        borderColor: '#ddd',
         borderRadius: 5,
         padding: 10,
         marginBottom: 10,
@@ -148,7 +148,6 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         marginBottom: 10,
         borderBottomWidth: 1,
-        borderBottomColor: '#eee',
         paddingBottom: 5,
     },
     agentName: {

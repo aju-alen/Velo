@@ -1,12 +1,11 @@
-import { StyleSheet, ScrollView, TouchableOpacity,ActivityIndicator } from 'react-native'
+import { StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, View, Text, useColorScheme } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { Ionicons } from '@expo/vector-icons'
-import { ThemedView } from '@/components/ThemedView'
-import { ThemedText } from '@/components/ThemedText'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { ipURL } from '@/constants/backendUrl'
 import axiosInstance from '@/constants/axiosHeader'
 import useShipmentStore from '@/store/shipmentStore'
+import { Colors } from '@/constants/Colors'
 
 const SingleOrderUser = () => {
     const {finalShipmentData, setFinalShipmentData} = useShipmentStore();
@@ -14,6 +13,8 @@ const SingleOrderUser = () => {
     const { singleOrderUser } = useLocalSearchParams();
     const [orderData, setOrderData] = useState<any>(null);
     const [loading, setLoading] = useState(false);
+    const colorScheme = useColorScheme() ?? 'light';
+    const themeColors = Colors[colorScheme];
 
     const getAdminSingleOrderData = async () => {
         try {
@@ -51,69 +52,67 @@ const SingleOrderUser = () => {
     }
 
     const renderDetailRow = (icon: keyof typeof Ionicons.glyphMap, title: string, value: string) => (
-        <ThemedView style={styles.detailRow}>
-            <ThemedView style={styles.detailIcon}>
+        <View style={styles.detailRow}>
+            <View style={styles.detailIcon}>
                 <Ionicons name={icon} size={20} color="#4A4A4A" />
-            </ThemedView>
-            <ThemedView style={styles.detailContent}>
-                <ThemedText style={styles.detailTitle}>{title}</ThemedText>
-                <ThemedText style={styles.detailValue}>{value}</ThemedText>
+            </View>
+            <View style={styles.detailContent}>
+                <Text style={[styles.detailTitle, { color: themeColors.text }]}>{title}</Text>
+                <Text style={[styles.detailValue, { color: themeColors.text }]}>{value}</Text>
 
-            </ThemedView>
-        </ThemedView>
+            </View>
+        </View>
     );
 
     const renderServiceTag = (label: string, active: boolean) => (
-        <ThemedView
+        <View
             style={[
                 styles.serviceTag,
-
+                { backgroundColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)' }
             ]}
         >
-            <ThemedText
+            <Text
                 style={[
                     styles.serviceTagText,
                     { color: active ? '#2196F3' : '#9E9E9E' }
                 ]}
             >
                 {label}
-            </ThemedText>
-        </ThemedView>
+            </Text>
+        </View>
     );
 
     if (!orderData) {
         return (
-            <ThemedView style={styles.container}>
-                <ThemedText>Loading...</ThemedText>
-            </ThemedView>
+            <View style={[styles.container, { backgroundColor: themeColors.background }]}>
+                <Text style={{ color: themeColors.text }}>Loading...</Text>
+            </View>
         );
     }
 
     return (
-        <ThemedView style={styles.container}>
-            <ThemedView style={styles.headerContainer}>
-                <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                    <Ionicons name="arrow-back" size={24} color="#2C3E50" />
-                </TouchableOpacity>
-                <ThemedText style={styles.pageTitle}>Shipment Details</ThemedText>
-                <ThemedView style={styles.headerPlaceholder} />
-            </ThemedView>
+        <View style={[styles.container, { backgroundColor: themeColors.background }]}>
+            <View style={styles.headerContainer}>
+              
+                <Text style={[styles.pageTitle, { color: themeColors.text }]}>Shipment Details</Text>
+                <View style={styles.headerPlaceholder} />
+            </View>
 
             <ScrollView
                 style={styles.scrollContainer}
                 showsVerticalScrollIndicator={false}
             >
-                <ThemedView style={styles.shipmentIdContainer}>
-                    <ThemedText style={styles.shipmentId}>
+                <View style={styles.shipmentIdContainer}>
+                    <Text style={[styles.shipmentId, { color: themeColors.text }]}>
                         Shipment #{orderData.shipmentId}
-                    </ThemedText>
-                    <ThemedText style={styles.shipmentStatus}>
+                    </Text>
+                    <Text style={styles.shipmentStatus}>
                         {orderData.shipmentStatus.replace('_', ' ')}
-                    </ThemedText>
-                </ThemedView>
+                    </Text>
+                </View>
 
-                <ThemedView style={styles.sectionContainer}>
-                    <ThemedText style={styles.sectionTitle}>Sender Information</ThemedText>
+                <View style={[styles.sectionContainer, { backgroundColor: colorScheme === 'dark' ? '#181A20' : '#FFF' }]}>
+                    <Text style={[styles.sectionTitle, { color: themeColors.text, borderBottomColor: colorScheme === 'dark' ? '#333' : '#E0E0E0' }]}>Sender Information</Text>
                     {renderDetailRow('person-outline', 'Name', orderData.senderName)}
                     {renderDetailRow('location-outline', 'Address',
                         `${orderData.senderAddressOne}, ${orderData.senderAddressTwo}, 
@@ -121,10 +120,10 @@ const SingleOrderUser = () => {
                     )}
                     {renderDetailRow('call-outline', 'Contact', orderData.senderMobileNumber)}
 
-                </ThemedView>
+                </View>
 
-                <ThemedView style={styles.sectionContainer}>
-                    <ThemedText style={styles.sectionTitle}>Receiver Information</ThemedText>
+                <View style={[styles.sectionContainer, { backgroundColor: colorScheme === 'dark' ? '#181A20' : '#FFF' }]}>
+                    <Text style={[styles.sectionTitle, { color: themeColors.text, borderBottomColor: colorScheme === 'dark' ? '#333' : '#E0E0E0' }]}>Receiver Information</Text>
                     {renderDetailRow('person-outline', 'Name', orderData.receiverName)}
                     {renderDetailRow('location-outline', 'Address',
                         `${orderData.receiverAddressOne}, ${orderData.receiverAddressTwo}, 
@@ -132,10 +131,10 @@ const SingleOrderUser = () => {
                     )}
                     {renderDetailRow('call-outline', 'Contact', orderData.receiverMobileNumber)}
                     {renderDetailRow('mail-outline', 'Email', orderData.receiverEmail)}
-                </ThemedView>
+                </View>
 
-                <ThemedView style={styles.sectionContainer}>
-                    <ThemedText style={styles.sectionTitle}>Shipment Details</ThemedText>
+                <View style={[styles.sectionContainer, { backgroundColor: colorScheme === 'dark' ? '#181A20' : '#FFF' }]}>
+                    <Text style={[styles.sectionTitle, { color: themeColors.text, borderBottomColor: colorScheme === 'dark' ? '#333' : '#E0E0E0' }]}>Shipment Details</Text>
                     {renderDetailRow('cube-outline', 'Package Description', orderData.packageDescription)}
                     {renderDetailRow('scale-outline', 'Package Weight', `${orderData.packageWeight} kg`)}
                     {renderDetailRow('layers-outline', 'Package Pieces', orderData.packagePieces)}
@@ -146,24 +145,24 @@ const SingleOrderUser = () => {
                         new Date(orderData.deliveryDate).toLocaleDateString()
                     )}
                     {renderDetailRow('location-outline', 'Pickup Time', `${orderData.pickupTimeFrom}-${orderData.pickupTimeTo}`)}
-                </ThemedView>
+                </View>
 
-                <ThemedView style={styles.sectionContainer}>
-                    <ThemedText style={styles.sectionTitle}>Additional Services</ThemedText>
-                    <ThemedView style={styles.servicesContainer}>
+                <View style={[styles.sectionContainer, { backgroundColor: colorScheme === 'dark' ? '#181A20' : '#FFF' }]}>
+                    <Text style={[styles.sectionTitle, { color: themeColors.text, borderBottomColor: colorScheme === 'dark' ? '#333' : '#E0E0E0' }]}>Additional Services</Text>
+                    <View style={styles.servicesContainer}>
                         {renderServiceTag('Adult Signature', orderData.adultSignatureService)}
                         {renderServiceTag('Direct Signature', orderData.directSignatureService)}
                         {renderServiceTag('Verbal Notification', orderData.verbalNotificationService)}
-                    </ThemedView>
-                </ThemedView>
+                    </View>
+                </View>
 
-                <ThemedView style={styles.sectionContainer}>
-                    <ThemedText style={styles.sectionTitle}>Payment Details</ThemedText>
+                <View style={[styles.sectionContainer, { backgroundColor: colorScheme === 'dark' ? '#181A20' : '#FFF' }]}>
+                    <Text style={[styles.sectionTitle, { color: themeColors.text, borderBottomColor: colorScheme === 'dark' ? '#333' : '#E0E0E0' }]}>Payment Details</Text>
                     {renderDetailRow('card-outline', 'Amount', `${orderData.shipmentStatus === 'PAYMENT_PENDING' ? orderData.openMarketPrice : orderData.paymentAmount} `)}
                     {renderDetailRow('checkmark-circle-outline', 'Payment Status',
                         orderData.paymentSuccess ? 'Successful' : 'Pending'
                     )}
-                </ThemedView>
+                </View>
 
                 {orderData.shipmentStatus === 'PAYMENT_PENDING' &&
                     <TouchableOpacity style={styles.acceptOrderButton}
@@ -172,11 +171,11 @@ const SingleOrderUser = () => {
                         {loading ? (
                             <ActivityIndicator size="small" color="#fff" />
                         ) :
-                            <ThemedText>Proceed to Payment </ThemedText>}
+                            <Text style={styles.buttonText}>Proceed to Payment</Text>}
                     </TouchableOpacity>
                 }
             </ScrollView>
-        </ThemedView>
+        </View>
     )
 }
 
@@ -292,6 +291,11 @@ const styles = StyleSheet.create({
         margin: 20,
         borderRadius: 15,
         alignItems: 'center',
+    },
+    buttonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: '600',
     },
 });
 

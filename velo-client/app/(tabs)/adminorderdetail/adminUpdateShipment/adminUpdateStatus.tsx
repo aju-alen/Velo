@@ -1,8 +1,6 @@
-import { StyleSheet, TouchableOpacity, Image, View, ScrollView, KeyboardAvoidingView, Platform } from 'react-native'
+import { StyleSheet, TouchableOpacity, Image, View, ScrollView, KeyboardAvoidingView, Platform, Text, useColorScheme } from 'react-native'
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import React, { useState, useRef, useEffect } from 'react'
-import { ThemedView } from '@/components/ThemedView'
-import { ThemedText } from '@/components/ThemedText'
 import * as ImageManipulator from 'expo-image-manipulator';
 import { ipURL } from '@/constants/backendUrl';
 import useShipmentStore from '@/store/shipmentStore';
@@ -10,7 +8,7 @@ import useLoginAccountStore from '@/store/loginAccountStore';
 import axiosInstance from '@/constants/axiosHeader';
 import { Picker } from '@react-native-picker/picker';
 import { router } from 'expo-router';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { Colors } from '@/constants/Colors';
 
 // Enum to match Prisma model
 enum ShipmentStatus {
@@ -34,7 +32,8 @@ const AdminUpdateStatus = () => {
   const [selectedStatus, setSelectedStatus] = useState<ShipmentStatus>();
   const cameraRef = useRef<any>(null);
 
-  const colorScheme = useColorScheme();
+  const colorScheme = useColorScheme() ?? 'light';
+  const themeColors = Colors[colorScheme];
   const pickerBg = colorScheme === 'dark' ? '#23242A' : '#FFF';
   const pickerBorder = colorScheme === 'dark' ? '#333' : '#E0E0E0';
   const pickerText = colorScheme === 'dark' ? '#FFF' : '#222';
@@ -162,17 +161,17 @@ const AdminUpdateStatus = () => {
   };
 
   if (!permission) {
-    return <ThemedView />;
+    return <View style={[styles.container, { backgroundColor: themeColors.background }]} />;
   }
 
   if (!permission.granted) {
     return (
-      <ThemedView style={styles.container}>
-        <ThemedText style={styles.message}>We need your permission to show the camera</ThemedText>
+      <View style={[styles.container, { backgroundColor: themeColors.background }]}>
+        <Text style={[styles.message, { color: themeColors.text }]}>We need your permission to show the camera</Text>
         <TouchableOpacity onPress={requestPermission} >
-          <ThemedText style={styles.message}>Grant Permission</ThemedText>
+          <Text style={[styles.message, { color: themeColors.text }]}>Grant Permission</Text>
         </TouchableOpacity>
-      </ThemedView>
+      </View>
     );
   }
 
@@ -186,13 +185,13 @@ const AdminUpdateStatus = () => {
       style={{ flex: 1 }}
     >
       <ScrollView
-        contentContainerStyle={{ flexGrow: 1, padding: 20 }}
+        contentContainerStyle={{ flexGrow: 1, padding: 20, backgroundColor: themeColors.background }}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <ThemedText style={styles.title}>Update Status</ThemedText>
+        <Text style={[styles.title, { color: themeColors.text }]}>Update Status</Text>
         
-        <ThemedView
+        <View
           style={{
             backgroundColor: pickerBg,
             borderColor: pickerBorder,
@@ -219,18 +218,18 @@ const AdminUpdateStatus = () => {
               />
             ))}
           </Picker>
-        </ThemedView>
+        </View>
 
-        <ThemedView style={styles.cameraContainer}>
+        <View style={styles.cameraContainer}>
           {isPreview && photo ? (
             <View style={styles.previewContainer}>
               <Image source={{ uri: photo }} style={styles.preview} />
               <TouchableOpacity style={styles.retakeButton} onPress={handleRetake}>
-                <ThemedText style={styles.buttonText}>Retake</ThemedText>
+                <Text style={styles.buttonText}>Retake</Text>
               </TouchableOpacity>
               {imageUrl && (
                 <View style={styles.uploadSuccess}>
-                  <ThemedText style={styles.successText}>Upload Successful!</ThemedText>
+                  <Text style={styles.successText}>Upload Successful!</Text>
                 </View>
               )}
             </View>
@@ -240,20 +239,20 @@ const AdminUpdateStatus = () => {
               style={styles.camera} 
               facing={facing}
             >
-              <ThemedView style={styles.cameraControls}>
+              <View style={styles.cameraControls}>
                 <TouchableOpacity style={styles.captureButton} onPress={handleCapture}>
                   <View style={styles.captureButtonInner} />
                 </TouchableOpacity>
                 
                 <TouchableOpacity style={styles.flipButton} onPress={toggleCameraFacing}>
-                  <ThemedText style={styles.text}>Flip</ThemedText>
+                  <Text style={styles.text}>Flip</Text>
                 </TouchableOpacity>
-              </ThemedView>
+              </View>
             </CameraView>
           )}
-        </ThemedView>
+        </View>
         
-        <ThemedView style={styles.buttonContainer}>
+        <View style={styles.buttonContainer}>
           <TouchableOpacity 
             style={[
               styles.button, 
@@ -263,9 +262,9 @@ const AdminUpdateStatus = () => {
             onPress={() => handleApprove('APPROVED')}
             disabled={!photo || isUploading}
           >
-            <ThemedText style={styles.buttonText}>
+            <Text style={styles.buttonText}>
               {isUploading ? 'Uploading...' : 'Approve'}
-            </ThemedText>
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity 
@@ -273,9 +272,9 @@ const AdminUpdateStatus = () => {
             onPress={() => handleApprove('REJECTED')}
             disabled={isUploading}
           >
-            <ThemedText style={styles.buttonText}>Reject</ThemedText>
+            <Text style={styles.buttonText}>Reject</Text>
           </TouchableOpacity>
-        </ThemedView>
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );

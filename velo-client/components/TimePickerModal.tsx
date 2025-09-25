@@ -1,14 +1,18 @@
 import React, { useState } from 'react';
-import { Modal, FlatList, Pressable, StyleSheet } from 'react-native';
-import { ThemedView } from './ThemedView';
-import { ThemedText } from './ThemedText';
+import { Modal, FlatList, Pressable, StyleSheet, View, Text, useColorScheme } from 'react-native';
 import useShipmentStore from '@/store/shipmentStore';
 import { verticalScale, moderateScale, horizontalScale } from '@/constants/metrics';
+import { Colors } from '@/constants/Colors';
 
 const TimePickerModal = ({ openModal, handleCloseModal }) => {
     const { deliveryServices, setDeliveryServices } = useShipmentStore();
     const [mode, setMode] = useState('start');
-
+    const colorScheme = useColorScheme() ?? 'light';
+    const themeColors = Colors[colorScheme];
+    const bgCard = colorScheme === 'dark' ? '#181A20' : '#FFF';
+    const borderColor = colorScheme === 'dark' ? '#333' : '#E0E0E0';
+    const textPrimary = colorScheme === 'dark' ? '#FFF' : '#000';
+    const textSecondary = colorScheme === 'dark' ? '#B0B0B0' : '#666';
 
     // Function to generate time slots
     const generateTimeSlots = (start, end, interval) => {
@@ -43,9 +47,9 @@ const TimePickerModal = ({ openModal, handleCloseModal }) => {
             onDismiss={handleCloseModal}
             transparent={true}
         >
-            <ThemedView style={styles.modalContainer}>
-                <ThemedView style={styles.contentContainer}>
-                    <ThemedText style={styles.modalTitle}>Select {mode === 'start' ? 'Suitable' : 'Latest By'} Time</ThemedText>
+            <View style={[styles.modalContainer, { backgroundColor: 'rgba(0,0,0,0.7)' }]}>
+                <View style={[styles.contentContainer, { backgroundColor: bgCard }]}>
+                    <Text style={[styles.modalTitle, { color: textPrimary }]}>Select {mode === 'start' ? 'Suitable' : 'Latest By'} Time</Text>
                     <FlatList
                         data={timeSlots}
                         keyExtractor={(item, index) => index.toString()}
@@ -54,6 +58,7 @@ const TimePickerModal = ({ openModal, handleCloseModal }) => {
                             <Pressable
                                 style={({ pressed }) => [
                                     styles.timeSlot,
+                                    { backgroundColor: bgCard, borderColor: borderColor },
                                     pressed && styles.timeSlotPressed,
                                 ]}
                                 onPress={() => {
@@ -75,7 +80,7 @@ const TimePickerModal = ({ openModal, handleCloseModal }) => {
                                     }
                                 }}
                             >
-                                <ThemedText style={styles.timeText}>{item}</ThemedText>
+                                <Text style={[styles.timeText, { color: textPrimary }]}>{item}</Text>
                             </Pressable>
                         )}
                     />
@@ -83,10 +88,10 @@ const TimePickerModal = ({ openModal, handleCloseModal }) => {
                         style={styles.closeButton}
                         onPress={handleCloseModal}
                     >
-                        <ThemedText style={styles.closeButtonText}>Close</ThemedText>
+                        <Text style={[styles.closeButtonText, { color: '#FFF' }]}>Close</Text>
                     </Pressable>
-                </ThemedView>
-            </ThemedView>
+                </View>
+            </View>
         </Modal>
     );
 };
@@ -94,14 +99,12 @@ const TimePickerModal = ({ openModal, handleCloseModal }) => {
 const styles = StyleSheet.create({
     modalContainer: {
         flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.7)',
         justifyContent: 'center',
         alignItems: 'center',
     },
     contentContainer: {
         width: '90%',
         height: '50%',
-
         borderRadius: moderateScale(15),
         padding: moderateScale(20),
         shadowColor: '#000',
@@ -113,7 +116,6 @@ const styles = StyleSheet.create({
     modalTitle: {
         fontSize: moderateScale(20),
         fontWeight: 'bold',
-
         textAlign: 'center',
         marginBottom: verticalScale(15),
     },
@@ -121,18 +123,15 @@ const styles = StyleSheet.create({
         paddingVertical: verticalScale(12),
         paddingHorizontal: horizontalScale(16),
         marginBottom: verticalScale(10),
-
         borderRadius: moderateScale(10),
         alignItems: 'center',
         borderWidth: 1,
-        borderColor: '#e0e0e0',
     },
     timeSlotPressed: {
         backgroundColor: '#d0e8fc',
     },
     timeText: {
         fontSize: moderateScale(16),
-
         fontWeight: '600',
     },
     closeButton: {
@@ -144,7 +143,6 @@ const styles = StyleSheet.create({
     },
     closeButtonText: {
         fontSize: moderateScale(16),
-
         fontWeight: 'bold',
     },
 });

@@ -5,17 +5,18 @@ import {
   View, 
   TouchableOpacity, 
   Dimensions, 
-  RefreshControl 
+  RefreshControl,
+  Text,
+  useColorScheme
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { ThemedView } from '@/components/ThemedView';
-import { ThemedText } from '@/components/ThemedText';
 import { horizontalScale, verticalScale } from '@/constants/metrics';
 import axios from 'axios';
 import { ipURL } from '@/constants/backendUrl';
 import useLoginAccountStore from '@/store/loginAccountStore';
 import axiosInstance from '@/constants/axiosHeader';
 import { router } from 'expo-router';
+import { Colors } from '@/constants/Colors';
 
 const { width } = Dimensions.get('window');
 
@@ -23,6 +24,9 @@ const OrderHistoryMainPage = () => {
   const { accountLoginData } = useLoginAccountStore();
   const [orderHistory, setOrderHistory] = useState([]);
   const [refreshing, setRefreshing] = useState(false); // State for refresh control
+  
+  const colorScheme = useColorScheme() ?? 'light';
+  const themeColors = Colors[colorScheme];
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -58,81 +62,81 @@ const OrderHistoryMainPage = () => {
   const renderOrderCard = (order) => (
     <TouchableOpacity 
       key={order.id} 
-      style={styles.card}
+      style={[styles.card, { backgroundColor: themeColors.background, borderColor: themeColors.text }]}
       activeOpacity={0.7}
       onPress={() => router.push( `/shippinghistory/${order.id}` )}
     >
       {/* Card Header */}
-      <ThemedView style={styles.cardHeader}>
-        <ThemedView style={styles.headerContent}>
-          <ThemedView style={styles.headerTop}>
-            <ThemedText style={styles.receiverName} numberOfLines={1}>
+      <View style={[styles.cardHeader, { backgroundColor: themeColors.background }]}>
+        <View style={styles.headerContent}>
+          <View style={styles.headerTop}>
+            <Text style={[styles.receiverName, { color: themeColors.text }]} numberOfLines={1}>
               {order.receiverName}
-            </ThemedText>
-            <ThemedView 
+            </Text>
+            <View 
               style={[
                 styles.statusBadge, 
                 { backgroundColor: getStatusColor(order.shipmentStatus) }
               ]}
             >
-              <ThemedText style={styles.statusText}>
+              <Text style={styles.statusText}>
               {order.shipmentStatus.replace(/_/g, ' ')}
-              </ThemedText>
-            </ThemedView>
-          </ThemedView>
-          <ThemedText style={styles.trackingNumber}>
+              </Text>
+            </View>
+          </View>
+          <Text style={[styles.trackingNumber, { color: themeColors.text }]}>
               ABC-TKS772-927
-          </ThemedText>
-        </ThemedView>
-      </ThemedView>
+          </Text>
+        </View>
+      </View>
 
       {/* Card Content */}
-      <ThemedView style={styles.cardContent}>
-        <ThemedView style={styles.detailRow}>
-          <ThemedView style={styles.detailItem}>
+      <View style={[styles.cardContent, { backgroundColor: themeColors.background }]}>
+        <View style={styles.detailRow}>
+          <View style={[styles.detailItem, { backgroundColor: themeColors.background }]}>
             <Ionicons name="cube-outline" size={20} color="#666" />
-            <ThemedText style={styles.detailLabel}>Dimensions</ThemedText>
-            <ThemedText style={styles.detailValue}>
+            <Text style={[styles.detailLabel, { color: themeColors.text }]}>Dimensions</Text>
+            <Text style={[styles.detailValue, { color: themeColors.text }]}>
               {`${order.packageLength || 0} × ${order.packageWidth || 0} × ${order.packageHeight || 0} cm`}
-            </ThemedText>
-          </ThemedView>
+            </Text>
+          </View>
 
-          <ThemedView style={styles.detailItem}>
+          <View style={[styles.detailItem, { backgroundColor: themeColors.background }]}>
             <Ionicons name="scale-outline" size={20} color="#666" />
-            <ThemedText style={styles.detailLabel}>Weight</ThemedText>
-            <ThemedText style={styles.detailValue}>
+            <Text style={[styles.detailLabel, { color: themeColors.text }]}>Weight</Text>
+            <Text style={[styles.detailValue, { color: themeColors.text }]}>
               {order.packageWeight} kg
-            </ThemedText>
-          </ThemedView>
-        </ThemedView>
+            </Text>
+          </View>
+        </View>
 
         {/* Delivery Dates */}
-        <ThemedView style={styles.dateContainer}>
-          <ThemedView style={styles.dateRow}>
+        <View style={[styles.dateContainer, { backgroundColor: themeColors.background }]}>
+          <View style={styles.dateRow}>
             <Ionicons name="calendar-outline" size={16} color="#666" />
-            <ThemedText style={styles.dateText}>
+            <Text style={[styles.dateText, { color: themeColors.text }]}>
               Order Date: {order.shipmentDate}
-            </ThemedText>
-          </ThemedView>
-          <ThemedView style={styles.dateRow}>
+            </Text>
+          </View>
+          <View style={styles.dateRow}>
             <Ionicons name="calendar-outline" size={16} color="#666" />
-            <ThemedText style={styles.dateText}>
+            <Text style={[styles.dateText, { color: themeColors.text }]}>
               Est. Delivery: {order.deliveryDate}
-            </ThemedText>
-          </ThemedView>
-        </ThemedView>
-      </ThemedView>
+            </Text>
+          </View>
+        </View>
+      </View>
     </TouchableOpacity>
   );
 
   return (
-    <ThemedView style={styles.container}>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText style={styles.pageTitle}>Order History</ThemedText>
+    <View style={[styles.container, { backgroundColor: themeColors.background }]}>
+      <View style={[styles.titleContainer, { backgroundColor: themeColors.background }]}>
+        <Text style={[styles.pageTitle, { color: themeColors.text }]}>Order History</Text>
         <TouchableOpacity>
           <Ionicons name="filter-outline" size={24} color="#666" />
         </TouchableOpacity>
-      </ThemedView>
+      </View>
       
       <ScrollView 
         contentContainerStyle={styles.scrollViewContent}
@@ -148,12 +152,12 @@ const OrderHistoryMainPage = () => {
         {orderHistory.length > 0 ? (
           orderHistory.map(renderOrderCard)
         ) : (
-          <ThemedText style={styles.noOrdersText}>
+          <Text style={[styles.noOrdersText, { color: themeColors.text }]}>
             No order history found
-          </ThemedText>
+          </Text>
         )}
       </ScrollView>
-    </ThemedView>
+    </View>
   );
 };
 
@@ -232,7 +236,6 @@ const styles = StyleSheet.create({
     gap: 15,
   },
   detailItem: {
-    flex: 1,
 
     borderRadius: 10,
     padding: 12,
@@ -247,7 +250,6 @@ const styles = StyleSheet.create({
   detailValue: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#333',
     textAlign: 'center',
   },
   dateContainer: {

@@ -1,19 +1,18 @@
-import { SafeAreaView, StyleSheet, TouchableOpacity, TextInput, View, ScrollView,Alert } from 'react-native'
+import { SafeAreaView, StyleSheet, TouchableOpacity, TextInput, View, ScrollView,Alert, Text, useColorScheme } from 'react-native'
 import React, { useState } from 'react'
-import { ThemedView } from '@/components/ThemedView'
-import { ThemedText } from '@/components/ThemedText'
 import { horizontalScale, moderateScale } from '@/constants/metrics'
 import { Divider} from 'react-native-paper'
 import useShipmentStore from '@/store/shipmentStore'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import TimePickerModal from '@/components/TimePickerModal'
 import PickupInstructionModal from '@/components/PickupInstructionModal'
-import { useColorScheme } from '@/hooks/useColorScheme'
 import { router } from 'expo-router'
+import { Colors } from '@/constants/Colors';
 
 
 const ShipmentSchedulePickup = () => {
-  const colorScheme = useColorScheme()
+  const colorScheme = useColorScheme() ?? 'light';
+  const themeColors = Colors[colorScheme];
   const { savedAddressData, accountAddressData, deliveryServices, packageDetail, setDeliveryServices,itemType,setEditData,packageDescription } = useShipmentStore()
   const [checked, setChecked] = useState('yes')
   const [openTimeModal, setOpenTimeModal] = useState(false)
@@ -50,13 +49,13 @@ const ShipmentSchedulePickup = () => {
   const handleClosInstructioneModal = () => setPickupInstructionModal(false)
 
   return (
-    <ScrollView style={styles.container}>
-    <ThemedView >
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedText style={styles.header}>Shipment Schedule Pickup</ThemedText>
+    <ScrollView style={[styles.container, { backgroundColor: themeColors.background }]}>
+    <View >
+      <SafeAreaView style={[styles.safeArea, { backgroundColor: themeColors.background }]}>
+        <Text style={[styles.header, { color: themeColors.text }]}>Shipment Schedule Pickup</Text>
         
         {/* Schedule Options */}
-        {/* <ThemedView style={styles.radioContainer}>
+        {/* <View style={styles.radioContainer}>
           <TouchableOpacity 
             style={[styles.radioBox, checked === 'yes' && styles.radioBoxSelected]}
             onPress={() => setChecked('yes')}
@@ -66,7 +65,7 @@ const ShipmentSchedulePickup = () => {
               status={checked === 'yes' ? 'checked' : 'unchecked'}
               color="#FFAC1C"
             />
-            <ThemedText style={styles.radioText}>Yes-Schedule a pickup</ThemedText>
+            <Text style={styles.radioText}>Yes-Schedule a pickup</Text>
           </TouchableOpacity>
           
           <TouchableOpacity 
@@ -78,109 +77,109 @@ const ShipmentSchedulePickup = () => {
               status={checked === 'no' ? 'checked' : 'unchecked'}
               color="#FFAC1C"
             />
-            <ThemedText style={styles.radioText}>No</ThemedText>
+            <Text style={styles.radioText}>No</Text>
           </TouchableOpacity>
-        </ThemedView> */}
+        </View> */}
 
         <Divider style={styles.divider} />
 
         {/* Pickup Date Section */}
-        <ThemedView style={styles.sectionContainer}>
+        <View style={[styles.sectionContainer, { backgroundColor: themeColors.background }]}>
           <View style={styles.pickupDateHeaderContainer}>
-            <ThemedText style={styles.sectionTitle}>Pickup Date</ThemedText>
-            <ThemedText style={styles.dateText}>{formattedDate}</ThemedText>
+            <Text style={[styles.sectionTitle, { color: themeColors.text }]}>Pickup Date</Text>
+            <Text style={[styles.dateText, { color: '#FFAC1C' }]}>{formattedDate}</Text>
           </View>
           
-          <View style={styles.infoBox}>
+          <View style={[styles.infoBox, { backgroundColor: themeColors.background }]}>
             <Ionicons name="information-circle-sharp" size={24} color="#FFAC1C" />
-            <ThemedText style={styles.infoText}>
+            <Text style={[styles.infoText, { color: themeColors.text }]}>
               If you wish to change any of the data,
               <TouchableOpacity onPress={()=>{
               setEditData(true)
               router.replace('/(tabs)/home/createShipment')
                 }}>
-                <ThemedText type='link'>
+                <Text style={{ color: '#FFAC1C', textDecorationLine: 'underline' }}>
                   CLICK HERE
-                </ThemedText>
+                </Text>
               </TouchableOpacity>
-            </ThemedText>
+            </Text>
           </View>
-        </ThemedView>
+        </View>
 
         {/* Pickup Address Section */}
-        <ThemedView style={styles.sectionContainer}>
-          <ThemedText style={styles.sectionTitle}>Pickup Address</ThemedText>
-          <View style={styles.addressCard}>
-            <ThemedText style={styles.addressName}>{accountAddressData.userName}</ThemedText>
-            <ThemedText style={styles.addressText}>
+        <View style={[styles.sectionContainer, { backgroundColor: themeColors.background }]}>
+          <Text style={[styles.sectionTitle, { color: themeColors.text }]}>Pickup Address</Text>
+          <View style={[styles.addressCard, { backgroundColor: themeColors.background, borderColor: themeColors.text }]}>
+            <Text style={[styles.addressName, { color: themeColors.text }]}>{accountAddressData.userName}</Text>
+            <Text style={[styles.addressText, { color: themeColors.text }]}>
               {accountAddressData.addressOne},{accountAddressData.addressTwo}
-            </ThemedText>
-            <ThemedText style={styles.addressText}>
+            </Text>
+            <Text style={[styles.addressText, { color: themeColors.text }]}>
               {accountAddressData.city}, {accountAddressData.state}
-            </ThemedText>
-            <ThemedText style={styles.addressText}>{accountAddressData.email}</ThemedText>
-            <ThemedText style={styles.addressText}>
+            </Text>
+            <Text style={[styles.addressText, { color: themeColors.text }]}>{accountAddressData.email}</Text>
+            <Text style={[styles.addressText, { color: themeColors.text }]}>
               {accountAddressData.countryCode} {accountAddressData.mobileNumber}
-            </ThemedText>
+            </Text>
           </View>
-        </ThemedView>
+        </View>
 
         {/* Pickup Time Section */}
-        <ThemedView style={styles.sectionContainer}>
+        <View style={[styles.sectionContainer, { backgroundColor: themeColors.background }]}>
           <TouchableOpacity 
             onPress={() => setOpenTimeModal(true)} 
-            style={styles.timeButton}
+            style={[styles.timeButton, { backgroundColor: themeColors.background, borderColor: themeColors.text }]}
           >
             <View>
-              <ThemedText style={styles.buttonLabel}>Select Pickup Time</ThemedText>
-              <ThemedText style={styles.selectedTime}>
+              <Text style={[styles.buttonLabel, { color: themeColors.text }]}>Select Pickup Time</Text>
+              <Text style={[styles.selectedTime, { color: '#FFAC1C' }]}>
                 {deliveryServices.deliveryPickupTimeFrom} - {deliveryServices.deliveryPickupTimeTo}
-              </ThemedText>
+              </Text>
             </View>
             <Ionicons name="time-outline" size={24} color="#FFAC1C" />
           </TouchableOpacity>
-        </ThemedView>
+        </View>
 
         {/* Weight Section ONLY FOR PACKAGE TYPE*/}
-        {itemType === 'PACKAGE' &&<ThemedView style={styles.sectionContainer}>
-          <ThemedText style={styles.sectionTitle}>Weight (kg)</ThemedText>
-          <View style={styles.weightCard}>
-            <ThemedText style={styles.weightLabel}>Total Weight</ThemedText>
-            <ThemedText style={styles.weightValue}>{packageDetail.weight}</ThemedText>
+        {itemType === 'PACKAGE' &&<View style={[styles.sectionContainer, { backgroundColor: themeColors.background }]}>
+          <Text style={[styles.sectionTitle, { color: themeColors.text }]}>Weight (kg)</Text>
+          <View style={[styles.weightCard, { backgroundColor: themeColors.background, borderColor: themeColors.text }]}>
+            <Text style={[styles.weightLabel, { color: themeColors.text }]}>Total Weight</Text>
+            <Text style={[styles.weightValue, { color: themeColors.text }]}>{packageDetail.weight}</Text>
           </View>
-        </ThemedView>}
+        </View>}
 
         {/* Num of pieces Section ONLY FOR DOCUMENT TYPE*/}
-        {itemType === 'DOCUMENT' &&<ThemedView style={styles.sectionContainer}>
-          <ThemedText style={styles.sectionTitle}>Number of pieces</ThemedText>
-          <View style={styles.weightCard}>
-            <ThemedText style={styles.weightLabel}>Total Pieces</ThemedText>
-            <ThemedText style={styles.weightValue}>{packageDetail.numberOfPieces}</ThemedText>
+        {itemType === 'DOCUMENT' &&<View style={[styles.sectionContainer, { backgroundColor: themeColors.background }]}>
+          <Text style={[styles.sectionTitle, { color: themeColors.text }]}>Number of pieces</Text>
+          <View style={[styles.weightCard, { backgroundColor: themeColors.background, borderColor: themeColors.text }]}>
+            <Text style={[styles.weightLabel, { color: themeColors.text }]}>Total Pieces</Text>
+            <Text style={[styles.weightValue, { color: themeColors.text }]}>{packageDetail.numberOfPieces}</Text>
           </View>
-        </ThemedView>}
+        </View>}
 
         {/* Pickup Instructions Section */}
-        <ThemedView style={styles.sectionContainer}>
-          <ThemedText style={styles.sectionTitle}>Pickup Instructions
+        <View style={[styles.sectionContainer, { backgroundColor: themeColors.background }]}>
+          <Text style={[styles.sectionTitle, { color: themeColors.text }]}>Pickup Instructions
             
-          </ThemedText>
+          </Text>
 
           <TouchableOpacity 
-            style={styles.instructionButton}
+            style={[styles.instructionButton, { backgroundColor: themeColors.background, borderColor: themeColors.text }]}
             onPress={() => setPickupInstructionModal(true)}
           >
-            <ThemedText style={styles.buttonText}>Pickup From - 
-            <ThemedText type='mini'> {deliveryServices.pickupInstruction}</ThemedText>
-            </ThemedText>
+            <Text style={[styles.buttonText, { color: themeColors.text }]}>Pickup From - 
+            <Text style={{ fontSize: moderateScale(12), lineHeight: moderateScale(16) }}> {deliveryServices.pickupInstruction}</Text>
+            </Text>
             <Ionicons name="chevron-forward" size={24} color="#FFAC1C" />
           </TouchableOpacity>
-        </ThemedView>
+        </View>
 
         {/* Special Instructions Section */}
-        <ThemedView style={styles.sectionContainer}>
-          <ThemedText style={styles.sectionTitle}>Special Instruction(s)</ThemedText>
+        <View style={[styles.sectionContainer, { backgroundColor: themeColors.background }]}>
+          <Text style={[styles.sectionTitle, { color: themeColors.text }]}>Special Instruction(s)</Text>
           <TextInput
-            style={[styles.textInput,{color: colorScheme === 'light' ? '#000' : '#fff'}]}
+            style={[styles.textInput,{color: themeColors.text, backgroundColor: themeColors.background, borderColor: themeColors.text}]}
             multiline
             placeholder="Eg: Don't ring bell, call on arrival"
             numberOfLines={4}
@@ -190,8 +189,8 @@ const ShipmentSchedulePickup = () => {
             }
             placeholderTextColor="#999"
           />
-        </ThemedView>
-        <ThemedView>
+        </View>
+        <View style={{ backgroundColor: themeColors.background }}>
             <TouchableOpacity 
               style={[
                 styles.buttonContainer, 
@@ -203,11 +202,11 @@ const ShipmentSchedulePickup = () => {
                 !deliveryServices.deliveryPickupTimeFrom || !deliveryServices.deliveryPickupTimeTo
               }
             >
-              <ThemedText style={styles.finalPreviewText}>
+              <Text style={styles.finalPreviewText}>
                 View Shipping Options
-              </ThemedText>
+              </Text>
             </TouchableOpacity>
-          </ThemedView>
+          </View>
       </SafeAreaView>
 
       <TimePickerModal 
@@ -218,7 +217,7 @@ const ShipmentSchedulePickup = () => {
         openModal={pickupInstructionmodal} 
         handleCloseModal={handleClosInstructioneModal} 
       />
-    </ThemedView>
+    </View>
     </ScrollView>
   )
 }
@@ -293,7 +292,6 @@ const styles = StyleSheet.create({
     marginBottom: horizontalScale(16),
   },
   dateText: {
-    color: '#FFAC1C',
     fontWeight: '500',
   },
   infoBox: {
@@ -312,7 +310,6 @@ const styles = StyleSheet.create({
     padding: horizontalScale(16),
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#E0E0E0',
   },
   addressName: {
     fontWeight: '600',
@@ -327,7 +324,6 @@ const styles = StyleSheet.create({
     padding: horizontalScale(16),
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#E0E0E0',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -337,14 +333,12 @@ const styles = StyleSheet.create({
     marginBottom: horizontalScale(4),
   },
   selectedTime: {
-    color: '#FFAC1C',
   },
   weightCard: {
 
     padding: horizontalScale(16),
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#E0E0E0',
   },
   weightLabel: {
 
@@ -359,7 +353,6 @@ const styles = StyleSheet.create({
     padding: horizontalScale(16),
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#E0E0E0',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -367,7 +360,6 @@ const styles = StyleSheet.create({
   textInput: {
 
     borderWidth: 1,
-    borderColor: '#E0E0E0',
     borderRadius: 12,
     padding: horizontalScale(12),
     height: horizontalScale(120),

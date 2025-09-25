@@ -1,13 +1,14 @@
 import React from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
-import { ThemedView } from '@/components/ThemedView';
-import { ThemedText } from '@/components/ThemedText';
+import { StyleSheet, TouchableOpacity, View, Text, useColorScheme } from 'react-native';
 import { router } from 'expo-router';
-
+import { Colors } from '@/constants/Colors';
 
 const OpenMarketConfirm = () => {
+  const colorScheme = useColorScheme() ?? 'light';
+  const themeColors = Colors[colorScheme];
+
   return (
-    <ThemedView style={styles.mainContainer}>
+    <View style={[styles.mainContainer, { backgroundColor: themeColors.background }]}>
       <View style={styles.contentContainer}>
         {/* Success Icon */}
         <View style={styles.iconContainer}>
@@ -15,14 +16,14 @@ const OpenMarketConfirm = () => {
         </View>
 
         {/* Main Message */}
-        <ThemedText style={styles.title}>
+        <Text style={[styles.title, { color: themeColors.text }]}>
             Your Order has been put out!
-        </ThemedText>
+        </Text>
 
         {/* Description */}
-        <ThemedText style={styles.description}>
+        <Text style={[styles.description, { color: themeColors.text }]}>
             Your order has been put out in the market and waiting for someone to accept it. You will be notified once someone accepts your order.
-        </ThemedText>
+        </Text>
 
    
 
@@ -31,12 +32,12 @@ const OpenMarketConfirm = () => {
           onPress={() => router.replace('/(tabs)/home/homeMainPage')} 
           style={styles.buttonContainer}
         >
-          <ThemedText style={styles.buttonText}>
+          <Text style={styles.buttonText}>
             Continue Market
-          </ThemedText>
+          </Text>
         </TouchableOpacity>
       </View>
-    </ThemedView>
+    </View>
   );
 };
 

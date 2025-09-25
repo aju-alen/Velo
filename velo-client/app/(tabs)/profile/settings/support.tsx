@@ -1,11 +1,10 @@
 import React from 'react';
-import { StyleSheet, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
-import { ThemedView } from '@/components/ThemedView';
-import { ThemedText } from '@/components/ThemedText';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { StyleSheet, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, View, Text, useColorScheme } from 'react-native';
+import { Colors } from '@/constants/Colors';
 
 const Support = () => {
-  const colorScheme = useColorScheme();
+  const colorScheme = useColorScheme() ?? 'light';
+  const themeColors = Colors[colorScheme];
   const bgCard = colorScheme === 'dark' ? '#181A20' : '#FFF';
   const borderColor = colorScheme === 'dark' ? '#333' : '#E0E0E0';
   const textPrimary = colorScheme === 'dark' ? '#FFF' : '#222';
@@ -13,19 +12,21 @@ const Support = () => {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <ThemedView style={[styles.outer, { backgroundColor: colorScheme === 'dark' ? '#101014' : '#F5F6FA' }]}> 
+      <View style={[styles.outer, { backgroundColor: colorScheme === 'dark' ? '#101014' : '#F5F6FA' }]}> 
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={{ flex: 1, width: '100%', justifyContent: 'center', alignItems: 'center' }}
         >
-          <ThemedView style={[styles.card, { backgroundColor: bgCard, borderColor }]}> 
-            <ThemedText style={[styles.title, { color: textPrimary }]}>Support</ThemedText>
-            <ThemedText style={[styles.sectionTitle, { color: textPrimary }]}>Contact Us</ThemedText>
-            <ThemedText style={[styles.info, { color: textSecondary }]}>Email: support@velointl.com</ThemedText>
-            <ThemedText style={[styles.info, { color: textSecondary, marginTop: 18 }]}>For any queries or support, please reach out to us at <ThemedText style={{ color: textPrimary, fontWeight: '700' }}>support@velointl.com</ThemedText>.</ThemedText>
-          </ThemedView>
+          <View style={[styles.card, { backgroundColor: bgCard, borderColor }]}> 
+            <Text style={[styles.title, { color: textPrimary }]}>Support</Text>
+            <Text style={[styles.sectionTitle, { color: textPrimary }]}>Contact Us</Text>
+            <Text style={[styles.info, { color: textSecondary }]}>Email: support@velointl.com</Text>
+            <Text style={[styles.info, { color: textSecondary, marginTop: 18 }]}>
+              For any queries or support, please reach out to us at <Text style={{ color: textPrimary, fontWeight: '700' }}>support@velointl.com</Text>.
+            </Text>
+          </View>
         </KeyboardAvoidingView>
-      </ThemedView>
+      </View>
     </TouchableWithoutFeedback>
   );
 };

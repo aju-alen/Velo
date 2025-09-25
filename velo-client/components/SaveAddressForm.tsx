@@ -1,19 +1,17 @@
-import { StyleSheet, Modal, TouchableWithoutFeedback, ScrollView, TouchableOpacity, TextInput, Image, Dimensions, FlatList, Platform } from 'react-native'
+import { StyleSheet, Modal, TouchableWithoutFeedback, ScrollView, TouchableOpacity, TextInput, Image, Dimensions, FlatList, Platform, View, Text, useColorScheme } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { ThemedView } from './ThemedView'
-import { ThemedText } from './ThemedText'
 import { horizontalScale, moderateScale, verticalScale } from '@/constants/metrics'
 import { MaterialIcons } from '@expo/vector-icons'
 import CustomButton from './CustomButton'
 import { Checkbox } from 'react-native-paper';
 import { Picker } from '@react-native-picker/picker'
-import { useColorScheme } from '@/hooks/useColorScheme'
 import axios from 'axios'
 import { ipURL } from '@/constants/backendUrl'
 import useShipmentStore from '@/store/shipmentStore'
 import AntDesign from '@expo/vector-icons/AntDesign';
 import useLoginAccountStore from '@/store/loginAccountStore'
 import axiosInstance from '@/constants/axiosHeader'
+import { Colors } from '@/constants/Colors';
 
 const { width } = Dimensions.get('window')
 
@@ -22,11 +20,13 @@ const SaveAddressForm = ({ addressModalVisible, onClose, userId }) => {
 const {accountLoginData} = useLoginAccountStore()
 
   const savedAddressData = useShipmentStore(state => state.savedAddressData)
-  const colorScheme = useColorScheme()
+  const colorScheme = useColorScheme() ?? 'light';
+  const themeColors = Colors[colorScheme];
 
 
   console.log(savedAddressData,'savedAddressData------______');
   
+
 
 
   const [countryCodeModal, setCountryCodeModal] = useState(false)
@@ -38,6 +38,7 @@ const {accountLoginData} = useLoginAccountStore()
   console.log(savedContact,'savedContact');
   
 console.log(savedAddressData,'savedAddressData------______');
+
 
 
  
@@ -111,8 +112,8 @@ console.log(savedAddressData,'savedAddressData------______');
   }, [addressModalVisible]);
 
   const CheckboxItem = ({ label, status, onPress }) => (
-    <ThemedView style={styles.checkboxTextContainer}>
-      <ThemedView style={[styles.checboxContainer,{
+    <View style={[styles.checkboxTextContainer, { backgroundColor: themeColors.background }]}>
+      <View style={[styles.checboxContainer,{
          borderRadius: Platform.OS === 'ios' ? moderateScale(4) : moderateScale(0),
          borderWidth:Platform.OS === 'ios' ? moderateScale(2) : moderateScale(0),
 
@@ -123,9 +124,9 @@ console.log(savedAddressData,'savedAddressData------______');
           onPress={onPress}
           color="#FFAC1C"
         />
-      </ThemedView>
-      <ThemedText type='mini' style={styles.checkboxLabel}>{label}</ThemedText>
-    </ThemedView>
+      </View>
+      <Text style={[styles.checkboxLabel, { color: themeColors.text }]}>{label}</Text>
+    </View>
   )
 
   const handleClear = () => {
@@ -180,7 +181,7 @@ console.log(savedAddressData,'savedAddressData------______');
   const renderAreaItem = ({ item }) => {    
     return(
     <TouchableOpacity
-      style={styles.countryListItem}
+      style={[styles.countryListItem, { backgroundColor: themeColors.background, borderBottomColor: themeColors.text }]}
       onPress={() => {
         setSelectedArea(item)
         setSavedAddressData({ countryCode: item.callingCode })
@@ -191,7 +192,7 @@ console.log(savedAddressData,'savedAddressData------______');
         source={{ uri: item.flag }}
         style={styles.countryFlag}
       />
-      <ThemedText style={[styles.countryName, { color: colorScheme === 'dark' ? 'white' : 'black' }]}>{item.item}</ThemedText>
+      <Text style={[styles.countryName, { color: themeColors.text }]}>{item.item}</Text>
     </TouchableOpacity>
 
   )}
@@ -203,20 +204,20 @@ console.log(savedAddressData,'savedAddressData------______');
       visible={countryCodeModal}
     >
       <TouchableWithoutFeedback onPress={() => setCountryCodeModal(false)}>
-        <ThemedView style={styles.modalOverlay}>
-          <ThemedView style={styles.modalContent}>
-          <ThemedView style={styles.selectCountryMainHeader}>
-      <ThemedText>Select countries</ThemedText>
+        <View style={[styles.modalOverlay, { backgroundColor: 'rgba(0,0,0,0.5)' }]}>
+          <View style={[styles.modalContent, { backgroundColor: themeColors.background }]}>
+          <View style={styles.selectCountryMainHeader}>
+      <Text style={{ color: themeColors.text }}>Select countries</Text>
       <MaterialIcons name="close" size={24} color= {colorScheme === 'dark' ? '#fff' : '#000'} />
-      </ThemedView>
+      </View>
             <FlatList
               data={areas}
               renderItem={renderAreaItem}
               keyExtractor={(item) => item.code}
               style={styles.countryList}
             />
-          </ThemedView>
-        </ThemedView>
+          </View>
+        </View>
       </TouchableWithoutFeedback>
     </Modal>
   )
@@ -224,7 +225,7 @@ console.log(savedAddressData,'savedAddressData------______');
   const savedContactFlatlist = ({ item }) => (
     
     <TouchableOpacity
-      style={styles.contactItemContainer}
+      style={[styles.contactItemContainer, { backgroundColor: themeColors.background }]}
       onPress={() => {
         setSavedAddressData({
           name: item.name,
@@ -249,30 +250,30 @@ console.log(savedAddressData,'savedAddressData------______');
         setSelectedArea(areas.find(a => a.callingCode === item.countryCode))
       }}
     >
-      <ThemedView style={styles.contactInfoContainer}>
-        <ThemedView style={styles.contactHeader}>
-          <ThemedText style={styles.contactName} numberOfLines={1}>
+      <View style={[styles.contactInfoContainer, { backgroundColor: themeColors.background }]}>
+        <View style={styles.contactHeader}>
+          <Text style={[styles.contactName, { color: themeColors.text }]} numberOfLines={1}>
             {item.name}
-          </ThemedText>
+          </Text>
       
-        </ThemedView>
+        </View>
         
-        <ThemedView style={styles.contactDetails}>
-          <ThemedView style={styles.contactDetailRow}>
+        <View style={styles.contactDetails}>
+          <View style={styles.contactDetailRow}>
             <MaterialIcons name="location-on" size={16} color="#FFAC1C" />
-            <ThemedText style={styles.contactDetailText} numberOfLines={2}>
+            <Text style={[styles.contactDetailText, { color: themeColors.text }]} numberOfLines={2}>
               {item.addressOne}
-            </ThemedText>
-          </ThemedView>
+            </Text>
+          </View>
           
-          <ThemedView style={styles.contactDetailRow}>
+          <View style={styles.contactDetailRow}>
             <MaterialIcons name="phone" size={16} color="#FFAC1C" />
-            <ThemedText style={styles.contactDetailText}>
+            <Text style={[styles.contactDetailText, { color: themeColors.text }]}>
               {`${item.countryCode} ${item.mobileNumber}`}
-            </ThemedText>
-          </ThemedView>
-        </ThemedView>
-      </ThemedView>
+            </Text>
+          </View>
+        </View>
+      </View>
     </TouchableOpacity>
   )
 
@@ -285,23 +286,23 @@ console.log(savedAddressData,'savedAddressData------______');
     >
       <TouchableWithoutFeedback onPress={() => setContactModal(false)}>
         
-        <ThemedView style={styles.modalOverlay}>
+        <View style={[styles.modalOverlay, { backgroundColor: 'rgba(0,0,0,0.5)' }]}>
         
-          <ThemedView style={styles.modalContent}>
+          <View style={[styles.modalContent, { backgroundColor: themeColors.background }]}>
             <FlatList
               data={savedContact}
               renderItem={savedContactFlatlist}
               keyExtractor={(item) => item.id}
               style={styles.countryList}
             />
-          </ThemedView>
-        </ThemedView>
+          </View>
+        </View>
       </TouchableWithoutFeedback>
     </Modal>
   )
 
   return (
-    <ThemedView>
+    <View>
       <Modal
         animationType="slide"
         transparent={true}
@@ -310,30 +311,30 @@ console.log(savedAddressData,'savedAddressData------______');
 
       >
       
-          <ThemedView style={styles.modalOverlay}>
+          <View style={[styles.modalOverlay, { backgroundColor: 'rgba(0,0,0,0.5)' }]}>
             <TouchableWithoutFeedback>
-              <ThemedView style={styles.modalContent}>
+              <View style={[styles.modalContent, { backgroundColor: themeColors.background }]}>
 
 
                
-                  <ThemedView style={styles.modalHeader}>
+                  <View style={[styles.modalHeader, { backgroundColor: themeColors.background }]}>
                     <TouchableOpacity onPress={()=>setContactModal(true)}>
                     <AntDesign name="contacts" size={24} color={colorScheme === 'dark' ? 'white' : 'black'} />
                     </TouchableOpacity>
-                    <ThemedText style={styles.modalTitle}>Add New Address</ThemedText>
+                    <Text style={[styles.modalTitle, { color: themeColors.text }]}>Add New Address</Text>
                     <TouchableOpacity
                       onPress={onClose}
                     >
                       <MaterialIcons name="close" size={24} color= {colorScheme === 'dark' ? '#fff' : '#000'} />
                     </TouchableOpacity>
-                  </ThemedView>
+                  </View>
                   <ScrollView showsVerticalScrollIndicator={false}>
-                  <ThemedView style={styles.formContainer}>
+                  <View style={[styles.formContainer, { backgroundColor: themeColors.background }]}>
                     <TextInput
                       placeholder="Enter First And Last Name"
                       value={savedAddressData.name}
                       onChangeText={(text) => setSavedAddressData({ name: text })}
-                      style={[styles.input,{color: colorScheme === 'dark' ? '#fff' : '#000',backgroundColor: colorScheme ==='dark'?'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)'}]}
+                      style={[styles.input,{color: themeColors.text,backgroundColor: colorScheme ==='dark'?'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)'}]}
                       keyboardType="default"
                     />
 
@@ -341,7 +342,7 @@ console.log(savedAddressData,'savedAddressData------______');
                       placeholder="Enter Company Name"
                       value={savedAddressData.companyName}
                       onChangeText={(text) => setSavedAddressData({ companyName: text })}
-                      style={[styles.input,{color: colorScheme === 'dark' ? '#fff' : '#000',backgroundColor: colorScheme ==='dark'?'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)' }]}
+                      style={[styles.input,{color: themeColors.text,backgroundColor: colorScheme ==='dark'?'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)' }]}
                       keyboardType="default"
                     />
 
@@ -350,7 +351,7 @@ console.log(savedAddressData,'savedAddressData------______');
                       placeholder="Address Line One"
                       value={savedAddressData.addressOne}
                       onChangeText={(text) => setSavedAddressData({ addressOne: text })}
-                       style={[styles.input,{color: colorScheme === 'dark' ? '#fff' : '#000',backgroundColor: colorScheme ==='dark'?'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)' }]}
+                       style={[styles.input,{color: themeColors.text,backgroundColor: colorScheme ==='dark'?'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)' }]}
                       keyboardType="default"
                     />
 
@@ -358,7 +359,7 @@ console.log(savedAddressData,'savedAddressData------______');
                       placeholder="Address Line Two"
                       value={savedAddressData.addressTwo}
                       onChangeText={(text) => setSavedAddressData({ addressTwo: text })}
-                       style={[styles.input,{color: colorScheme === 'dark' ? '#fff' : '#000',backgroundColor: colorScheme ==='dark'?'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)' }]}
+                       style={[styles.input,{color: themeColors.text,backgroundColor: colorScheme ==='dark'?'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)' }]}
                       keyboardType="default"
                     />
 
@@ -366,7 +367,7 @@ console.log(savedAddressData,'savedAddressData------______');
                       placeholder="City"
                       value={savedAddressData.city}
                       onChangeText={(text) => setSavedAddressData({ city: text })}
-                       style={[styles.input,{color: colorScheme === 'dark' ? '#fff' : '#000',backgroundColor: colorScheme ==='dark'?'rgba(255, 255, 255, 0.1)' :  'rgba(255, 255, 255, 0.9)'}]}
+                       style={[styles.input,{color: themeColors.text,backgroundColor: colorScheme ==='dark'?'rgba(255, 255, 255, 0.1)' :  'rgba(255, 255, 255, 0.9)'}]}
                       keyboardType="default"
                     />
 
@@ -374,7 +375,7 @@ console.log(savedAddressData,'savedAddressData------______');
                       placeholder="State"
                       value={savedAddressData.state}
                       onChangeText={(text) => setSavedAddressData({ state: text })}
-                       style={[styles.input,{color: colorScheme === 'dark' ? '#fff' : '#000',backgroundColor: colorScheme ==='dark'?'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)' }]}
+                       style={[styles.input,{color: themeColors.text,backgroundColor: colorScheme ==='dark'?'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)' }]}
                       keyboardType="default"
                     />
 
@@ -382,7 +383,7 @@ console.log(savedAddressData,'savedAddressData------______');
                       placeholder="Zip Code"
                       value={savedAddressData.zipCode}
                       onChangeText={(text) => setSavedAddressData({ zipCode: text })}
-                       style={[styles.input,{color: colorScheme === 'dark' ? '#fff' : '#000',backgroundColor: colorScheme ==='dark'?'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)' }]}
+                       style={[styles.input,{color: themeColors.text,backgroundColor: colorScheme ==='dark'?'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)' }]}
                       keyboardType="default"
                     />
 
@@ -390,13 +391,13 @@ console.log(savedAddressData,'savedAddressData------______');
                       placeholder="Email Address"
                       value={savedAddressData.email}
                       onChangeText={(text) => setSavedAddressData({ email: text })}
-                       style={[styles.input,{color: colorScheme === 'dark' ? '#fff' : '#000',backgroundColor: colorScheme ==='dark'?'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)'  }]}
+                       style={[styles.input,{color: themeColors.text,backgroundColor: colorScheme ==='dark'?'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)'  }]}
                       keyboardType="email-address"
                       autoCapitalize='none'
                     />
 
 
-                    <ThemedView style={styles.phoneContainer}>
+                    <View style={[styles.phoneContainer, { backgroundColor: themeColors.background }]}>
                       <TouchableOpacity
                         style={styles.countryCodeButton}
                         onPress={() => setCountryCodeModal(true)}
@@ -405,17 +406,17 @@ console.log(savedAddressData,'savedAddressData------______');
                           source={{ uri: selectedArea?.flag }}
                           style={styles.countryFlag}
                         />
-                        <ThemedText style={[
+                        <Text style={[
                           styles.countryCode,
-                          { color: colorScheme === 'dark' ? '#fff' : '#000' }
+                          { color: themeColors.text }
                         ]}>
                           {selectedArea?.callingCode}
-                        </ThemedText>
-                        <MaterialIcons name="arrow-drop-down" size={24} color={colorScheme === 'dark' ? '#fff' : '#000'} />
+                        </Text>
+                        <MaterialIcons name="arrow-drop-down" size={24} color={themeColors.text} />
                       </TouchableOpacity>
 
                       <TextInput
-                        style={[styles.phoneInput, { color: colorScheme === 'dark' ? '#fff' : '#000', backgroundColor: colorScheme ==='dark'?'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)' }]}
+                        style={[styles.phoneInput, { color: themeColors.text, backgroundColor: colorScheme ==='dark'?'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)' }]}
                         value={savedAddressData.mobileNumber}
                         onChangeText={(text) => setSavedAddressData({ mobileNumber: text })}
                         placeholder="Mobile Number"
@@ -424,15 +425,15 @@ console.log(savedAddressData,'savedAddressData------______');
                         maxLength={12}
                       />
 
-                    </ThemedView>
+                    </View>
 
-                    <ThemedView style={[styles.pickerContainer, {height:Platform.OS === 'ios'? verticalScale(130) : verticalScale(40)}]}>
+                    <View style={[styles.pickerContainer, {height:Platform.OS === 'ios'? verticalScale(130) : verticalScale(40), backgroundColor: colorScheme ==='dark'?'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)'}]}>
                       <Picker
 
                         selectedValue={savedAddressData.countryId}
                         onValueChange={(itemValue, itemIndex) => setSavedAddressData({ countryId: itemValue })}
                         mode='dropdown'
-                        style={{ color: colorScheme === 'dark' ? '#fff' : '#000', backgroundColor: colorScheme ==='dark'?'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)' }}
+                        style={{ color: themeColors.text }}
                       >
                         <Picker.Item color="red" label="Select Country" value="" />
                         {countryList?.map((country, index) => (
@@ -444,7 +445,7 @@ console.log(savedAddressData,'savedAddressData------______');
                           />
                         ))}
                       </Picker>
-                    </ThemedView>
+                    </View>
 
                     <CheckboxItem
                       label="This is a residential address"
@@ -459,7 +460,7 @@ console.log(savedAddressData,'savedAddressData------______');
                       onPress={() => setSavedAddressData({ saveAddress: !savedAddressData.saveAddress })}
                     />
 
-                    <ThemedView style={styles.buttonContainer}>
+                    <View style={[styles.buttonContainer, { backgroundColor: themeColors.background }]}>
 
                       <CustomButton
                         buttonText="Clear"
@@ -473,17 +474,17 @@ console.log(savedAddressData,'savedAddressData------______');
                         handlePress={handleSave}
                         buttonWidth={150}
                       />
-                    </ThemedView>
-                  </ThemedView>
+                    </View>
+                  </View>
                 </ScrollView>
-              </ThemedView>
+              </View>
             </TouchableWithoutFeedback>
-          </ThemedView>
+          </View>
 
         {renderAreasCodesModal()}
         {renderContactModal()}
       </Modal>
-    </ThemedView>
+    </View>
   )
 }
 
@@ -566,7 +567,6 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(16),
   },
   pickerContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     borderRadius: moderateScale(12),
     marginBottom: verticalScale(25),
     overflow: 'hidden',
@@ -580,7 +580,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: moderateScale(12),
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.1)',
   },
   countryName: {
     fontSize: moderateScale(16),
@@ -598,6 +597,8 @@ const styles = StyleSheet.create({
   },
   checkboxLabel: {
     marginLeft: horizontalScale(8),
+    fontSize: moderateScale(12),
+    lineHeight: moderateScale(16),
   },
   contactItemContainer: {
     marginBottom: verticalScale(15),

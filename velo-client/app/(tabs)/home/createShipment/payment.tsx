@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, TouchableOpacity, Alert } from 'react-native';
-import { ThemedView } from '@/components/ThemedView';
-import { ThemedText } from '@/components/ThemedText';
+import { StyleSheet, TouchableOpacity, Alert, View, Text, useColorScheme } from 'react-native';
 import { useStripe } from '@stripe/stripe-react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Divider } from 'react-native-paper';
@@ -15,6 +13,7 @@ import useLoginAccountStore from '@/store/loginAccountStore';
 import { ipURL } from '@/constants/backendUrl';
 import axiosInstance from '@/constants/axiosHeader';
 import StripeProviderWrapper from '@/components/StripeProviderWrapper';
+import { Colors } from '@/constants/Colors';
 
 interface TotalAmount {
   totalAmount: number;
@@ -43,6 +42,12 @@ const Payment = () => {
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
   const [loading, setLoading] = useState(false);
   const [getTotalAmount, setGetTotalAmount] = useState<TotalAmount | null>(null);
+  const colorScheme = useColorScheme() ?? 'light';
+  const themeColors = Colors[colorScheme];
+  const bgCard = colorScheme === 'dark' ? '#181A20' : '#FFF';
+  const borderColor = colorScheme === 'dark' ? '#333' : '#E0E0E0';
+  const textPrimary = colorScheme === 'dark' ? '#FFF' : '#000';
+  const textSecondary = colorScheme === 'dark' ? '#B0B0B0' : '#666';
 
   // Date calculation logic
   const originalDate = new Date(savedAddressData.shipmentDate);
@@ -167,56 +172,56 @@ const Payment = () => {
     amount: number;
     isTotal?: boolean;
   }) => (
-    <ThemedView
-      style={[styles.summaryRowContainer, isTotal && styles.totalRow]}
+    <View
+      style={[styles.summaryRowContainer, { backgroundColor: bgCard }, isTotal && styles.totalRow]}
     >
-      <ThemedText
-        style={[styles.summaryText, isTotal && styles.totalText]}
+      <Text
+        style={[styles.summaryText, { color: textPrimary }, isTotal && styles.totalText]}
       >
         {label}
-      </ThemedText>
-      <ThemedText
-        style={[styles.summaryText, isTotal && styles.totalText]}
+      </Text>
+      <Text
+        style={[styles.summaryText, { color: textPrimary }, isTotal && styles.totalText]}
       >
         AED {amount}
-      </ThemedText>
-    </ThemedView>
+      </Text>
+    </View>
   );
 
   // Show a loading message until getTotalAmount is available
   if (!getTotalAmount) {
     return (
-      <ThemedView style={styles.container}>
-        <ThemedText>Loading payment information...</ThemedText>
-      </ThemedView>
+      <View style={[styles.container, { backgroundColor: themeColors.background }]}>
+        <Text style={{ color: textPrimary }}>Loading payment information...</Text>
+      </View>
     );
   }
 
   return (
     <StripeProviderWrapper>
-    <ThemedView style={styles.container}>
+    <View style={[styles.container, { backgroundColor: themeColors.background }]}>
       {/* Redesigned Header */}
-      <ThemedView style={styles.headerContainer}>
-        <ThemedView style={styles.headerTitleContainer}>
-          <ThemedText style={styles.headerTitle}>Payment Summary</ThemedText>
+      <View style={[styles.headerContainer, { backgroundColor: bgCard }]}>
+        <View style={styles.headerTitleContainer}>
+          <Text style={[styles.headerTitle, { color: textPrimary }]}>Payment Summary</Text>
           <MaterialIcons name="payment" size={24} color="#FFAC1C" />
-        </ThemedView>
-      </ThemedView>
+        </View>
+      </View>
 
       {/* Summary Container with Elevated Card Design */}
-      <ThemedView style={styles.summaryContainer}>
+      <View style={[styles.summaryContainer, { backgroundColor: bgCard }]}>
         <SummaryRow label="Base Price" amount={getTotalAmount.baseAmount} />
         <SummaryRow label="Collection Price" amount={getTotalAmount.collectionPrice} />
         <SummaryRow label="Services Price" amount={getTotalAmount.servicesPrice} />
 
-        <Divider style={styles.divider} />
+        <Divider style={[styles.divider, { backgroundColor: borderColor }]} />
 
         <SummaryRow
           label="Total Amount"
           amount={getTotalAmount.totalAmount}
           isTotal={true}
         />
-      </ThemedView>
+      </View>
 
       {/* Payment Button with Improved Design */}
       <TouchableOpacity
@@ -227,12 +232,12 @@ const Payment = () => {
         onPress={openPaymentSheet}
         disabled={!loading}
       >
-        <ThemedText style={styles.paymentButtonText}>
+        <Text style={[styles.paymentButtonText, { color: loading ? '#000' : textPrimary }]}>
           {loading ? 'Proceed to Payment' : 'Loading...'}
-        </ThemedText>
+        </Text>
         {loading && <MaterialIcons name="arrow-forward" size={20} color="#000" />}
       </TouchableOpacity>
-    </ThemedView>
+    </View>
     </StripeProviderWrapper>
   );
 };

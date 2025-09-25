@@ -5,19 +5,27 @@ import {
     TouchableOpacity,
     LayoutAnimation,
     Alert,
-    TextInput
+    TextInput,
+    View,
+    Text,
+    useColorScheme
 } from 'react-native'
-import { ThemedView } from '@/components/ThemedView'
-import { ThemedText } from '@/components/ThemedText'
 import axiosInstance from '@/constants/axiosHeader'
 import useShipmentStore from '@/store/shipmentStore'
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { router } from 'expo-router'
 import { Divider } from 'react-native-paper'
+import { Colors } from '@/constants/Colors'
 
 
 const StaticData = ({ onSelect, isSelected }) => {
     const [price, setPrice] = useState('');
+    const colorScheme = useColorScheme() ?? 'light';
+    const themeColors = Colors[colorScheme];
+    const bgCard = colorScheme === 'dark' ? '#181A20' : '#FFF';
+    const borderColor = colorScheme === 'dark' ? '#333' : '#E0E0E0';
+    const textPrimary = colorScheme === 'dark' ? '#FFF' : '#000';
+    const textSecondary = colorScheme === 'dark' ? '#B0B0B0' : '#666';
 
     const handleStaticPrice = () => {
         if (!price || isNaN(price) || Number(price) <= 0) {
@@ -43,22 +51,23 @@ const StaticData = ({ onSelect, isSelected }) => {
             onPress={handleStaticPrice}
             activeOpacity={0.7}
         >
-            <ThemedView style={[
+            <View style={[
                 styles.card,
+                { backgroundColor: bgCard, borderColor: borderColor },
                 isSelected && styles.selectedCard
             ]}>
-                <ThemedText style={[styles.minimalDetail, { textAlign: 'center' }]}>
+                <Text style={[styles.minimalDetail, { textAlign: 'center', color: textPrimary }]}>
                     Enter Your price and someone will try to match it.
-                </ThemedText>
+                </Text>
                 <TextInput
                     value={price}
                     onChangeText={(text)=>handleSetPrice(text)}
-                    style={styles.textInput}
+                    style={[styles.textInput, { backgroundColor: bgCard, borderColor: borderColor, color: textPrimary }]}
                     placeholder="Enter Your Price"
-                    placeholderTextColor="#999"
+                    placeholderTextColor={textSecondary}
                     keyboardType="numeric"
                 />
-            </ThemedView>
+            </View>
         </TouchableOpacity>
     );
 };
@@ -67,6 +76,12 @@ const StaticData = ({ onSelect, isSelected }) => {
 const OrganisationCard = ({ item, onSelect, isSelected }) => {
     const { itemType, packageDetail, deliveryServices } = useShipmentStore()
     const [expanded, setExpanded] = useState(false);
+    const colorScheme = useColorScheme() ?? 'light';
+    const themeColors = Colors[colorScheme];
+    const bgCard = colorScheme === 'dark' ? '#181A20' : '#FFF';
+    const borderColor = colorScheme === 'dark' ? '#333' : '#E0E0E0';
+    const textPrimary = colorScheme === 'dark' ? '#FFF' : '#000';
+    const textSecondary = colorScheme === 'dark' ? '#B0B0B0' : '#666';
 
     const toggleExpand = () => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -113,112 +128,119 @@ const OrganisationCard = ({ item, onSelect, isSelected }) => {
             onPress={handleCardSelect}
             activeOpacity={0.7}
         >
-            <ThemedView style={[
+            <View style={[
                 styles.card,
+                { backgroundColor: bgCard, borderColor: borderColor },
                 isSelected && styles.selectedCard
             ]}>
                 {/* Card Header */}
-                <ThemedView style={styles.cardHeader}>
-                    <ThemedText style={styles.organisationName} numberOfLines={1}>
+                <View style={[styles.cardHeader, { borderBottomColor: borderColor }]}>
+                    <Text style={[styles.organisationName, { color: textPrimary }]} numberOfLines={1}>
                         {item.organisationName || 'Unnamed Organisation'}
-                    </ThemedText>
+                    </Text>
                     <TouchableOpacity 
                         onPress={toggleExpand}
                         style={styles.expandButton}
                     >
-                        <ThemedText style={styles.expandButtonText}>
+                        <Text style={styles.expandButtonText}>
                             {expanded ? 'Show Less' : 'Show More'}
-                        </ThemedText>
+                        </Text>
                         <AntDesign 
                             name={expanded ? 'up' : 'down'} 
                             size={16} 
                             color="#FFAC1C" 
                         />
                     </TouchableOpacity>
-                </ThemedView>
+                </View>
 
                 {/* Minimal Initial Details */}
-                <ThemedView style={styles.minimalDetailsContainer}>
-                    <ThemedView style={styles.minimalDetailItem}>
+                <View style={styles.minimalDetailsContainer}>
+                    <View style={styles.minimalDetailItem}>
                         <AntDesign name="clockcircleo" size={14} color="#555" style={styles.minimalDetailIcon} />
-                        <ThemedText style={styles.minimalDetail}>
+                        <Text style={[styles.minimalDetail, { color: textPrimary }]}>
                             Deliver within {item.deliveryTimeline || 'N/A'} days
-                        </ThemedText>
-                    </ThemedView>
-                    <ThemedView style={styles.minimalDetailItem}>
+                        </Text>
+                    </View>
+                    <View style={styles.minimalDetailItem}>
                         <AntDesign name="wallet" size={14} color="#555" style={styles.minimalDetailIcon} />
-                        <ThemedText style={styles.minimalDetail}>
+                        <Text style={[styles.minimalDetail, { color: textPrimary }]}>
                             Total AED {(calculateFinalPrice(item)).toFixed(2)}
-                        </ThemedText>
-                    </ThemedView>
-                </ThemedView>
+                        </Text>
+                    </View>
+                </View>
 
                 {/* Expanded Details */}
                 {expanded && (
-                    <ThemedView style={styles.expandedDetailsContainer}>
-                        <ThemedView style={styles.pricingSection}>
-                            <ThemedText style={styles.pricingSectionTitle}>Shipping Details</ThemedText>
+                    <View style={styles.expandedDetailsContainer}>
+                        <View style={[styles.pricingSection, { backgroundColor: bgCard }]}>
+                            <Text style={[styles.pricingSectionTitle, { color: textPrimary }]}>Shipping Details</Text>
                             {itemType === 'DOCUMENT' && 
-                            <ThemedView style={styles.pricingRow}>
-                                <ThemedText style={styles.pricingLabel}>Document Price</ThemedText>
-                                <ThemedText style={styles.pricingValue}>
+                            <View style={styles.pricingRow}>
+                                <Text style={[styles.pricingLabel, { color: textPrimary }]}>Document Price</Text>
+                                <Text style={[styles.pricingValue, { color: textPrimary }]}>
                                     AED {calculateTotalPrice(item)}
-                                </ThemedText>
-                            </ThemedView>
+                                </Text>
+                            </View>
                             }
                            {itemType === 'PACKAGE' && 
-                           <ThemedView style={styles.pricingRow}>
-                                <ThemedText style={styles.pricingLabel}>Package Price:</ThemedText>
-                                <ThemedText style={styles.pricingValue}>
+                           <View style={styles.pricingRow}>
+                                <Text style={[styles.pricingLabel, { color: textPrimary }]}>Package Price:</Text>
+                                <Text style={[styles.pricingValue, { color: textPrimary }]}>
                                     AED{calculateTotalPrice(item)}
-                                </ThemedText>
-                            </ThemedView>
+                                </Text>
+                            </View>
                            }
                           
-                            <ThemedView style={styles.pricingRow}>
-                                <ThemedText style={styles.pricingLabel}>Collection Price</ThemedText>
-                                <ThemedText style={styles.pricingValue}>
+                            <View style={styles.pricingRow}>
+                                <Text style={[styles.pricingLabel, { color: textPrimary }]}>Collection Price</Text>
+                                <Text style={[styles.pricingValue, { color: textPrimary }]}>
                                     AED { calculateCollectionCharge(item) } 
-                                </ThemedText>
-                            </ThemedView>
+                                </Text>
+                            </View>
 
-                            <ThemedView style={styles.pricingRow}>
-                                <ThemedText style={styles.pricingLabel}>Verbal Notification</ThemedText>
-                                <ThemedText style={styles.pricingValue}>
+                            <View style={styles.pricingRow}>
+                                <Text style={[styles.pricingLabel, { color: textPrimary }]}>Verbal Notification</Text>
+                                <Text style={[styles.pricingValue, { color: textPrimary }]}>
                                     AED { deliveryServices.verbalNotification? 10 : 0 } 
-                                </ThemedText>
-                            </ThemedView>
+                                </Text>
+                            </View>
 
-                            <ThemedView style={styles.pricingRow}>
-                                <ThemedText style={styles.pricingLabel}>Adult Signature</ThemedText>
-                                <ThemedText style={styles.pricingValue}>
+                            <View style={styles.pricingRow}>
+                                <Text style={[styles.pricingLabel, { color: textPrimary }]}>Adult Signature</Text>
+                                <Text style={[styles.pricingValue, { color: textPrimary }]}>
                                     AED { deliveryServices.adultSignature? 20 : 0 } 
-                                </ThemedText>
-                            </ThemedView>
+                                </Text>
+                            </View>
 
-                            <ThemedView style={styles.pricingRow}>
-                                <ThemedText style={styles.pricingLabel}>Direct Signature</ThemedText>
-                                <ThemedText style={styles.pricingValue}>
+                            <View style={styles.pricingRow}>
+                                <Text style={[styles.pricingLabel, { color: textPrimary }]}>Direct Signature</Text>
+                                <Text style={[styles.pricingValue, { color: textPrimary }]}>
                                     AED { deliveryServices.directSignature? 20 : 0 } 
-                                </ThemedText>
-                            </ThemedView>
+                                </Text>
+                            </View>
 
-                            <ThemedView style={[styles.pricingRow, styles.totalPricingRow]}>
-                                <ThemedText style={styles.totalPricingLabel}>Total</ThemedText>
-                                <ThemedText style={styles.totalPricingValue}>
+                            <View style={[styles.pricingRow, styles.totalPricingRow, { borderTopColor: borderColor }]}>
+                                <Text style={[styles.totalPricingLabel, { color: textPrimary }]}>Total</Text>
+                                <Text style={styles.totalPricingValue}>
                                     AED {(calculateFinalPrice(item)).toFixed(2)} 
-                                </ThemedText>
-                            </ThemedView>
-                        </ThemedView>
-                    </ThemedView>
+                                </Text>
+                            </View>
+                        </View>
+                    </View>
                 )}
-            </ThemedView>
+            </View>
         </TouchableOpacity>
     );
 };
 
 const ViewShippingOptions = () => {
     const { itemType, setFinalShipmentData,finalShipmentData } = useShipmentStore()
+    const colorScheme = useColorScheme() ?? 'light';
+    const themeColors = Colors[colorScheme];
+    const bgCard = colorScheme === 'dark' ? '#181A20' : '#FFF';
+    const borderColor = colorScheme === 'dark' ? '#333' : '#E0E0E0';
+    const textPrimary = colorScheme === 'dark' ? '#FFF' : '#000';
+    const textSecondary = colorScheme === 'dark' ? '#B0B0B0' : '#666';
 
     const [allShippingOptions, setAllShippingOptions] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -265,15 +287,15 @@ const ViewShippingOptions = () => {
 
     if (loading) {
         return (
-            <ThemedView style={styles.container}>
-                <ThemedText style={styles.loadingText}>Loading Organisations...</ThemedText>
-            </ThemedView>
+            <View style={[styles.container, { backgroundColor: themeColors.background }]}>
+                <Text style={[styles.loadingText, { color: textPrimary }]}>Loading Organisations...</Text>
+            </View>
         )
     }
 
     return (
-        <ThemedView style={styles.container}>
-            <ThemedText style={styles.title}>Shipping Options</ThemedText>
+        <View style={[styles.container, { backgroundColor: themeColors.background }]}>
+            <Text style={[styles.title, { color: textPrimary }]}>Shipping Options</Text>
 
            
 
@@ -290,7 +312,7 @@ const ViewShippingOptions = () => {
                 contentContainerStyle={styles.listContainer}
                 showsVerticalScrollIndicator={false}
             />
-            <ThemedView>
+            <View>
                 <Divider
                     style={{
                         marginVertical: 15,
@@ -298,32 +320,35 @@ const ViewShippingOptions = () => {
                         height: 2,
                     }}
                 />
-                <ThemedText
-                    style={{
-                        textAlign: 'center',
-                        fontSize: 22,
-                        fontWeight: '700',
-                        marginBottom: 10,
-                    }}
+                <Text
+                    style={[
+                        {
+                            textAlign: 'center',
+                            fontSize: 22,
+                            fontWeight: '700',
+                            marginBottom: 10,
+                        },
+                        { color: textPrimary }
+                    ]}
                 >
                     OR
-                </ThemedText>
+                </Text>
 
                 <StaticData 
                     onSelect={handleItemSelect} 
                     isSelected={selectedItem === null}
                 />
-            </ThemedView>
+            </View>
 
             <TouchableOpacity 
                 style={styles.selectedItemBanner}
                 onPress={()=>router.push('/home/createShipment/finalPreview')}
             >
-                <ThemedText style={styles.selectedItemText}>
+                <Text style={styles.selectedItemText}>
                     Preview Final Changes
-                </ThemedText>
+                </Text>
             </TouchableOpacity>
-        </ThemedView>
+        </View>
     )
 }
 
@@ -333,19 +358,16 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 15,
-
     },
     title: {
         fontSize: 24,
         fontWeight: '700',
         marginBottom: 20,
         textAlign: 'center',
-
     },
     loadingText: {
         fontSize: 18,
         textAlign: 'center',
-
     },
     listContainer: {
         paddingBottom: 20,
@@ -367,15 +389,12 @@ const styles = StyleSheet.create({
         elevation: 6,
     },
     card: {
-
         borderRadius: 12,
         padding: 15,
         borderWidth: 1,
-
     },
     selectedCard: {
         borderColor: '#FFAC1C',
-
     },
     selectedItemBanner: {
         backgroundColor: '#FFAC1C',
@@ -395,12 +414,10 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         paddingBottom: 10,
         borderBottomWidth: 1,
-
     },
     organisationName: {
         fontSize: 19,
         fontWeight: '600',
-
         flex: 1,
         marginRight: 10,
     },
@@ -426,13 +443,11 @@ const styles = StyleSheet.create({
     },
     minimalDetail: {
         fontSize: 13,
-
     },
     expandedDetailsContainer: {
         marginTop: 15,
     },
     pricingSection: {
-
         borderRadius: 8,
         padding: 12,
     },
@@ -440,7 +455,6 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         marginBottom: 10,
         textAlign: 'center',
-
         fontSize: 16,
     },
     pricingRow: {
@@ -451,22 +465,18 @@ const styles = StyleSheet.create({
     },
     totalPricingRow: {
         borderTopWidth: 1,
-
         paddingTop: 8,
         marginTop: 8,
     },
     pricingLabel: {
         fontSize: 13,
-
     },
     pricingValue: {
         fontWeight: '500',
-
     },
     totalPricingLabel: {
         fontSize: 15,
         fontWeight: '600',
-
     },
     totalPricingValue: {
         fontSize: 16,
@@ -475,10 +485,8 @@ const styles = StyleSheet.create({
     },
     textInput: {
         borderWidth: 1,
-        borderColor: '#e0e0e0',
         borderRadius: 10,
         padding: 16,
         fontSize: 15,
-        color: '#fff',
     },
 });

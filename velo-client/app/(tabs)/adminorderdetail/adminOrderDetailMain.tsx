@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, FlatList, TouchableOpacity, RefreshControl, View } from 'react-native';
+import { StyleSheet, FlatList, TouchableOpacity, RefreshControl, View, Text, useColorScheme } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { ThemedView } from '@/components/ThemedView';
-import { ThemedText } from '@/components/ThemedText';
 import { ipURL } from '@/constants/backendUrl';
 import { router } from 'expo-router';
 import axiosInstance from '@/constants/axiosHeader';
-import { useColorScheme } from '@/hooks/useColorScheme';
 import useLoginAccountStore from '@/store/loginAccountStore';
+import { Colors } from '@/constants/Colors';
 
 const cardData = [
   {
@@ -25,7 +23,8 @@ const cardData = [
 ];
 
 const AdminOrderDetailMain = () => {
-  const colorScheme = useColorScheme();
+  const colorScheme = useColorScheme() ?? 'light';
+  const themeColors = Colors[colorScheme];
   const {accountLoginData} = useLoginAccountStore();
   const [pendingOrders, setPendingOrders] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
@@ -63,54 +62,54 @@ const AdminOrderDetailMain = () => {
       style={styles.card}
       onPress={() => router.push(`/(tabs)/adminorderdetail/${item.id}`)}
     >
-      <ThemedView style={styles.cardHeader}>
-        <ThemedText style={styles.shipmentId}>
+      <View style={[styles.cardHeader, { backgroundColor: themeColors.background }]}>
+        <Text style={[styles.shipmentId, { color: themeColors.text }]}>
           Shipment #{item.shipmentId}
-        </ThemedText>
-        <ThemedView style={[styles.statusBadge, { backgroundColor: getStatusColor(item.status) }]}>
-          <ThemedText style={styles.statusText}>
+        </Text>
+        <View style={[styles.statusBadge, { backgroundColor: getStatusColor(item.status) }]}>
+          <Text style={styles.statusText}>
             {item.shipmentStatus}
-          </ThemedText>
-        </ThemedView>
-      </ThemedView>
+          </Text>
+        </View>
+      </View>
 
-      <ThemedView style={styles.cardContent}>
-        <ThemedView style={styles.senderContainer}>
-          <ThemedView style={styles.senderIcon}>
+      <View style={[styles.cardContent, { backgroundColor: themeColors.background }]}>
+        <View style={styles.senderContainer}>
+          <View style={styles.senderIcon}>
             <Ionicons name="person-outline" size={24} color="#4A4A4A" />
-          </ThemedView>
-          <ThemedView style={styles.senderDetails}>
-            <ThemedText style={styles.senderTitle}>Sender</ThemedText>
-            <ThemedText style={styles.senderText}>
+          </View>
+          <View style={styles.senderDetails}>
+            <Text style={[styles.senderTitle, { color: themeColors.text }]}>Sender</Text>
+            <Text style={[styles.senderText, { color: themeColors.text }]}>
               {item.senderName}
-            </ThemedText>
-          </ThemedView>
-        </ThemedView>
+            </Text>
+          </View>
+        </View>
 
-        <ThemedView style={styles.locationContainer}>
-          <ThemedView style={styles.locationIcon}>
+        <View style={styles.locationContainer}>
+          <View style={styles.locationIcon}>
             <Ionicons name="location-outline" size={24} color="#4A4A4A" />
-          </ThemedView>
-          <ThemedView style={styles.locationDetails}>
-            <ThemedText style={styles.locationTitle}>Shipping Route</ThemedText>
-            <ThemedText style={styles.locationText}>
+          </View>
+          <View style={styles.locationDetails}>
+            <Text style={[styles.locationTitle, { color: themeColors.text }]}>Shipping Route</Text>
+            <Text style={[styles.locationText, { color: themeColors.text }]}>
               {item.senderCity}, {item.senderState} → {item.receiverCity}, {item.receiverState}
-            </ThemedText>
-          </ThemedView>
-        </ThemedView>
+            </Text>
+          </View>
+        </View>
 
-        <ThemedView style={styles.locationContainer}>
-          <ThemedView style={styles.locationIcon}>
+        <View style={styles.locationContainer}>
+          <View style={styles.locationIcon}>
             <Ionicons name="cash" size={24} color="#4A4A4A" />
-          </ThemedView>
-          <ThemedView style={styles.locationDetails}>
-            <ThemedText style={styles.locationTitle}> {item.shippingMarket === "OPEN_MARKET" ? "SUGGESTED AMOUNT" : "PAID AMOUNT"}</ThemedText>
-            <ThemedText style={styles.locationText}>
+          </View>
+          <View style={styles.locationDetails}>
+            <Text style={[styles.locationTitle, { color: themeColors.text }]}> {item.shippingMarket === "OPEN_MARKET" ? "SUGGESTED AMOUNT" : "PAID AMOUNT"}</Text>
+            <Text style={[styles.locationText, { color: themeColors.text }]}>
               {item.shippingMarket === "OPEN_MARKET" ? item.openMarketPrice : item.paymentAmount}
-            </ThemedText>
-          </ThemedView>
-        </ThemedView>
-      </ThemedView>
+            </Text>
+          </View>
+        </View>
+      </View>
     </TouchableOpacity>
   );
 
@@ -124,13 +123,13 @@ const AdminOrderDetailMain = () => {
   };
 
   return (
-    <ThemedView style={styles.container}>
-     {accountLoginData.registerVerificationStatus === "LOGGED_IN"? <ThemedView >
-      <ThemedView style={styles.headerContainer}>
-        <ThemedText style={styles.pageTitle}>Pending Shipments</ThemedText>
-      </ThemedView>
+    <View style={[styles.container, { backgroundColor: themeColors.background }]}>
+     {accountLoginData.registerVerificationStatus === "LOGGED_IN"? <View >
+      <View style={[styles.headerContainer, { backgroundColor: themeColors.background }]}>
+        <Text style={[styles.pageTitle, { color: themeColors.text }]}>Pending Shipments</Text>
+      </View>
 
-      <ThemedView >
+      <View >
         <FlatList
           data={cardData}
           keyExtractor={(item) => item.title}
@@ -140,18 +139,18 @@ const AdminOrderDetailMain = () => {
               style={[styles.statusCardContainer, {
                 backgroundColor: orderStatus === item.status ? '#4CAF50' : 'transparent', 
               }]} >
-              <ThemedView >
-                <ThemedText type='mini' style={{ backgroundColor: orderStatus === item.status ? '#4CAF50' :'transparent' }}>
+              <View >
+                <Text style={[styles.miniText, { color: themeColors.text, backgroundColor: orderStatus === item.status ? '#4CAF50' :'transparent' }]}>
                   {item.title}
-                </ThemedText>
-              </ThemedView>
+                </Text>
+              </View>
             </TouchableOpacity>
           )}
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{ paddingHorizontal: 20 }}
         />
-      </ThemedView>
+      </View>
 
       {pendingOrders.length > 0 ? (
         <FlatList
@@ -169,25 +168,21 @@ const AdminOrderDetailMain = () => {
           showsVerticalScrollIndicator={false}
         />
       ) : (
-        <ThemedView style={styles.emptyStateContainer}>
+        <View style={[styles.emptyStateContainer, { backgroundColor: themeColors.background }]}>
           <Ionicons name="cube-outline" size={64} color="#E0E0E0" />
-          <ThemedText style={styles.emptyStateText}>
+          <Text style={[styles.emptyStateText, { color: themeColors.text }]}>
             No shipments in progress
-          </ThemedText>
-        </ThemedView>
+          </Text>
+        </View>
       )}
-      </ThemedView> :
-      <ThemedView style={{
-        flex:1,
-        justifyContent:'center',
-        alignItems:'center'
-        }}>
-        <ThemedText>
+      </View> :
+      <View style={[styles.notVerifiedContainer, { backgroundColor: themeColors.background }]}>
+        <Text style={[styles.notVerifiedText, { color: themeColors.text }]}>
           You are not verified
-        </ThemedText>
-        </ThemedView>
+        </Text>
+        </View>
       }
-    </ThemedView>
+    </View>
   );
 };
 
@@ -306,6 +301,19 @@ const styles = StyleSheet.create({
   emptyStateText: {
     fontSize: 16,
     textAlign: 'center',
+  },
+  notVerifiedContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  notVerifiedText: {
+    fontSize: 16,
+    lineHeight: 22,
+  },
+  miniText: {
+    fontSize: 12,
+    lineHeight: 16,
   },
   statusCardContainer: {
 

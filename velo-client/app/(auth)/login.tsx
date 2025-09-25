@@ -6,10 +6,10 @@ import {
   KeyboardAvoidingView, 
   TouchableWithoutFeedback,
   Alert,
-  
+  View,
+  Text,
+  useColorScheme
 } from 'react-native';
-import { ThemedView } from '@/components/ThemedView'
-import { ThemedText } from '@/components/ThemedText'
 import { verticalScale, horizontalScale, moderateScale } from '@/constants/metrics'
 import CustomButton from '@/components/CustomButton';
 import { router } from 'expo-router';
@@ -18,6 +18,7 @@ import { ipURL } from '@/constants/backendUrl';
 import * as SecureStore from 'expo-secure-store';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import useLoginAccountStore from '@/store/loginAccountStore';
+import { Colors } from '@/constants/Colors';
 
 
 const Login = () => {
@@ -26,6 +27,9 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  
+  const colorScheme = useColorScheme() ?? 'light';
+  const themeColors = Colors[colorScheme];
 
   const handleLogin = async() => {
     try {
@@ -93,21 +97,21 @@ const Login = () => {
   }
 
   return (
-    <ThemedView style={styles.container}>
+    <View style={[styles.container, { backgroundColor: themeColors.background }]}>
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
        
-          <ThemedView style={styles.headerContainer}>
-            <ThemedText type='logoText' style={styles.logoText}>Velo</ThemedText>
-            <ThemedText type='subtitle' style={styles.welcomeText}>Welcome back!</ThemedText>
-            <ThemedText style={styles.subtitleText}>Please sign in to continue</ThemedText>
-          </ThemedView>
+          <View style={styles.headerContainer}>
+            <Text style={[styles.logoText, { color: '#FFAC1C' }]}>Velo</Text>
+            <Text style={[styles.welcomeText, { color: themeColors.text }]}>Welcome back!</Text>
+            <Text style={[styles.subtitleText, { color: themeColors.text }]}>Please sign in to continue</Text>
+          </View>
 
-          <ThemedView style={styles.formContainer}>
-            <ThemedView style={styles.inputContainer}>
-              <ThemedText type='default' style={styles.label}>Email</ThemedText>
-              <ThemedView style={styles.inputWrapper}>
+          <View style={styles.formContainer}>
+            <View style={styles.inputContainer}>
+              <Text style={[styles.label, { color: themeColors.text }]}>Email</Text>
+              <View style={[styles.inputWrapper, { borderColor: themeColors.text }]}>
                 <MaterialIcons name="email" size={20} color="gray" style={styles.inputIcon} />
                 <TextInput
                   placeholder="Enter your email"
@@ -117,14 +121,14 @@ const Login = () => {
                   onChangeText={setEmail}
                   keyboardType='email-address'
                   autoComplete='email'
-                  style={styles.input}
+                  style={[styles.input, { color: themeColors.text }]}
                 />
-              </ThemedView>
-            </ThemedView>
+              </View>
+            </View>
 
-            <ThemedView style={styles.inputContainer}>
-              <ThemedText type='default' style={styles.label}>Password</ThemedText>
-              <ThemedView style={styles.inputWrapper}>
+            <View style={styles.inputContainer}>
+              <Text style={[styles.label, { color: themeColors.text }]}>Password</Text>
+              <View style={[styles.inputWrapper, { borderColor: themeColors.text }]}>
                 <MaterialIcons name="lock" size={20} color="gray" style={styles.inputIcon} />
                 <TextInput
                   placeholder="Enter your password"
@@ -132,7 +136,7 @@ const Login = () => {
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry={!showPassword}
-                  style={[styles.input, { flex: 1 }]}
+                  style={[styles.input, { flex: 1, color: themeColors.text }]}
                 />
                 <TouchableWithoutFeedback onPress={() => setShowPassword(!showPassword)}>
                   <MaterialIcons 
@@ -141,33 +145,33 @@ const Login = () => {
                     color="gray" 
                   />
                 </TouchableWithoutFeedback>
-              </ThemedView>
-            </ThemedView>
+              </View>
+            </View>
 
-            <ThemedView style={styles.forgotPasswordContainer}>
+            <View style={styles.forgotPasswordContainer}>
               <TouchableWithoutFeedback onPress={() => console.log('Forgot password')}>
-                <ThemedText style={styles.forgotPasswordText}>Forgot Password?</ThemedText>
+                <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
               </TouchableWithoutFeedback>
-            </ThemedView>
+            </View>
 
-            <ThemedView style={styles.buttonContainer}>
+            <View style={styles.buttonContainer}>
               <CustomButton 
                 buttonText='Sign In' 
                 buttonWidth={horizontalScale(300)} 
                 handlePress={handleLogin}
                 disableButton={loading}
               />
-            </ThemedView>
+            </View>
 
-            <ThemedView style={styles.signupContainer}>
-              <ThemedText style={styles.signupText}>Don't have an account? </ThemedText>
+            <View style={styles.signupContainer}>
+              <Text style={[styles.signupText, { color: themeColors.text }]}>Don't have an account? </Text>
               <TouchableWithoutFeedback onPress={() => router.push('/(auth)/chooseRole')}>
-                <ThemedText style={styles.signupLink}>Sign Up</ThemedText>
+                <Text style={styles.signupLink}>Sign Up</Text>
               </TouchableWithoutFeedback>
-            </ThemedView>
-          </ThemedView>
+            </View>
+          </View>
     </KeyboardAvoidingView>
-    </ThemedView>
+    </View>
   )
 }
 
@@ -188,15 +192,20 @@ const styles = StyleSheet.create({
     
   },
   logoText: {
-    fontSize: moderateScale(32),
+    fontSize: moderateScale(40),
+    lineHeight: moderateScale(56),
+    fontWeight: 'bold',
     marginBottom: verticalScale(16),
   },
   welcomeText: {
     fontSize: moderateScale(24),
+    lineHeight: moderateScale(28),
+    fontWeight: 'bold',
     marginBottom: verticalScale(8),
   },
   subtitleText: {
     fontSize: moderateScale(16),
+    lineHeight: moderateScale(22),
     color: 'gray',
   },
   formContainer: {
@@ -208,14 +217,14 @@ const styles = StyleSheet.create({
   },
   label: {
     marginBottom: verticalScale(8),
-
+    fontSize: moderateScale(16),
+    lineHeight: moderateScale(22),
     fontWeight: '500',
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'gray',
     borderRadius: moderateScale(12),
     paddingHorizontal: horizontalScale(16),
     height: verticalScale(48),
@@ -226,7 +235,6 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: moderateScale(16),
-    color: '#666',
   },
   forgotPasswordContainer: {
     alignItems: 'flex-end',

@@ -1,9 +1,6 @@
-import { StyleSheet, Text, Image,Animated } from 'react-native'
+import { StyleSheet, Text, Image, Animated, View, TouchableOpacity } from 'react-native'
 import { router } from "expo-router";
 import React,{useEffect, useRef} from 'react'
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import CustomButton from '@/components/CustomButton';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { verticalScale,horizontalScale,moderateScale } from '@/constants/metrics';
 import * as SecureStore from 'expo-secure-store';
@@ -77,41 +74,42 @@ const RootIndex = () => {
 
   return (
     
-      <ThemedView  style={styles.container}   >
-        <ThemedView style={styles.logoContainer}>
-{/* <ThemedText type='logoText' style={styles.logoText}>Velo</ThemedText> */}
+      <View  style={styles.container}   >
+        <View style={styles.logoContainer}>
+{/* <Text style={styles.logoText}>Velo</Text> */}
 <Image
             source={require('@/assets/images/logo.png')}
             style={styles.logoImgContainer}
           />
-          <ThemedText type='subtitle' style={[styles.heroText, styles.heroTextLogoText]}>Velo</ThemedText>
-</ThemedView>
-        <ThemedView>
+          <Text style={[styles.heroText, styles.heroTextLogoText]}>Velo</Text>
+</View>
+        <View>
           <Image
             source={require('@/assets/images/heroImage.jpg')}
             style={styles.heroImgContainer}
           />
-        </ThemedView>
+        </View>
 
-        <ThemedView style={styles.heroTextcontainer}>
-          <ThemedText type='subtitle' style={styles.heroText}>
+        <View style={styles.heroTextcontainer}>
+          <Text style={styles.heroText}>
             Shipping made simple, anywhere. 
-          </ThemedText>
-        </ThemedView>
+          </Text>
+        </View>
 
-        <ThemedView style={styles.heroTextcontainer}>
+        <View style={styles.heroTextcontainer}>
         <Animated.View style={{ transform: [{ scale: scaleValue }] }}>
-          <CustomButton
-            buttonText='Get Started'
-            handlePress={animateButton}
-            buttonWidth={horizontalScale(250)}
-          />
+          <TouchableOpacity
+            style={styles.customButton}
+            onPress={animateButton}
+          >
+            <Text style={styles.buttonText}>Get Started</Text>
+          </TouchableOpacity>
           </Animated.View>
-          <ThemedText type='default'>
-            Already have an account? <ThemedText type='link' style={{ color: '#FFAC1C' }} onPress={() => router.replace('/(auth)/login')}>Sign In</ThemedText>
-          </ThemedText>
-        </ThemedView>
-      </ThemedView>
+          <Text style={styles.defaultText}>
+            Already have an account? <Text style={styles.linkText} onPress={() => router.replace('/(auth)/login')}>Sign In</Text>
+          </Text>
+        </View>
+      </View>
     
   );
 }
@@ -156,6 +154,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: horizontalScale(20), // Optional: add padding for better spacing
   },
   heroText: {
+    color: '#fff',
     fontSize: moderateScale(25),
     fontWeight: 'bold',
     // textAlign: 'center', // Center the text within the container
@@ -170,5 +169,28 @@ const styles = StyleSheet.create({
     padding: moderateScale(10),
     borderRadius: moderateScale(10),
     width: horizontalScale(300),
+  },
+  customButton: {
+    backgroundColor: '#FFAC1C',
+    paddingVertical: verticalScale(15),
+    paddingHorizontal: horizontalScale(30),
+    borderRadius: moderateScale(10),
+    width: horizontalScale(250),
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: moderateScale(16),
+    fontWeight: 'bold',
+  },
+  defaultText: {
+    fontSize: moderateScale(16),
+    marginTop: verticalScale(10),
+    color: '#fff',
+  },
+  linkText: {
+    color: '#FFAC1C',
+    textDecorationLine: 'underline',
   },
 });

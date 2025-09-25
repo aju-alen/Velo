@@ -1,19 +1,18 @@
-import { StyleSheet, TouchableOpacity, View, Linking } from 'react-native';
+import { StyleSheet, TouchableOpacity, View, Linking, Text, useColorScheme } from 'react-native';
 import React, { useState } from 'react';
-import { ThemedView } from '@/components/ThemedView';
-import { ThemedText } from '@/components/ThemedText';
 import { Ionicons } from '@expo/vector-icons';
-import { useColorScheme } from '@/hooks/useColorScheme';
 import useLoginAccountStore from '@/store/loginAccountStore';
 import { router } from 'expo-router';
+import { Colors } from '@/constants/Colors';
 
 const features = [
   { label: 'Change Password', icon: 'lock-closed-outline', route: '/profile/settings/changePassword' },
-  { label: 'My Orders', icon: 'cube-outline', route: '/profile/settings/myOrders' },
-  { label: 'Delete Account', icon: 'trash-outline', route: '/profile/settings/deleteAccount' },
+  // { label: 'My Orders', icon: 'cube-outline', route: '/profile/settings/myOrders' },
+  
   { label: 'Support', icon: 'chatbox-outline', route: '/profile/settings/support' },
   { label: 'Privacy Policy', icon: 'document-text-outline', route: 'https://www.termsfeed.com/live/45aff027-4be0-4fba-9f3f-8f827233fc4a', isExternal: true },
   { label: 'EULA', icon: 'document-text-outline', route: 'https://velo-mobile-bucket.s3.ap-southeast-1.amazonaws.com/Asset/Velo+EULA.pdf', isExternal: true },
+  { label: 'Delete Account', icon: 'trash-outline', route: '/profile/settings/deleteAccount' },
 ];
 
 const ProfileHome = () => {
@@ -22,7 +21,8 @@ const ProfileHome = () => {
     name: accountLoginData.name,
     email: accountLoginData.email,
   });
-  const colorScheme = useColorScheme();
+  const colorScheme = useColorScheme() ?? 'light';
+  const themeColors = Colors[colorScheme];
   const bgCard = colorScheme === 'dark' ? '#181A20' : '#FFF';
   const textPrimary = colorScheme === 'dark' ? '#FFF' : '#222';
   const textSecondary = colorScheme === 'dark' ? '#AAA' : '#666';
@@ -38,13 +38,13 @@ const ProfileHome = () => {
   };
 
   return (
-    <ThemedView style={styles.container}>
+    <View style={[styles.container, { backgroundColor: themeColors.background }]}>
       {/* User Info */}
-      <ThemedView style={[styles.card, { backgroundColor: bgCard, borderColor }]}> 
-        <ThemedText style={[styles.name, { color: textPrimary }]}>Hello {userData.name}</ThemedText>
-      </ThemedView>
+      <View style={[styles.card, { backgroundColor: bgCard, borderColor }]}> 
+        <Text style={[styles.name, { color: textPrimary }]}>Hello {userData.name}</Text>
+      </View>
       {/* Features */}
-      <ThemedView style={[styles.card, { backgroundColor: bgCard, borderColor }]}> 
+      <View style={[styles.card, { backgroundColor: bgCard, borderColor }]}> 
         {features.map((item, idx) => (
           <TouchableOpacity
             key={item.label}
@@ -53,12 +53,12 @@ const ProfileHome = () => {
             onPress={() => handleFeaturePress(item)}
           >
             <Ionicons name={item.icon as any} size={20} color={accent} style={{ marginRight: 16 }} />
-            <ThemedText style={[styles.featureLabel, { color: textPrimary }]}>{item.label}</ThemedText>
+            <Text style={[styles.featureLabel, { color: textPrimary }]}>{item.label}</Text>
             <Ionicons name="chevron-forward" size={18} color={textSecondary} style={{ marginLeft: 'auto' }} />
           </TouchableOpacity>
         ))}
-      </ThemedView>
-    </ThemedView>
+      </View>
+    </View>
   );
 };
 

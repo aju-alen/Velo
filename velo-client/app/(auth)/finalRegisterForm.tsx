@@ -1,7 +1,5 @@
-import { StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, ActivityIndicator, ScrollView, Modal, View } from 'react-native';
+import { StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, ActivityIndicator, ScrollView, Modal, View, Text, useColorScheme } from 'react-native';
 import React, { useEffect, useState } from 'react';
-import { ThemedView } from '@/components/ThemedView';
-import { ThemedText } from '@/components/ThemedText';
 import { verticalScale, horizontalScale, moderateScale } from '@/constants/metrics';
 import CustomButton from '@/components/CustomButton';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -10,9 +8,9 @@ import { Chip, Divider, RadioButton } from 'react-native-paper';
 import { Picker } from '@react-native-picker/picker';
 import axios from 'axios';
 import { ipURL } from '@/constants/backendUrl';
-import { useColorScheme } from '@/hooks/useColorScheme';
 import useLoginAccountStore from '@/store/loginAccountStore';
 import { Ionicons } from '@expo/vector-icons';
+import { Colors } from '@/constants/Colors';
 
 const styles = StyleSheet.create({
   outerContainer: {
@@ -142,7 +140,8 @@ const styles = StyleSheet.create({
 
 const FinalRegisterForm = () => {
   const { accountLoginData, setAccountLoginData } = useLoginAccountStore();
-  const colorScheme = useColorScheme();
+  const colorScheme = useColorScheme() ?? 'light';
+  const themeColors = Colors[colorScheme];
   const [countryList, setCountryList] = useState([]);
   const [categoryList, setCategoryList] = useState([]);
   const [accountId, setAccountId] = useState('');
@@ -249,34 +248,34 @@ const FinalRegisterForm = () => {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <ThemedView style={[styles.outerContainer, { backgroundColor: bgOuter }]}> 
+      <View style={[styles.outerContainer, { backgroundColor: bgOuter }]}> 
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={{ flex: 1, width: '100%' }}
         >
           {loading ? (
-            <ThemedView style={styles.loadingContainer}>
+            <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color={chipSelected} />
-            </ThemedView>
+            </View>
           ) : (
-            <ThemedView style={{ flex: 1, width: '100%' }}>
+            <View style={{ flex: 1, width: '100%' }}>
               <ScrollView
                 contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center', paddingBottom: verticalScale(40) }}
                 keyboardShouldPersistTaps="handled"
                 showsVerticalScrollIndicator={false}
               >
-                <ThemedView style={[styles.card, { backgroundColor: bgCard, shadowColor: colorScheme === 'dark' ? '#000' : '#000' }]}> 
-                  <ThemedView style={styles.headerContainer}>
-                    <ThemedView style={[styles.iconContainer, { backgroundColor: colorScheme === 'dark' ? '#23242A' : '#FFF3E0' }]}> 
-                      <ThemedText style={[styles.icon, { color: textPrimary }]}>📝</ThemedText>
-                    </ThemedView>
-                    <ThemedText type="subtitle" style={[styles.title, { color: textPrimary }]}>Final Steps</ThemedText>
-                    <ThemedText type="default" style={[styles.subtitle, { color: textSecondary }]}>Complete your registration</ThemedText>
-                  </ThemedView>
+                <View style={[styles.card, { backgroundColor: bgCard, shadowColor: colorScheme === 'dark' ? '#000' : '#000' }]}> 
+                  <View style={styles.headerContainer}>
+                    <View style={[styles.iconContainer, { backgroundColor: colorScheme === 'dark' ? '#23242A' : '#FFF3E0' }]}> 
+                      <Text style={[styles.icon, { color: textPrimary }]}>📝</Text>
+                    </View>
+                    <Text style={[styles.title, { color: textPrimary }]}>Final Steps</Text>
+                    <Text style={[styles.subtitle, { color: textSecondary }]}>Complete your registration</Text>
+                  </View>
                   {accountRole === 'USER' && (
                     <>
-                      <ThemedView style={styles.inputContainer}>
-                        <ThemedText style={[styles.inputLabel, { color: textPrimary }]}>Address 1</ThemedText>
+                      <View style={styles.inputContainer}>
+                        <Text style={[styles.inputLabel, { color: textPrimary }]}>Address 1</Text>
                         <TextInput
                           placeholder="Enter Address 1"
                           placeholderTextColor={textSecondary}
@@ -284,9 +283,9 @@ const FinalRegisterForm = () => {
                           onChangeText={setAddressOne}
                           style={[styles.input, { backgroundColor: inputBg, color: textPrimary, borderColor }]}
                         />
-                      </ThemedView>
-                      <ThemedView style={styles.inputContainer}>
-                        <ThemedText style={[styles.inputLabel, { color: textPrimary }]}>Address 2</ThemedText>
+                      </View>
+                      <View style={styles.inputContainer}>
+                        <Text style={[styles.inputLabel, { color: textPrimary }]}>Address 2</Text>
                         <TextInput
                           placeholder="Enter Address 2"
                           placeholderTextColor={textSecondary}
@@ -294,9 +293,9 @@ const FinalRegisterForm = () => {
                           onChangeText={setAddressTwo}
                           style={[styles.input, { backgroundColor: inputBg, color: textPrimary, borderColor }]}
                         />
-                      </ThemedView>
-                      <ThemedView style={styles.inputContainer}>
-                        <ThemedText style={[styles.inputLabel, { color: textPrimary }]}>State</ThemedText>
+                      </View>
+                      <View style={styles.inputContainer}>
+                        <Text style={[styles.inputLabel, { color: textPrimary }]}>State</Text>
                         <TextInput
                           placeholder="Enter Your State"
                           placeholderTextColor={textSecondary}
@@ -304,9 +303,9 @@ const FinalRegisterForm = () => {
                           onChangeText={setState}
                           style={[styles.input, { backgroundColor: inputBg, color: textPrimary, borderColor }]}
                         />
-                      </ThemedView>
-                      <ThemedView style={styles.inputContainer}>
-                        <ThemedText style={[styles.inputLabel, { color: textPrimary }]}>City</ThemedText>
+                      </View>
+                      <View style={styles.inputContainer}>
+                        <Text style={[styles.inputLabel, { color: textPrimary }]}>City</Text>
                         <TextInput
                           placeholder="Enter Your City"
                           placeholderTextColor={textSecondary}
@@ -314,9 +313,9 @@ const FinalRegisterForm = () => {
                           onChangeText={setCity}
                           style={[styles.input, { backgroundColor: inputBg, color: textPrimary, borderColor }]}
                         />
-                      </ThemedView>
-                      <ThemedView style={styles.inputContainer}>
-                        <ThemedText style={[styles.inputLabel, { color: textPrimary }]}>Zip Code</ThemedText>
+                      </View>
+                      <View style={styles.inputContainer}>
+                        <Text style={[styles.inputLabel, { color: textPrimary }]}>Zip Code</Text>
                         <TextInput
                           placeholder="Enter Your Zipcode"
                           placeholderTextColor={textSecondary}
@@ -324,9 +323,9 @@ const FinalRegisterForm = () => {
                           onChangeText={setZipCode}
                           style={[styles.input, { backgroundColor: inputBg, color: textPrimary, borderColor }]}
                         />
-                      </ThemedView>
-                      <ThemedView style={styles.inputContainer}>
-                        <ThemedText style={[styles.inputLabel, { color: textPrimary }]}>Country</ThemedText>
+                      </View>
+                      <View style={styles.inputContainer}>
+                        <Text style={[styles.inputLabel, { color: textPrimary }]}>Country</Text>
                         {Platform.OS === 'ios' ? (
                           <>
                             <TouchableOpacity
@@ -345,11 +344,11 @@ const FinalRegisterForm = () => {
                               onPress={() => setIosPickerVisible(true)}
                               activeOpacity={0.8}
                             >
-                              <ThemedText style={{ color: country ? textPrimary : textSecondary, flex: 1 }}>
+                              <Text style={{ color: country ? textPrimary : textSecondary, flex: 1 }}>
                                 {country
-                                  ? (countryList.find((item) => item.id === country)?.name || '--Select--')
+                                  ? (countryList.find((item) => String(item.id) === country)?.name || '--Select--')
                                   : '--Select--'}
-                              </ThemedText>
+                              </Text>
                               <Ionicons
                                 name="chevron-down"
                                 size={18}
@@ -410,15 +409,15 @@ const FinalRegisterForm = () => {
                             ))}
                           </Picker>
                         )}
-                      </ThemedView>
+                      </View>
                     </>
                   )}
                   {accountRole === 'AGENT' && (
                     <>
-                      <ThemedView style={styles.sectionContainer}>
-                        <ThemedText style={[styles.sectionTitle, { color: textPrimary }]}>Countries of Operation</ThemedText>
+                      <View style={styles.sectionContainer}>
+                        <Text style={[styles.sectionTitle, { color: textPrimary }]}>Countries of Operation</Text>
                         <Divider style={[styles.divider, { backgroundColor: borderColor }]} />
-                        <ThemedView style={styles.chipGrid}>
+                        <View style={styles.chipGrid}>
                           {countryList.map((item) => (
                             <Chip
                               key={item.id}
@@ -430,12 +429,12 @@ const FinalRegisterForm = () => {
                               {item.name}
                             </Chip>
                           ))}
-                        </ThemedView>
-                      </ThemedView>
-                      <ThemedView style={styles.sectionContainer}>
-                        <ThemedText style={[styles.sectionTitle, { color: textPrimary }]}>Categories</ThemedText>
+                        </View>
+                      </View>
+                      <View style={styles.sectionContainer}>
+                        <Text style={[styles.sectionTitle, { color: textPrimary }]}>Categories</Text>
                         <Divider style={[styles.divider, { backgroundColor: borderColor }]} />
-                        <ThemedView style={styles.chipGrid}>
+                        <View style={styles.chipGrid}>
                           {categoryList.map((item) => (
                             <Chip
                               key={item.id}
@@ -447,19 +446,19 @@ const FinalRegisterForm = () => {
                               {item.name}
                             </Chip>
                           ))}
-                        </ThemedView>
-                      </ThemedView>
-                      <ThemedView style={styles.sectionContainer}>
-                        <ThemedText style={[styles.sectionTitle, { color: textPrimary }]}>Mode of Work</ThemedText>
+                        </View>
+                      </View>
+                      <View style={styles.sectionContainer}>
+                        <Text style={[styles.sectionTitle, { color: textPrimary }]}>Mode of Work</Text>
                         <Divider style={[styles.divider, { backgroundColor: borderColor }]} />
-                        <ThemedView style={styles.rowContainer}>
+                        <View style={styles.rowContainer}>
                           <TouchableOpacity onPress={() => setModeOfWork('SOLO')} style={styles.radioButtonRow}>
                             <RadioButton
                               value="SOLO"
                               status={modeOfWork === 'SOLO' ? 'checked' : 'unchecked'}
                               onPress={() => setModeOfWork('SOLO')}
                             />
-                            <ThemedText style={{ color: textPrimary }}>SOLO</ThemedText>
+                            <Text style={{ color: textPrimary }}>SOLO</Text>
                           </TouchableOpacity>
                           <TouchableOpacity onPress={() => setModeOfWork('ORGANISATION')} style={styles.radioButtonRow}>
                             <RadioButton
@@ -467,12 +466,12 @@ const FinalRegisterForm = () => {
                               status={modeOfWork === 'ORGANISATION' ? 'checked' : 'unchecked'}
                               onPress={() => setModeOfWork('ORGANISATION')}
                             />
-                            <ThemedText style={{ color: textPrimary }}>Organisation</ThemedText>
+                            <Text style={{ color: textPrimary }}>Organisation</Text>
                           </TouchableOpacity>
-                        </ThemedView>
-                      </ThemedView>
-                      <ThemedView style={styles.inputContainer}>
-                        <ThemedText style={[styles.inputLabel, { color: textPrimary }]}>Organisation Name</ThemedText>
+                        </View>
+                      </View>
+                      <View style={styles.inputContainer}>
+                        <Text style={[styles.inputLabel, { color: textPrimary }]}>Organisation Name</Text>
                         <TextInput
                           placeholder={modeOfWork === 'SOLO' ? 'Create a Velo company name' : 'Enter Organisation Name'}
                           placeholderTextColor={textSecondary}
@@ -480,9 +479,9 @@ const FinalRegisterForm = () => {
                           onChangeText={setOrganisationName}
                           style={[styles.input, { backgroundColor: inputBg, color: textPrimary, borderColor }]}
                         />
-                      </ThemedView>
-                      <ThemedView style={styles.inputContainer}>
-                        <ThemedText style={[styles.inputLabel, { color: textPrimary }]}>Organisation Address 1</ThemedText>
+                      </View>
+                      <View style={styles.inputContainer}>
+                        <Text style={[styles.inputLabel, { color: textPrimary }]}>Organisation Address 1</Text>
                         <TextInput
                           placeholder={modeOfWork === 'SOLO' ? 'Input your address' : 'Enter Organisation Address'}
                           placeholderTextColor={textSecondary}
@@ -490,9 +489,9 @@ const FinalRegisterForm = () => {
                           onChangeText={setOrganisationAddress}
                           style={[styles.input, { backgroundColor: inputBg, color: textPrimary, borderColor }]}
                         />
-                      </ThemedView>
-                      <ThemedView style={styles.inputContainer}>
-                        <ThemedText style={[styles.inputLabel, { color: textPrimary }]}>Organisation Website URL</ThemedText>
+                      </View>
+                      <View style={styles.inputContainer}>
+                        <Text style={[styles.inputLabel, { color: textPrimary }]}>Organisation Website URL</Text>
                         <TextInput
                           placeholder={modeOfWork === 'SOLO' ? 'Enter your website URL' : 'Enter Organisation Website URL'}
                           placeholderTextColor={textSecondary}
@@ -500,7 +499,7 @@ const FinalRegisterForm = () => {
                           onChangeText={setOrganisationWebsiteUrl}
                           style={[styles.input, { backgroundColor: inputBg, color: textPrimary, borderColor }]}
                         />
-                      </ThemedView>
+                      </View>
                     </>
                   )}
                   <CustomButton
@@ -508,12 +507,12 @@ const FinalRegisterForm = () => {
                     handlePress={handleFinalRegisterForm}
                     disableButton={buttonDisable}
                   />
-                </ThemedView>
+                </View>
               </ScrollView>
-            </ThemedView>
+            </View>
           )}
         </KeyboardAvoidingView>
-      </ThemedView>
+      </View>
     </TouchableWithoutFeedback>
   );
 };

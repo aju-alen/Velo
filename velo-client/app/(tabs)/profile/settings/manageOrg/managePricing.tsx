@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, TextInput, ScrollView } from 'react-native';
-import { ThemedView } from '@/components/ThemedView';
-import { ThemedText } from '@/components/ThemedText';
+import { StyleSheet, TextInput, ScrollView, View, Text, useColorScheme } from 'react-native';
 import { TouchableOpacity } from 'react-native';
 import axiosInstance from '@/constants/axiosHeader';
 import { router } from 'expo-router';
+import { Colors } from '@/constants/Colors';
 
 const ManagePricingOption = () => {
 
@@ -12,6 +11,9 @@ const ManagePricingOption = () => {
   const [packagePricePerKg, setPackagePricePerKg] = useState('');
   const [packagePricePerPiece, setPackagePricePerPiece] = useState('');
   const [shipmentTimeline, setShipmentTimeline] = useState('');
+  
+  const colorScheme = useColorScheme() ?? 'light';
+  const themeColors = Colors[colorScheme];
   
   const handleSavePricing = async() => {
     try{
@@ -51,27 +53,27 @@ const ManagePricingOption = () => {
   }, []);
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <ThemedText style={styles.title}>Manage Pricing Options</ThemedText>
+    <ScrollView contentContainerStyle={[styles.container, { backgroundColor: themeColors.background }]}>
+      <Text style={[styles.title, { color: themeColors.text }]}>Manage Pricing Options</Text>
       
       {/* Document Pricing Section */}
-      <ThemedView style={styles.sectionContainer}>
-        <ThemedText style={styles.sectionTitle}>Document Pricing</ThemedText>
+      <View style={[styles.sectionContainer, { backgroundColor: themeColors.background }]}>
+        <Text style={[styles.sectionTitle, { color: themeColors.text }]}>Document Pricing</Text>
         <TextInput
-          style={styles.input}
+          style={[styles.input, { backgroundColor: themeColors.background, borderColor: themeColors.text, color: themeColors.text }]}
           placeholder="Price per Piece"
           value={(documentPricePerPiece)}
           onChangeText={setDocumentPricePerPiece}
           keyboardType="numeric"
           placeholderTextColor="#888"
         />
-      </ThemedView>
+      </View>
       
       {/* Package Pricing Section */}
-      <ThemedView style={styles.sectionContainer}>
-        <ThemedText style={styles.sectionTitle}>Package Pricing</ThemedText>
+      <View style={[styles.sectionContainer, { backgroundColor: themeColors.background }]}>
+        <Text style={[styles.sectionTitle, { color: themeColors.text }]}>Package Pricing</Text>
         <TextInput
-          style={styles.input}
+          style={[styles.input, { backgroundColor: themeColors.background, borderColor: themeColors.text, color: themeColors.text }]}
           placeholder="Price per Kg"
           value={packagePricePerKg}
           onChangeText={setPackagePricePerKg}
@@ -79,7 +81,7 @@ const ManagePricingOption = () => {
           placeholderTextColor="#888"
         />
         <TextInput
-          style={styles.input}
+          style={[styles.input, { backgroundColor: themeColors.background, borderColor: themeColors.text, color: themeColors.text }]}
           placeholder="Price per Piece"
           value={packagePricePerPiece}
           onChangeText={setPackagePricePerPiece}
@@ -89,12 +91,12 @@ const ManagePricingOption = () => {
         
         {/* Collection Price Note */}
        
-      </ThemedView>
+      </View>
 
-      <ThemedView style={styles.sectionContainer}>
-        <ThemedText style={styles.sectionTitle}>{`Delivery Timeline (in days)`} </ThemedText>
+      <View style={[styles.sectionContainer, { backgroundColor: themeColors.background }]}>
+        <Text style={[styles.sectionTitle, { color: themeColors.text }]}>{`Delivery Timeline (in days)`} </Text>
         <TextInput
-          style={styles.input}
+          style={[styles.input, { backgroundColor: themeColors.background, borderColor: themeColors.text, color: themeColors.text }]}
           placeholder="Input a delivery timeline"
           value={shipmentTimeline}
           onChangeText={setShipmentTimeline}
@@ -105,16 +107,16 @@ const ManagePricingOption = () => {
         
         {/* Collection Price Note */}
        
-      </ThemedView>
+      </View>
       
       {/* Save Button */}
       <TouchableOpacity 
         style={styles.saveButton} 
         onPress={handleSavePricing}
       >
-        <ThemedText style={styles.saveButtonText}>
+        <Text style={styles.saveButtonText}>
           Save Pricing
-        </ThemedText>
+        </Text>
       </TouchableOpacity>
     </ScrollView>
   );
@@ -149,7 +151,6 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 10,
     borderRadius: 5,
-    backgroundColor: 'white',
   },
   noteContainer: {
 

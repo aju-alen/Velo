@@ -1,21 +1,20 @@
-import { SafeAreaView, StyleSheet, Platform, TouchableOpacity } from 'react-native';
+import { SafeAreaView, StyleSheet, Platform, TouchableOpacity, View, Text, useColorScheme } from 'react-native';
 import React, { useState } from 'react';
-import { ThemedView } from '@/components/ThemedView';
-import { ThemedText } from '@/components/ThemedText';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { useColorScheme } from '@/hooks/useColorScheme';
 import CustomButton from '@/components/CustomButton';
 import axios from 'axios';
 import { ipURL } from '@/constants/backendUrl';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import useLoginAccountStore from '@/store/loginAccountStore';
+import { Colors } from '@/constants/Colors';
 
 const SetAppointment = () => {
   const { setAccountLoginData } = useLoginAccountStore();
   const params = useLocalSearchParams();
   const { accountId } = params;
-  const colorScheme = useColorScheme();
+  const colorScheme = useColorScheme() ?? 'light';
+  const themeColors = Colors[colorScheme];
 
   const [date, setDate] = useState(new Date());
   const [mode, setMode] = useState('date');
@@ -68,43 +67,43 @@ const SetAppointment = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ThemedView style={styles.container}>
+      <View style={[styles.container, { backgroundColor: themeColors.background }]}>
         {/* Header Section */}
-        <ThemedView style={styles.headerSection}>
-          <ThemedText type="title" style={styles.headerTitle}>
+        <View style={styles.headerSection}>
+          <Text style={[styles.headerTitle, { color: themeColors.text }]}>
             Book Appointment
-          </ThemedText>
-          <ThemedText type="defaultSemiBold" style={styles.headerSubtitle}>
+          </Text>
+          <Text style={[styles.headerSubtitle, { color: themeColors.text }]}>
             Select a date and time for your appointment
-          </ThemedText>
-        </ThemedView>
+          </Text>
+        </View>
 
         {/* Date Time Selection Section */}
-        <ThemedView style={styles.dateTimeSection}>
-          <ThemedView style={styles.selectionButtons}>
+        <View style={styles.dateTimeSection}>
+          <View style={styles.selectionButtons}>
             <TouchableOpacity 
               onPress={() => showMode('date')}
               style={[styles.selectionButton, mode === 'date' && styles.activeButton]}
             >
-              <ThemedText type="link" style={[styles.buttonText, mode === 'date' && styles.activeButtonText]}>
+              <Text style={[styles.buttonText, mode === 'date' && styles.activeButtonText, { color: themeColors.text }]}>
                 Select Date
-              </ThemedText>
+              </Text>
             </TouchableOpacity>
             
             <TouchableOpacity 
               onPress={() => showMode('time')}
               style={[styles.selectionButton, mode === 'time' && styles.activeButton]}
             >
-              <ThemedText type="link" style={[styles.buttonText, mode === 'time' && styles.activeButtonText]}>
+              <Text style={[styles.buttonText, mode === 'time' && styles.activeButtonText, { color: themeColors.text }]}>
                 Select Time
-              </ThemedText>
+              </Text>
             </TouchableOpacity>
-          </ThemedView>
+          </View>
 
           {/* Selected DateTime Display */}
-          <ThemedView style={styles.selectedDateContainer}>
-            <ThemedText style={styles.selectedDateLabel}>Selected Date & Time</ThemedText>
-            <ThemedText style={styles.selectedDateTime}>
+          <View style={[styles.selectedDateContainer, { backgroundColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)' }]}>
+            <Text style={[styles.selectedDateLabel, { color: themeColors.text }]}>Selected Date & Time</Text>
+            <Text style={[styles.selectedDateTime, { color: themeColors.text }]}>
               {date.toLocaleString([], {
                 weekday: 'long',
                 year: 'numeric',
@@ -113,12 +112,12 @@ const SetAppointment = () => {
                 hour: '2-digit',
                 minute: '2-digit',
               })}
-            </ThemedText>
-          </ThemedView>
+            </Text>
+          </View>
 
           {/* DateTime Picker */}
           {show && (
-            <ThemedView style={styles.pickerContainer}>
+            <View style={[styles.pickerContainer, { backgroundColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)' }]}>
               <DateTimePicker
                 testID="dateTimePicker"
                 value={date}
@@ -130,19 +129,19 @@ const SetAppointment = () => {
                 minimumDate={new Date()}
                 maximumDate={new Date(new Date().setDate(new Date().getDate() + 365))}
               />
-            </ThemedView>
+            </View>
           )}
-        </ThemedView>
+        </View>
 
         {/* Confirm Button */}
-        <ThemedView style={styles.buttonContainer}>
+        <View style={styles.buttonContainer}>
           <CustomButton
             handlePress={handleConfirmBooking}
             buttonText="Confirm Appointment"
             buttonWidth={300}
           />
-        </ThemedView>
-      </ThemedView>
+        </View>
+      </View>
     </SafeAreaView>
   );
 };
@@ -206,7 +205,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     padding: 20,
     borderRadius: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
   },
   selectedDateLabel: {
     fontSize: 14,
@@ -219,7 +217,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   pickerContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderRadius: 16,
     padding: 10,
     marginBottom: 20,

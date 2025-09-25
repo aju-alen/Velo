@@ -1,7 +1,5 @@
-import { StyleSheet, TouchableOpacity,ScrollView } from 'react-native'
+import { StyleSheet, TouchableOpacity,ScrollView, View, Text, useColorScheme } from 'react-native'
 import React, { useState } from 'react'
-import { ThemedView } from '@/components/ThemedView'
-import { ThemedText } from '@/components/ThemedText'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { horizontalScale, moderateScale, verticalScale } from '@/constants/metrics'
 import { Divider } from 'react-native-paper'
@@ -9,6 +7,7 @@ import Checkbox from 'expo-checkbox'
 import useShipmentStore from '@/store/shipmentStore'
 import { router } from 'expo-router'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
+import { Colors } from '@/constants/Colors';
 
 const services = [
   {
@@ -36,12 +35,14 @@ const services = [
 
 const ShippingOptionalService = () => {
   const { deliveryServices, setDeliveryServices,setCuminativeExpence,cummilativeExpence } = useShipmentStore()
+  const colorScheme = useColorScheme() ?? 'light';
+  const themeColors = Colors[colorScheme];
   console.log(cummilativeExpence, 'cummilativeExpence');
   
 
   const ServiceCard = ({ service }) => (
-    <ThemedView style={styles.serviceCard}>
-      <ThemedView style={styles.checkboxWrapper}>
+    <View style={[styles.serviceCard, { backgroundColor: themeColors.background }]}>
+      <View style={styles.checkboxWrapper}>
         <Checkbox
           value={deliveryServices[service.id]}
           onValueChange={(value) => {
@@ -55,69 +56,69 @@ const ShippingOptionalService = () => {
           }}
           style={styles.checkbox}
         />
-      </ThemedView>
+      </View>
       
-      <ThemedView style={styles.serviceContent}>
-        <ThemedView style={styles.serviceHeader}>
+      <View style={styles.serviceContent}>
+        <View style={styles.serviceHeader}>
           <MaterialCommunityIcons name={service.icon} size={24} color="#666" />
-          <ThemedText type='defaultSemiBold' style={styles.serviceName}>
+          <Text style={[styles.serviceName, { color: themeColors.text }]}>
             {service.name}
-          </ThemedText>
-        </ThemedView>
+          </Text>
+        </View>
         
-        <ThemedText type='default' style={styles.serviceDescription}>
+        <Text style={[styles.serviceDescription, { color: themeColors.text }]}>
           {service.description}
-        </ThemedText>
+        </Text>
         
-        <ThemedView style={styles.priceContainer}>
-          <ThemedText type='defaultSemiBold' style={styles.priceText}>
+        <View style={styles.priceContainer}>
+          <Text style={styles.priceText}>
             AED {service.price}
-          </ThemedText>
-        </ThemedView>
-      </ThemedView>
-    </ThemedView>
+          </Text>
+        </View>
+      </View>
+    </View>
   )
 
   return (
-    <ScrollView style={styles.container}>
-    <ThemedView >
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.header}>
-          <ThemedView style={styles.headerContent}>
+    <ScrollView style={[styles.container, { backgroundColor: themeColors.background }]}>
+    <View >
+      <SafeAreaView style={[styles.safeArea, { backgroundColor: themeColors.background }]}>
+        <View style={[styles.header, { backgroundColor: themeColors.background }]}>
+          <View style={styles.headerContent}>
             
-            <ThemedText type='defaultSemiBold' style={styles.headerTitle}>
+            <Text style={[styles.headerTitle, { color: themeColors.text }]}>
               Optional Services
-            </ThemedText>
-          </ThemedView>
-          <ThemedText style={styles.headerDescription}>
+            </Text>
+          </View>
+          <Text style={[styles.headerDescription, { color: themeColors.text }]}>
             Select additional services you want for your shipment. Charges are mentioned below.
-          </ThemedText>
-        </ThemedView>
+          </Text>
+        </View>
 
         <Divider style={styles.divider} />
 
-        <ThemedView >
-          <ThemedText type='defaultSemiBold' style={styles.sectionTitle}>
+        <View style={{ backgroundColor: themeColors.background }}>
+          <Text style={[styles.sectionTitle, { color: themeColors.text }]}>
             Available Services
-          </ThemedText>
+          </Text>
 
-          <ThemedView style={styles.servicesList}>
+          <View style={styles.servicesList}>
             {services.map((service, index) => (
               <ServiceCard key={service.id} service={service} />
             ))}
-          </ThemedView>
-        </ThemedView>
+          </View>
+        </View>
 
         <TouchableOpacity 
           style={styles.buttonContainer}
           onPress={() => router.push('/(tabs)/home/createShipment/shipmentSchedulePickup')}
         >
-          <ThemedText style={styles.buttonText}>
+          <Text style={styles.buttonText}>
             Continue
-          </ThemedText>
+          </Text>
         </TouchableOpacity>
       </SafeAreaView>
-    </ThemedView>
+    </View>
     </ScrollView>
   )
 }
@@ -143,6 +144,8 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: moderateScale(20),
+    lineHeight: moderateScale(22),
+    fontWeight: '600',
     marginLeft: horizontalScale(8),
   },
   headerDescription: {
@@ -155,6 +158,8 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: moderateScale(18),
+    lineHeight: moderateScale(22),
+    fontWeight: '600',
     marginBottom: verticalScale(16),
   },
   servicesList: {
@@ -192,6 +197,8 @@ const styles = StyleSheet.create({
   },
   serviceName: {
     fontSize: moderateScale(16),
+    lineHeight: moderateScale(22),
+    fontWeight: '600',
     marginLeft: horizontalScale(8),
   },
   serviceDescription: {
@@ -210,6 +217,8 @@ const styles = StyleSheet.create({
   priceText: {
     color: '#FFAC1C',
     fontSize: moderateScale(14),
+    lineHeight: moderateScale(22),
+    fontWeight: '600',
   },
   buttonContainer: {
     backgroundColor: '#FFAC1C',
@@ -229,6 +238,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   buttonText: {
+    color: 'white',
     fontSize: moderateScale(16),
     fontWeight: '600',
   },

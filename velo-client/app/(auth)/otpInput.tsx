@@ -1,7 +1,5 @@
-import { StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { StyleSheet, TouchableOpacity, ActivityIndicator, View, Text, useColorScheme } from 'react-native';
 import React, { useEffect, useState } from 'react';
-import { ThemedView } from '@/components/ThemedView';
-import { ThemedText } from '@/components/ThemedText';
 import { horizontalScale, verticalScale } from '@/constants/metrics';
 import { router, useLocalSearchParams } from 'expo-router';
 import { OtpInput } from 'react-native-otp-entry';
@@ -9,6 +7,7 @@ import * as SecureStore from 'expo-secure-store';
 import CustomButton from '@/components/CustomButton';
 import axios from 'axios';
 import { ipURL } from '@/constants/backendUrl';
+import { Colors } from '@/constants/Colors';
 
 export type selectedArea = {
   code: string;
@@ -18,6 +17,9 @@ export type selectedArea = {
 };
 
 const OtpInputs = () => {
+  const colorScheme = useColorScheme() ?? 'light';
+  const themeColors = Colors[colorScheme];
+  
   const params = useLocalSearchParams();
   const { verfication_id } = params;
 
@@ -78,13 +80,13 @@ const OtpInputs = () => {
   };
 
   return (
-    <ThemedView style={styles.container}>
-      <ThemedText style={styles.header}>Verify Your Number</ThemedText>
-      <ThemedText style={styles.subText}>
-        We’ve sent a 4-digit verification code to {phoneNumber.code} {phoneNumber.mobile}.
-      </ThemedText>
+    <View style={[styles.container, { backgroundColor: themeColors.background }]}>
+      <Text style={[styles.header, { color: themeColors.text }]}>Verify Your Number</Text>
+      <Text style={[styles.subText, { color: themeColors.text }]}>
+        We've sent a 4-digit verification code to {phoneNumber.code} {phoneNumber.mobile}.
+      </Text>
 
-      <ThemedView style={styles.otpContainer}>
+      <View style={styles.otpContainer}>
         <OtpInput
           numberOfDigits={4}
           onTextChange={(otp) => {
@@ -99,18 +101,18 @@ const OtpInputs = () => {
           focusStickBlinkingDuration={400}
           theme={{
             pinCodeContainerStyle: {
-              backgroundColor: '#f9f9f9',
+              backgroundColor: colorScheme === 'dark' ? '#23242A' : '#f9f9f9',
               width: horizontalScale(58),
               height: verticalScale(58),
               borderRadius: 12,
               borderWidth: 1,
-              borderColor: '#d3d3d3',
+              borderColor: colorScheme === 'dark' ? '#333' : '#d3d3d3',
             },
           }}
         />
-      </ThemedView>
+      </View>
 
-      {errorMessage ? <ThemedText style={styles.errorText}>{errorMessage}</ThemedText> : null}
+      {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
 
       <CustomButton
         disableButton={loading}
@@ -119,7 +121,7 @@ const OtpInputs = () => {
       />
 
      
-    </ThemedView>
+    </View>
   );
 };
 

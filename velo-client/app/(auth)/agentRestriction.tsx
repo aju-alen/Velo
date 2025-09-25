@@ -1,13 +1,13 @@
 import React from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
-import { ThemedView } from '@/components/ThemedView';
-import { ThemedText } from '@/components/ThemedText';
+import { StyleSheet, TouchableOpacity, View, Text, useColorScheme } from 'react-native';
 import { router } from 'expo-router';
-
+import { Colors } from '@/constants/Colors';
 
 const AgentRestriction = () => {
+  const colorScheme = useColorScheme() ?? 'light';
+  const themeColors = Colors[colorScheme];
   return (
-    <ThemedView style={styles.mainContainer}>
+    <View style={[styles.mainContainer, { backgroundColor: themeColors.background }]}>
       <View style={styles.contentContainer}>
         {/* Success Icon */}
         <View style={styles.iconContainer}>
@@ -15,19 +15,19 @@ const AgentRestriction = () => {
         </View>
 
         {/* Main Message */}
-        <ThemedText style={styles.title}>
+        <Text style={[styles.title, { color: themeColors.text }]}>
           Appointment Scheduled!
-        </ThemedText>
+        </Text>
 
         {/* Description */}
-        <ThemedText style={styles.description}>
+        <Text style={[styles.description, { color: themeColors.text }]}>
           Your appointment has been successfully booked and scheduled. You will have access to limited features until your verification is complete.
-        </ThemedText>
+        </Text>
 
         {/* Status Card */}
         <View style={styles.statusCard}>
-          <ThemedText style={styles.statusTitle}>Current Status</ThemedText>
-          <ThemedText style={styles.statusText}>Pending Verification</ThemedText>
+          <Text style={[styles.statusTitle, { color: themeColors.text }]}>Current Status</Text>
+          <Text style={[styles.statusText, { color: themeColors.text }]}>Pending Verification</Text>
         </View>
 
         {/* Action Button */}
@@ -35,12 +35,12 @@ const AgentRestriction = () => {
           onPress={() => router.replace('/(tabs)/home/homeMainPage')} 
           style={styles.buttonContainer}
         >
-          <ThemedText style={styles.buttonText}>
+          <Text style={styles.buttonText}>
             Continue with Limited Access
-          </ThemedText>
+          </Text>
         </TouchableOpacity>
       </View>
-    </ThemedView>
+    </View>
   );
 };
 

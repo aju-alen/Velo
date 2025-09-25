@@ -4,18 +4,21 @@ import {
   StyleSheet, 
   Dimensions, 
   TouchableOpacity, 
-  Animated 
+  Animated,
+  Text,
+  useColorScheme
 } from 'react-native'
 import { MaterialIcons } from '@expo/vector-icons'
-import { ThemedView } from '@/components/ThemedView'
-import { ThemedText } from '@/components/ThemedText'
 import { router } from 'expo-router'
 import useShipmentStore from '@/store/shipmentStore'
 import { useLocalSearchParams } from 'expo-router'
+import { Colors } from '@/constants/Colors'
 
 const { width, height } = Dimensions.get('window')
 
 const PaymentSuccess = () => {
+  const colorScheme = useColorScheme() ?? 'light';
+  const themeColors = Colors[colorScheme];
   const {totalAmount} = useLocalSearchParams();
   // Animation values
   const scaleValue = useRef(new Animated.Value(0)).current
@@ -53,20 +56,21 @@ const PaymentSuccess = () => {
   }
 
   const AnimatedDetailsRow = ({ icon, label, value }) => (
-    <ThemedView style={styles.detailRow}>
+    <View style={[styles.detailRow, { backgroundColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)' }]}>
       <MaterialIcons name={icon} size={24} color="#FFAC1C" />
-      <ThemedView style={styles.detailTextContainer}>
-        <ThemedText style={styles.detailLabel}>{label}</ThemedText>
-        <ThemedText style={styles.detailValue}>{value}</ThemedText>
-      </ThemedView>
-    </ThemedView>
+      <View style={styles.detailTextContainer}>
+        <Text style={[styles.detailLabel, { color: themeColors.text }]}>{label}</Text>
+        <Text style={[styles.detailValue, { color: themeColors.text }]}>{value}</Text>
+      </View>
+    </View>
   )
 
   return (
-    <ThemedView style={styles.container}>
+    <View style={[styles.container, { backgroundColor: themeColors.background }]}>
       <Animated.View 
         style={[
           styles.successContainer,
+          { backgroundColor: colorScheme === 'dark' ? '#181A20' : '#FFF' },
           {
             transform: [
               { scale: scaleValue },
@@ -89,12 +93,12 @@ const PaymentSuccess = () => {
         </Animated.View>
 
         {/* Success Title */}
-        <ThemedText style={styles.successTitle}>
+        <Text style={[styles.successTitle, { color: themeColors.text }]}>
           Payment Successful!
-        </ThemedText>
+        </Text>
 
         {/* Details Section */}
-        <ThemedView style={styles.detailsSection}>
+        <View style={styles.detailsSection}>
           <AnimatedDetailsRow 
             icon="local-shipping" 
             label="Shipment Date" 
@@ -105,20 +109,20 @@ const PaymentSuccess = () => {
             label="Payment Amount" 
             value={`AED ${totalAmount}`} 
           />
-        </ThemedView>
+        </View>
 
         {/* Home Button */}
         <TouchableOpacity 
           style={styles.homeButton}
           onPress={navigateToHome}
         >
-          <ThemedText style={styles.homeButtonText}>
+          <Text style={styles.homeButtonText}>
             Back to Home
-          </ThemedText>
+          </Text>
           <MaterialIcons name="home" size={20} color='black' />
         </TouchableOpacity>
       </Animated.View>
-    </ThemedView>
+    </View>
   )
 }
 

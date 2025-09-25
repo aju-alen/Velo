@@ -1,7 +1,5 @@
-import { StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Alert, View, Text, useColorScheme } from 'react-native';
 import React,{useState} from 'react';
-import { ThemedView } from '@/components/ThemedView';
-import { ThemedText } from '@/components/ThemedText';
 import useShipmentStore from '@/store/shipmentStore';
 import useLoginAccountStore from '@/store/loginAccountStore';
 import { Divider } from 'react-native-paper';
@@ -11,6 +9,7 @@ import { horizontalScale, moderateScale, verticalScale } from '@/constants/metri
 import axios from 'axios';
 import { ipURL } from '@/constants/backendUrl';
 import axiosInstance from '@/constants/axiosHeader';
+import { Colors } from '@/constants/Colors';
 
 const FinalPreview = () => {
   const {
@@ -24,6 +23,12 @@ const FinalPreview = () => {
   } = useShipmentStore();
   const { accountLoginData } = useLoginAccountStore();
   const [laoding, setLoading] = useState(false);
+  const colorScheme = useColorScheme() ?? 'light';
+  const themeColors = Colors[colorScheme];
+  const bgCard = colorScheme === 'dark' ? '#181A20' : '#FFF';
+  const borderColor = colorScheme === 'dark' ? '#333' : '#E0E0E0';
+  const textPrimary = colorScheme === 'dark' ? '#FFF' : '#000';
+  const textSecondary = colorScheme === 'dark' ? '#B0B0B0' : '#666';
 
   
   
@@ -104,44 +109,44 @@ const FinalPreview = () => {
   }
 
   const renderAddressCard = (title, data) => (
-    <ThemedView style={styles.card}>
-      <ThemedText style={styles.cardTitle}>{title}</ThemedText>
-      <Divider style={styles.cardDivider} />
-      <ThemedText style={styles.nameText}>{data.userName || data.name}</ThemedText>
-      <ThemedText style={styles.detailText}>
+    <View style={[styles.card, { backgroundColor: bgCard }]}>
+      <Text style={[styles.cardTitle, { color: textPrimary }]}>{title}</Text>
+      <Divider style={[styles.cardDivider, { backgroundColor: borderColor }]} />
+      <Text style={[styles.nameText, { color: textPrimary }]}>{data.userName || data.name}</Text>
+      <Text style={[styles.detailText, { color: textPrimary }]}>
         {data.addressOne}, {data.addressTwo}
-      </ThemedText>
-      <ThemedText style={styles.detailText}>
+      </Text>
+      <Text style={[styles.detailText, { color: textPrimary }]}>
         {data.city}, {data.state}
-      </ThemedText>
-      <ThemedText style={styles.detailText}>{data.email}</ThemedText>
-      <ThemedText style={styles.detailText}>
+      </Text>
+      <Text style={[styles.detailText, { color: textPrimary }]}>{data.email}</Text>
+      <Text style={[styles.detailText, { color: textPrimary }]}>
         {data.countryCode} {data.mobileNumber}
-      </ThemedText>
-    </ThemedView>
+      </Text>
+    </View>
   );
 
   const renderIconHeader = (iconName, title) => (
-    <ThemedView style={styles.sectionHeader}>
+    <View style={styles.sectionHeader}>
       <Ionicons name={iconName} size={24} color="#FFAC1C" />
-      <ThemedText style={styles.sectionTitle}>{title}</ThemedText>
-    </ThemedView>
+      <Text style={[styles.sectionTitle, { color: textPrimary }]}>{title}</Text>
+    </View>
   );
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+    <ScrollView style={[styles.container, { backgroundColor: themeColors.background }]} showsVerticalScrollIndicator={false}>
       {/* Shipment Details Section */}
-      <ThemedView style={styles.section}>
+      <View style={[styles.section, { backgroundColor: bgCard }]}>
         {renderIconHeader("cube-outline", "Shipment Details")}
-        <Divider style={styles.sectionDivider} />
+        <Divider style={[styles.sectionDivider, { backgroundColor: borderColor }]} />
 
-        <ThemedView style={styles.card}>
-          <ThemedText style={styles.cardTitle}>Shipping Date</ThemedText>
-          <Divider style={styles.cardDivider} />
-          <ThemedText style={styles.highlightText}>
+        <View style={[styles.card, { backgroundColor: bgCard }]}>
+          <Text style={[styles.cardTitle, { color: textPrimary }]}>Shipping Date</Text>
+          <Divider style={[styles.cardDivider, { backgroundColor: borderColor }]} />
+          <Text style={styles.highlightText}>
             {savedAddressData.deliveryDate.toDateString()}
-          </ThemedText>
-        </ThemedView>
+          </Text>
+        </View>
 
         {/* Shipping From */}
         {renderAddressCard('Shipping From', accountAddressData)}
@@ -150,69 +155,69 @@ const FinalPreview = () => {
         {renderAddressCard('Shipping To', savedAddressData)}
 
         {/* Package Details */}
-        <ThemedView style={styles.card}>
-          <ThemedText style={styles.cardTitle}>Package Details</ThemedText>
-          <Divider style={styles.cardDivider} />
-          <ThemedText style={styles.detailText}>{packageDetail.packageName}</ThemedText>
-          {itemType === 'PACKAGE' && <ThemedText style={styles.detailText}>
+        <View style={[styles.card, { backgroundColor: bgCard }]}>
+          <Text style={[styles.cardTitle, { color: textPrimary }]}>Package Details</Text>
+          <Divider style={[styles.cardDivider, { backgroundColor: borderColor }]} />
+          <Text style={[styles.detailText, { color: textPrimary }]}>{packageDetail.packageName}</Text>
+          {itemType === 'PACKAGE' && <Text style={[styles.detailText, { color: textPrimary }]}>
             Dimensions: {packageDetail.length} x {packageDetail.width} x {packageDetail.height} cm
-          </ThemedText>}
-          <ThemedText style={styles.detailText}>
+          </Text>}
+          <Text style={[styles.detailText, { color: textPrimary }]}>
             {packageDetail.numberOfPieces} Piece(s) • {packageDetail.weight} kg
-          </ThemedText>
-        </ThemedView>
+          </Text>
+        </View>
 
         {/* Package Description */}
-        <ThemedView style={styles.card}>
-          <ThemedText style={styles.cardTitle}>Package Description</ThemedText>
-          <Divider style={styles.cardDivider} />
-          <ThemedText style={styles.detailText}>{packageDescription}</ThemedText>
-        </ThemedView>
-      </ThemedView>
+        <View style={[styles.card, { backgroundColor: bgCard }]}>
+          <Text style={[styles.cardTitle, { color: textPrimary }]}>Package Description</Text>
+          <Divider style={[styles.cardDivider, { backgroundColor: borderColor }]} />
+          <Text style={[styles.detailText, { color: textPrimary }]}>{packageDescription}</Text>
+        </View>
+      </View>
 
       {/* Pickup Details Section */}
-      <ThemedView style={styles.section}>
+      <View style={[styles.section, { backgroundColor: bgCard }]}>
         {renderIconHeader("time-outline", "Pickup Details")}
-        <Divider style={styles.sectionDivider} />
+        <Divider style={[styles.sectionDivider, { backgroundColor: borderColor }]} />
 
         {/* Pickup Time */}
-        <ThemedView style={styles.card}>
-          <ThemedText style={styles.cardTitle}>Pickup Time</ThemedText>
-          <Divider style={styles.cardDivider} />
-          <ThemedText style={styles.highlightText}>
+        <View style={[styles.card, { backgroundColor: bgCard }]}>
+          <Text style={[styles.cardTitle, { color: textPrimary }]}>Pickup Time</Text>
+          <Divider style={[styles.cardDivider, { backgroundColor: borderColor }]} />
+          <Text style={styles.highlightText}>
             {deliveryServices.deliveryPickupTimeFrom} - {deliveryServices.deliveryPickupTimeTo}
-          </ThemedText>
-        </ThemedView>
+          </Text>
+        </View>
 
         
         {/* Pickup Services */}
 
         {/* Pickup Instructions */}
-        <ThemedView style={styles.card}>
-          <ThemedText style={styles.cardTitle}>Pickup Instruction</ThemedText>
-          <Divider style={styles.cardDivider} />
-          <ThemedText style={styles.detailText}>
+        <View style={[styles.card, { backgroundColor: bgCard }]}>
+          <Text style={[styles.cardTitle, { color: textPrimary }]}>Pickup Instruction</Text>
+          <Divider style={[styles.cardDivider, { backgroundColor: borderColor }]} />
+          <Text style={[styles.detailText, { color: textPrimary }]}>
             {deliveryServices.pickupInstruction || 'No specific instructions provided'}
-          </ThemedText>
-        </ThemedView>
+          </Text>
+        </View>
 
         {/* Special Instructions */}
-        <ThemedView style={styles.card}>
-          <ThemedText style={styles.cardTitle}>Special Instruction</ThemedText>
-          <Divider style={styles.cardDivider} />
-          <ThemedText style={styles.detailText}>
+        <View style={[styles.card, { backgroundColor: bgCard }]}>
+          <Text style={[styles.cardTitle, { color: textPrimary }]}>Special Instruction</Text>
+          <Divider style={[styles.cardDivider, { backgroundColor: borderColor }]} />
+          <Text style={[styles.detailText, { color: textPrimary }]}>
             {deliveryServices.pickupSpecialInstruction || 'No special instructions provided'}
-          </ThemedText>
-        </ThemedView>
-      </ThemedView>
+          </Text>
+        </View>
+      </View>
         <TouchableOpacity onPress={handleSendShipmentToDb}>
-      <ThemedView style={styles.buttonContainer}>
+      <View style={styles.buttonContainer}>
           {
           laoding? <ActivityIndicator size="small" color="#fff" /> : 
-          <ThemedText style={styles.finalPreviewText}>Confirm Shipment</ThemedText>
+          <Text style={styles.finalPreviewText}>Confirm Shipment</Text>
           }
           
-      </ThemedView>
+      </View>
         </TouchableOpacity>
     </ScrollView>
   );
@@ -224,7 +229,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: horizontalScale(16),
-
   },
   section: {
     marginBottom: verticalScale(24),
@@ -243,38 +247,31 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: moderateScale(18),
     fontWeight: '600',
-
     marginLeft: horizontalScale(8),
   },
   sectionDivider: {
     marginVertical: verticalScale(12),
-
   },
   card: {
     padding: moderateScale(16),
-
     borderRadius: moderateScale(8),
     marginBottom: verticalScale(16),
   },
   cardTitle: {
     fontSize: moderateScale(14),
     fontWeight: '600',
-
     marginBottom: verticalScale(8),
   },
   cardDivider: {
     marginVertical: verticalScale(8),
-
   },
   nameText: {
     fontSize: moderateScale(16),
     fontWeight: '500',
-
     marginBottom: verticalScale(4),
   },
   detailText: {
     fontSize: moderateScale(14),
-
     marginBottom: verticalScale(4),
   },
   highlightText: {
@@ -307,10 +304,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: moderateScale(4),
     fontSize: moderateScale(16),
-
   },
   finalPreviewText: {
     fontSize: moderateScale(16),
     fontWeight: '600',
+    color: '#FFF',
   },
 });

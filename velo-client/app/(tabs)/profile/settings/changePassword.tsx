@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
-import { StyleSheet, TextInput, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
-import { ThemedView } from '@/components/ThemedView';
-import { ThemedText } from '@/components/ThemedText';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { StyleSheet, TextInput, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, View, Text, useColorScheme } from 'react-native';
 import useLoginAccountStore from '@/store/loginAccountStore';
 import axiosInstance from '@/constants/axiosHeader';
 import { router } from 'expo-router';
+import { Colors } from '@/constants/Colors';
 
 const ChangePassword = () => {
-  const colorScheme = useColorScheme();
+  const colorScheme = useColorScheme() ?? 'light';
+  const themeColors = Colors[colorScheme];
   const { accountLoginData } = useLoginAccountStore();
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -56,13 +55,13 @@ const ChangePassword = () => {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <ThemedView style={[styles.outer, { backgroundColor: colorScheme === 'dark' ? '#101014' : '#F5F6FA' }]}> 
+      <View style={[styles.outer, { backgroundColor: colorScheme === 'dark' ? '#101014' : '#F5F6FA' }]}> 
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={{ flex: 1, width: '100%', justifyContent: 'center', alignItems: 'center' }}
         >
-          <ThemedView style={[styles.card, { backgroundColor: bgCard, borderColor }]}> 
-            <ThemedText style={[styles.title, { color: textPrimary }]}>Change Password</ThemedText>
+          <View style={[styles.card, { backgroundColor: bgCard, borderColor }]}> 
+            <Text style={[styles.title, { color: textPrimary }]}>Change Password</Text>
             <TextInput
               style={[styles.input, { backgroundColor: inputBg, borderColor, color: textPrimary }]}
               placeholder="Current Password"
@@ -87,8 +86,8 @@ const ChangePassword = () => {
               secureTextEntry
               placeholderTextColor={placeholderColor}
             />
-            {error ? <ThemedText style={styles.error}>{error}</ThemedText> : null}
-            {success ? <ThemedText style={styles.success}>{success}</ThemedText> : null}
+            {error ? <Text style={styles.error}>{error}</Text> : null}
+            {success ? <Text style={styles.success}>{success}</Text> : null}
             <TouchableOpacity
               style={[styles.button, { backgroundColor: accent }]} 
               onPress={handleChangePassword}
@@ -98,12 +97,12 @@ const ChangePassword = () => {
               {loading ? (
                 <ActivityIndicator color="#FFF" />
               ) : (
-                <ThemedText style={styles.buttonText}>Change Password</ThemedText>
+                <Text style={styles.buttonText}>Change Password</Text>
               )}
             </TouchableOpacity>
-          </ThemedView>
+          </View>
         </KeyboardAvoidingView>
-      </ThemedView>
+      </View>
     </TouchableWithoutFeedback>
   );
 };

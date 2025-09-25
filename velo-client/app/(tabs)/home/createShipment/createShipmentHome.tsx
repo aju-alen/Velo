@@ -1,20 +1,18 @@
-import { StyleSheet,  Modal, TouchableOpacity, Dimensions, ScrollView, Platform,SafeAreaView } from 'react-native'
+import { StyleSheet,  Modal, TouchableOpacity, Dimensions, ScrollView, Platform,SafeAreaView, View, Text, useColorScheme } from 'react-native'
 import React, { useEffect, useState,useCallback } from 'react'
 import { horizontalScale, moderateScale, verticalScale } from '@/constants/metrics'
-import { ThemedView } from '@/components/ThemedView'
-import { ThemedText } from '@/components/ThemedText'
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { Divider, RadioButton } from 'react-native-paper';
 import * as SecureStore from 'expo-secure-store';
 import axios from 'axios'
 import { ipURL } from '@/constants/backendUrl'
-import { useColorScheme } from '@/hooks/useColorScheme'
 import SaveAddressForm from '@/components/SaveAddressForm'
 import SelectPackage from '@/components/SelectPackage'
 import ShipmentDetailPayment from '@/components/ShipmentDetailPayment'
 import { router, useFocusEffect } from 'expo-router'
 import useShipmentStore from '@/store/shipmentStore'
 import { MaterialIcons } from '@expo/vector-icons'
+import { Colors } from '@/constants/Colors';
 
 
 
@@ -35,7 +33,8 @@ const CreateShipmentHome = () => {
   } = useShipmentStore()
 
   
-  const colorScheme = useColorScheme()
+  const colorScheme = useColorScheme() ?? 'light';
+  const themeColors = Colors[colorScheme];
   const [userSecureStorage, setUserSecureStorage] = useState(false)
 
   const [userAddress, setUserAddress] = useState('')
@@ -202,26 +201,26 @@ const CreateShipmentHome = () => {
 
 
   const PaymentOption = ({ title, description, buttonText, isSecondary, onPress }) => (
-    <ThemedView style={styles.section}>
-      <ThemedView style={styles.sectionHeader}>
-        <ThemedText style={styles.sectionTitle}>{title}</ThemedText>
-        <ThemedText style={styles.sectionDescription}>{description}</ThemedText>
-      </ThemedView>
+    <View style={[styles.section, { backgroundColor: themeColors.background }]}>
+      <View style={styles.sectionHeader}>
+        <Text style={[styles.sectionTitle, { color: themeColors.text }]}>{title}</Text>
+        <Text style={[styles.sectionDescription, { color: themeColors.text }]}>{description}</Text>
+      </View>
       <TouchableOpacity
         style={[styles.actionButton, isSecondary && styles.secondaryButton]}
         onPress={onPress}
         activeOpacity={0.7}
       >
-        <ThemedText style={[styles.buttonText, isSecondary && styles.secondaryButtonText]}>
+        <Text style={[styles.buttonText, isSecondary && styles.secondaryButtonText, { color: isSecondary ? '#FFAC1C' : 'white' }]}>
           {buttonText}
-        </ThemedText>
+        </Text>
       </TouchableOpacity>
-    </ThemedView>
+    </View>
   )
 
 
   return (
-    <ThemedView style={styles.container}>
+    <View style={[styles.container, { backgroundColor: themeColors.background }]}>
       
       {/* Modal component remains unchanged */}
      {!editData &&  <Modal
@@ -230,10 +229,10 @@ const CreateShipmentHome = () => {
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
       >
-        <ThemedView style={styles.modalOverlay}>
-          <ThemedView style={styles.modalContent}>
-            <ThemedView style={styles.shippingMethodHeadContainer}>
-            <ThemedText style={styles.modalTitle}>Select Shipping Method</ThemedText>
+        <View style={[styles.modalOverlay, { backgroundColor: 'rgba(0,0,0,0.5)' }]}>
+          <View style={[styles.modalContent, { backgroundColor: themeColors.background }]}>
+            <View style={styles.shippingMethodHeadContainer}>
+            <Text style={[styles.modalTitle, { color: themeColors.text }]}>Select Shipping Method</Text>
             <TouchableOpacity
                       onPress={()=>{
                         setCreateShipment(false)
@@ -242,7 +241,7 @@ const CreateShipmentHome = () => {
                     >
                       <MaterialIcons name="close" size={24} color= {colorScheme === 'dark' ? '#fff' : '#000'} />
                     </TouchableOpacity>
-            </ThemedView>
+            </View>
 
             <PaymentOption
               title="Ship and pay online"
@@ -252,7 +251,7 @@ const CreateShipmentHome = () => {
               onPress={() => handleOptionSelect({ id: 1, text: 'Online Payment' })}
             />
 
-            <ThemedView style={styles.divider} />
+            <View style={[styles.divider, { backgroundColor: themeColors.text }]} />
 
             <PaymentOption
               title="Ship and pay on collection"
@@ -261,8 +260,8 @@ const CreateShipmentHome = () => {
               isSecondary
               onPress={() => handleOptionSelect({ id: 2, text: 'Payment during pickup' })}
             />
-          </ThemedView>
-        </ThemedView>
+          </View>
+        </View>
       </Modal>}
       <SaveAddressForm
         addressModalVisible={addressModalVisible}
@@ -271,12 +270,12 @@ const CreateShipmentHome = () => {
       />
 
 {(!modalVisible || editData) && <ScrollView showsVerticalScrollIndicator={false} style={styles.contentContainer}>
-      <ThemedView >
+      <View >
         {/* Shipping Date Section */}
 
-        {Platform.OS === 'ios' &&<ThemedView style={styles.section}>
-          <ThemedView style={styles.shippingDateContainer}>
-            <ThemedText style={styles.sectionHeaderText}>Shipping Date</ThemedText>
+        {Platform.OS === 'ios' &&<View style={[styles.section, { backgroundColor: themeColors.background }]}>
+          <View style={styles.shippingDateContainer}>
+            <Text style={[styles.sectionHeaderText, { color: themeColors.text }]}>Shipping Date</Text>
             
            {show && <DateTimePicker
               testID="dateTimePicker"
@@ -288,27 +287,27 @@ const CreateShipmentHome = () => {
             />}
 
 
-          </ThemedView>
-        </ThemedView>}
+          </View>
+        </View>}
 
-        {Platform.OS === 'android' && <SafeAreaView style={styles.section}>
-          <ThemedView style={styles.shippingDateContainer}>
-          <ThemedText style={styles.sectionHeaderText}>Shipping Date</ThemedText>
+        {Platform.OS === 'android' && <SafeAreaView style={[styles.section, { backgroundColor: themeColors.background }]}>
+          <View style={styles.shippingDateContainer}>
+          <Text style={[styles.sectionHeaderText, { color: themeColors.text }]}>Shipping Date</Text>
       <TouchableOpacity onPress={showDatepicker} style={styles.androidDateButton}  >
-        <ThemedText>{date.toDateString()}</ThemedText>
+        <Text style={{ color: 'white' }}>{date.toDateString()}</Text>
       </TouchableOpacity>
       
-      </ThemedView>
+      </View>
     </SafeAreaView>}
 
         {/* Shipping Type Section */}
-        <ThemedView style={styles.section}>
+        <View style={[styles.section, { backgroundColor: themeColors.background }]}>
 
-        <ThemedView style={styles.titleContainer}>
+        <View style={styles.titleContainer}>
 
           
-        </ThemedView>
-          <ThemedView style={styles.shippingTypeContainer}>
+        </View>
+          <View style={styles.shippingTypeContainer}>
             <TouchableOpacity
               style={[
                 styles.shippingTypeOption,
@@ -331,7 +330,7 @@ const CreateShipmentHome = () => {
 
                 }}
               />
-              <ThemedText style={styles.shippingTypeText}>Document</ThemedText>
+              <Text style={[styles.shippingTypeText, { color: themeColors.text }]}>Document</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -356,62 +355,62 @@ const CreateShipmentHome = () => {
 
                 }}
               />
-              <ThemedText style={styles.shippingTypeText}>Package</ThemedText>
+              <Text style={[styles.shippingTypeText, { color: themeColors.text }]}>Package</Text>
             </TouchableOpacity>
-          </ThemedView>
-        </ThemedView>
+          </View>
+        </View>
 
         {/* Shipping Address Section */}
         {checked !== 'false'  && 
          ( <>
-            <ThemedView style={styles.section}>
+            <View style={[styles.section, { backgroundColor: themeColors.background }]}>
 
-              <ThemedText style={styles.sectionHeaderText}>Shipping From</ThemedText>
-              <ThemedView style={styles.addressCard}>
-                <ThemedText style={styles.addressName}>{userSecureStorage['name']}</ThemedText>
-                <ThemedText style={styles.addressText}>{accountAddressData.addressOne}</ThemedText>
-                <ThemedText style={styles.addressText}>{accountAddressData.addressTwo}</ThemedText>
-                <ThemedText style={styles.addressText}>
+              <Text style={[styles.sectionHeaderText, { color: themeColors.text }]}>Shipping From</Text>
+              <View style={[styles.addressCard, { backgroundColor: themeColors.background }]}>
+                <Text style={[styles.addressName, { color: themeColors.text }]}>{userSecureStorage['name']}</Text>
+                <Text style={[styles.addressText, { color: themeColors.text }]}>{accountAddressData.addressOne}</Text>
+                <Text style={[styles.addressText, { color: themeColors.text }]}>{accountAddressData.addressTwo}</Text>
+                <Text style={[styles.addressText, { color: themeColors.text }]}>
                   {accountAddressData.city}, {accountAddressData.country.name}
-                </ThemedText>
-                <ThemedView style={styles.contactInfo}>
-                  <ThemedText style={styles.contactText}>{userSecureStorage['email']}</ThemedText>
-                  <ThemedText style={styles.contactText}>
+                </Text>
+                <View style={[styles.contactInfo, { borderTopColor: themeColors.text }]}>
+                  <Text style={[styles.contactText, { color: themeColors.text }]}>{userSecureStorage['email']}</Text>
+                  <Text style={[styles.contactText, { color: themeColors.text }]}>
                     {userSecureStorage['mobileCode']} {userSecureStorage['mobileNumber']}
-                  </ThemedText>
-                </ThemedView>
-              </ThemedView>
-            </ThemedView>
+                  </Text>
+                </View>
+              </View>
+            </View>
 
-            <ThemedView style={styles.section}>
+            <View style={[styles.section, { backgroundColor: themeColors.background }]}>
 
-              <ThemedText style={styles.sectionHeaderText}>Shipping To</ThemedText>
+              <Text style={[styles.sectionHeaderText, { color: themeColors.text }]}>Shipping To</Text>
               
-              <ThemedView style={styles.addressCard}>
+              <View style={[styles.addressCard, { backgroundColor: themeColors.background }]}>
                 {savedAddressData.gotDetails &&
                 <>
-                <ThemedText style={styles.addressName}>{savedAddressData.name}</ThemedText>
-                <ThemedText style={styles.addressText}>{savedAddressData.addressOne}</ThemedText>
-                <ThemedText style={styles.addressText}>{savedAddressData.addressTwo}</ThemedText>
-                <ThemedText style={styles.addressText}>
+                <Text style={[styles.addressName, { color: themeColors.text }]}>{savedAddressData.name}</Text>
+                <Text style={[styles.addressText, { color: themeColors.text }]}>{savedAddressData.addressOne}</Text>
+                <Text style={[styles.addressText, { color: themeColors.text }]}>{savedAddressData.addressTwo}</Text>
+                <Text style={[styles.addressText, { color: themeColors.text }]}>
                   {savedAddressData.city}, {savedAddressData.countryId}
-                </ThemedText>
-                <ThemedText style={styles.addressText}>
+                </Text>
+                <Text style={[styles.addressText, { color: themeColors.text }]}>
                   ZipCode:{savedAddressData.zipCode}
-                </ThemedText>
-                <ThemedView style={styles.contactInfo}>
-                  <ThemedText style={styles.contactText}>{savedAddressData.email}</ThemedText>
-                  <ThemedText style={styles.contactText}>{savedAddressData.countryCode} {savedAddressData.mobileNumber}
-                  </ThemedText>
-                </ThemedView>
+                </Text>
+                <View style={[styles.contactInfo, { borderTopColor: themeColors.text }]}>
+                  <Text style={[styles.contactText, { color: themeColors.text }]}>{savedAddressData.email}</Text>
+                  <Text style={[styles.contactText, { color: themeColors.text }]}>{savedAddressData.countryCode} {savedAddressData.mobileNumber}
+                  </Text>
+                </View>
                 </>
               }
                 <TouchableOpacity style={styles.addAddressContainer} onPress={() => setAddressModalVisible(true)}>
 
-                  <ThemedText style={styles.addressName}>Add New Address</ThemedText>
+                  <Text style={[styles.addressName, { color: themeColors.text }]}>Add New Address</Text>
                 </TouchableOpacity>
-              </ThemedView>
-            </ThemedView>
+              </View>
+            </View>
             <Divider style={{ marginVertical: verticalScale(16) }} />
           </>) 
         }
@@ -422,11 +421,11 @@ const CreateShipmentHome = () => {
         {savedAddressData.gotDetails && <ShipmentDetailPayment itemType={checked} onGetData={handleGetDescription} onButtonclick={buttonClick} />}
 
        { savedAddressData.gotDetails &&<TouchableOpacity style={styles.actionButton} onPress={handleContinuePackageDetail}>
-          <ThemedText style={styles.buttonText}>Continue</ThemedText>
+          <Text style={styles.buttonText}>Continue</Text>
         </TouchableOpacity>  }
-      </ThemedView>
+      </View>
       </ScrollView>}
-    </ThemedView>
+    </View>
     
   )
 }
@@ -507,6 +506,7 @@ const styles = StyleSheet.create({
   buttonText: {
     fontSize: 16,
     fontWeight: '600',
+    color: 'white',
 
   },
   secondaryButtonText: {
@@ -514,7 +514,6 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: '#E5E5E5',
     marginVertical: verticalScale(16),
   },
 
@@ -601,7 +600,6 @@ const styles = StyleSheet.create({
     marginTop: verticalScale(16),
     paddingTop: verticalScale(16),
     borderTopWidth: 1,
-    borderTopColor: '#E5E5E5',
   },
   contactText: {
     fontSize: 14,

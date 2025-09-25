@@ -1,17 +1,15 @@
-import { StyleSheet, TextInput, TouchableOpacity, Modal, Image, TouchableWithoutFeedback, FlatList, Keyboard, ActivityIndicator, Alert } from 'react-native'
+import { StyleSheet, TextInput, TouchableOpacity, Modal, Image, TouchableWithoutFeedback, FlatList, Keyboard, ActivityIndicator, Alert, View, Text, useColorScheme } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { ThemedView } from '@/components/ThemedView'
-import { ThemedText } from '@/components/ThemedText'
 import { horizontalScale, verticalScale, moderateScale } from '@/constants/metrics'
 import CustomButton from '@/components/CustomButton'
 import { router } from 'expo-router'
 import * as SecureStore from 'expo-secure-store'
-import { useColorScheme } from '@/hooks/useColorScheme'
 import axios from 'axios'
 import { ipURL } from '@/constants/backendUrl'
 import { getAuth, onAuthStateChanged, signInWithPhoneNumber, signOut  } from '@react-native-firebase/auth';
 import { OtpInput } from 'react-native-otp-entry';
 import CountryPicker, { Country, CountryCode } from 'react-native-country-picker-modal';
+import { Colors } from '@/constants/Colors';
 
 export type selectedArea = {
   code: string,
@@ -22,7 +20,8 @@ export type selectedArea = {
 
 
 const MobileInput = () => {
-  const colorScheme = useColorScheme()
+  const colorScheme = useColorScheme() ?? 'light';
+  const themeColors = Colors[colorScheme];
   const [tempRegister, setTempRegister] = useState({})
   const [isLoading, setIsLoading] = useState(false)
   const [mobile, setMobile] = useState('')
@@ -55,7 +54,6 @@ const MobileInput = () => {
   }
 
   
-
 
   // confirm the code
   async function confirmCode() { 
@@ -140,21 +138,21 @@ const MobileInput = () => {
   // Show OTP input when confirmation is available
   if (confirm) {
     return (
-      <ThemedView style={styles.container}>
-        <ThemedView style={styles.headerContainer}>
-          <ThemedView style={styles.iconContainer}>
-            <ThemedText style={styles.icon}>🔐</ThemedText>
-          </ThemedView>
-          <ThemedText type='subtitle' style={styles.title}>
+      <View style={[styles.container, { backgroundColor: themeColors.background }]}>
+        <View style={styles.headerContainer}>
+          <View style={[styles.iconContainer, { backgroundColor: colorScheme === 'dark' ? '#23242A' : '#FFF3E0' }]}>
+            <Text style={styles.icon}>🔐</Text>
+          </View>
+          <Text style={[styles.title, { color: themeColors.text }]}>
             Verify Your Number
-          </ThemedText>
-          <ThemedText type='default' style={styles.subtitle}>
+          </Text>
+          <Text style={[styles.subtitle, { color: themeColors.text }]}>
             We've sent a 6-digit verification code to +{selectedCountry.callingCode[0]}{mobile}
-          </ThemedText>
-        </ThemedView>
+          </Text>
+        </View>
 
-        <ThemedView style={styles.otpContainer}>
-          <ThemedText style={styles.otpLabel}>Enter verification code</ThemedText>
+        <View style={styles.otpContainer}>
+          <Text style={[styles.otpLabel, { color: themeColors.text }]}>Enter verification code</Text>
           <OtpInput
             numberOfDigits={6}
             onTextChange={handleOtpChange}
@@ -162,18 +160,18 @@ const MobileInput = () => {
             focusStickBlinkingDuration={400}
             theme={{
               pinCodeContainerStyle: {
-                backgroundColor: '#f9f9f9',
+                backgroundColor: colorScheme === 'dark' ? '#23242A' : '#f9f9f9',
                 width: horizontalScale(48),
                 height: verticalScale(48),
                 borderRadius: 12,
                 borderWidth: 1,
-                borderColor: '#d3d3d3',
+                borderColor: colorScheme === 'dark' ? '#333' : '#d3d3d3',
               },
             }}
           />
-        </ThemedView>
+        </View>
 
-        {errorMessage ? <ThemedText style={styles.errorText}>{errorMessage}</ThemedText> : null}
+        {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
 
         <CustomButton
           disableButton={loading}
@@ -189,53 +187,53 @@ const MobileInput = () => {
             setErrorMessage('')
           }}
         >
-          <ThemedText style={styles.backText}>← Back to Mobile Input</ThemedText>
+          <Text style={styles.backText}>← Back to Mobile Input</Text>
         </TouchableOpacity>
-      </ThemedView>
+      </View>
     )
   }
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <ThemedView style={styles.container}>
-        <ThemedView style={styles.headerContainer}>
-          <ThemedView style={styles.iconContainer}>
-            <ThemedText style={styles.icon}>📱</ThemedText>
-          </ThemedView>
-          <ThemedText type='subtitle' style={styles.title}>
+      <View style={[styles.container, { backgroundColor: themeColors.background }]}>
+        <View style={styles.headerContainer}>
+          <View style={[styles.iconContainer, { backgroundColor: colorScheme === 'dark' ? '#23242A' : '#FFF3E0' }]}>
+            <Text style={styles.icon}>📱</Text>
+          </View>
+          <Text style={[styles.title, { color: themeColors.text }]}>
             Enter Your Mobile Number
-          </ThemedText>
-          <ThemedText type='default' style={styles.subtitle}>
+          </Text>
+          <Text style={[styles.subtitle, { color: themeColors.text }]}>
             We will send you a verification code to verify your number
-          </ThemedText>
-        </ThemedView>
+          </Text>
+        </View>
 
-        <ThemedView style={styles.inputContainer}>
+        <View style={[styles.inputContainer, { backgroundColor: colorScheme === 'dark' ? '#23242A' : '#FAFAFA', borderColor: colorScheme === 'dark' ? '#333' : '#E0E0E0' }]}>
           <TouchableOpacity
-            style={styles.countryPickerButton}
+            style={[styles.countryPickerButton, { borderRightColor: colorScheme === 'dark' ? '#333' : '#E0E0E0' }]}
             onPress={() => setShowCountryPicker(true)}
           >
-            <ThemedText style={styles.countryCodeText}>
+            <Text style={[styles.countryCodeText, { color: themeColors.text }]}>
               +{selectedCountry.callingCode[0]}
-            </ThemedText>
-            <ThemedText style={styles.dropdownIcon}>▼</ThemedText>
+            </Text>
+            <Text style={[styles.dropdownIcon, { color: themeColors.text }]}>▼</Text>
           </TouchableOpacity>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { color: themeColors.text }]}
             value={mobile}
             keyboardType='number-pad'
             onChangeText={setMobile}
             placeholder='Enter mobile number'
-            placeholderTextColor='#999'
+            placeholderTextColor={colorScheme === 'dark' ? '#666' : '#999'}
             maxLength={12}
           />
-        </ThemedView>
+        </View>
 
-        <ThemedView style={styles.infoContainer}>
-          <ThemedText style={styles.infoText}>
+        <View style={styles.infoContainer}>
+          <Text style={[styles.infoText, { color: themeColors.text }]}>
             By continuing, you agree to our Terms of Service and Privacy Policy
-          </ThemedText>
-        </ThemedView>
+          </Text>
+        </View>
 
         <CountryPicker
           visible={showCountryPicker}
@@ -257,7 +255,7 @@ const MobileInput = () => {
           handlePress={handleSignInWithPhoneNumber}
           disableButton={isLoading}
         />
-      </ThemedView>
+      </View>
     </TouchableWithoutFeedback>
   )
 }
@@ -301,7 +299,6 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: moderateScale(16),
     textAlign: 'center',
-    color: '#666',
     lineHeight: moderateScale(22),
   },
   detailsContainer: {
@@ -327,7 +324,6 @@ const styles = StyleSheet.create({
   
   inputContainer: {
     flexDirection: 'row',
-    borderColor: '#E0E0E0',
     borderWidth: moderateScale(1.5),
     borderRadius: moderateScale(16),
     width: "100%",
@@ -335,7 +331,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: verticalScale(30),
     paddingHorizontal: horizontalScale(20),
-    backgroundColor: '#FAFAFA',
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -367,7 +362,6 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: horizontalScale(20),
     fontSize: moderateScale(16),
-    color: '#333',
     fontWeight: '400',
   },
   modalOverlay: {
@@ -460,25 +454,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingRight: horizontalScale(15),
     borderRightWidth: 1,
-    borderRightColor: '#E0E0E0',
     paddingVertical: verticalScale(10),
   },
   countryCodeText: {
     fontSize: moderateScale(18),
     fontWeight: '600',
-    color: '#333',
   },
   dropdownIcon: {
     fontSize: moderateScale(12),
     marginLeft: horizontalScale(8),
-    color: '#666',
   },
   iconContainer: {
     marginBottom: verticalScale(15),
     width: horizontalScale(80),
     height: verticalScale(80),
     borderRadius: moderateScale(40),
-    backgroundColor: '#FFF3E0',
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',
@@ -501,7 +491,6 @@ const styles = StyleSheet.create({
   },
   infoText: {
     fontSize: moderateScale(12),
-    color: '#999',
     textAlign: 'center',
     lineHeight: moderateScale(18),
   },
@@ -510,7 +499,6 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     marginBottom: verticalScale(15),
     textAlign: 'center',
-    color: '#333',
   },
 })
 

@@ -1,18 +1,20 @@
-import { StyleSheet, ScrollView, TouchableOpacity, FlatList, Image,ActivityIndicator} from 'react-native'
+import { StyleSheet, ScrollView, TouchableOpacity, FlatList, Image, ActivityIndicator, View, Text, useColorScheme } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { ThemedView } from '@/components/ThemedView'
-import { ThemedText } from '@/components/ThemedText'
 import { useLocalSearchParams, router } from 'expo-router'
 import axios from 'axios'
 import { ipURL } from '@/constants/backendUrl'
 import MaterialIcons from '@expo/vector-icons/MaterialIcons'
 import { verticalScale, horizontalScale, moderateScale } from '@/constants/metrics'
+import { Colors } from '@/constants/Colors';
 
 const SingleListing = () => {
   const [listing, setListing] = useState(null)
   const [similarListings, setSimilarListings] = useState([])
   const [loading, setLoading] = useState(true)
   const { singleListing } = useLocalSearchParams()
+  
+  const colorScheme = useColorScheme() ?? 'light';
+  const themeColors = Colors[colorScheme];
 
   useEffect(() => {
     const getSingleListing = async () => {
@@ -46,92 +48,92 @@ const SingleListing = () => {
       style={styles.similarItemContainer}
       onPress={() => router.push(`/(tabs)/market/${item.id}`)}
     >
-      <ThemedView style={styles.similarItemCard}>
+      <View style={[styles.similarItemCard, { backgroundColor: themeColors.background }]}>
         <MaterialIcons name="directions-car" size={40} color="#FFAC1C" />
-        <ThemedView style={styles.similarItemContent}>
-          <ThemedText type="defaultSemiBold" style={styles.similarItemTitle} numberOfLines={1}>
+        <View style={styles.similarItemContent}>
+          <Text style={[styles.similarItemTitle, { color: themeColors.text }]} numberOfLines={1}>
             {item.title}
-          </ThemedText>
-          <ThemedText type="defaultSemiBold" style={styles.similarItemPrice}>
+          </Text>
+          <Text style={[styles.similarItemPrice, { color: '#FFAC1C' }]}>
             {formatPrice(item.price)}
-          </ThemedText>
-        </ThemedView>
-      </ThemedView>
+          </Text>
+        </View>
+      </View>
     </TouchableOpacity>
   )
 
   if (loading) {
     return (
-      <ThemedView style={styles.loadingContainer}>
+      <View style={[styles.loadingContainer, { backgroundColor: themeColors.background }]}>
         <ActivityIndicator size="large" color="#FFAC1C" />
-      </ThemedView>
+      </View>
     )
   }
 
   if (!listing) {
     return (
-      <ThemedView style={styles.errorContainer}>
-        <ThemedText>Unable to load listing details</ThemedText>
-      </ThemedView>
+      <View style={[styles.errorContainer, { backgroundColor: themeColors.background }]}>
+        <Text style={[styles.errorText, { color: themeColors.text }]}>Unable to load listing details</Text>
+      </View>
     )
   }
 
   return (
-    <ThemedView style={styles.container}>
-      <ThemedView style={styles.header}>
+    <View style={[styles.container, { backgroundColor: themeColors.background }]}>
+      <View style={[styles.header, { backgroundColor: themeColors.background }]}>
         <TouchableOpacity onPress={() => router.back()}>
           <MaterialIcons name="arrow-back" size={24} color="#666" />
         </TouchableOpacity>
-        <ThemedText type="logoText">Details</ThemedText>
+        <Text style={[styles.logoText, { color: '#FFAC1C' }]}>Details</Text>
         <TouchableOpacity>
           <MaterialIcons name="share" size={24} color="#666" />
         </TouchableOpacity>
-      </ThemedView>
+      </View>
 
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-        <ThemedView style={styles.imageContainer}>
+        <View style={styles.imageContainer}>
           <Image source={{uri:listing.imageUrl}} style={styles.image} />
-        </ThemedView>
+        </View>
 
-        <ThemedView style={styles.contentContainer}>
-          <ThemedView style={styles.titleContainer}>
-            <ThemedText type="defaultSemiBold" style={styles.title}>
+        <View style={styles.contentContainer}>
+          <View style={styles.titleContainer}>
+            <Text style={[styles.title, { color: themeColors.text }]}>
               {listing.title}
-            </ThemedText>
-            <ThemedText type="defaultSemiBold" style={styles.price}>
+            </Text>
+            <Text style={[styles.price, { color: '#FFAC1C' }]}>
               {formatPrice(listing.price)}
-            </ThemedText>
-          </ThemedView>
+            </Text>
+          </View>
 
-          <ThemedView style={styles.infoContainer}>
-            <ThemedView style={styles.infoItem}>
+          <View style={[styles.infoContainer, { backgroundColor: themeColors.background }]}>
+            <View style={styles.infoItem}>
               <MaterialIcons name="star" size={20} color="#FFAC1C" />
-              <ThemedText style={styles.infoText}>Condition: {listing.condition}</ThemedText>
-            </ThemedView>
-            <ThemedView style={styles.infoItem}>
+              <Text style={[styles.infoText, { color: themeColors.text }]}>Condition: {listing.condition}</Text>
+            </View>
+            <View style={styles.infoItem}>
               <MaterialIcons name="access-time" size={20} color="#FFAC1C" />
-              <ThemedText style={styles.infoText}>Listed on: {formatDate(listing.createdAt)}</ThemedText>
-            </ThemedView>
-          </ThemedView>
+              <Text style={[styles.infoText, { color: themeColors.text }]}>Listed on: {formatDate(listing.createdAt)}</Text>
+            </View>
+          </View>
 
-          <ThemedView style={styles.descriptionContainer}>
-            <ThemedText type="defaultSemiBold" style={styles.sectionTitle}>
+          <View style={styles.descriptionContainer}>
+            <Text style={[styles.sectionTitle, { color: themeColors.text }]}>
               Description
-            </ThemedText>
-            <ThemedText style={styles.description}>
+            </Text>
+            <Text style={[styles.description, { color: themeColors.text }]}>
               {listing.description}
-            </ThemedText>
-          </ThemedView>
+            </Text>
+          </View>
 
           <TouchableOpacity style={styles.contactButton}>
             <MaterialIcons name="bookmark" size={24} color="#FFF" />
-            <ThemedText style={styles.contactButtonText}>View Shippers</ThemedText>
+            <Text style={styles.contactButtonText}>View Shippers</Text>
           </TouchableOpacity>
 
-          <ThemedView style={styles.similarItemsContainer}>
-            <ThemedText type="defaultSemiBold" style={styles.sectionTitle}>
+          <View style={styles.similarItemsContainer}>
+            <Text style={[styles.sectionTitle, { color: themeColors.text }]}>
               Similar Items
-            </ThemedText>
+            </Text>
             <FlatList
               data={similarListings}
               renderItem={renderSimilarItem}
@@ -140,10 +142,10 @@ const SingleListing = () => {
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.similarItemsList}
             />
-          </ThemedView>
-        </ThemedView>
+          </View>
+        </View>
       </ScrollView>
-    </ThemedView>
+    </View>
   )
 }
 
@@ -163,6 +165,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  errorText: {
+    fontSize: moderateScale(16),
+    lineHeight: moderateScale(22),
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -170,6 +176,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: horizontalScale(20),
     paddingTop: verticalScale(60),
     paddingBottom: verticalScale(20),
+  },
+  logoText: {
+    fontSize: moderateScale(40),
+    lineHeight: moderateScale(56),
+    fontWeight: 'bold',
   },
   imageContainer: {
     height: verticalScale(200),
@@ -186,11 +197,14 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: moderateScale(24),
+    lineHeight: moderateScale(22),
+    fontWeight: '600',
     marginBottom: verticalScale(8),
   },
   price: {
     fontSize: moderateScale(24),
-    color: '#FFAC1C',
+    lineHeight: moderateScale(22),
+    fontWeight: '600',
   },
   infoContainer: {
     borderRadius: moderateScale(12),
@@ -205,19 +219,20 @@ const styles = StyleSheet.create({
   infoText: {
     marginLeft: horizontalScale(8),
     fontSize: moderateScale(16),
-    color: '#666',
+    lineHeight: moderateScale(22),
   },
   descriptionContainer: {
     marginBottom: verticalScale(24),
   },
   sectionTitle: {
     fontSize: moderateScale(18),
+    lineHeight: moderateScale(22),
+    fontWeight: '600',
     marginBottom: verticalScale(8),
   },
   description: {
     fontSize: moderateScale(16),
     lineHeight: moderateScale(24),
-    color: '#666',
   },
   contactButton: {
     backgroundColor: '#FFAC1C',
@@ -254,11 +269,14 @@ const styles = StyleSheet.create({
   },
   similarItemTitle: {
     fontSize: moderateScale(14),
+    lineHeight: moderateScale(22),
+    fontWeight: '600',
     textAlign: 'center',
   },
   similarItemPrice: {
     fontSize: moderateScale(16),
-    color: '#FFAC1C',
+    lineHeight: moderateScale(22),
+    fontWeight: '600',
     marginTop: verticalScale(4),
   },
   image: {
