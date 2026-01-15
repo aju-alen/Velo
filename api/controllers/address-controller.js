@@ -1,10 +1,10 @@
 import crypto from "crypto";
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
-import nodemailer from "nodemailer";
 import jwt from "jsonwebtoken";
 import { backendUrl } from "../utils/backendUrl.js";
-import { createTransport } from "../utils/emailTransport.js";
+import resend from "../utils/resend.js";
+import { getWelcomeEmail } from "../utils/emailTemplates/welcomeEmail.js";
 import dotenv from "dotenv";
 import { log } from "console";
 dotenv.config();
@@ -60,44 +60,14 @@ export const addUserAddress = async (req, res, next) => {
 }
 
 //Send welcome email
-
 const sendWelcomeEmail = async (email, name) => {
-
-    const mailOptions = {
-        from: process.env.EMAIL,
-        to: email,
-        subject: 'Welcome to Velo',
-        html: `
-    <html>
-    <body>
-        <div>
-
-    
-        </div>
-        <div>
-            <p>welcome ${name},</p>
-            <p>Welcome to Velo. Ship anywhere with care.</p>
-            <br>
-            <p>The Velo Team</p>
-            <br>
-           
-            <br>
-            <p>--------------------</p>
-            <p>Copyright © 2024, Velo, its licensors and distributors. All rights are reserved, including those for text and data mining.</p>
-            <br>
-            <p>We use cookies to help provide and enhance our service. By continuing you agree to the use of cookies.</p>
-        </div>
-    </body>
-    </html>`
-    }
-
-    //send the mail
     try {
-        const response = await createTransport.sendMail(mailOptions);
-        console.log("Verification email sent", response);
+        const emailData = getWelcomeEmail(email, name);
+        await resend.emails.send(emailData);
+        console.log("Welcome email sent successfully");
     }
     catch (err) {
-        console.log("Err sending verification email", err);
+        console.log("Err sending welcome email", err);
     }
 }
 

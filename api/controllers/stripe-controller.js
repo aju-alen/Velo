@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import dotenv from "dotenv";
-import { createTransport } from '../utils/emailTransport.js';
+import resend from '../utils/resend.js';
+import { getPaymentSuccessEmail } from '../utils/emailTemplates/paymentSuccess.js';
 import {nanoid} from 'nanoid';
 dotenv.config();
 
@@ -193,26 +194,13 @@ export const stripteCreateAccount = async (req, res, next) => {
 }
 
 //Success Payment Email function.
-
-const sendSuccessPaymentEmail = async (email,price,currency,url) => {
-    const mailOptions = {
-        from: process.env.EMAIL,
-        to: email,
-        subject: 'Payment Success',
-        text: `
-        Hi there,
-
-        Your payment of ${currency}${price} has been successfully processed.
-        Please find the reciept below.
-        ${url}
-
-        Thank you for using our service.
-        `}
-    //send the mail
+const sendSuccessPaymentEmail = async (email, price, currency, url) => {
     try {
-        const sendEmailToAdmin = await createTransport.sendMail(mailOptions);
+        const emailData = getPaymentSuccessEmail(email, price, currency, url);
+        await resend.emails.send(emailData);
+        console.log("Payment success email sent successfully");
     }
     catch (err) {
-        console.log("Err sending verification email", err);
+        console.log("Err sending payment success email", err);
     }
 }

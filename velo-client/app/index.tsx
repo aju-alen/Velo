@@ -5,11 +5,14 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { verticalScale,horizontalScale,moderateScale } from '@/constants/metrics';
 import * as SecureStore from 'expo-secure-store';
 import useLoginAccountStore from '@/store/loginAccountStore';
+import { Colors } from '@/constants/Colors';
 
 const RootIndex = () => {
   const {setAccountLoginData} = useLoginAccountStore()
   const scaleValue = useRef(new Animated.Value(1)).current; // Initialize scale value
   const colorScheme = useColorScheme();
+  const theme = colorScheme ?? 'light';
+  const textColor = theme === 'dark' ? Colors.dark.text : Colors.light.text;
 
   const animateButton = () => {
     // Scale the button down
@@ -91,7 +94,7 @@ const RootIndex = () => {
         </View>
 
         <View style={styles.heroTextcontainer}>
-          <Text style={styles.heroText}>
+          <Text style={[styles.heroText, { color: textColor }]}>
             Shipping made simple, anywhere. 
           </Text>
         </View>
@@ -105,7 +108,7 @@ const RootIndex = () => {
             <Text style={styles.buttonText}>Get Started</Text>
           </TouchableOpacity>
           </Animated.View>
-          <Text style={styles.defaultText}>
+          <Text style={[styles.defaultText, { color: textColor }]}>
             Already have an account? <Text style={styles.linkText} onPress={() => router.replace('/(auth)/login')}>Sign In</Text>
           </Text>
         </View>
@@ -154,7 +157,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: horizontalScale(20), // Optional: add padding for better spacing
   },
   heroText: {
-    color: '#fff',
     fontSize: moderateScale(25),
     fontWeight: 'bold',
     // textAlign: 'center', // Center the text within the container
@@ -187,7 +189,6 @@ const styles = StyleSheet.create({
   defaultText: {
     fontSize: moderateScale(16),
     marginTop: verticalScale(10),
-    color: '#fff',
   },
   linkText: {
     color: '#FFAC1C',

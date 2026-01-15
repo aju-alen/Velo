@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import dotenv from "dotenv";
-import { createTransport } from '../utils/emailTransport.js';
+import resend from '../utils/resend.js';
+import { getPaymentSuccessEmail } from '../utils/emailTemplates/paymentSuccess.js';
 import {nanoid} from 'nanoid';
 dotenv.config();
 
@@ -8,7 +9,17 @@ import Stripe from 'stripe';
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const prisma = new PrismaClient();
 
-
+//Success Payment Email function.
+const sendSuccessPaymentEmail = async (email, price, currency, url) => {
+    try {
+        const emailData = getPaymentSuccessEmail(email, price, currency, url);
+        await resend.emails.send(emailData);
+        console.log("Payment success email sent successfully");
+    }
+    catch (err) {
+        console.log("Err sending payment success email", err);
+    }
+}
 
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 export const webhook = async (req, res, next) => {

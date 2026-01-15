@@ -1,7 +1,9 @@
 import jwt from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
-import { createTransport } from "../utils/emailTransport.js";
+import resend, { FROM_EMAIL } from "../utils/resend.js";
+import { getAppointmentEmailToAgent, getAppointmentEmailToAdmin } from "../utils/emailTemplates/appointmentEmail.js";
+import { getPasswordResetOTPEmail } from "../utils/emailTemplates/passwordResetOTP.js";
 import dotenv from "dotenv";
 import { log } from "console";
 import { get } from 'http';
@@ -189,68 +191,17 @@ export const bookAgentAppointment = async (req, res, next) => {
 }
 
 const sendAppoitmentEmail = async (name, email, date, agentId) => {
-    const mailOptions = {
-        from: process.env.EMAIL,
-        to: email,
-        subject: 'Your appointment has been booked',
-        html: `
-        <div style="font-family: Arial, sans-serif; background: #f9f9f9; padding: 32px;">
-          <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-            <tr>
-              <td style="padding: 32px 32px 16px 32px;">
-                <h2 style="color: #FFAC1C; margin-bottom: 12px;">Hi ${name},</h2>
-                <p style="font-size: 16px; color: #333; margin-bottom: 24px;">Your appointment has been <b>successfully booked</b> for:</p>
-                <div style="background: #f1f7ff; border-radius: 6px; padding: 18px 24px; margin-bottom: 24px;">
-                  <p style="font-size: 18px; color: #FFAC1C; margin: 0 0 8px 0;"><b>Appointment Date:</b> ${date}</p>
-                  <p style="font-size: 16px; color: #555; margin: 0;"><b>Agent ID:</b> ${agentId}</p>
-                </div>
-                <p style="font-size: 15px; color: #555;">If you have any questions, feel free to reply to this email.</p>
-                <p style="margin-top: 32px; color: #888; font-size: 13px;">Best regards,<br/>The Velo Team</p>
-              </td>
-            </tr>
-          </table>
-        </div>
-        `
-    };
-    const mailOptionsOne = {
-        from: process.env.EMAIL,
-        to: process.env.EMAIL,
-        subject: 'Agent appointment booked',
-        html: `
-        <div style="font-family: Arial, sans-serif; background: #f9f9f9; padding: 32px;">
-          <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-            <tr>
-              <td style="padding: 32px 32px 16px 32px;">
-                <h2 style="color: #FFAC1C; margin-bottom: 12px;">Agent Appointment Booked</h2>
-                <p style="font-size: 16px; color: #333; margin-bottom: 24px;">An appointment has been booked with the following details:</p>
-                <table width="100%" cellpadding="0" cellspacing="0" style="background: #f1f7ff; border-radius: 6px; padding: 18px 24px; margin-bottom: 24px;">
-                  <tr>
-                    <td style="font-size: 16px; color: #555; padding: 8px 0;"><b>Name:</b></td>
-                    <td style="font-size: 16px; color: #FFAC1C; padding: 8px 0;">${name}</td>
-                  </tr>
-                  <tr>
-                    <td style="font-size: 16px; color: #555; padding: 8px 0;"><b>Appointment Date:</b></td>
-                    <td style="font-size: 16px; color: #FFAC1C; padding: 8px 0;">${date}</td>
-                  </tr>
-                  <tr>
-                    <td style="font-size: 16px; color: #555; padding: 8px 0;"><b>Agent ID:</b></td>
-                    <td style="font-size: 16px; color: #FFAC1C; padding: 8px 0;">${agentId}</td>
-                  </tr>
-                </table>
-                <p style="margin-top: 32px; color: #888; font-size: 13px;">Velo Admin Notification</p>
-              </td>
-            </tr>
-          </table>
-        </div>
-        `
-    };
-    //send the mail
     try {
-        const sendEmailToAdmin = await createTransport.sendMail(mailOptions);
-        const sendEmailToAgent = await createTransport.sendMail(mailOptionsOne);
+        // Send email to agent
+        const agentEmailData = getAppointmentEmailToAgent(name, email, date, agentId);
+        await resend.emails.send(agentEmailData);
+        
+        // Send email to admin
+        const adminEmailData = getAppointmentEmailToAdmin(name, date, agentId);
+        await resend.emails.send(adminEmailData);
     }
     catch (err) {
-        console.log("Err sending verification email", err);
+        console.log("Err sending appointment email", err);
     }
 }
 
@@ -438,5 +389,261 @@ export const deleteAccount = async (req, res) => {
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Helper function to generate 6-digit OTP
+const generateOTP = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+};
+
+// Helper function to send reset password OTP email
+const sendResetPasswordOTPEmail = async (name, email, otp) => {
+  try {
+    const emailData = getPasswordResetOTPEmail(name, email, otp);
+    await resend.emails.send(emailData);
+  } catch (err) {
+    console.log("Error sending reset password OTP email", err);
+    throw err;
+  }
+};
+
+export const forgotPassword = async (req, res, next) => {
+  const { email } = req.body;
+  try {
+    const lowercaseEmail = email.toLowerCase();
+    
+    // Check if user exists in any table
+    let user = await prisma.user.findUnique({
+      where: { email: lowercaseEmail }
+    });
+    let userType = 'user';
+    
+    if (!user) {
+      user = await prisma.agent.findUnique({
+        where: { email: lowercaseEmail }
+      });
+      userType = 'agent';
+    }
+    
+    if (!user) {
+      user = await prisma.superAdmin.findUnique({
+        where: { email: lowercaseEmail }
+      });
+      userType = 'superAdmin';
+    }
+    
+    // Don't reveal if email exists or not for security
+    if (!user) {
+      return res.status(200).json({ 
+        message: "If an account with this email exists, a password reset OTP has been sent." 
+      });
+    }
+    
+    // Generate 6-digit OTP
+    const otp = generateOTP();
+    const hashedOTP = await bcrypt.hash(otp, 10);
+    
+    // Set expiry to 10 minutes from now
+    const expiryDate = new Date();
+    expiryDate.setMinutes(expiryDate.getMinutes() + 10);
+    
+    // Update user with reset token and expiry
+    if (userType === 'user') {
+      await prisma.user.update({
+        where: { email: lowercaseEmail },
+        data: {
+          resetPasswordToken: hashedOTP,
+          resetPasswordTokenExpiry: expiryDate
+        }
+      });
+    } else if (userType === 'agent') {
+      await prisma.agent.update({
+        where: { email: lowercaseEmail },
+        data: {
+          resetPasswordToken: hashedOTP,
+          resetPasswordTokenExpiry: expiryDate
+        }
+      });
+    } else if (userType === 'superAdmin') {
+      await prisma.superAdmin.update({
+        where: { email: lowercaseEmail },
+        data: {
+          resetPasswordToken: hashedOTP,
+          resetPasswordTokenExpiry: expiryDate
+        }
+      });
+    }
+    
+    // Send OTP email
+    await sendResetPasswordOTPEmail(user.name, user.email, otp);
+    
+    await prisma.$disconnect();
+    
+    return res.status(200).json({ 
+      message: "If an account with this email exists, a password reset OTP has been sent." 
+    });
+  } catch (error) {
+    console.log(error);
+    await prisma.$disconnect();
+    return res.status(500).json({ message: "An error occurred. Please try again." });
+  }
+};
+
+export const verifyResetPasswordOTP = async (req, res, next) => {
+  const { email, otp } = req.body;
+  try {
+    const lowercaseEmail = email.toLowerCase();
+    
+    // Find user
+    let user = await prisma.user.findUnique({
+      where: { email: lowercaseEmail }
+    });
+    let userType = 'user';
+    
+    if (!user) {
+      user = await prisma.agent.findUnique({
+        where: { email: lowercaseEmail }
+      });
+      userType = 'agent';
+    }
+    
+    if (!user) {
+      user = await prisma.superAdmin.findUnique({
+        where: { email: lowercaseEmail }
+      });
+      userType = 'superAdmin';
+    }
+    
+    if (!user) {
+      return res.status(400).json({ message: "Invalid email or OTP" });
+    }
+    
+    // Check if reset token exists and is not expired
+    if (!user.resetPasswordToken || !user.resetPasswordTokenExpiry) {
+      return res.status(400).json({ message: "No active password reset request found" });
+    }
+    
+    const now = new Date();
+    if (new Date(user.resetPasswordTokenExpiry) < now) {
+      return res.status(400).json({ message: "OTP has expired. Please request a new one." });
+    }
+    
+    // Verify OTP
+    const isOTPValid = await bcrypt.compare(otp, user.resetPasswordToken);
+    if (!isOTPValid) {
+      return res.status(400).json({ message: "Invalid OTP" });
+    }
+    
+    // Generate JWT verification token (valid for 5 minutes)
+    const verificationToken = jwt.sign(
+      { 
+        email: lowercaseEmail, 
+        userType: userType,
+        purpose: 'password_reset' 
+      },
+      process.env.JWT_SECRET_KEY,
+      { expiresIn: '5m' }
+    );
+    
+    await prisma.$disconnect();
+    
+    return res.status(200).json({ 
+      message: "OTP verified successfully",
+      verificationToken: verificationToken
+    });
+  } catch (error) {
+    console.log(error);
+    await prisma.$disconnect();
+    return res.status(500).json({ message: "An error occurred. Please try again." });
+  }
+};
+
+export const resetPassword = async (req, res, next) => {
+  const { email, verificationToken, newPassword } = req.body;
+  try {
+    // Verify JWT token
+    let decoded;
+    try {
+      decoded = jwt.verify(verificationToken, process.env.JWT_SECRET_KEY);
+    } catch (err) {
+      return res.status(400).json({ message: "Invalid or expired verification token" });
+    }
+    
+    // Check token purpose
+    if (decoded.purpose !== 'password_reset') {
+      return res.status(400).json({ message: "Invalid token purpose" });
+    }
+    
+    // Verify email matches
+    const lowercaseEmail = email.toLowerCase();
+    if (decoded.email !== lowercaseEmail) {
+      return res.status(400).json({ message: "Email mismatch" });
+    }
+    
+    // Find user
+    let user = await prisma.user.findUnique({
+      where: { email: lowercaseEmail }
+    });
+    let userType = 'user';
+    
+    if (!user) {
+      user = await prisma.agent.findUnique({
+        where: { email: lowercaseEmail }
+      });
+      userType = 'agent';
+    }
+    
+    if (!user) {
+      user = await prisma.superAdmin.findUnique({
+        where: { email: lowercaseEmail }
+      });
+      userType = 'superAdmin';
+    }
+    
+    if (!user) {
+      return res.status(400).json({ message: "User not found" });
+    }
+    
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    
+    // Update password and clear reset token fields
+    if (userType === 'user') {
+      await prisma.user.update({
+        where: { email: lowercaseEmail },
+        data: {
+          password: hashedPassword,
+          resetPasswordToken: null,
+          resetPasswordTokenExpiry: null
+        }
+      });
+    } else if (userType === 'agent') {
+      await prisma.agent.update({
+        where: { email: lowercaseEmail },
+        data: {
+          password: hashedPassword,
+          resetPasswordToken: null,
+          resetPasswordTokenExpiry: null
+        }
+      });
+    } else if (userType === 'superAdmin') {
+      await prisma.superAdmin.update({
+        where: { email: lowercaseEmail },
+        data: {
+          password: hashedPassword,
+          resetPasswordToken: null,
+          resetPasswordTokenExpiry: null
+        }
+      });
+    }
+    
+    await prisma.$disconnect();
+    
+    return res.status(200).json({ message: "Password reset successfully" });
+  } catch (error) {
+    console.log(error);
+    await prisma.$disconnect();
+    return res.status(500).json({ message: "An error occurred. Please try again." });
   }
 };

@@ -4,6 +4,7 @@ import {
   TextInput, 
   Platform, 
   KeyboardAvoidingView, 
+  ScrollView,
   TouchableWithoutFeedback,
   Alert,
   View,
@@ -89,9 +90,10 @@ const Login = () => {
       }
       setLoading(false)
     }
-    catch(err) {
+    catch(err: any) {
       console.log(err, 'error--');
-      alert(`${err.response.data.message}`)
+      const errorMessage = err?.response?.data?.message || err?.message || 'An error occurred. Please try again.';
+      Alert.alert('Error', errorMessage);
       setLoading(false)
     }
   }
@@ -99,9 +101,14 @@ const Login = () => {
   return (
     <View style={[styles.container, { backgroundColor: themeColors.background }]}>
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior="padding"
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
     >
-       
+      <ScrollView
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{ flexGrow: 1 }}
+        showsVerticalScrollIndicator={false}
+      >
           <View style={styles.headerContainer}>
             <Text style={[styles.logoText, { color: '#FFAC1C' }]}>Velo</Text>
             <Text style={[styles.welcomeText, { color: themeColors.text }]}>Welcome back!</Text>
@@ -149,7 +156,7 @@ const Login = () => {
             </View>
 
             <View style={styles.forgotPasswordContainer}>
-              <TouchableWithoutFeedback onPress={() => console.log('Forgot password')}>
+              <TouchableWithoutFeedback onPress={() => router.push('/(auth)/forgotPassword')}>
                 <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
               </TouchableWithoutFeedback>
             </View>
@@ -170,6 +177,7 @@ const Login = () => {
               </TouchableWithoutFeedback>
             </View>
           </View>
+      </ScrollView>
     </KeyboardAvoidingView>
     </View>
   )

@@ -27,6 +27,8 @@ model User {
   firstTimeLogin Boolean @default(true)
   registerVerificationStatus String @default("PARTIAL")
   verificationToken String?
+  resetPasswordToken String?
+  resetPasswordTokenExpiry DateTime?
   
   updatedAt DateTime @updatedAt
   createdAt DateTime @default(now())
@@ -53,6 +55,8 @@ model SuperAdmin{
   mobileNumber String
   firstTimeLogin Boolean @default(true)
   registerVerificationStatus String @default("SUPERADMINLOGGEDIN")
+  resetPasswordToken String?
+  resetPasswordTokenExpiry DateTime?
 
   updatedAt DateTime @updatedAt
   createdAt DateTime @default(now())
@@ -95,6 +99,8 @@ model Agent {
   registerVerificationStatus   String     @default("PARTIAL")
   appointmentDate              DateTime?
   verificationToken            String?
+  resetPasswordToken String?
+  resetPasswordTokenExpiry DateTime?
   isOrganisationLeader           Boolean    @default(false)
 
   updatedAt                    DateTime   @updatedAt

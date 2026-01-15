@@ -1,15 +1,15 @@
-import { StyleSheet, TextInput, TouchableOpacity, Modal, Image, TouchableWithoutFeedback, FlatList, Keyboard, ActivityIndicator, Alert, View, Text, useColorScheme } from 'react-native'
-import React, { useEffect, useState } from 'react'
-import { horizontalScale, verticalScale, moderateScale } from '@/constants/metrics'
 import CustomButton from '@/components/CustomButton'
+import { ipURL } from '@/constants/backendUrl'
+import { Colors } from '@/constants/Colors'
+import { horizontalScale, moderateScale, verticalScale } from '@/constants/metrics'
+import { getAuth, onAuthStateChanged, signInWithPhoneNumber } from '@react-native-firebase/auth'
+import axios from 'axios'
 import { router } from 'expo-router'
 import * as SecureStore from 'expo-secure-store'
-import axios from 'axios'
-import { ipURL } from '@/constants/backendUrl'
-import { getAuth, onAuthStateChanged, signInWithPhoneNumber, signOut  } from '@react-native-firebase/auth';
-import { OtpInput } from 'react-native-otp-entry';
-import CountryPicker, { Country, CountryCode } from 'react-native-country-picker-modal';
-import { Colors } from '@/constants/Colors';
+import React, { useEffect, useState } from 'react'
+import { Keyboard, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, useColorScheme, View } from 'react-native'
+import CountryPicker, { Country, CountryCode } from 'react-native-country-picker-modal'
+import { OtpInput } from 'react-native-otp-entry'
 
 export type selectedArea = {
   code: string,
