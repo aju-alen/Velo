@@ -90,7 +90,27 @@ const MobileInput = () => {
     console.log(tempRegister, 'tempRegister------');
     try {
       setIsLoading(true)
-      const phoneNumber = `+${selectedCountry.callingCode[0]}${mobile}`;
+      // Clean mobile number: remove all non-numeric characters
+      const cleanedMobile = mobile.replace(/\D/g, '');
+      
+      // Validate cleaned mobile number
+      if (!cleanedMobile || cleanedMobile.length < 7) {
+        alert('Please enter a valid mobile number (at least 7 digits)')
+        setIsLoading(false)
+        return
+      }
+      
+      // Ensure calling code doesn't have a + and is numeric
+      const callingCode = selectedCountry.callingCode[0].replace(/\D/g, '');
+      
+      if (!callingCode) {
+        alert('Invalid country code. Please select a country.')
+        setIsLoading(false)
+        return
+      }
+      
+      // Construct E.164 format: +[country code][subscriber number]
+      const phoneNumber = `+${callingCode}${cleanedMobile}`;
       console.log(phoneNumber, 'phoneNumber------');
 
       //check if mobile number is already registered

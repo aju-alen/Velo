@@ -1,6 +1,6 @@
-import { StyleSheet, Text, Image, Animated, View, TouchableOpacity } from 'react-native'
+import { StyleSheet, Text, Image, Animated, View, TouchableOpacity, ActivityIndicator } from 'react-native'
 import { router } from "expo-router";
-import React,{useEffect, useRef} from 'react'
+import React,{useEffect, useRef, useState} from 'react'
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { verticalScale,horizontalScale,moderateScale } from '@/constants/metrics';
 import * as SecureStore from 'expo-secure-store';
@@ -13,6 +13,8 @@ const RootIndex = () => {
   const colorScheme = useColorScheme();
   const theme = colorScheme ?? 'light';
   const textColor = theme === 'dark' ? Colors.dark.text : Colors.light.text;
+  const [isChecking, setIsChecking] = useState(true);
+  const [shouldShowLanding, setShouldShowLanding] = useState(false);
 
   const animateButton = () => {
     // Scale the button down
@@ -36,70 +38,99 @@ const RootIndex = () => {
 
   useEffect(() => {
     const checkUser = async () => {
+      setIsChecking(true);
       let user = await SecureStore.getItemAsync('registerDetail')
       console.log(JSON.parse(user),'parsed user detail');
       
-      setAccountLoginData(JSON.parse(user))
-      
       if(!user){
+        setIsChecking(false);
+        setShouldShowLanding(true);
         return
       }
+      
       const userData = JSON.parse(user)
+      setAccountLoginData(userData)
       console.log(userData, 'userData------');
+      
+      let navigated = false;
       
       if(userData.registerVerificationStatus === 'PARTIAL' && userData.role === 'AGENT'){
         router.push('/(auth)/finalRegisterForm')
+        navigated = true;
       }
       else if(userData.registerVerificationStatus === 'PARTIAL' && userData.role === 'USER'){
         router.replace('/(auth)/finalRegisterForm')
+        navigated = true;
       }
       else if(userData.registerVerificationStatus === 'APPOINTMENT_BOOKED' && userData.role === 'AGENT'){
         router.replace('/(tabs)/home/homeMainPage')
+        navigated = true;
       }
       else if(userData.registerVerificationStatus === 'LOGGED_IN' && userData.role === 'AGENT'){
         router.replace('/(tabs)/home/homeMainPage')
+        navigated = true;
       }
       else if(userData.registerVerificationStatus === 'LOGGED_IN' && userData.role === 'USER'){
         router.replace('/(tabs)/home/homeMainPage')
+        navigated = true;
       }
       else if(userData.registerVerificationStatus === 'SUPERADMINLOGGEDIN' && userData.role === 'SUPERADMIN'){
         router.replace('/(tabs)/home/homeMainPage')
+        navigated = true;
       }      
       else if(userData.registerVerificationStatus === 'LOGGED_IN' && userData.role === 'SUB_AGENT'){
         router.replace('/(tabs)/home/homeMainPage')
-      }      
+        navigated = true;
+      }
+      
+      setIsChecking(false);
+      // Only show landing page if no navigation occurred
+      if(!navigated){
+        setShouldShowLanding(true);
+      }
     }
 
     checkUser();
   }, []);
 
-  
+  // Show loading while checking user status
+  if(isChecking){
+    return (
+      <View style={[styles.container, styles.loadingContainer]}>
+        <ActivityIndicator size="large" color="#FFAC1C" />
+      </View>
+    );
+  }
+
+  // Only show landing page if all checks failed (no navigation occurred)
+  if(!shouldShowLanding){
+    return null;
+  }
 
   return (
-    
-      <View  style={styles.container}   >
-        <View style={styles.logoContainer}>
-{/* <Text style={styles.logoText}>Velo</Text> */}
-<Image
-            source={require('@/assets/images/logo.png')}
-            style={styles.logoImgContainer}
-          />
-          <Text style={[styles.heroText, styles.heroTextLogoText]}>Velo</Text>
-</View>
-        <View>
-          <Image
-            source={require('@/assets/images/heroImage.jpg')}
-            style={styles.heroImgContainer}
-          />
-        </View>
+    <View style={styles.container}>
+      <View style={styles.logoContainer}>
+        {/* <Text style={styles.logoText}>Velo</Text> */}
+        <Image
+          source={require('@/assets/images/logo.png')}
+          style={styles.logoImgContainer}
+        />
+        <Text style={[styles.heroText, styles.heroTextLogoText]}>Velo</Text>
+      </View>
+      <View>
+        <Image
+          source={require('@/assets/images/heroImage.jpg')}
+          style={styles.heroImgContainer}
+        />
+      </View>
 
-        <View style={styles.heroTextcontainer}>
-          <Text style={[styles.heroText, { color: textColor }]}>
-            Shipping made simple, anywhere. 
-          </Text>
-        </View>
+      <View style={styles.heroTextcontainer}>
+        <Text style={[styles.heroText, { color: textColor }]}>
+          Shipping made simple, anywhere. 
+        </Text>
+      </View>
 
-        <View style={styles.heroTextcontainer}>
+      <View style={styles.heroTextcontainer}>
         <Animated.View style={{ transform: [{ scale: scaleValue }] }}>
           <TouchableOpacity
             style={styles.customButton}
@@ -107,13 +138,12 @@ const RootIndex = () => {
           >
             <Text style={styles.buttonText}>Get Started</Text>
           </TouchableOpacity>
-          </Animated.View>
-          <Text style={[styles.defaultText, { color: textColor }]}>
-            Already have an account? <Text style={styles.linkText} onPress={() => router.replace('/(auth)/login')}>Sign In</Text>
-          </Text>
-        </View>
+        </Animated.View>
+        <Text style={[styles.defaultText, { color: textColor }]}>
+          Already have an account? <Text style={styles.linkText} onPress={() => router.replace('/(auth)/login')}>Sign In</Text>
+        </Text>
       </View>
-    
+    </View>
   );
 }
 
@@ -124,6 +154,9 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     marginTop: verticalScale(40),
+  },
+  loadingContainer: {
+    justifyContent: 'center',
   },
   logoText: {
     marginTop: verticalScale(60),

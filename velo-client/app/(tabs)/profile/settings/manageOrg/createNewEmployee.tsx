@@ -46,7 +46,7 @@ const CreateNewEmployeeSignup = () => {
           style={{ flex: 1, width: '100%', justifyContent: 'center', alignItems: 'center' }}
         >
           <ThemedView style={[styles.card, { backgroundColor: bgCard, shadowColor: colorScheme === 'dark' ? '#000' : '#000' }]}> 
-            <ThemedText style={[styles.title, { color: textPrimary }]}>Sign-up a new sub employee</ThemedText>
+            <ThemedText style={[styles.title, { color: textPrimary }]}>Sign up a new sub employee</ThemedText>
             <TextInput
               style={[styles.input, { backgroundColor: inputBg, borderColor, color: textPrimary }]}
               placeholder="Full Name"

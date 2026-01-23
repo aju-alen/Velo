@@ -201,17 +201,17 @@ const CreateShipmentHome = () => {
 
 
   const PaymentOption = ({ title, description, buttonText, isSecondary, onPress }) => (
-    <View style={[styles.section, { backgroundColor: themeColors.background }]}>
-      <View style={styles.sectionHeader}>
-        <Text style={[styles.sectionTitle, { color: themeColors.text }]}>{title}</Text>
-        <Text style={[styles.sectionDescription, { color: themeColors.text }]}>{description}</Text>
+    <View style={styles.paymentOptionContainer}>
+      <View style={styles.paymentOptionHeader}>
+        <Text style={[styles.paymentOptionTitle, { color: themeColors.text }]}>{title}</Text>
+        <Text style={[styles.paymentOptionDescription, { color: themeColors.text }]}>{description}</Text>
       </View>
       <TouchableOpacity
-        style={[styles.actionButton, isSecondary && styles.secondaryButton]}
+        style={[styles.paymentOptionButton, isSecondary && styles.paymentOptionSecondaryButton]}
         onPress={onPress}
         activeOpacity={0.7}
       >
-        <Text style={[styles.buttonText, isSecondary && styles.secondaryButtonText, { color: isSecondary ? '#FFAC1C' : 'white' }]}>
+        <Text style={[styles.paymentOptionButtonText, isSecondary && styles.paymentOptionSecondaryButtonText, { color: isSecondary ? '#FFAC1C' : 'white' }]}>
           {buttonText}
         </Text>
       </TouchableOpacity>
@@ -220,7 +220,7 @@ const CreateShipmentHome = () => {
 
 
   return (
-    <View style={[styles.container, { backgroundColor: themeColors.background }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]}>
       
       {/* Modal component remains unchanged */}
      {!editData &&  <Modal
@@ -232,15 +232,14 @@ const CreateShipmentHome = () => {
         <View style={[styles.modalOverlay, { backgroundColor: 'rgba(0,0,0,0.5)' }]}>
           <View style={[styles.modalContent, { backgroundColor: themeColors.background }]}>
             <View style={styles.shippingMethodHeadContainer}>
-            <Text style={[styles.modalTitle, { color: themeColors.text }]}>Select Shipping Method</Text>
-            <TouchableOpacity
-                      onPress={()=>{
-                        setCreateShipment(false)
-                        router.push('/home/homeMainPage')}}
-
-                    >
-                      <MaterialIcons name="close" size={24} color= {colorScheme === 'dark' ? '#fff' : '#000'} />
-                    </TouchableOpacity>
+              <Text style={[styles.modalTitle, { color: themeColors.text }]}>Select Shipping Method</Text>
+              <TouchableOpacity
+                onPress={()=>{
+                  setCreateShipment(false)
+                  router.push('/home/homeMainPage')}}
+              >
+                <MaterialIcons name="close" size={24} color= {colorScheme === 'dark' ? '#fff' : '#000'} />
+              </TouchableOpacity>
             </View>
 
             <PaymentOption
@@ -273,45 +272,41 @@ const CreateShipmentHome = () => {
       <View >
         {/* Shipping Date Section */}
 
-        {Platform.OS === 'ios' &&<View style={[styles.section, { backgroundColor: themeColors.background }]}>
-          <View style={styles.shippingDateContainer}>
-            <Text style={[styles.sectionHeaderText, { color: themeColors.text }]}>Shipping Date</Text>
-            
-           {show && <DateTimePicker
+        {Platform.OS === 'ios' && <View style={[styles.section, { backgroundColor: themeColors.background }]}>
+          <Text style={[styles.sectionHeaderText, { color: themeColors.text, marginBottom: verticalScale(12) }]}>Shipping Date</Text>
+          <View style={[styles.iosDatePickerContainer, { backgroundColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)' }]}>
+            {show && <DateTimePicker
               testID="dateTimePicker"
-              value={savedAddressData.shipmentDate}
+              value={savedAddressData.shipmentDate || date}
               mode={'date'}
               onChange={onChange}
               minimumDate={new Date()}
               maximumDate={new Date(new Date().setDate(new Date().getDate() + 7))}
             />}
-
-
           </View>
         </View>}
 
-        {Platform.OS === 'android' && <SafeAreaView style={[styles.section, { backgroundColor: themeColors.background }]}>
-          <View style={styles.shippingDateContainer}>
-          <Text style={[styles.sectionHeaderText, { color: themeColors.text }]}>Shipping Date</Text>
-      <TouchableOpacity onPress={showDatepicker} style={styles.androidDateButton}  >
-        <Text style={{ color: 'white' }}>{date.toDateString()}</Text>
-      </TouchableOpacity>
-      
-      </View>
-    </SafeAreaView>}
+        {Platform.OS === 'android' && <View style={[styles.section, { backgroundColor: themeColors.background }]}>
+          <Text style={[styles.sectionHeaderText, { color: themeColors.text, marginBottom: verticalScale(12) }]}>Shipping Date</Text>
+          <TouchableOpacity onPress={showDatepicker} style={styles.androidDateButton}>
+            <Text style={{ color: 'white', fontSize: moderateScale(16), fontWeight: '500' }}>{date.toDateString()}</Text>
+          </TouchableOpacity>
+        </View>}
 
         {/* Shipping Type Section */}
         <View style={[styles.section, { backgroundColor: themeColors.background }]}>
 
-        <View style={styles.titleContainer}>
-
-          
-        </View>
           <View style={styles.shippingTypeContainer}>
             <TouchableOpacity
               style={[
                 styles.shippingTypeOption,
-                checked === 'DOCUMENT' && styles.shippingTypeSelected
+                checked === 'DOCUMENT' && styles.shippingTypeSelected,
+                { 
+                  borderColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+                  backgroundColor: checked === 'DOCUMENT' 
+                    ? (colorScheme === 'dark' ? 'rgba(255, 172, 28, 0.1)' : 'rgba(255, 172, 28, 0.05)')
+                    : 'transparent'
+                }
               ]}
               onPress={() => {
                 setChecked('DOCUMENT')
@@ -336,7 +331,13 @@ const CreateShipmentHome = () => {
             <TouchableOpacity
               style={[
                 styles.shippingTypeOption,
-                checked === 'PACKAGE' && styles.shippingTypeSelected
+                checked === 'PACKAGE' && styles.shippingTypeSelected,
+                { 
+                  borderColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+                  backgroundColor: checked === 'PACKAGE' 
+                    ? (colorScheme === 'dark' ? 'rgba(255, 172, 28, 0.1)' : 'rgba(255, 172, 28, 0.05)')
+                    : 'transparent'
+                }
               ]}
               onPress={() => {
                 setChecked('PACKAGE')
@@ -365,8 +366,8 @@ const CreateShipmentHome = () => {
          ( <>
             <View style={[styles.section, { backgroundColor: themeColors.background }]}>
 
-              <Text style={[styles.sectionHeaderText, { color: themeColors.text }]}>Shipping From</Text>
-              <View style={[styles.addressCard, { backgroundColor: themeColors.background }]}>
+              <Text style={[styles.sectionHeaderText, { color: themeColors.text, marginBottom: verticalScale(12) }]}>Shipping From</Text>
+              <View style={[styles.addressCard, { backgroundColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)' }]}>
                 <Text style={[styles.addressName, { color: themeColors.text }]}>{userSecureStorage['name']}</Text>
                 <Text style={[styles.addressText, { color: themeColors.text }]}>{accountAddressData.addressOne}</Text>
                 <Text style={[styles.addressText, { color: themeColors.text }]}>{accountAddressData.addressTwo}</Text>
@@ -384,9 +385,9 @@ const CreateShipmentHome = () => {
 
             <View style={[styles.section, { backgroundColor: themeColors.background }]}>
 
-              <Text style={[styles.sectionHeaderText, { color: themeColors.text }]}>Shipping To</Text>
+              <Text style={[styles.sectionHeaderText, { color: themeColors.text, marginBottom: verticalScale(12) }]}>Shipping To</Text>
               
-              <View style={[styles.addressCard, { backgroundColor: themeColors.background }]}>
+              <View style={[styles.addressCard, { backgroundColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)' }]}>
                 {savedAddressData.gotDetails &&
                 <>
                 <Text style={[styles.addressName, { color: themeColors.text }]}>{savedAddressData.name}</Text>
@@ -420,12 +421,12 @@ const CreateShipmentHome = () => {
       
         {savedAddressData.gotDetails && <ShipmentDetailPayment itemType={checked} onGetData={handleGetDescription} onButtonclick={buttonClick} />}
 
-       { savedAddressData.gotDetails &&<TouchableOpacity style={styles.actionButton} onPress={handleContinuePackageDetail}>
+       { savedAddressData.gotDetails &&<TouchableOpacity style={[styles.actionButton, styles.continueButton]} onPress={handleContinuePackageDetail}>
           <Text style={styles.buttonText}>Continue</Text>
         </TouchableOpacity>  }
       </View>
       </ScrollView>}
-    </View>
+    </SafeAreaView>
     
   )
 }
@@ -436,12 +437,12 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: verticalScale(100),
   },
   modalContent: {
     borderRadius: 16,
     width: width * 0.9,
     paddingVertical: verticalScale(24),
+    paddingHorizontal: horizontalScale(20),
     elevation: 5,
     shadowColor: '#000',
     shadowOffset: {
@@ -454,7 +455,7 @@ const styles = StyleSheet.create({
   shippingMethodHeadContainer:{
     display:"flex",
     flexDirection:"row",
-    justifyContent:"space-around",
+    justifyContent:"space-between",
     alignItems:"center",
     marginBottom:verticalScale(20),
   },
@@ -464,18 +465,14 @@ const styles = StyleSheet.create({
  
   },
   section: {
-
     paddingHorizontal: horizontalScale(10),
-    marginBottom: verticalScale(16),
-
+    marginBottom: verticalScale(20),
   },
-  shippingDateContainer: {
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  iosDatePickerContainer: {
+    padding: horizontalScale(12),
+    borderRadius: moderateScale(12),
     alignItems: 'center',
-    marginBottom: verticalScale(16),
-    marginTop: verticalScale(16),
+    justifyContent: 'center',
   },
   sectionHeader: {
     marginBottom: verticalScale(16),
@@ -510,7 +507,10 @@ const styles = StyleSheet.create({
 
   },
   secondaryButtonText: {
-
+    fontWeight: '600',
+  },
+  continueButton: {
+    marginTop: verticalScale(24),
   },
   divider: {
     height: 1,
@@ -531,7 +531,9 @@ const styles = StyleSheet.create({
   },
   androidDateButton:{
     backgroundColor: '#FFAC1C',
-    padding: verticalScale(10),
+    paddingVertical: verticalScale(12),
+    paddingHorizontal: horizontalScale(16),
+    minWidth: horizontalScale(120),
     borderRadius: moderateScale(8),
     alignItems: 'center',
     justifyContent: 'center',
@@ -544,47 +546,38 @@ const styles = StyleSheet.create({
 
   shippingTypeContainer: {
     flexDirection: 'row',
-    marginTop: verticalScale(8),
-    
+    gap: horizontalScale(12),
   },
   shippingTypeOption: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    marginRight: horizontalScale(16),
-    paddingVertical: verticalScale(12),
-
-    borderRadius: 12,
-
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 0,
+    justifyContent: 'center',
+    paddingVertical: verticalScale(14),
+    paddingHorizontal: horizontalScale(16),
+    borderRadius: moderateScale(12),
+    borderWidth: 1,
   },
   shippingTypeSelected: {
-
     borderColor: '#FFAC1C',
-    borderWidth: 1,
-    paddingHorizontal: horizontalScale(12),
+    borderWidth: 2,
   },
   shippingTypeText: {
     fontSize: 16,
     fontWeight: '500',
   },
   addressCard: {
-
+    padding: horizontalScale(16),
+    marginTop: verticalScale(12),
     borderRadius: 12,
+    elevation: 2,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 2,
     },
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.1,
     shadowRadius: 4,
-
   },
   addressName: {
     fontSize: 18,
@@ -600,6 +593,7 @@ const styles = StyleSheet.create({
     marginTop: verticalScale(16),
     paddingTop: verticalScale(16),
     borderTopWidth: 1,
+    opacity: 0.3,
   },
   contactText: {
     fontSize: 14,
@@ -607,8 +601,10 @@ const styles = StyleSheet.create({
     marginBottom: verticalScale(4),
   },
   addAddressContainer: {
-    padding: horizontalScale(10),
-    backgroundColor: 'rgba(255, 107, 107, 0.1)',
+    paddingVertical: verticalScale(12),
+    paddingHorizontal: horizontalScale(16),
+    minHeight: verticalScale(50),
+    backgroundColor: 'rgba(255, 172, 28, 0.1)',
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
@@ -641,10 +637,6 @@ const styles = StyleSheet.create({
   picker: {
     color: '#fff',
   },
-  titleContainer: {
-    alignItems: 'center',
-    marginBottom: verticalScale(22),
-  },
   title: {
     fontWeight: '700',
     marginBottom: verticalScale(8),
@@ -654,6 +646,42 @@ const styles = StyleSheet.create({
     height: verticalScale(4),
     backgroundColor: '#FFAC1C',
     borderRadius: moderateScale(2),
+  },
+  paymentOptionContainer: {
+    marginBottom: verticalScale(16),
+  },
+  paymentOptionHeader: {
+    marginBottom: verticalScale(12),
+  },
+  paymentOptionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: verticalScale(4),
+  },
+  paymentOptionDescription: {
+    fontSize: 14,
+    lineHeight: 20,
+    opacity: 0.8,
+  },
+  paymentOptionButton: {
+    backgroundColor: '#FFAC1C',
+    paddingVertical: verticalScale(14),
+    borderRadius: moderateScale(12),
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  paymentOptionSecondaryButton: {
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: '#FFAC1C',
+  },
+  paymentOptionButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: 'white',
+  },
+  paymentOptionSecondaryButtonText: {
+    fontWeight: '600',
   },
 });
 

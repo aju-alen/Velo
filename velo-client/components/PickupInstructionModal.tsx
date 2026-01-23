@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Modal, StyleSheet, TouchableOpacity, FlatList, View, Text, useColorScheme } from 'react-native';
+import { Modal, StyleSheet, TouchableOpacity, FlatList, View, Text, useColorScheme, TouchableWithoutFeedback } from 'react-native';
 import useShipmentStore from '@/store/shipmentStore';
 import { verticalScale,moderateScale,horizontalScale } from '@/constants/metrics';
 import { Colors } from '@/constants/Colors';
+import { MaterialIcons } from '@expo/vector-icons';
 
 const PickupInstructionModal = ({openModal,handleCloseModal}) => {
     const {setDeliveryServices,deliveryServices} = useShipmentStore();
@@ -29,31 +30,37 @@ const PickupInstructionModal = ({openModal,handleCloseModal}) => {
       visible={openModal}
       animationType="slide"
       transparent={true}
-      onRequestClose={handleCloseModal} // Handle Android back button
+      onRequestClose={handleCloseModal}
     >
-      <View style={[styles.modalContainer, { backgroundColor: 'rgba(0, 0, 0, 0.5)' }]}>
-        <View style={[styles.contentContainer, { backgroundColor: bgCard }]}>
-          <Text style={[styles.title, { color: textPrimary }]}>Pickup Instructions</Text>
-          <FlatList
-            data={instructions}
-            keyExtractor={(item, index) => index.toString()}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={[styles.option, { backgroundColor: bgCard, borderColor: borderColor }]}
-                onPress={()=>handleSelectitem(item)}
-              >
-                <Text style={[styles.optionText, { color: textPrimary }]}>{item}</Text>
-              </TouchableOpacity>
-            )}
-          />
-          <TouchableOpacity
-            style={styles.closeButton}
-            onPress={handleCloseModal}
-          >
-            <Text style={[styles.closeButtonText, { color: '#FFF' }]}>Close</Text>
-          </TouchableOpacity>
+      <TouchableWithoutFeedback onPress={handleCloseModal}>
+        <View style={[styles.modalContainer, { backgroundColor: 'rgba(0, 0, 0, 0.5)' }]}>
+          <TouchableWithoutFeedback>
+            <View style={[styles.contentContainer, { backgroundColor: bgCard }]}>
+              <View style={styles.modalHeader}>
+                <Text style={[styles.title, { color: textPrimary }]}>Pickup Instructions</Text>
+                <TouchableOpacity onPress={handleCloseModal}>
+                  <MaterialIcons name="close" size={24} color={textPrimary} />
+                </TouchableOpacity>
+              </View>
+              <FlatList
+                data={instructions}
+                keyExtractor={(item, index) => index.toString()}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={[styles.option, { 
+                      backgroundColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)',
+                      borderColor: borderColor 
+                    }]}
+                    onPress={()=>handleSelectitem(item)}
+                  >
+                    <Text style={[styles.optionText, { color: textPrimary }]}>{item}</Text>
+                  </TouchableOpacity>
+                )}
+              />
+            </View>
+          </TouchableWithoutFeedback>
         </View>
-      </View>
+      </TouchableWithoutFeedback>
     </Modal>
   );
 };
@@ -68,39 +75,35 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     width: '90%',
-    borderRadius: moderateScale(15),
+    borderRadius: moderateScale(16),
     padding: moderateScale(20),
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
     elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: verticalScale(20),
   },
   title: {
     fontSize: moderateScale(20),
-    fontWeight: 'bold',
-    marginBottom: verticalScale(20),
-    textAlign: 'center',
+    fontWeight: '700',
+    flex: 1,
   },
   option: {
-    padding: moderateScale(15),
-    marginVertical: verticalScale(8),
-    borderRadius: moderateScale(10),
+    paddingVertical: verticalScale(14),
+    paddingHorizontal: horizontalScale(16),
+    marginVertical: verticalScale(6),
+    borderRadius: moderateScale(12),
     borderWidth: 1,
     alignItems: 'center',
   },
   optionText: {
     fontSize: moderateScale(16),
-  },
-  closeButton: {
-    marginTop: moderateScale(20),
-    paddingVertical: verticalScale(12),
-    alignItems: 'center',
-    backgroundColor: '#FFAC1C',
-    borderRadius: moderateScale(10),
-  },
-  closeButtonText: {
-    fontSize: moderateScale(16),
-    fontWeight: 'bold',
+    fontWeight: '500',
   },
 });

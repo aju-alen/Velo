@@ -16,7 +16,8 @@ export default function ManageOrgLayout() {
              title: 'Manage Pricing',
             gestureEnabled:false }}/>
 
-             <Stack.Screen name='createNewEmployee' options={{ headerShown: true,  
+             <Stack.Screen name='createNewEmployee' options={{ headerShown: true,
+              title: 'Create New Employee',
             gestureEnabled:false }}/>
         </Stack>
     );

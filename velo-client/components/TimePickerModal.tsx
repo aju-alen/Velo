@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Modal, FlatList, Pressable, StyleSheet, View, Text, useColorScheme } from 'react-native';
+import { Modal, FlatList, Pressable, StyleSheet, View, Text, useColorScheme, TouchableOpacity, TouchableWithoutFeedback } from 'react-native';
 import useShipmentStore from '@/store/shipmentStore';
 import { verticalScale, moderateScale, horizontalScale } from '@/constants/metrics';
 import { Colors } from '@/constants/Colors';
+import { MaterialIcons } from '@expo/vector-icons';
 
 const TimePickerModal = ({ openModal, handleCloseModal }) => {
     const { deliveryServices, setDeliveryServices } = useShipmentStore();
@@ -47,51 +48,59 @@ const TimePickerModal = ({ openModal, handleCloseModal }) => {
             onDismiss={handleCloseModal}
             transparent={true}
         >
-            <View style={[styles.modalContainer, { backgroundColor: 'rgba(0,0,0,0.7)' }]}>
-                <View style={[styles.contentContainer, { backgroundColor: bgCard }]}>
-                    <Text style={[styles.modalTitle, { color: textPrimary }]}>Select {mode === 'start' ? 'Suitable' : 'Latest By'} Time</Text>
-                    <FlatList
-                        data={timeSlots}
-                        keyExtractor={(item, index) => index.toString()}
-                        showsVerticalScrollIndicator={false}
-                        renderItem={({ item }) => (
-                            <Pressable
-                                style={({ pressed }) => [
-                                    styles.timeSlot,
-                                    { backgroundColor: bgCard, borderColor: borderColor },
-                                    pressed && styles.timeSlotPressed,
-                                ]}
-                                onPress={() => {
-                                    console.log(`Selected time: ${item}`);
-                                    if (mode === 'start') {
-                                        setDeliveryServices({
-                                            ...deliveryServices,
-                                            deliveryPickupTimeFrom: item,
-                                        })
-                                        setMode('end');
-                                    }
-                                    else {
-                                        setDeliveryServices({
-                                            ...deliveryServices,
-                                            deliveryPickupTimeTo: item,
-                                        })
-                                        handleCloseModal();
-                                        setMode('start');
-                                    }
-                                }}
-                            >
-                                <Text style={[styles.timeText, { color: textPrimary }]}>{item}</Text>
-                            </Pressable>
-                        )}
-                    />
-                    <Pressable
-                        style={styles.closeButton}
-                        onPress={handleCloseModal}
-                    >
-                        <Text style={[styles.closeButtonText, { color: '#FFF' }]}>Close</Text>
-                    </Pressable>
+            <TouchableWithoutFeedback onPress={handleCloseModal}>
+                <View style={[styles.modalContainer, { backgroundColor: 'rgba(0,0,0,0.5)' }]}>
+                    <TouchableWithoutFeedback>
+                        <View style={[styles.contentContainer, { backgroundColor: bgCard }]}>
+                            <View style={styles.modalHeader}>
+                                <Text style={[styles.modalTitle, { color: textPrimary }]}>Select {mode === 'start' ? 'Suitable' : 'Latest By'} Time</Text>
+                                <TouchableOpacity onPress={handleCloseModal}>
+                                    <MaterialIcons name="close" size={24} color={textPrimary} />
+                                </TouchableOpacity>
+                            </View>
+                            <FlatList
+                                data={timeSlots}
+                                keyExtractor={(item, index) => index.toString()}
+                                showsVerticalScrollIndicator={false}
+                                style={styles.listContainer}
+                                renderItem={({ item }) => (
+                                    <Pressable
+                                        style={({ pressed }) => [
+                                            styles.timeSlot,
+                                            { 
+                                                backgroundColor: pressed 
+                                                    ? (colorScheme === 'dark' ? 'rgba(255, 172, 28, 0.2)' : 'rgba(255, 172, 28, 0.1)')
+                                                    : (colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)'),
+                                                borderColor: borderColor 
+                                            },
+                                        ]}
+                                        onPress={() => {
+                                            console.log(`Selected time: ${item}`);
+                                            if (mode === 'start') {
+                                                setDeliveryServices({
+                                                    ...deliveryServices,
+                                                    deliveryPickupTimeFrom: item,
+                                                })
+                                                setMode('end');
+                                            }
+                                            else {
+                                                setDeliveryServices({
+                                                    ...deliveryServices,
+                                                    deliveryPickupTimeTo: item,
+                                                })
+                                                handleCloseModal();
+                                                setMode('start');
+                                            }
+                                        }}
+                                    >
+                                        <Text style={[styles.timeText, { color: textPrimary }]}>{item}</Text>
+                                    </Pressable>
+                                )}
+                            />
+                        </View>
+                    </TouchableWithoutFeedback>
                 </View>
-            </View>
+            </TouchableWithoutFeedback>
         </Modal>
     );
 };
@@ -104,46 +113,40 @@ const styles = StyleSheet.create({
     },
     contentContainer: {
         width: '90%',
-        height: '50%',
-        borderRadius: moderateScale(15),
+        maxHeight: '70%',
+        borderRadius: moderateScale(16),
         padding: moderateScale(20),
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
         elevation: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.25,
+        shadowRadius: 8,
+    },
+    modalHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: verticalScale(20),
     },
     modalTitle: {
         fontSize: moderateScale(20),
-        fontWeight: 'bold',
-        textAlign: 'center',
-        marginBottom: verticalScale(15),
+        fontWeight: '700',
+        flex: 1,
+    },
+    listContainer: {
+        maxHeight: verticalScale(400),
     },
     timeSlot: {
-        paddingVertical: verticalScale(12),
+        paddingVertical: verticalScale(14),
         paddingHorizontal: horizontalScale(16),
-        marginBottom: verticalScale(10),
-        borderRadius: moderateScale(10),
+        marginBottom: verticalScale(8),
+        borderRadius: moderateScale(12),
         alignItems: 'center',
         borderWidth: 1,
-    },
-    timeSlotPressed: {
-        backgroundColor: '#d0e8fc',
     },
     timeText: {
         fontSize: moderateScale(16),
         fontWeight: '600',
-    },
-    closeButton: {
-        marginTop: verticalScale(20),
-        paddingVertical: verticalScale(12),
-        alignItems: 'center',
-        backgroundColor: '#FFAC1C',
-        borderRadius: moderateScale(10),
-    },
-    closeButtonText: {
-        fontSize: moderateScale(16),
-        fontWeight: 'bold',
     },
 });
 

@@ -1,6 +1,6 @@
 import { SafeAreaView, StyleSheet, TouchableOpacity, TextInput, View, ScrollView,Alert, Text, useColorScheme } from 'react-native'
 import React, { useState } from 'react'
-import { horizontalScale, moderateScale } from '@/constants/metrics'
+import { horizontalScale, moderateScale, verticalScale } from '@/constants/metrics'
 import { Divider} from 'react-native-paper'
 import useShipmentStore from '@/store/shipmentStore'
 import Ionicons from '@expo/vector-icons/Ionicons'
@@ -49,39 +49,12 @@ const ShipmentSchedulePickup = () => {
   const handleClosInstructioneModal = () => setPickupInstructionModal(false)
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor: themeColors.background }]}>
-    <View >
-      <SafeAreaView style={[styles.safeArea, { backgroundColor: themeColors.background }]}>
-        <Text style={[styles.header, { color: themeColors.text }]}>Shipment Schedule Pickup</Text>
-        
-        {/* Schedule Options */}
-        {/* <View style={styles.radioContainer}>
-          <TouchableOpacity 
-            style={[styles.radioBox, checked === 'yes' && styles.radioBoxSelected]}
-            onPress={() => setChecked('yes')}
-          >
-            <RadioButton
-              value="yes"
-              status={checked === 'yes' ? 'checked' : 'unchecked'}
-              color="#FFAC1C"
-            />
-            <Text style={styles.radioText}>Yes-Schedule a pickup</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={[styles.radioBox, checked === 'no' && styles.radioBoxSelected]}
-            onPress={() => setChecked('no')}
-          >
-            <RadioButton
-              value="no"
-              status={checked === 'no' ? 'checked' : 'unchecked'}
-              color="#FFAC1C"
-            />
-            <Text style={styles.radioText}>No</Text>
-          </TouchableOpacity>
-        </View> */}
-
-        <Divider style={styles.divider} />
+    <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]}>
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
 
         {/* Pickup Date Section */}
         <View style={[styles.sectionContainer, { backgroundColor: themeColors.background }]}>
@@ -89,27 +62,12 @@ const ShipmentSchedulePickup = () => {
             <Text style={[styles.sectionTitle, { color: themeColors.text }]}>Pickup Date</Text>
             <Text style={[styles.dateText, { color: '#FFAC1C' }]}>{formattedDate}</Text>
           </View>
-          
-          <View style={[styles.infoBox, { backgroundColor: themeColors.background }]}>
-            <Ionicons name="information-circle-sharp" size={24} color="#FFAC1C" />
-            <Text style={[styles.infoText, { color: themeColors.text }]}>
-              If you wish to change any of the data,
-              <TouchableOpacity onPress={()=>{
-              setEditData(true)
-              router.replace('/(tabs)/home/createShipment')
-                }}>
-                <Text style={{ color: '#FFAC1C', textDecorationLine: 'underline' }}>
-                  CLICK HERE
-                </Text>
-              </TouchableOpacity>
-            </Text>
-          </View>
         </View>
 
         {/* Pickup Address Section */}
         <View style={[styles.sectionContainer, { backgroundColor: themeColors.background }]}>
-          <Text style={[styles.sectionTitle, { color: themeColors.text }]}>Pickup Address</Text>
-          <View style={[styles.addressCard, { backgroundColor: themeColors.background, borderColor: themeColors.text }]}>
+          <Text style={[styles.sectionTitle, { color: themeColors.text, marginBottom: verticalScale(12) }]}>Pickup Address</Text>
+          <View style={[styles.addressCard, { backgroundColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)' }]}>
             <Text style={[styles.addressName, { color: themeColors.text }]}>{accountAddressData.userName}</Text>
             <Text style={[styles.addressText, { color: themeColors.text }]}>
               {accountAddressData.addressOne},{accountAddressData.addressTwo}
@@ -126,9 +84,10 @@ const ShipmentSchedulePickup = () => {
 
         {/* Pickup Time Section */}
         <View style={[styles.sectionContainer, { backgroundColor: themeColors.background }]}>
+          <Text style={[styles.sectionTitle, { color: themeColors.text, marginBottom: verticalScale(12) }]}>Pickup Time</Text>
           <TouchableOpacity 
             onPress={() => setOpenTimeModal(true)} 
-            style={[styles.timeButton, { backgroundColor: themeColors.background, borderColor: themeColors.text }]}
+            style={[styles.timeButton, { backgroundColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)' }]}
           >
             <View>
               <Text style={[styles.buttonLabel, { color: themeColors.text }]}>Select Pickup Time</Text>
@@ -142,8 +101,8 @@ const ShipmentSchedulePickup = () => {
 
         {/* Weight Section ONLY FOR PACKAGE TYPE*/}
         {itemType === 'PACKAGE' &&<View style={[styles.sectionContainer, { backgroundColor: themeColors.background }]}>
-          <Text style={[styles.sectionTitle, { color: themeColors.text }]}>Weight (kg)</Text>
-          <View style={[styles.weightCard, { backgroundColor: themeColors.background, borderColor: themeColors.text }]}>
+          <Text style={[styles.sectionTitle, { color: themeColors.text, marginBottom: verticalScale(12) }]}>Weight (kg)</Text>
+          <View style={[styles.weightCard, { backgroundColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)' }]}>
             <Text style={[styles.weightLabel, { color: themeColors.text }]}>Total Weight</Text>
             <Text style={[styles.weightValue, { color: themeColors.text }]}>{packageDetail.weight}</Text>
           </View>
@@ -151,8 +110,8 @@ const ShipmentSchedulePickup = () => {
 
         {/* Num of pieces Section ONLY FOR DOCUMENT TYPE*/}
         {itemType === 'DOCUMENT' &&<View style={[styles.sectionContainer, { backgroundColor: themeColors.background }]}>
-          <Text style={[styles.sectionTitle, { color: themeColors.text }]}>Number of pieces</Text>
-          <View style={[styles.weightCard, { backgroundColor: themeColors.background, borderColor: themeColors.text }]}>
+          <Text style={[styles.sectionTitle, { color: themeColors.text, marginBottom: verticalScale(12) }]}>Number of pieces</Text>
+          <View style={[styles.weightCard, { backgroundColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)' }]}>
             <Text style={[styles.weightLabel, { color: themeColors.text }]}>Total Pieces</Text>
             <Text style={[styles.weightValue, { color: themeColors.text }]}>{packageDetail.numberOfPieces}</Text>
           </View>
@@ -160,12 +119,10 @@ const ShipmentSchedulePickup = () => {
 
         {/* Pickup Instructions Section */}
         <View style={[styles.sectionContainer, { backgroundColor: themeColors.background }]}>
-          <Text style={[styles.sectionTitle, { color: themeColors.text }]}>Pickup Instructions
-            
-          </Text>
+          <Text style={[styles.sectionTitle, { color: themeColors.text, marginBottom: verticalScale(12) }]}>Pickup Instructions</Text>
 
           <TouchableOpacity 
-            style={[styles.instructionButton, { backgroundColor: themeColors.background, borderColor: themeColors.text }]}
+            style={[styles.instructionButton, { backgroundColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)' }]}
             onPress={() => setPickupInstructionModal(true)}
           >
             <Text style={[styles.buttonText, { color: themeColors.text }]}>Pickup From - 
@@ -177,9 +134,9 @@ const ShipmentSchedulePickup = () => {
 
         {/* Special Instructions Section */}
         <View style={[styles.sectionContainer, { backgroundColor: themeColors.background }]}>
-          <Text style={[styles.sectionTitle, { color: themeColors.text }]}>Special Instruction(s)</Text>
+          <Text style={[styles.sectionTitle, { color: themeColors.text, marginBottom: verticalScale(12) }]}>Special Instruction(s)</Text>
           <TextInput
-            style={[styles.textInput,{color: themeColors.text, backgroundColor: themeColors.background, borderColor: themeColors.text}]}
+            style={[styles.textInput,{color: themeColors.text, backgroundColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)', borderColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'}]}
             multiline
             placeholder="Eg: Don't ring bell, call on arrival"
             numberOfLines={4}
@@ -190,24 +147,24 @@ const ShipmentSchedulePickup = () => {
             placeholderTextColor="#999"
           />
         </View>
-        <View style={{ backgroundColor: themeColors.background }}>
-            <TouchableOpacity 
-              style={[
-                styles.buttonContainer, 
-                (!deliveryServices.deliveryPickupTimeFrom || !deliveryServices.deliveryPickupTimeTo) 
-                  && styles.disabledButton
-              ]}
-              onPress={handleFinalPreview}
-              disabled={
-                !deliveryServices.deliveryPickupTimeFrom || !deliveryServices.deliveryPickupTimeTo
-              }
-            >
-              <Text style={styles.finalPreviewText}>
-                View Shipping Options
-              </Text>
-            </TouchableOpacity>
-          </View>
-      </SafeAreaView>
+        <View style={styles.buttonWrapper}>
+          <TouchableOpacity 
+            style={[
+              styles.buttonContainer, 
+              (!deliveryServices.deliveryPickupTimeFrom || !deliveryServices.deliveryPickupTimeTo) 
+                && styles.disabledButton
+            ]}
+            onPress={handleFinalPreview}
+            disabled={
+              !deliveryServices.deliveryPickupTimeFrom || !deliveryServices.deliveryPickupTimeTo
+            }
+          >
+            <Text style={styles.finalPreviewText}>
+              View Shipping Options
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
 
       <TimePickerModal 
         openModal={openTimeModal} 
@@ -217,8 +174,7 @@ const ShipmentSchedulePickup = () => {
         openModal={pickupInstructionmodal} 
         handleCloseModal={handleClosInstructioneModal} 
       />
-    </View>
-    </ScrollView>
+    </SafeAreaView>
   )
 }
 
@@ -228,16 +184,32 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  safeArea: {
+  scrollView: {
     flex: 1,
-    paddingHorizontal: horizontalScale(16),
+  },
+  scrollContent: {
+    paddingHorizontal: horizontalScale(20),
+    paddingBottom: verticalScale(80),
+  },
+  buttonWrapper: {
+    marginTop: verticalScale(24),
+    marginBottom: verticalScale(20),
   },
   buttonContainer: {
-    padding: 15,
+    paddingVertical: verticalScale(14),
+    paddingHorizontal: horizontalScale(20),
     backgroundColor: '#FFAC1C',
-    borderRadius: 5,
+    borderRadius: moderateScale(12),
     alignItems: 'center',
     justifyContent: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   disabledButton: {
     backgroundColor: '#cccccc', // Light gray color for disabled state
@@ -274,11 +246,10 @@ const styles = StyleSheet.create({
     marginLeft: horizontalScale(4),
   },
   divider: {
-    marginVertical: horizontalScale(24),
-
+    marginVertical: verticalScale(20),
   },
   sectionContainer: {
-    marginBottom: horizontalScale(24),
+    marginBottom: verticalScale(20),
   },
   sectionTitle: {
     fontSize: 18,
@@ -289,7 +260,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: horizontalScale(16),
   },
   dateText: {
     fontWeight: '500',
@@ -306,10 +276,17 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   addressCard: {
-
     padding: horizontalScale(16),
-    borderRadius: 12,
-    borderWidth: 1,
+    marginTop: verticalScale(8),
+    borderRadius: moderateScale(12),
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   addressName: {
     fontWeight: '600',
@@ -320,25 +297,41 @@ const styles = StyleSheet.create({
     marginBottom: horizontalScale(4),
   },
   timeButton: {
-
     padding: horizontalScale(16),
-    borderRadius: 12,
-    borderWidth: 1,
+    marginTop: verticalScale(8),
+    borderRadius: moderateScale(12),
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   buttonLabel: {
     fontWeight: '500',
     marginBottom: horizontalScale(4),
   },
   selectedTime: {
+    fontSize: moderateScale(16),
+    fontWeight: '600',
   },
   weightCard: {
-
     padding: horizontalScale(16),
-    borderRadius: 12,
-    borderWidth: 1,
+    marginTop: verticalScale(8),
+    borderRadius: moderateScale(12),
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   weightLabel: {
 
@@ -349,21 +342,29 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   instructionButton: {
-
     padding: horizontalScale(16),
-    borderRadius: 12,
-    borderWidth: 1,
+    marginTop: verticalScale(8),
+    borderRadius: moderateScale(12),
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   textInput: {
-
+    marginTop: verticalScale(8),
     borderWidth: 1,
-    borderRadius: 12,
+    borderRadius: moderateScale(12),
     padding: horizontalScale(12),
-    height: horizontalScale(120),
+    height: verticalScale(100),
     textAlignVertical: 'top',
+    fontSize: moderateScale(14),
   },
   buttonText: {
     fontWeight: '500',

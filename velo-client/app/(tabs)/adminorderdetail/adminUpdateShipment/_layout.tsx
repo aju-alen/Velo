@@ -9,7 +9,7 @@ export default function AdminUpdateStatusLayout() {
 
     return (
         <Stack>
-            <Stack.Screen name='adminUpdateStatus' options={{ headerShown: true }}/>
+            <Stack.Screen name='adminUpdateStatus' options={{ headerShown: true, headerTitle: 'Update Shipment Status' }}/>
         </Stack>
     );
 }

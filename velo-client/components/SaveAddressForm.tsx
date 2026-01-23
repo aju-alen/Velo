@@ -1,4 +1,4 @@
-import { StyleSheet, Modal, TouchableWithoutFeedback, ScrollView, TouchableOpacity, TextInput, Image, Dimensions, FlatList, Platform, View, Text, useColorScheme } from 'react-native'
+import { StyleSheet, Modal, TouchableWithoutFeedback, ScrollView, TouchableOpacity, TextInput, Dimensions, FlatList, Platform, View, Text, useColorScheme } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { horizontalScale, moderateScale, verticalScale } from '@/constants/metrics'
 import { MaterialIcons } from '@expo/vector-icons'
@@ -29,9 +29,6 @@ const {accountLoginData} = useLoginAccountStore()
 
 
 
-  const [countryCodeModal, setCountryCodeModal] = useState(false)
-  const [selectedArea, setSelectedArea] = useState(null)
-  const [areas, setAreas] = useState([])
   const [countryList, setCountryList] = useState([]);
   const [contactModal, setContactModal] = useState(false)
   const [savedContact, setSavedContact] = useState([])
@@ -44,40 +41,11 @@ console.log(savedAddressData,'savedAddressData------______');
  
 
   useEffect(() => {
-    if (areas.length > 0) return; // Prevent refetch
-    fetch("https://restcountries.com/v3.1/all/?fields=cca2,name,idd,flag")
-      .then(response => response.json())
-      .then(data => {
-        
-        const areaData = data.map(item =>{
-          console.log(item,'item----');
-          
-          return ({
-            code: item.cca2,
-            item: item.name.common,
-            callingCode: `${item.idd.root}`,
-            flag: `https://flagsapi.com/${item.cca2}/flat/64.png`,
-          })
-        })
-          
-
-        setAreas(areaData);
-        console.log('areaData:', areaData);
-        
-  
-        const defaultArea = areaData.find(a => a.callingCode === "+971");
-        console.log('defaultArea:', defaultArea);
-        
-        if (defaultArea) {
-          setSelectedArea(defaultArea);
-          setSavedAddressData({ countryCode: defaultArea.callingCode });
-        }
-      })
-      .catch(error => {
-        console.error("Error fetching country data:", error);
-        alert("Failed to load country data");
-      });
-  }, [areas]);
+    // Initialize default country code if not set
+    if (!savedAddressData.countryCode) {
+      setSavedAddressData({ countryCode: "+971" });
+    }
+  }, []);
 
   useEffect(() => {
     const getAllSavedAddress = async () => {
@@ -178,49 +146,6 @@ console.log(savedAddressData,'savedAddressData------______');
     }
   }
 
-  const renderAreaItem = ({ item }) => {    
-    return(
-    <TouchableOpacity
-      style={[styles.countryListItem, { backgroundColor: themeColors.background, borderBottomColor: themeColors.text }]}
-      onPress={() => {
-        setSelectedArea(item)
-        setSavedAddressData({ countryCode: item.callingCode })
-        setCountryCodeModal(false)
-      }}
-    >
-      <Image
-        source={{ uri: item.flag }}
-        style={styles.countryFlag}
-      />
-      <Text style={[styles.countryName, { color: themeColors.text }]}>{item.item}</Text>
-    </TouchableOpacity>
-
-  )}
-
-  const renderAreasCodesModal = () => (
-    <Modal
-      animationType="slide"
-      transparent={true}
-      visible={countryCodeModal}
-    >
-      <TouchableWithoutFeedback onPress={() => setCountryCodeModal(false)}>
-        <View style={[styles.modalOverlay, { backgroundColor: 'rgba(0,0,0,0.5)' }]}>
-          <View style={[styles.modalContent, { backgroundColor: themeColors.background }]}>
-          <View style={styles.selectCountryMainHeader}>
-      <Text style={{ color: themeColors.text }}>Select countries</Text>
-      <MaterialIcons name="close" size={24} color= {colorScheme === 'dark' ? '#fff' : '#000'} />
-      </View>
-            <FlatList
-              data={areas}
-              renderItem={renderAreaItem}
-              keyExtractor={(item) => item.code}
-              style={styles.countryList}
-            />
-          </View>
-        </View>
-      </TouchableWithoutFeedback>
-    </Modal>
-  )
 
   const savedContactFlatlist = ({ item }) => (
     
@@ -243,11 +168,6 @@ console.log(savedAddressData,'savedAddressData------______');
           zipCode: item.zipCode
         })
         setContactModal(false)
-        
-        const selectedArea = areas.find(a => a.callingCode === item.countryCode)
-        console.log(selectedArea,'selectedArea');
-        
-        setSelectedArea(areas.find(a => a.callingCode === item.countryCode))
       }}
     >
       <View style={[styles.contactInfoContainer, { backgroundColor: themeColors.background }]}>
@@ -397,35 +317,23 @@ console.log(savedAddressData,'savedAddressData------______');
                     />
 
 
-                    <View style={[styles.phoneContainer, { backgroundColor: themeColors.background }]}>
-                      <TouchableOpacity
-                        style={styles.countryCodeButton}
-                        onPress={() => setCountryCodeModal(true)}
-                      >
-                        <Image
-                          source={{ uri: selectedArea?.flag }}
-                          style={styles.countryFlag}
-                        />
-                        <Text style={[
-                          styles.countryCode,
-                          { color: themeColors.text }
-                        ]}>
-                          {selectedArea?.callingCode}
-                        </Text>
-                        <MaterialIcons name="arrow-drop-down" size={24} color={themeColors.text} />
-                      </TouchableOpacity>
+                    <TextInput
+                      placeholder="Country Code (e.g., +971)"
+                      value={savedAddressData.countryCode}
+                      onChangeText={(text) => setSavedAddressData({ countryCode: text })}
+                      style={[styles.input,{color: themeColors.text,backgroundColor: colorScheme ==='dark'?'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)' }]}
+                      keyboardType="phone-pad"
+                      autoCapitalize='none'
+                    />
 
-                      <TextInput
-                        style={[styles.phoneInput, { color: themeColors.text, backgroundColor: colorScheme ==='dark'?'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)' }]}
-                        value={savedAddressData.mobileNumber}
-                        onChangeText={(text) => setSavedAddressData({ mobileNumber: text })}
-                        placeholder="Mobile Number"
-                        placeholderTextColor="gray"
-                        keyboardType="numeric"
-                        maxLength={12}
-                      />
-
-                    </View>
+                    <TextInput
+                      placeholder="Mobile Number"
+                      value={savedAddressData.mobileNumber}
+                      onChangeText={(text) => setSavedAddressData({ mobileNumber: text })}
+                      style={[styles.input,{color: themeColors.text,backgroundColor: colorScheme ==='dark'?'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)' }]}
+                      keyboardType="numeric"
+                      maxLength={12}
+                    />
 
                     <View style={[styles.pickerContainer, {height:Platform.OS === 'ios'? verticalScale(130) : verticalScale(40), backgroundColor: colorScheme ==='dark'?'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)'}]}>
                       <Picker
@@ -481,7 +389,6 @@ console.log(savedAddressData,'savedAddressData------______');
             </TouchableWithoutFeedback>
           </View>
 
-        {renderAreasCodesModal()}
         {renderContactModal()}
       </Modal>
     </View>
@@ -538,34 +445,6 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(16),
 
   },
-  phoneContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: verticalScale(15),
-  },
-  countryCodeButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingRight: horizontalScale(15),
-    borderRightColor: 'grey',
-  },
-  countryFlag: {
-    width: horizontalScale(30),
-    height: verticalScale(30),
-    marginRight: horizontalScale(12),
-    borderRadius: moderateScale(4),
-  },
-  countryCode: {
-    fontSize: moderateScale(16),
-    fontWeight: '500',
-  },
-  phoneInput: {
-    flex: 1,
-    height: verticalScale(50),
-    borderRadius: moderateScale(12),
-    paddingHorizontal: horizontalScale(15),
-    fontSize: moderateScale(16),
-  },
   pickerContainer: {
     borderRadius: moderateScale(12),
     marginBottom: verticalScale(25),
@@ -574,15 +453,6 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-  },
-  countryListItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: moderateScale(12),
-    borderBottomWidth: 1,
-  },
-  countryName: {
-    fontSize: moderateScale(16),
   },
   countryList: {
     padding: moderateScale(15),
@@ -631,11 +501,4 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(14),
     flex: 1,
   },
-  selectCountryMainHeader:{
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: horizontalScale(20),
-    marginBottom: verticalScale(20),
-  }
 })

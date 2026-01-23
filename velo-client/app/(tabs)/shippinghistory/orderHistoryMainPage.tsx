@@ -7,10 +7,11 @@ import {
   Dimensions, 
   RefreshControl,
   Text,
-  useColorScheme
+  useColorScheme,
+  SafeAreaView
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { horizontalScale, verticalScale } from '@/constants/metrics';
+import { horizontalScale, verticalScale, moderateScale } from '@/constants/metrics';
 import axios from 'axios';
 import { ipURL } from '@/constants/backendUrl';
 import useLoginAccountStore from '@/store/loginAccountStore';
@@ -62,12 +63,12 @@ const OrderHistoryMainPage = () => {
   const renderOrderCard = (order) => (
     <TouchableOpacity 
       key={order.id} 
-      style={[styles.card, { backgroundColor: themeColors.background, borderColor: themeColors.text }]}
+      style={[styles.card, { backgroundColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)' }]}
       activeOpacity={0.7}
       onPress={() => router.push( `/shippinghistory/${order.id}` )}
     >
       {/* Card Header */}
-      <View style={[styles.cardHeader, { backgroundColor: themeColors.background }]}>
+      <View style={[styles.cardHeader, { backgroundColor: 'transparent' }]}>
         <View style={styles.headerContent}>
           <View style={styles.headerTop}>
             <Text style={[styles.receiverName, { color: themeColors.text }]} numberOfLines={1}>
@@ -91,18 +92,18 @@ const OrderHistoryMainPage = () => {
       </View>
 
       {/* Card Content */}
-      <View style={[styles.cardContent, { backgroundColor: themeColors.background }]}>
+      <View style={[styles.cardContent, { backgroundColor: 'transparent' }]}>
         <View style={styles.detailRow}>
-          <View style={[styles.detailItem, { backgroundColor: themeColors.background }]}>
-            <Ionicons name="cube-outline" size={20} color="#666" />
+          <View style={[styles.detailItem, { backgroundColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.01)' }]}>
+            <Ionicons name="cube-outline" size={20} color={colorScheme === 'dark' ? '#FFAC1C' : '#666'} />
             <Text style={[styles.detailLabel, { color: themeColors.text }]}>Dimensions</Text>
             <Text style={[styles.detailValue, { color: themeColors.text }]}>
               {`${order.packageLength || 0} × ${order.packageWidth || 0} × ${order.packageHeight || 0} cm`}
             </Text>
           </View>
 
-          <View style={[styles.detailItem, { backgroundColor: themeColors.background }]}>
-            <Ionicons name="scale-outline" size={20} color="#666" />
+          <View style={[styles.detailItem, { backgroundColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.01)' }]}>
+            <Ionicons name="scale-outline" size={20} color={colorScheme === 'dark' ? '#FFAC1C' : '#666'} />
             <Text style={[styles.detailLabel, { color: themeColors.text }]}>Weight</Text>
             <Text style={[styles.detailValue, { color: themeColors.text }]}>
               {order.packageWeight} kg
@@ -111,15 +112,15 @@ const OrderHistoryMainPage = () => {
         </View>
 
         {/* Delivery Dates */}
-        <View style={[styles.dateContainer, { backgroundColor: themeColors.background }]}>
+        <View style={[styles.dateContainer, { backgroundColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.01)' }]}>
           <View style={styles.dateRow}>
-            <Ionicons name="calendar-outline" size={16} color="#666" />
+            <Ionicons name="calendar-outline" size={16} color={colorScheme === 'dark' ? '#FFAC1C' : '#666'} />
             <Text style={[styles.dateText, { color: themeColors.text }]}>
               Order Date: {order.shipmentDate}
             </Text>
           </View>
           <View style={styles.dateRow}>
-            <Ionicons name="calendar-outline" size={16} color="#666" />
+            <Ionicons name="calendar-outline" size={16} color={colorScheme === 'dark' ? '#FFAC1C' : '#666'} />
             <Text style={[styles.dateText, { color: themeColors.text }]}>
               Est. Delivery: {order.deliveryDate}
             </Text>
@@ -130,11 +131,11 @@ const OrderHistoryMainPage = () => {
   );
 
   return (
-    <View style={[styles.container, { backgroundColor: themeColors.background }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]}>
       <View style={[styles.titleContainer, { backgroundColor: themeColors.background }]}>
         <Text style={[styles.pageTitle, { color: themeColors.text }]}>Order History</Text>
         <TouchableOpacity>
-          <Ionicons name="filter-outline" size={24} color="#666" />
+          <Ionicons name="filter-outline" size={24} color={colorScheme === 'dark' ? '#FFAC1C' : '#666'} />
         </TouchableOpacity>
       </View>
       
@@ -144,7 +145,7 @@ const OrderHistoryMainPage = () => {
           <RefreshControl 
             refreshing={refreshing} 
             onRefresh={onRefresh} 
-            tintColor="#666" 
+            tintColor={colorScheme === 'dark' ? '#FFAC1C' : '#666'} 
           />
         }
         showsVerticalScrollIndicator={false}
@@ -152,53 +153,56 @@ const OrderHistoryMainPage = () => {
         {orderHistory.length > 0 ? (
           orderHistory.map(renderOrderCard)
         ) : (
-          <Text style={[styles.noOrdersText, { color: themeColors.text }]}>
-            No order history found
-          </Text>
+          <View style={styles.emptyContainer}>
+            <Text style={[styles.noOrdersText, { color: themeColors.text }]}>
+              No order history found
+            </Text>
+          </View>
         )}
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: verticalScale(60),
-    paddingHorizontal: horizontalScale(20),
   },
   titleContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    paddingHorizontal: horizontalScale(20),
+    paddingTop: verticalScale(20),
     marginBottom: verticalScale(20),
   },
   pageTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: moderateScale(24),
+    fontWeight: '700',
   },
   scrollViewContent: {
-    paddingBottom: verticalScale(20),
+    paddingHorizontal: horizontalScale(20),
+    paddingBottom: verticalScale(80),
   },
   card: {
-
-    borderRadius: 16,
-    marginBottom: verticalScale(15),
+    borderRadius: moderateScale(12),
+    marginBottom: verticalScale(12),
+    padding: horizontalScale(16),
+    elevation: 2,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 6,
-    borderWidth: 0.4,
-
+    shadowRadius: 4,
     overflow: 'hidden',
   },
   cardHeader: {
-
-    paddingHorizontal: horizontalScale(15),
-    paddingVertical: verticalScale(12),
+    paddingBottom: verticalScale(12),
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0, 0, 0, 0.1)',
+    marginBottom: verticalScale(12),
   },
   headerContent: {
-    gap: 5,
+    gap: verticalScale(8),
   },
   headerTop: {
     flexDirection: 'row',
@@ -206,71 +210,78 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   receiverName: {
-    fontSize: 18,
-    fontWeight: 'bold',
+    fontSize: moderateScale(18),
+    fontWeight: '600',
     flex: 1,
-    marginRight: 10,
+    marginRight: horizontalScale(10),
   },
   trackingNumber: {
-    fontSize: 12,
-
+    fontSize: moderateScale(12),
+    opacity: 0.7,
   },
   statusBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 15,
+    paddingHorizontal: horizontalScale(12),
+    paddingVertical: verticalScale(6),
+    borderRadius: moderateScale(16),
   },
   statusText: {
     color: 'white',
-    fontSize: 12,
+    fontSize: moderateScale(11),
     fontWeight: '600',
+    textTransform: 'capitalize',
   },
   cardContent: {
-    paddingHorizontal: horizontalScale(15),
-    paddingVertical: verticalScale(15),
-    gap: 15,
+    gap: verticalScale(12),
   },
   detailRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: 15,
+    gap: horizontalScale(12),
   },
   detailItem: {
-
-    borderRadius: 10,
-    padding: 12,
+    flex: 1,
+    borderRadius: moderateScale(12),
+    padding: horizontalScale(12),
     alignItems: 'center',
-    gap: 6,
+    gap: verticalScale(6),
   },
   detailLabel: {
-    fontSize: 12,
-
+    fontSize: moderateScale(11),
+    fontWeight: '500',
     textTransform: 'uppercase',
+    opacity: 0.7,
   },
   detailValue: {
-    fontSize: 14,
+    fontSize: moderateScale(14),
     fontWeight: '600',
     textAlign: 'center',
   },
   dateContainer: {
-
-    borderRadius: 10,
-    padding: 12,
-    gap: 8,
+    borderRadius: moderateScale(12),
+    padding: horizontalScale(12),
+    paddingVertical: verticalScale(12),
+    marginTop: verticalScale(8),
+    gap: verticalScale(8),
   },
   dateRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: horizontalScale(8),
   },
   dateText: {
-    fontSize: 12,
-
+    fontSize: moderateScale(12),
+    opacity: 0.8,
+  },
+  emptyContainer: {
+    paddingVertical: verticalScale(60),
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   noOrdersText: {
     textAlign: 'center',
-    marginTop: verticalScale(50),
-
+    fontSize: moderateScale(16),
+    fontWeight: '500',
+    opacity: 0.7,
   },
 });
 

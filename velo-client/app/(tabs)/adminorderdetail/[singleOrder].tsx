@@ -1,12 +1,12 @@
-import { StyleSheet, ScrollView, TouchableOpacity,ActivityIndicator } from 'react-native'
+import { StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, View, Text, useColorScheme, SafeAreaView } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { Ionicons } from '@expo/vector-icons'
-import { ThemedView } from '@/components/ThemedView'
-import { ThemedText } from '@/components/ThemedText'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { ipURL } from '@/constants/backendUrl'
 import axiosInstance from '@/constants/axiosHeader'
 import useShipmentStore from '@/store/shipmentStore'
+import { Colors } from '@/constants/Colors'
+import { horizontalScale, verticalScale, moderateScale } from '@/constants/metrics'
 
 const SingleOrder = () => {
     const {setAgentShipmentData} = useShipmentStore();
@@ -14,6 +14,26 @@ const SingleOrder = () => {
     const { singleOrder } = useLocalSearchParams();
     const [orderData, setOrderData] = useState<any>(null);
     const [loading, setLoading] = useState(false);
+    const colorScheme = useColorScheme() ?? 'light';
+    const themeColors = Colors[colorScheme];
+
+    const getStatusColor = (status: string) => {
+        if (!status) return '#A0A0A0';
+        const statusLower = status.toLowerCase().replace(/_/g, '');
+        switch (statusLower) {
+            case 'paymentpending': return '#FF9800';
+            case 'orderinmarket': return '#2196F3';
+            case 'orderplaced': return '#9C27B0';
+            case 'orderconfirmed': return '#00BCD4';
+            case 'shipmentpicked': return '#4CAF50';
+            case 'shipmentdropped': return '#8BC34A';
+            case 'intransitstart': return '#00ACC1';
+            case 'intransitend': return '#0097A7';
+            case 'outfordelivery': return '#FFC107';
+            case 'delivered': return '#4CAF50';
+            default: return '#A0A0A0';
+        }
+    };
 
     const getAdminSingleOrderData = async () => {
         try {
@@ -41,7 +61,8 @@ const SingleOrder = () => {
             const response = await axiosInstance.put(`${ipURL}/api/shipment/agent-update-shipment-status-open-market/${singleOrder}`, );
             console.log(response.data);
             setLoading(false);
-            router.push('/(tabs)/adminorderdetail/adminOrderDetailMain');
+            // Navigate back to the main screen
+            router.back();
         }
         catch (err) {
             console.log(err);
@@ -55,7 +76,8 @@ const SingleOrder = () => {
             const response = await axiosInstance.put(`${ipURL}/api/shipment/agent-update-shipment-status-ready-for-pickup/${singleOrder}`, );
             console.log(response.data);
             setLoading(false);
-            router.push('/(tabs)/adminorderdetail/adminOrderDetailMain');
+            // Navigate back to the main screen
+            router.back();
         }
         catch (err) {
             console.log(err);
@@ -64,80 +86,84 @@ const SingleOrder = () => {
     }
 
     const renderDetailRow = (icon: keyof typeof Ionicons.glyphMap, title: string, value: string) => (
-        <ThemedView style={styles.detailRow}>
-            <ThemedView style={styles.detailIcon}>
-                <Ionicons name={icon} size={20} color="#4A4A4A" />
-            </ThemedView>
-            <ThemedView style={styles.detailContent}>
-                <ThemedText style={styles.detailTitle}>{title}</ThemedText>
-                <ThemedText style={styles.detailValue}>{value}</ThemedText>
-
-            </ThemedView>
-        </ThemedView>
+        <View style={styles.detailRow}>
+            <View style={[styles.detailIcon, { backgroundColor: colorScheme === 'dark' ? 'rgba(255, 172, 28, 0.1)' : 'rgba(255, 172, 28, 0.05)' }]}>
+                <Ionicons name={icon} size={20} color={colorScheme === 'dark' ? '#FFAC1C' : '#666'} />
+            </View>
+            <View style={styles.detailContent}>
+                <Text style={[styles.detailTitle, { color: themeColors.text }]}>{title}</Text>
+                <Text style={[styles.detailValue, { color: themeColors.text }]}>{value}</Text>
+            </View>
+        </View>
     );
 
     const renderServiceTag = (label: string, active: boolean) => (
-        <ThemedView
+        <View
             style={[
                 styles.serviceTag,
-
+                { backgroundColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)' }
             ]}
         >
-            <ThemedText
+            <Text
                 style={[
                     styles.serviceTagText,
-                    { color: active ? '#2196F3' : '#9E9E9E' }
+                    { color: active ? '#2196F3' : (colorScheme === 'dark' ? '#9E9E9E' : '#666') }
                 ]}
             >
                 {label}
-            </ThemedText>
-        </ThemedView>
+            </Text>
+        </View>
     );
 
     if (!orderData) {
         return (
-            <ThemedView style={styles.container}>
-                <ThemedText>Loading...</ThemedText>
-            </ThemedView>
+            <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]}>
+                <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="large" color="#FFAC1C" />
+                    <Text style={[styles.loadingText, { color: themeColors.text }]}>Loading...</Text>
+                </View>
+            </SafeAreaView>
         );
     }
 
     return (
-        <ThemedView style={styles.container}>
-            <ThemedView style={styles.headerContainer}>
+        <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]}>
+            <View style={styles.headerContainer}>
                 <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                    <Ionicons name="arrow-back" size={24} color="#2C3E50" />
+                    <Ionicons name="arrow-back" size={24} color={themeColors.text} />
                 </TouchableOpacity>
-                <ThemedText style={styles.pageTitle}>Shipment Details</ThemedText>
-                <ThemedView style={styles.headerPlaceholder} />
-            </ThemedView>
+                <Text style={[styles.pageTitle, { color: themeColors.text }]}>Shipment Details</Text>
+                <View style={styles.headerPlaceholder} />
+            </View>
 
             <ScrollView
                 style={styles.scrollContainer}
+                contentContainerStyle={styles.scrollContent}
                 showsVerticalScrollIndicator={false}
             >
-                <ThemedView style={styles.shipmentIdContainer}>
-                    <ThemedText style={styles.shipmentId}>
+                <View style={[styles.shipmentIdContainer, { backgroundColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)' }]}>
+                    <Text style={[styles.shipmentId, { color: themeColors.text }]}>
                         Shipment #{orderData.shipmentId}
-                    </ThemedText>
-                    <ThemedText style={styles.shipmentStatus}>
-                        {orderData.shipmentStatus.replace('_', ' ')}
-                    </ThemedText>
-                </ThemedView>
+                    </Text>
+                    <View style={[styles.statusBadge, { backgroundColor: getStatusColor(orderData.shipmentStatus) }]}>
+                        <Text style={styles.statusText}>
+                            {orderData.shipmentStatus.replace(/_/g, ' ')}
+                        </Text>
+                    </View>
+                </View>
 
-                <ThemedView style={styles.sectionContainer}>
-                    <ThemedText style={styles.sectionTitle}>Sender Information</ThemedText>
+                <View style={[styles.sectionContainer, { backgroundColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)' }]}>
+                    <Text style={[styles.sectionTitle, { color: themeColors.text, marginBottom: verticalScale(16) }]}>Sender Information</Text>
                     {renderDetailRow('person-outline', 'Name', orderData.senderName)}
                     {renderDetailRow('location-outline', 'Address',
                         `${orderData.senderAddressOne}, ${orderData.senderAddressTwo}, 
             ${orderData.senderCity}, ${orderData.senderState}`
                     )}
                     {renderDetailRow('call-outline', 'Contact', orderData.senderMobileNumber)}
+                </View>
 
-                </ThemedView>
-
-                <ThemedView style={styles.sectionContainer}>
-                    <ThemedText style={styles.sectionTitle}>Receiver Information</ThemedText>
+                <View style={[styles.sectionContainer, { backgroundColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)' }]}>
+                    <Text style={[styles.sectionTitle, { color: themeColors.text, marginBottom: verticalScale(16) }]}>Receiver Information</Text>
                     {renderDetailRow('person-outline', 'Name', orderData.receiverName)}
                     {renderDetailRow('location-outline', 'Address',
                         `${orderData.receiverAddressOne}, ${orderData.receiverAddressTwo}, 
@@ -145,10 +171,10 @@ const SingleOrder = () => {
                     )}
                     {renderDetailRow('call-outline', 'Contact', orderData.receiverMobileNumber)}
                     {renderDetailRow('mail-outline', 'Email', orderData.receiverEmail)}
-                </ThemedView>
+                </View>
 
-                <ThemedView style={styles.sectionContainer}>
-                    <ThemedText style={styles.sectionTitle}>Shipment Details</ThemedText>
+                <View style={[styles.sectionContainer, { backgroundColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)' }]}>
+                    <Text style={[styles.sectionTitle, { color: themeColors.text, marginBottom: verticalScale(16) }]}>Shipment Details</Text>
                     {renderDetailRow('cube-outline', 'Package Description', orderData.packageDescription)}
                     {renderDetailRow('scale-outline', 'Package Weight', `${orderData.packageWeight} kg`)}
                     {renderDetailRow('layers-outline', 'Package Pieces', orderData.packagePieces)}
@@ -159,59 +185,73 @@ const SingleOrder = () => {
                         new Date(orderData.deliveryDate).toLocaleDateString()
                     )}
                     {renderDetailRow('location-outline', 'Pickup Time', `${orderData.pickupTimeFrom}-${orderData.pickupTimeTo}`)}
-                </ThemedView>
+                </View>
 
-                <ThemedView style={styles.sectionContainer}>
-                    <ThemedText style={styles.sectionTitle}>Additional Services</ThemedText>
-                    <ThemedView style={styles.servicesContainer}>
+                <View style={[styles.sectionContainer, { backgroundColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)' }]}>
+                    <Text style={[styles.sectionTitle, { color: themeColors.text, marginBottom: verticalScale(16) }]}>Additional Services</Text>
+                    <View style={styles.servicesContainer}>
                         {renderServiceTag('Adult Signature', orderData.adultSignatureService)}
                         {renderServiceTag('Direct Signature', orderData.directSignatureService)}
                         {renderServiceTag('Verbal Notification', orderData.verbalNotificationService)}
-                    </ThemedView>
-                </ThemedView>
+                    </View>
+                </View>
 
-                <ThemedView style={styles.sectionContainer}>
-                    <ThemedText style={styles.sectionTitle}>Payment Details</ThemedText>
+                <View style={[styles.sectionContainer, { backgroundColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)' }]}>
+                    <Text style={[styles.sectionTitle, { color: themeColors.text, marginBottom: verticalScale(16) }]}>Payment Details</Text>
                     {renderDetailRow('card-outline', 'Amount', `${orderData.shippingMarket === 'OPEN_MARKET' ? orderData.openMarketPrice : orderData.paymentAmount} `)}
                     {renderDetailRow('checkmark-circle-outline', 'Payment Status',
                         orderData.paymentSuccess ? 'Successful' : 'Pending'
                     )}
-                </ThemedView>
+                </View>
 
-                {orderData.shipmentStatus === 'ORDER_IN_MARKET' &&
-                    <TouchableOpacity style={styles.acceptOrderButton}
-                        onPress={handleAcceptShipment}
-                    >
-                        {loading ? (
-                            <ActivityIndicator size="small" color="#fff" />
-                        ) :
-                            <ThemedText>Accept Shipment</ThemedText>}
-                    </TouchableOpacity>
-                }
-                {orderData.shipmentStatus === 'ORDER_PLACED' &&
-                    <TouchableOpacity style={styles.acceptOrderButton}
-                        onPress={handleReadyForPickup}
-                    >
-                        {loading ? (
-                            <ActivityIndicator size="small" color="#fff" />
-                        ) :
-                            <ThemedText>Ready For Pickup</ThemedText>}
-                    </TouchableOpacity>
-                }
-                {orderData.shipmentStatus !== 'ORDER_PLACED' && orderData.shipmentStatus !== "ORDER_IN_MARKET" &&
-    <TouchableOpacity style={styles.acceptOrderButton}
-        onPress={() => router.push('/adminorderdetail/adminUpdateShipment/adminUpdateStatus')}
-    >
-        {loading ? (
-            <ActivityIndicator size="small" color="#fff" />
-        ) : (
-            <ThemedText>Update Status</ThemedText>
-        )}
-    </TouchableOpacity>
-}
+                {orderData.shipmentStatus === 'ORDER_IN_MARKET' && (
+                    <View style={styles.buttonContainer}>
+                        <TouchableOpacity
+                            style={styles.acceptOrderButton}
+                            onPress={handleAcceptShipment}
+                            disabled={loading}
+                        >
+                            {loading ? (
+                                <ActivityIndicator size="small" color="#fff" />
+                            ) : (
+                                <Text style={styles.buttonText}>Accept Shipment</Text>
+                            )}
+                        </TouchableOpacity>
+                    </View>
+                )}
+                {orderData.shipmentStatus === 'ORDER_PLACED' && (
+                    <View style={styles.buttonContainer}>
+                        <TouchableOpacity
+                            style={styles.acceptOrderButton}
+                            onPress={handleReadyForPickup}
+                            disabled={loading}
+                        >
+                            {loading ? (
+                                <ActivityIndicator size="small" color="#fff" />
+                            ) : (
+                                <Text style={styles.buttonText}>Ready For Pickup</Text>
+                            )}
+                        </TouchableOpacity>
+                    </View>
+                )}
+                {orderData.shipmentStatus !== 'ORDER_PLACED' && orderData.shipmentStatus !== "ORDER_IN_MARKET" && (
+                    <View style={styles.buttonContainer}>
+                        <TouchableOpacity
+                            style={styles.acceptOrderButton}
+                            onPress={() => router.push('/adminorderdetail/adminUpdateShipment/adminUpdateStatus')}
+                            disabled={loading}
+                        >
+                            {loading ? (
+                                <ActivityIndicator size="small" color="#fff" />
+                            ) : (
+                                <Text style={styles.buttonText}>Update Status</Text>
+                            )}
+                        </TouchableOpacity>
+                    </View>
+                )}
 
             </ScrollView>
-        </ThemedView>
+        </SafeAreaView>
     )
 }
 
@@ -219,114 +259,155 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
     },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: horizontalScale(20),
+    },
+    loadingText: {
+        marginTop: verticalScale(12),
+        fontSize: moderateScale(16),
+        fontWeight: '500',
+    },
     headerContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingHorizontal: 20,
-        paddingTop: 50,
-        paddingBottom: 20,
+        paddingHorizontal: horizontalScale(20),
+        paddingTop: verticalScale(20),
+        paddingBottom: verticalScale(16),
     },
     backButton: {
-        padding: 10,
-        marginLeft: -10,
+        padding: horizontalScale(10),
+        marginLeft: horizontalScale(-10),
     },
     headerPlaceholder: {
-        width: 24,
+        width: moderateScale(24),
     },
     pageTitle: {
-        fontSize: 20,
+        fontSize: moderateScale(22),
         fontWeight: '700',
-
     },
     scrollContainer: {
         flex: 1,
+    },
+    scrollContent: {
+        paddingBottom: verticalScale(80),
     },
     shipmentIdContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingHorizontal: 20,
-        paddingVertical: 15,
-
-    },
-    shipmentId: {
-        fontSize: 18,
-        fontWeight: '700',
-
-    },
-    shipmentStatus: {
-        fontSize: 14,
-        fontWeight: '600',
-        color: '#4CAF50',
-        textTransform: 'capitalize',
-    },
-    sectionContainer: {
-
-        borderRadius: 15,
-        marginHorizontal: 20,
-        marginVertical: 10,
-        padding: 15,
+        paddingHorizontal: horizontalScale(20),
+        paddingVertical: verticalScale(16),
+        marginHorizontal: horizontalScale(20),
+        marginTop: verticalScale(12),
+        marginBottom: verticalScale(12),
+        borderRadius: moderateScale(12),
+        elevation: 2,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 4,
-        elevation: 3,
+    },
+    shipmentId: {
+        fontSize: moderateScale(18),
+        fontWeight: '700',
+        flex: 1,
+    },
+    statusBadge: {
+        paddingHorizontal: horizontalScale(12),
+        paddingVertical: verticalScale(6),
+        borderRadius: moderateScale(16),
+    },
+    statusText: {
+        color: 'white',
+        fontSize: moderateScale(11),
+        fontWeight: '600',
+        textTransform: 'capitalize',
+    },
+    sectionContainer: {
+        borderRadius: moderateScale(12),
+        marginHorizontal: horizontalScale(20),
+        marginVertical: verticalScale(12),
+        padding: horizontalScale(16),
+        elevation: 2,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
     },
     sectionTitle: {
-        fontSize: 16,
+        fontSize: moderateScale(18),
         fontWeight: '700',
-
-        marginBottom: 15,
-        borderBottomWidth: 1,
-
-        paddingBottom: 10,
     },
     detailRow: {
         flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 12,
+        alignItems: 'flex-start',
+        marginBottom: verticalScale(16),
     },
     detailIcon: {
-
-        padding: 10,
-        borderRadius: 15,
-        marginRight: 15,
+        width: moderateScale(40),
+        height: moderateScale(40),
+        borderRadius: moderateScale(12),
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: horizontalScale(12),
     },
     detailContent: {
         flex: 1,
     },
     detailTitle: {
-        fontSize: 12,
-
+        fontSize: moderateScale(11),
+        fontWeight: '500',
         textTransform: 'uppercase',
-        marginBottom: 5,
+        marginBottom: verticalScale(4),
+        opacity: 0.7,
+        letterSpacing: 0.5,
     },
     detailValue: {
-        fontSize: 15,
+        fontSize: moderateScale(15),
         fontWeight: '600',
-
+        lineHeight: moderateScale(20),
     },
     servicesContainer: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        gap: 10,
+        gap: horizontalScale(10),
+        marginTop: verticalScale(4),
     },
     serviceTag: {
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-        borderRadius: 20,
+        paddingHorizontal: horizontalScale(14),
+        paddingVertical: verticalScale(8),
+        borderRadius: moderateScale(20),
     },
     serviceTagText: {
-        fontSize: 12,
+        fontSize: moderateScale(12),
         fontWeight: '600',
     },
+    buttonContainer: {
+        paddingHorizontal: horizontalScale(20),
+        paddingBottom: verticalScale(20),
+        marginTop: verticalScale(12),
+    },
     acceptOrderButton: {
-        backgroundColor: '#4CAF50',
-        padding: 15,
-        margin: 20,
-        borderRadius: 15,
+        backgroundColor: '#FFAC1C',
+        paddingVertical: verticalScale(14),
+        paddingHorizontal: horizontalScale(20),
+        borderRadius: moderateScale(12),
         alignItems: 'center',
+        justifyContent: 'center',
+        elevation: 2,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+    },
+    buttonText: {
+        color: 'white',
+        fontSize: moderateScale(16),
+        fontWeight: '600',
     },
 });
 

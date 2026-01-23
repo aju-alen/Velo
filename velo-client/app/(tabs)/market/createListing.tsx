@@ -1,7 +1,5 @@
-import { StyleSheet, TextInput, TouchableOpacity, ScrollView, Platform, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard,RefreshControl } from 'react-native'
+import { StyleSheet, TextInput, TouchableOpacity, ScrollView, Platform, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, RefreshControl, Text, View, SafeAreaView, useColorScheme } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { ThemedView } from '@/components/ThemedView'
-import { ThemedText } from '@/components/ThemedText'
 import { verticalScale, horizontalScale, moderateScale } from '@/constants/metrics'
 import axios from 'axios'
 import { ipURL } from '@/constants/backendUrl'
@@ -9,13 +7,15 @@ import { useLocalSearchParams, router } from 'expo-router'
 import MaterialIcons from '@expo/vector-icons/MaterialIcons'
 import CustomButton from '@/components/CustomButton'
 import {Picker} from '@react-native-picker/picker';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { Colors } from '@/constants/Colors'
 import axiosInstance from '@/constants/axiosHeader'
 import * as ImagePicker from 'expo-image-picker'
-import { Image, ActivityIndicator, View } from 'react-native'
+import * as ImageManipulator from 'expo-image-manipulator'
+import { Image, ActivityIndicator } from 'react-native'
 
 const CreateListing = () => {
-  const colorScheme = useColorScheme()
+  const colorScheme = useColorScheme() ?? 'light'
+  const themeColors = Colors[colorScheme]
   
   const { accountId } = useLocalSearchParams()
   const [categoryData, setCategoryData] = useState([])
@@ -111,10 +111,27 @@ const CreateListing = () => {
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [4, 3],
-      quality: 1,
+      quality: 0.8, // Reduced from 1.0 for initial selection
     })
     if (!result.canceled) {
-      setImage(result.assets[0].uri)
+      try {
+        // Compress and resize the image
+        const manipulatedImage = await ImageManipulator.manipulateAsync(
+          result.assets[0].uri,
+          [
+            { resize: { width: 1200 } }, // Resize to max width of 1200px (maintains aspect ratio)
+          ],
+          { 
+            compress: 0.6, // Compress to 60% quality (good balance between size and quality)
+            format: ImageManipulator.SaveFormat.JPEG // Use JPEG for better compression
+          }
+        )
+        setImage(manipulatedImage.uri)
+      } catch (error) {
+        console.error('Error compressing image:', error)
+        // Fallback to original image if compression fails
+        setImage(result.assets[0].uri)
+      }
     }
   }
 
@@ -188,136 +205,215 @@ const CreateListing = () => {
   }
 
   return (
-    <ThemedView style={styles.container}>
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    
-    >
-      <TouchableWithoutFeedback onPress={() => {
-        Keyboard.dismiss()
-        setShowCategoryDropdown(false)
-        setShowConditionDropdown(false)
-      }}>
-        <ScrollView showsVerticalScrollIndicator={false}>
-          <ThemedView style={styles.header}>
-            <MaterialIcons 
-              name="arrow-back" 
-              size={24} 
-              color="#666" 
-              onPress={() => router.back()} 
-            />
-            <ThemedText style={styles.headerTitle}>Create Listing</ThemedText>
-            <ThemedView style={{ width: 24 }} />
-          </ThemedView>
-
-          <ThemedView style={styles.formContainer}>
-            {/* Title Input */}
-            <ThemedView style={styles.inputContainer}>
-              <ThemedText style={styles.label}>Title</ThemedText>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter listing title"
-                value={formData.listingTitle}
-                onChangeText={(text) => setFormData({ ...formData, listingTitle: text })}
-              />
-              {errors.listingTitle ? <ThemedText style={styles.errorText}>{errors.listingTitle}</ThemedText> : null}
-            </ThemedView>
-
-            {/* Description Input */}
-            <ThemedView style={styles.inputContainer}>
-              <ThemedText style={styles.label}>Description</ThemedText>
-              <TextInput
-                style={[styles.input, styles.textArea]}
-                placeholder="Enter listing description"
-                value={formData.listingDescription}
-                onChangeText={(text) => setFormData({ ...formData, listingDescription: text })}
-                multiline
-                numberOfLines={4}
-              />
-              {errors.listingDescription ? <ThemedText style={styles.errorText}>{errors.listingDescription}</ThemedText> : null}
-            </ThemedView>
-
-            {/* Price Input */}
-            <ThemedView style={styles.inputContainer}>
-              <ThemedText style={styles.label}>Price</ThemedText>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter price"
-                value={formData.listingPrice}
-                onChangeText={(text) => setFormData({ ...formData, listingPrice: text })}
-                keyboardType="numeric"
-              />
-              {errors.listingPrice ? <ThemedText style={styles.errorText}>{errors.listingPrice}</ThemedText> : null}
-            </ThemedView>
-
-            {/* Image Picker */}
-            <ThemedView style={styles.inputContainer}>
-              <ThemedText style={styles.label}>Image</ThemedText>
-              <TouchableOpacity onPress={pickImage} style={{ marginBottom: 10 }}>
-                <ThemedText style={{ color: '#007AFF' }}>{image ? 'Change Image' : 'Pick an Image'}</ThemedText>
+    <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1 }}
+      >
+        <TouchableWithoutFeedback onPress={() => {
+          Keyboard.dismiss()
+          setShowCategoryDropdown(false)
+          setShowConditionDropdown(false)
+        }}>
+          <ScrollView 
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.scrollContent}
+          >
+            <View style={styles.header}>
+              <TouchableOpacity onPress={() => router.back()} activeOpacity={0.7}>
+                <MaterialIcons 
+                  name="arrow-back" 
+                  size={24} 
+                  color={themeColors.icon} 
+                />
               </TouchableOpacity>
-              {image && (
-                <View style={{ alignItems: 'center', marginBottom: 10 }}>
-                  <Image source={{ uri: image }} style={{ width: 120, height: 120, borderRadius: 8 }} />
+              <Text style={[styles.headerTitle, { color: themeColors.text }]}>Create Listing</Text>
+              <View style={{ width: 24 }} />
+            </View>
+
+            <View style={styles.formContainer}>
+              {/* Title Input */}
+              <View style={styles.inputContainer}>
+                <Text style={[styles.label, { color: themeColors.text }]}>Title</Text>
+                <TextInput
+                  style={[
+                    styles.input,
+                    {
+                      backgroundColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)',
+                      borderColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+                      color: themeColors.text,
+                    }
+                  ]}
+                  placeholder="Enter listing title"
+                  placeholderTextColor={colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)'}
+                  value={formData.listingTitle}
+                  onChangeText={(text) => setFormData({ ...formData, listingTitle: text })}
+                />
+                {errors.listingTitle ? <Text style={styles.errorText}>{errors.listingTitle}</Text> : null}
+              </View>
+
+              {/* Description Input */}
+              <View style={styles.inputContainer}>
+                <Text style={[styles.label, { color: themeColors.text }]}>Description</Text>
+                <TextInput
+                  style={[
+                    styles.input,
+                    styles.textArea,
+                    {
+                      backgroundColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)',
+                      borderColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+                      color: themeColors.text,
+                    }
+                  ]}
+                  placeholder="Enter listing description"
+                  placeholderTextColor={colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)'}
+                  value={formData.listingDescription}
+                  onChangeText={(text) => setFormData({ ...formData, listingDescription: text })}
+                  multiline
+                  numberOfLines={4}
+                />
+                {errors.listingDescription ? <Text style={styles.errorText}>{errors.listingDescription}</Text> : null}
+              </View>
+
+              {/* Price Input */}
+              <View style={styles.inputContainer}>
+                <Text style={[styles.label, { color: themeColors.text }]}>Price</Text>
+                <TextInput
+                  style={[
+                    styles.input,
+                    {
+                      backgroundColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)',
+                      borderColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+                      color: themeColors.text,
+                    }
+                  ]}
+                  placeholder="Enter price"
+                  placeholderTextColor={colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)'}
+                  value={formData.listingPrice}
+                  onChangeText={(text) => setFormData({ ...formData, listingPrice: text })}
+                  keyboardType="numeric"
+                />
+                {errors.listingPrice ? <Text style={styles.errorText}>{errors.listingPrice}</Text> : null}
+              </View>
+
+              {/* Image Picker */}
+              <View style={styles.inputContainer}>
+                <Text style={[styles.label, { color: themeColors.text }]}>Image</Text>
+                <TouchableOpacity 
+                  onPress={pickImage} 
+                  style={[
+                    styles.imagePickerButton,
+                    {
+                      backgroundColor: colorScheme === 'dark' ? 'rgba(255, 172, 28, 0.1)' : 'rgba(255, 172, 28, 0.1)',
+                      borderColor: '#FFAC1C',
+                    }
+                  ]}
+                  activeOpacity={0.7}
+                >
+                  <MaterialIcons 
+                    name={image ? 'edit' : 'add-photo-alternate'} 
+                    size={20} 
+                    color="#FFAC1C" 
+                    style={{ marginRight: horizontalScale(8) }}
+                  />
+                  <Text style={[styles.imagePickerText, { color: '#FFAC1C' }]}>
+                    {image ? 'Change Image' : 'Pick an Image'}
+                  </Text>
+                </TouchableOpacity>
+                {image && (
+                  <View style={styles.imagePreviewContainer}>
+                    <Image 
+                      source={{ uri: image }} 
+                      style={styles.imagePreview}
+                    />
+                  </View>
+                )}
+                {uploading && (
+                  <View style={styles.uploadingContainer}>
+                    <ActivityIndicator size="small" color="#FFAC1C" />
+                    <Text style={[styles.uploadingText, { color: themeColors.text }]}>Uploading...</Text>
+                  </View>
+                )}
+              </View>
+
+              {/* Category Dropdown */}
+              <View style={styles.inputContainer}>
+                <Text style={[styles.label, { color: themeColors.text }]}>Category</Text>
+                <View style={[
+                  styles.pickerContainer,
+                  {
+                    backgroundColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)',
+                    borderColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+                  }
+                ]}>
+                  <Picker
+                    style={[
+                      styles.dropdown,
+                      { color: themeColors.text }
+                    ]}
+                    mode='dialog'
+                    selectedValue={formData.listingCategoryId}
+                    onValueChange={(itemValue, itemIndex) =>
+                      setFormData({ ...formData, listingCategoryId: itemValue })
+                    }
+                  >
+                    <Picker.Item label="--Select category--" value="" color={colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)'} />
+                    {
+                      categoryData.map((category) => (
+                        <Picker.Item 
+                          label={category.name} 
+                          value={category.id} 
+                          key={category.id} 
+                          color={themeColors.text}
+                        />
+                      ))
+                    }
+                  </Picker>
                 </View>
-              )}
-              {uploading && <ActivityIndicator size="small" color="#007AFF" />}
-            </ThemedView>
+                {errors.listingCategoryId ? <Text style={styles.errorText}>{errors.listingCategoryId}</Text> : null}
+              </View>
 
-            {/* Category Dropdown */}
-            <ThemedView style={styles.inputContainer}>
-              <ThemedText style={styles.label}>Category</ThemedText>
+              {/* Condition Dropdown */}
+              <View style={styles.inputContainer}>
+                <Text style={[styles.label, { color: themeColors.text }]}>Condition</Text>
+                <View style={[
+                  styles.pickerContainer,
+                  {
+                    backgroundColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)',
+                    borderColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+                  }
+                ]}>
+                  <Picker
+                    mode='dialog'
+                    style={[
+                      styles.dropdown,
+                      { color: themeColors.text }
+                    ]}
+                    selectedValue={formData.condition}
+                    onValueChange={(itemValue, itemIndex) =>
+                      setFormData({ ...formData, condition: itemValue })
+                    }
+                  >
+                    <Picker.Item label="--Select condition--" value="" color={colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)'} />
+                    <Picker.Item label="New" value="NEW" color={themeColors.text} />
+                    <Picker.Item label="Used" value="USED" color={themeColors.text} />
+                  </Picker>
+                </View>
+                {errors.condition ? <Text style={styles.errorText}>{errors.condition}</Text> : null}
+              </View>
 
-              <Picker
-              style={styles.dropdown}
-              mode='dialog'
-  selectedValue={formData.listingCategoryId}
-  onValueChange={(itemValue, itemIndex) =>
-    setFormData({ ...formData, listingCategoryId: itemValue })
-
-  }>
-    <Picker.Item label="--Select category--" value="" color={ colorScheme === 'dark' ? 'white' : 'black' }/>
-    {
-        categoryData.map((category) => (
-            <Picker.Item label={category.name} value={category.id} key={category.id} color='#666' />
-        ))
-    }
-</Picker>
-              
-              {errors.listingCategoryId ? <ThemedText style={styles.errorText}>{errors.listingCategoryId}</ThemedText> : null}
-            </ThemedView>
-
-            {/* Condition Dropdown */}
-            <ThemedView style={styles.inputContainer}>
-              <ThemedText style={styles.label}>Condition</ThemedText>
-             
-                <Picker
-                mode='dialog'
-                style={styles.dropdown}
-    selectedValue={formData.condition}
-    onValueChange={(itemValue, itemIndex) =>
-        setFormData({ ...formData, condition: itemValue })
-    }>
-    <Picker.Item label="--Select condition--" value="" color={ colorScheme === 'dark' ? 'white' : 'black' }/>
-    <Picker.Item label="New" value="NEW" color='#666' />
-    <Picker.Item label="Used" value="USED" color='#666' />
-</Picker>
-
-              {errors.condition ? <ThemedText style={styles.errorText}>{errors.condition}</ThemedText> : null}
-            </ThemedView>
-
-            <ThemedView style={styles.buttonContainer}>
-              <CustomButton
-                buttonText="Create Listing"
-                buttonWidth={horizontalScale(300)}
-                handlePress={handleSubmit}
-              />
-            </ThemedView>
-          </ThemedView>
-        </ScrollView>
-      </TouchableWithoutFeedback>
-    </KeyboardAvoidingView>
-    </ThemedView>
+              <View style={styles.buttonContainer}>
+                <CustomButton
+                  buttonText="Create Listing"
+                  buttonWidth={horizontalScale(300)}
+                  handlePress={handleSubmit}
+                />
+              </View>
+            </View>
+          </ScrollView>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   )
 }
 
@@ -327,76 +423,140 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  scrollContent: {
+    paddingHorizontal: horizontalScale(20),
+    paddingTop: verticalScale(20),
+    paddingBottom: verticalScale(40),
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingTop: verticalScale(60),
-    paddingHorizontal: horizontalScale(20),
-    marginBottom: verticalScale(20),
+    paddingBottom: verticalScale(20),
+    marginBottom: verticalScale(10),
   },
   headerTitle: {
-    fontSize: moderateScale(18),
+    fontSize: moderateScale(20),
     fontWeight: '600',
   },
   formContainer: {
-    paddingHorizontal: horizontalScale(20),
+    gap: verticalScale(20),
   },
   inputContainer: {
-    marginBottom: verticalScale(16),
+    marginBottom: verticalScale(4),
   },
   label: {
     fontSize: moderateScale(14),
     marginBottom: verticalScale(8),
-    fontWeight: '500',
+    fontWeight: '600',
   },
   input: {
-    color: '#666',
     borderWidth: 1,
-    borderColor: 'gray',
-    borderRadius: moderateScale(8),
-    padding: moderateScale(12),
+    borderRadius: moderateScale(12),
+    paddingHorizontal: horizontalScale(16),
+    paddingVertical: verticalScale(14),
     fontSize: moderateScale(16),
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 2,
+      },
+      android: {
+        elevation: 1,
+      },
+    }),
   },
   textArea: {
-    height: verticalScale(100),
+    height: verticalScale(120),
     textAlignVertical: 'top',
   },
-    dropdown: {
-        color: '#666',
-        borderRadius: moderateScale(8),
-        fontSize: moderateScale(16),
-    },
-  dropdownText: {
-    fontSize: moderateScale(16),
-    color: 'gray',
-  },
-  dropdownList: {
-    position: 'absolute',
-    top: '100%',
-    left: 0,
-    right: 0,
-
+  pickerContainer: {
     borderWidth: 1,
-    borderColor: 'gray',
-    borderRadius: moderateScale(8),
-    marginTop: verticalScale(4),
-    zIndex: 1000,
-    elevation: 5,
+    borderRadius: moderateScale(12),
+    overflow: 'hidden',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 2,
+      },
+      android: {
+        elevation: 1,
+      },
+    }),
   },
-  dropdownItem: {
-    padding: moderateScale(12),
-    borderBottomWidth: 1,
-
+  dropdown: {
+    fontSize: moderateScale(16),
+  },
+  imagePickerButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderRadius: moderateScale(12),
+    paddingVertical: verticalScale(14),
+    paddingHorizontal: horizontalScale(16),
+    marginBottom: verticalScale(12),
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
+  },
+  imagePickerText: {
+    fontSize: moderateScale(16),
+    fontWeight: '500',
+  },
+  imagePreviewContainer: {
+    alignItems: 'center',
+    marginTop: verticalScale(8),
+    marginBottom: verticalScale(8),
+  },
+  imagePreview: {
+    width: horizontalScale(200),
+    height: verticalScale(200),
+    borderRadius: moderateScale(12),
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 3,
+      },
+    }),
+  },
+  uploadingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: verticalScale(8),
+    gap: horizontalScale(8),
+  },
+  uploadingText: {
+    fontSize: moderateScale(14),
+    fontStyle: 'italic',
   },
   errorText: {
-    color: 'red',
+    color: '#F44336',
     fontSize: moderateScale(12),
-    marginTop: verticalScale(4),
+    marginTop: verticalScale(6),
+    marginLeft: horizontalScale(4),
   },
   buttonContainer: {
     alignItems: 'center',
-    marginTop: verticalScale(20),
-    marginBottom: verticalScale(40),
+    marginTop: verticalScale(30),
+    marginBottom: verticalScale(20),
   },
 })

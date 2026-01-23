@@ -8,7 +8,8 @@ import {
     TextInput,
     View,
     Text,
-    useColorScheme
+    useColorScheme,
+    SafeAreaView
 } from 'react-native'
 import axiosInstance from '@/constants/axiosHeader'
 import useShipmentStore from '@/store/shipmentStore'
@@ -16,6 +17,7 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import { router } from 'expo-router'
 import { Divider } from 'react-native-paper'
 import { Colors } from '@/constants/Colors'
+import { horizontalScale, moderateScale, verticalScale } from '@/constants/metrics'
 
 
 const StaticData = ({ onSelect, isSelected }) => {
@@ -53,16 +55,16 @@ const StaticData = ({ onSelect, isSelected }) => {
         >
             <View style={[
                 styles.card,
-                { backgroundColor: bgCard, borderColor: borderColor },
+                { backgroundColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)' },
                 isSelected && styles.selectedCard
             ]}>
-                <Text style={[styles.minimalDetail, { textAlign: 'center', color: textPrimary }]}>
+                <Text style={[styles.minimalDetail, { textAlign: 'center', color: textPrimary, marginBottom: verticalScale(12) }]}>
                     Enter Your price and someone will try to match it.
                 </Text>
                 <TextInput
                     value={price}
                     onChangeText={(text)=>handleSetPrice(text)}
-                    style={[styles.textInput, { backgroundColor: bgCard, borderColor: borderColor, color: textPrimary }]}
+                    style={[styles.textInput, { backgroundColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)', borderColor: borderColor, color: textPrimary }]}
                     placeholder="Enter Your Price"
                     placeholderTextColor={textSecondary}
                     keyboardType="numeric"
@@ -130,7 +132,7 @@ const OrganisationCard = ({ item, onSelect, isSelected }) => {
         >
             <View style={[
                 styles.card,
-                { backgroundColor: bgCard, borderColor: borderColor },
+                { backgroundColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)' },
                 isSelected && styles.selectedCard
             ]}>
                 {/* Card Header */}
@@ -156,13 +158,13 @@ const OrganisationCard = ({ item, onSelect, isSelected }) => {
                 {/* Minimal Initial Details */}
                 <View style={styles.minimalDetailsContainer}>
                     <View style={styles.minimalDetailItem}>
-                        <AntDesign name="clockcircleo" size={14} color="#555" style={styles.minimalDetailIcon} />
+                        <AntDesign name="clockcircleo" size={16} color={colorScheme === 'dark' ? '#FFAC1C' : '#666'} style={styles.minimalDetailIcon} />
                         <Text style={[styles.minimalDetail, { color: textPrimary }]}>
                             Deliver within {item.deliveryTimeline || 'N/A'} days
                         </Text>
                     </View>
                     <View style={styles.minimalDetailItem}>
-                        <AntDesign name="wallet" size={14} color="#555" style={styles.minimalDetailIcon} />
+                        <AntDesign name="wallet" size={16} color={colorScheme === 'dark' ? '#FFAC1C' : '#666'} style={styles.minimalDetailIcon} />
                         <Text style={[styles.minimalDetail, { color: textPrimary }]}>
                             Total AED {(calculateFinalPrice(item)).toFixed(2)}
                         </Text>
@@ -172,7 +174,7 @@ const OrganisationCard = ({ item, onSelect, isSelected }) => {
                 {/* Expanded Details */}
                 {expanded && (
                     <View style={styles.expandedDetailsContainer}>
-                        <View style={[styles.pricingSection, { backgroundColor: bgCard }]}>
+                        <View style={[styles.pricingSection, { backgroundColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.01)' }]}>
                             <Text style={[styles.pricingSectionTitle, { color: textPrimary }]}>Shipping Details</Text>
                             {itemType === 'DOCUMENT' && 
                             <View style={styles.pricingRow}>
@@ -287,15 +289,17 @@ const ViewShippingOptions = () => {
 
     if (loading) {
         return (
-            <View style={[styles.container, { backgroundColor: themeColors.background }]}>
-                <Text style={[styles.loadingText, { color: textPrimary }]}>Loading Organisations...</Text>
-            </View>
+            <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]}>
+                <View style={styles.loadingContainer}>
+                    <Text style={[styles.loadingText, { color: textPrimary }]}>Loading Organisations...</Text>
+                </View>
+            </SafeAreaView>
         )
     }
 
     return (
-        <View style={[styles.container, { backgroundColor: themeColors.background }]}>
-            <Text style={[styles.title, { color: textPrimary }]}>Shipping Options</Text>
+        <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]}>
+
 
            
 
@@ -311,26 +315,22 @@ const ViewShippingOptions = () => {
                 keyExtractor={(item) => item.id.toString()}
                 contentContainerStyle={styles.listContainer}
                 showsVerticalScrollIndicator={false}
+                ListEmptyComponent={
+                    <View style={styles.emptyContainer}>
+                        <Text style={[styles.emptyMessage, { color: textPrimary }]}>
+                            No agents are able to view your request.
+                        </Text>
+                        <Text style={[styles.emptySubMessage, { color: textSecondary }]}>
+                            Maybe try the open market below so someone can accept.
+                        </Text>
+                    </View>
+                }
             />
-            <View>
+            <View style={styles.openMarketSection}>
                 <Divider
-                    style={{
-                        marginVertical: 15,
-                        backgroundColor: '#FFAC1C',
-                        height: 2,
-                    }}
+                    style={styles.divider}
                 />
-                <Text
-                    style={[
-                        {
-                            textAlign: 'center',
-                            fontSize: 22,
-                            fontWeight: '700',
-                            marginBottom: 10,
-                        },
-                        { color: textPrimary }
-                    ]}
-                >
+                <Text style={[styles.orText, { color: textPrimary }]}>
                     OR
                 </Text>
 
@@ -348,7 +348,7 @@ const ViewShippingOptions = () => {
                     Preview Final Changes
                 </Text>
             </TouchableOpacity>
-        </View>
+        </SafeAreaView>
     )
 }
 
@@ -357,7 +357,12 @@ export default ViewShippingOptions
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 15,
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: horizontalScale(20),
     },
     title: {
         fontSize: 24,
@@ -366,60 +371,76 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     loadingText: {
-        fontSize: 18,
+        fontSize: moderateScale(18),
         textAlign: 'center',
+        fontWeight: '500',
     },
     listContainer: {
-        paddingBottom: 20,
+        paddingHorizontal: horizontalScale(20),
+        paddingTop: verticalScale(20),
+        paddingBottom: verticalScale(20),
     },
     cardContainer: {
-        marginBottom: 15,
+        marginBottom: verticalScale(12),
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 4,
-        elevation: 3,
+        elevation: 2,
     },
     selectedCardContainer: {
-        marginBottom: 15,
+        marginBottom: verticalScale(12),
         shadowColor: '#FFAC1C',
         shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.4,
+        shadowOpacity: 0.3,
         shadowRadius: 6,
-        elevation: 6,
+        elevation: 4,
     },
     card: {
-        borderRadius: 12,
-        padding: 15,
+        borderRadius: moderateScale(12),
+        padding: horizontalScale(16),
         borderWidth: 1,
+        borderColor: 'transparent',
+        elevation: 2,
     },
     selectedCard: {
         borderColor: '#FFAC1C',
+        borderWidth: 2,
     },
     selectedItemBanner: {
         backgroundColor: '#FFAC1C',
-        padding: 10,
-        borderRadius: 8,
-        marginBottom: 15,
+        paddingVertical: verticalScale(14),
+        paddingHorizontal: horizontalScale(20),
+        borderRadius: moderateScale(12),
+        marginHorizontal: horizontalScale(20),
+        marginBottom: verticalScale(20),
+        marginTop: verticalScale(12),
         alignItems: 'center',
+        justifyContent: 'center',
+        elevation: 2,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
     },
     selectedItemText: {
         color: 'white',
+        fontSize: moderateScale(16),
         fontWeight: '600',
     },
     cardHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 10,
-        paddingBottom: 10,
+        marginBottom: verticalScale(12),
+        paddingBottom: verticalScale(12),
         borderBottomWidth: 1,
     },
     organisationName: {
-        fontSize: 19,
+        fontSize: moderateScale(18),
         fontWeight: '600',
         flex: 1,
-        marginRight: 10,
+        marginRight: horizontalScale(10),
     },
     expandButton: {
         flexDirection: 'row',
@@ -427,35 +448,39 @@ const styles = StyleSheet.create({
     },
     expandButtonText: {
         color: '#FFAC1C',
-        marginRight: 5,
-        fontSize: 14,
+        marginRight: horizontalScale(5),
+        fontSize: moderateScale(14),
+        fontWeight: '500',
     },
     minimalDetailsContainer: {
         flexDirection: 'column',
+        marginTop: verticalScale(4),
     },
     minimalDetailItem: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 5,
+        marginBottom: verticalScale(6),
     },
     minimalDetailIcon: {
-        marginRight: 8,
+        marginRight: horizontalScale(8),
     },
     minimalDetail: {
-        fontSize: 13,
+        fontSize: moderateScale(14),
+        lineHeight: moderateScale(20),
     },
     expandedDetailsContainer: {
-        marginTop: 15,
+        marginTop: verticalScale(16),
     },
     pricingSection: {
-        borderRadius: 8,
-        padding: 12,
+        borderRadius: moderateScale(12),
+        padding: horizontalScale(16),
+        marginTop: verticalScale(8),
     },
     pricingSectionTitle: {
         fontWeight: '600',
-        marginBottom: 10,
+        marginBottom: verticalScale(12),
         textAlign: 'center',
-        fontSize: 16,
+        fontSize: moderateScale(16),
     },
     pricingRow: {
         flexDirection: 'row',
@@ -485,8 +510,43 @@ const styles = StyleSheet.create({
     },
     textInput: {
         borderWidth: 1,
-        borderRadius: 10,
-        padding: 16,
-        fontSize: 15,
+        borderRadius: moderateScale(12),
+        paddingVertical: verticalScale(12),
+        paddingHorizontal: horizontalScale(16),
+        fontSize: moderateScale(16),
+        marginTop: verticalScale(8),
+    },
+    openMarketSection: {
+        paddingHorizontal: horizontalScale(20),
+        marginTop: verticalScale(20),
+    },
+    divider: {
+        marginVertical: verticalScale(20),
+        backgroundColor: '#FFAC1C',
+        height: 2,
+    },
+    orText: {
+        textAlign: 'center',
+        fontSize: moderateScale(20),
+        fontWeight: '700',
+        marginBottom: verticalScale(16),
+    },
+    emptyContainer: {
+        paddingVertical: verticalScale(60),
+        paddingHorizontal: horizontalScale(20),
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    emptyMessage: {
+        fontSize: moderateScale(18),
+        fontWeight: '600',
+        textAlign: 'center',
+        marginBottom: verticalScale(12),
+    },
+    emptySubMessage: {
+        fontSize: moderateScale(14),
+        textAlign: 'center',
+        lineHeight: moderateScale(20),
+        opacity: 0.8,
     },
 });
