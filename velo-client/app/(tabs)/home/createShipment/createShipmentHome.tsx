@@ -443,7 +443,6 @@ const styles = StyleSheet.create({
     width: width * 0.9,
     paddingVertical: verticalScale(24),
     paddingHorizontal: horizontalScale(20),
-    elevation: 5,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -570,7 +569,6 @@ const styles = StyleSheet.create({
     padding: horizontalScale(16),
     marginTop: verticalScale(12),
     borderRadius: 12,
-    elevation: 2,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,

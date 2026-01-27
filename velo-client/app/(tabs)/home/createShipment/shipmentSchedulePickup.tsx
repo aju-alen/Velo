@@ -202,7 +202,6 @@ const styles = StyleSheet.create({
     borderRadius: moderateScale(12),
     alignItems: 'center',
     justifyContent: 'center',
-    elevation: 2,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -279,7 +278,7 @@ const styles = StyleSheet.create({
     padding: horizontalScale(16),
     marginTop: verticalScale(8),
     borderRadius: moderateScale(12),
-    elevation: 2,
+
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -303,7 +302,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    elevation: 2,
+
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -324,7 +323,6 @@ const styles = StyleSheet.create({
     padding: horizontalScale(16),
     marginTop: verticalScale(8),
     borderRadius: moderateScale(12),
-    elevation: 2,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -348,7 +346,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    elevation: 2,
+
     shadowColor: '#000',
     shadowOffset: {
       width: 0,

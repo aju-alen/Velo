@@ -127,7 +127,6 @@ const styles = StyleSheet.create({
     padding: horizontalScale(12),
     marginTop: verticalScale(6),
     borderRadius: moderateScale(12),
-    elevation: 2,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -169,7 +168,6 @@ const styles = StyleSheet.create({
     marginTop: verticalScale(4),
     marginLeft: horizontalScale(32),
     borderRadius: moderateScale(12),
-    elevation: 2,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -211,7 +209,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: verticalScale(12),
-    elevation: 2,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,

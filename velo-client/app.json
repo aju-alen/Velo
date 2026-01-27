@@ -2,15 +2,15 @@
   "expo": {
     "name": "Velo International Shipping",
     "slug": "velo-international-shipping",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "orientation": "portrait",
-    "icon": "./assets/images/logo.png",
+    "icon": "./assets/images/appstore.png",
     "scheme": "velo-international-shipping",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/images/logo.png",
+      "image": "./assets/images/appstore.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#000000"
     },
     "ios": {
       "googleServicesFile": "./GoogleService-Info-velo.plist",
@@ -20,22 +20,22 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.rise.velointernationalshipping",
       "splash": {
-        "image": "./assets/images/logo.png",
+        "image": "./assets/images/appstore.png",
         "resizeMode": "contain",
         "backgroundColor": "#000000",
         "dark": {
-          "image": "./assets/images/logo.png",
+          "image": "./assets/images/appstore.png",
           "resizeMode": "contain",
           "backgroundColor": "#000000"
         }
       },
-      "buildNumber": "11"
+      "buildNumber": "14"
     },
     "android": {
       "googleServicesFile": "./google-services-velo.json",
-      "versionCode": 3,
+      "versionCode": 6,
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/logo.png",
+        "foregroundImage": "./assets/images/appstore.png",
         "backgroundColor": "#000000"
       },
       "package": "com.rise.velointernationalshipping",
@@ -47,7 +47,7 @@
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/playstore.png"
     },
     "plugins": [
       "@react-native-firebase/app",

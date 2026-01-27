@@ -170,7 +170,7 @@ const styles = StyleSheet.create({
 
     borderRadius: 12,
     padding: horizontalScale(16),
-    elevation: 2,
+
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: verticalScale(24),
     marginBottom: verticalScale(24),
-    elevation: 2,
+
     shadowColor: '#000',
     shadowOffset: {
       width: 0,

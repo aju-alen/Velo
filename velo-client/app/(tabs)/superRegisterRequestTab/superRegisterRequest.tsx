@@ -239,7 +239,6 @@ const styles = StyleSheet.create({
   card: {
     borderRadius: moderateScale(12),
     marginBottom: verticalScale(16),
-    elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -322,7 +321,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: horizontalScale(8),
-    elevation: 1,
+
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,

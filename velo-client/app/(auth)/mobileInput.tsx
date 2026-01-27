@@ -304,7 +304,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 20,
     alignItems: 'center',
-    elevation: 5,
+
   },
   header: {
     marginBottom: 20,
@@ -358,7 +358,6 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.1,
     shadowRadius: 3.84,
-    elevation: 5,
   },
   countryCodeButton: {
     flexDirection: 'row',
@@ -498,7 +497,6 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.1,
     shadowRadius: 3.84,
-    elevation: 5,
   },
   icon: {
     fontSize: moderateScale(40),

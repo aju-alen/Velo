@@ -283,7 +283,6 @@ const styles = StyleSheet.create({
         shadowRadius: 2,
       },
       android: {
-        elevation: 1,
       },
     }),
   },
@@ -312,7 +311,6 @@ const styles = StyleSheet.create({
         shadowRadius: 2,
       },
       android: {
-        elevation: 2,
       },
     }),
   },
@@ -338,7 +336,6 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
       },
       android: {
-        elevation: 3,
       },
     }),
   },

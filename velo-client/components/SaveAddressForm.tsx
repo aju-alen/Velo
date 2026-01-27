@@ -410,7 +410,6 @@ const styles = StyleSheet.create({
     width: width * 1.0,
     height: '130%',
     paddingVertical: verticalScale(24),
-    elevation: 5,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,

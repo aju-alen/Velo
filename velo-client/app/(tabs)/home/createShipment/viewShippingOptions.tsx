@@ -386,7 +386,6 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 4,
-        elevation: 2,
     },
     selectedCardContainer: {
         marginBottom: verticalScale(12),
@@ -394,14 +393,13 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.3,
         shadowRadius: 6,
-        elevation: 4,
     },
     card: {
         borderRadius: moderateScale(12),
         padding: horizontalScale(16),
         borderWidth: 1,
         borderColor: 'transparent',
-        elevation: 2,
+
     },
     selectedCard: {
         borderColor: '#FFAC1C',
@@ -417,7 +415,6 @@ const styles = StyleSheet.create({
         marginTop: verticalScale(12),
         alignItems: 'center',
         justifyContent: 'center',
-        elevation: 2,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,

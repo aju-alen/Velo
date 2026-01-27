@@ -116,7 +116,6 @@ const styles = StyleSheet.create({
         maxHeight: '70%',
         borderRadius: moderateScale(16),
         padding: moderateScale(20),
-        elevation: 5,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.25,
