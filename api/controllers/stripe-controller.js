@@ -35,10 +35,10 @@ export const createPaymentIntent = async (req, res, next) => {
             { apiVersion: '2020-08-27' }
         );
         const paymentIntent = await stripe.paymentIntents.create({
-            // amount: (amount).toFixed(2),
-            amount: (Number(amount) * 100).toFixed(0),
+            amount: Math.round(Number(amount) * 100),
             currency: 'aed',
             customer: customer.id,
+            payment_method_types: ['card'],
             shipping: {
                 address: {
                   line1: addressLineOne,
