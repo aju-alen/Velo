@@ -1,5 +1,5 @@
-import { FlatList, StyleSheet, TouchableOpacity, Image, ActivityIndicator, TextInput, Alert, View, Text, useColorScheme, SafeAreaView, Platform } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import { FlatList, StyleSheet, TouchableOpacity, Image, ActivityIndicator, TextInput, Alert, View, Text, useColorScheme, SafeAreaView, Platform, Animated } from 'react-native'
+import React, { useEffect, useState, useRef } from 'react'
 import { verticalScale, horizontalScale, moderateScale } from '@/constants/metrics'
 import { router, useLocalSearchParams } from 'expo-router'
 import axios from 'axios'
@@ -12,33 +12,44 @@ const MarketHome = () => {
   const colorScheme = useColorScheme() ?? 'light';
   const themeColors = Colors[colorScheme];
   const [accountDetails, setAccountDetails] = useState(null);
+  const [accountLoaded, setAccountLoaded] = useState(false);
 
   const [getCatIdListing, setGetCatIdListing] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const { catId } = useLocalSearchParams();
+  const loadingBarAnim = useRef(new Animated.Value(0)).current;
+  const loadingActive = useRef(true);
 
   useEffect(() => {
     const checkUser = async () => {
-      let account = await SecureStore.getItemAsync('registerDetail');
-      setAccountDetails(JSON.parse(account));
-
-    }
+      try {
+        const account = await SecureStore.getItemAsync('registerDetail');
+        setAccountDetails(account != null ? JSON.parse(account) : null);
+      } catch (e) {
+        setAccountDetails(null);
+      } finally {
+        setAccountLoaded(true);
+      }
+    };
     checkUser();
   }, []);
-  console.log(accountDetails, 'accountDetails------');
-  
 
   useEffect(() => {
+    if (!accountLoaded) return;
     const getLisitingFromCatId = async () => {
-      setGetCatIdListing([]);
       setLoading(true);
-      const getCatIdListing = await axios.get(`${ipURL}/api/listing/get-listing-by-category/${catId}`);
-      setGetCatIdListing(getCatIdListing.data.listingData);
-    }
+      try {
+        const res = await axios.get(`${ipURL}/api/listing/get-listing-by-category/${catId}`);
+        setGetCatIdListing(res.data?.listingData ?? []);
+      } catch (e) {
+        setGetCatIdListing([]);
+      } finally {
+        setLoading(false);
+      }
+    };
     getLisitingFromCatId();
-    setLoading(false);
-  }, [catId]);
+  }, [catId, accountLoaded]);
 
   const filteredListings = getCatIdListing.filter(item =>
     item.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -60,13 +71,47 @@ const MarketHome = () => {
     }
   };
 
-  if (loading) {
+  useEffect(() => {
+    if (!accountLoaded || loading) {
+      loadingActive.current = true;
+      const loop = () => {
+        if (!loadingActive.current) return;
+        loadingBarAnim.setValue(0);
+        Animated.timing(loadingBarAnim, {
+          toValue: 1,
+          duration: 1200,
+          useNativeDriver: false,
+        }).start(({ finished }) => {
+          if (finished && loadingActive.current) loop();
+        });
+      };
+      loop();
+      return () => {
+        loadingActive.current = false;
+        loadingBarAnim.stopAnimation();
+      };
+    }
+  }, [accountLoaded, loading]);
+
+  const loadingBarWidth = loadingBarAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0%', '100%'],
+  });
+
+  const isReady = accountLoaded && !loading;
+
+  if (!isReady) {
     return (
       <SafeAreaView style={[styles.loadingContainer, { backgroundColor: themeColors.background }]}>
+        <View style={styles.loadingBarTrack}>
+          <Animated.View style={[styles.loadingBarFill, { width: loadingBarWidth }]} />
+        </View>
         <ActivityIndicator size="large" color="#FFAC1C" />
-        <Text style={[styles.loadingText, { color: themeColors.text }]}>Loading listings...</Text>
+        <Text style={[styles.loadingText, { color: themeColors.text }]}>
+          {!accountLoaded ? 'Loading...' : 'Loading listings...'}
+        </Text>
       </SafeAreaView>
-    )
+    );
   }
 
   const renderMarketplaceCategoryCard = ({ item }) => {
@@ -256,6 +301,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     gap: verticalScale(12),
+  },
+  loadingBarTrack: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 3,
+    backgroundColor: 'rgba(0,0,0,0.08)',
+  },
+  loadingBarFill: {
+    height: '100%',
+    backgroundColor: '#FFAC1C',
   },
   loadingText: {
     fontSize: moderateScale(16),

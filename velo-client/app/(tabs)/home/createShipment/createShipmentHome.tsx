@@ -19,7 +19,7 @@ import { Colors } from '@/constants/Colors';
 const { width } = Dimensions.get('window')
 
 const CreateShipmentHome = () => {
-  const { 
+  const {
     setPackageDetail,
     setPackageDescription,
     savedAddressData,
@@ -30,7 +30,9 @@ const CreateShipmentHome = () => {
     setItemType,
     setCreateShipment,
     editData,
-  } = useShipmentStore()
+    packageDetail,
+    packageDescription,
+  } = useShipmentStore();
 
   
   const colorScheme = useColorScheme() ?? 'light';
@@ -44,7 +46,8 @@ const CreateShipmentHome = () => {
   const [date, setDate] = useState(new Date());
   const [show, setShow] = useState(Platform.OS === 'ios' ? true : false);
   const [checked, setChecked] = useState('false');
-  const [buttonClick, setButtonClick] = useState(false)
+  const [buttonClick, setButtonClick] = useState(false);
+  const [formErrors, setFormErrors] = useState<{ package?: string; description?: string }>({});
 
   const handleGetDescription = (description) => {
     setPackageDescription(description)
@@ -78,47 +81,63 @@ const CreateShipmentHome = () => {
     }
   },[])
 
+  const validateForm = (): { valid: boolean; errors: { package?: string; description?: string } } => {
+    const errors: { package?: string; description?: string } = {};
+    if (checked === 'DOCUMENT') {
+      const num = Number(packageDetail?.numberOfPieces);
+      if (!packageDetail?.numberOfPieces?.trim() || isNaN(num) || num < 1) {
+        errors.package = 'Please enter number of document(s) (at least 1).';
+      }
+    } else if (checked === 'PACKAGE') {
+      const len = Number(packageDetail?.length);
+      const wdt = Number(packageDetail?.width);
+      const hgt = Number(packageDetail?.height);
+      const pieces = Number(packageDetail?.numberOfPieces);
+      const w = Number(packageDetail?.weight);
+      const hasValidDimensions =
+        packageDetail?.length?.trim() && !isNaN(len) && len > 0 &&
+        packageDetail?.width?.trim() && !isNaN(wdt) && wdt > 0 &&
+        packageDetail?.height?.trim() && !isNaN(hgt) && hgt > 0;
+      const hasValidPieces = packageDetail?.numberOfPieces?.trim() && !isNaN(pieces) && pieces >= 1;
+      const hasValidWeight = packageDetail?.weight?.trim() && !isNaN(w) && w > 0;
+      if (!hasValidDimensions || !hasValidPieces || !hasValidWeight) {
+        errors.package = 'Please complete all package details (dimensions, number of pieces, and weight).';
+      }
+    }
+    const desc = (packageDescription ?? '').trim();
+    if (!desc) {
+      errors.description = 'Please enter a description for your shipment.';
+    }
+    return { valid: Object.keys(errors).length === 0, errors };
+  };
+
   const handleContinuePackageDetail = () => {
-    setButtonClick(true)
+    setButtonClick(true);
+    const { valid, errors } = validateForm();
+    if (!valid) {
+      setFormErrors(errors);
+      return;
+    }
+    setFormErrors({});
     setAccountAddressData({
       ...accountAddressData,
       userName: userSecureStorage['name'],
       email: userSecureStorage['email'],
       mobileNumber: userSecureStorage['mobileNumber'],
-
-      countryCode: userSecureStorage['mobileCode']
-
-    })
+      countryCode: userSecureStorage['mobileCode'],
+    });
     setSavedAddressData({
       ...savedAddressData,
-      shipmentDate:date,
-      deliveryDate: new Date(new Date(date).setDate(new Date(date).getDate() + 1))
-    })
-
-
-    router.push('/home/createShipment/shippingOptions')
-  }
+      shipmentDate: date,
+      deliveryDate: new Date(new Date(date).setDate(new Date(date).getDate() + 1)),
+    });
+    router.push('/home/createShipment/shippingOptions');
+  };
 
 
   const handleCloseSaveAddressModal = () => {
     setAddressModalVisible(false)
   }
-
-  // useEffect(() => {
-  //   if (!addressModalVisible) return;
-
-  //   const getAllCountries = async () => {
-  //     try {
-  //       const allCountry = await axios.get(`${ipURL}/api/country/get-all-countries`);
-  //       setCountryList(allCountry.data);
-  //     } catch (error) {
-  //       console.error('Error fetching countries:', error);
-  //     }
-  //   };
-
-  //   getAllCountries();
-  // }, [addressModalVisible]);  // Depend directly on addressModalVisible
-
   
 
   useEffect(() => {
@@ -309,20 +328,20 @@ const CreateShipmentHome = () => {
                 }
               ]}
               onPress={() => {
-                setChecked('DOCUMENT')
-                setItemType('DOCUMENT')
-                resetShipmentData()
-
+                setChecked('DOCUMENT');
+                setItemType('DOCUMENT');
+                resetShipmentData();
+                setFormErrors((e) => ({ ...e, package: undefined }));
               }}
             >
               <RadioButton
                 value="DOCUMENT"
                 status={checked === 'DOCUMENT' ? 'checked' : 'unchecked'}
                 onPress={() => {
-                  setChecked('DOCUMENT')
-                  setItemType('DOCUMENT')
-                  resetShipmentData()
-
+                  setChecked('DOCUMENT');
+                  setItemType('DOCUMENT');
+                  resetShipmentData();
+                  setFormErrors((e) => ({ ...e, package: undefined }));
                 }}
               />
               <Text style={[styles.shippingTypeText, { color: themeColors.text }]}>Document</Text>
@@ -340,20 +359,20 @@ const CreateShipmentHome = () => {
                 }
               ]}
               onPress={() => {
-                setChecked('PACKAGE')
-                setItemType('PACKAGE')
-                resetShipmentData()
-
+                setChecked('PACKAGE');
+                setItemType('PACKAGE');
+                resetShipmentData();
+                setFormErrors((e) => ({ ...e, package: undefined }));
               }}
             >
               <RadioButton
                 value="PACKAGE"
                 status={checked === 'PACKAGE' ? 'checked' : 'unchecked'}
                 onPress={() => {
-                  setChecked('PACKAGE')
-                  setItemType('PACKAGE')
-                  resetShipmentData()
-
+                  setChecked('PACKAGE');
+                  setItemType('PACKAGE');
+                  resetShipmentData();
+                  setFormErrors((e) => ({ ...e, package: undefined }));
                 }}
               />
               <Text style={[styles.shippingTypeText, { color: themeColors.text }]}>Package</Text>
@@ -418,12 +437,20 @@ const CreateShipmentHome = () => {
        
        
        {savedAddressData.gotDetails && <SelectPackage itemType={checked} getPackageDetail={handlePackagedetail} onButtonclick={buttonClick} />}
-      
-        {savedAddressData.gotDetails && <ShipmentDetailPayment itemType={checked} onGetData={handleGetDescription} onButtonclick={buttonClick} />}
+       {formErrors.package ? (
+          <Text style={styles.fieldError}>{formErrors.package}</Text>
+        ) : null}
 
-       { savedAddressData.gotDetails &&<TouchableOpacity style={[styles.actionButton, styles.continueButton]} onPress={handleContinuePackageDetail}>
-          <Text style={styles.buttonText}>Continue</Text>
-        </TouchableOpacity>  }
+        {savedAddressData.gotDetails && <ShipmentDetailPayment itemType={checked} onGetData={handleGetDescription} onButtonclick={buttonClick} />}
+        {formErrors.description ? (
+          <Text style={styles.fieldError}>{formErrors.description}</Text>
+        ) : null}
+
+       {savedAddressData.gotDetails && (
+          <TouchableOpacity style={[styles.actionButton, styles.continueButton]} onPress={handleContinuePackageDetail}>
+            <Text style={styles.buttonText}>Continue</Text>
+          </TouchableOpacity>
+        )}
       </View>
       </ScrollView>}
     </SafeAreaView>
@@ -510,6 +537,13 @@ const styles = StyleSheet.create({
   },
   continueButton: {
     marginTop: verticalScale(24),
+  },
+  fieldError: {
+    color: '#E53935',
+    fontSize: moderateScale(13),
+    marginHorizontal: horizontalScale(10),
+    marginTop: verticalScale(-8),
+    marginBottom: verticalScale(8),
   },
   divider: {
     height: 1,

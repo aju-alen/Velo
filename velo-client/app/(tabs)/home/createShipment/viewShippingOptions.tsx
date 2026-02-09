@@ -20,7 +20,7 @@ import { Colors } from '@/constants/Colors'
 import { horizontalScale, moderateScale, verticalScale } from '@/constants/metrics'
 
 
-const StaticData = ({ onSelect, isSelected }) => {
+const StaticData = ({ onSelect, isSelected, error }) => {
     const [price, setPrice] = useState('');
     const colorScheme = useColorScheme() ?? 'light';
     const themeColors = Colors[colorScheme];
@@ -28,20 +28,21 @@ const StaticData = ({ onSelect, isSelected }) => {
     const borderColor = colorScheme === 'dark' ? '#333' : '#E0E0E0';
     const textPrimary = colorScheme === 'dark' ? '#FFF' : '#000';
     const textSecondary = colorScheme === 'dark' ? '#B0B0B0' : '#666';
+    const hasError = Boolean(error);
+    const inputBorderColor = hasError ? '#E53935' : borderColor;
 
     const handleStaticPrice = () => {
-        if (!price || isNaN(price) || Number(price) <= 0) {
-            Alert.alert('Invalid Input', 'Please enter a valid price.');
+        const numPrice = Number(price);
+        if (!price.trim() || isNaN(numPrice) || numPrice <= 0) {
             return;
         }
-        onSelect(null, Number(price), 0, 0,'OPEN_MARKET');
+        onSelect(null, numPrice, 0, 0, 'OPEN_MARKET');
     };
 
     const handleSetPrice = (text) => {
-        console.log(text,'--__--textttttttt');
-        
         setPrice(text);
-        onSelect(null, Number(text), 0, 0,'OPEN_MARKET');
+        const num = Number(text);
+        onSelect(null, isNaN(num) ? 0 : num, 0, 0, 'OPEN_MARKET');
     };
 
     return (
@@ -63,12 +64,23 @@ const StaticData = ({ onSelect, isSelected }) => {
                 </Text>
                 <TextInput
                     value={price}
-                    onChangeText={(text)=>handleSetPrice(text)}
-                    style={[styles.textInput, { backgroundColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)', borderColor: borderColor, color: textPrimary }]}
-                    placeholder="Enter Your Price"
+                    onChangeText={handleSetPrice}
+                    style={[
+                        styles.textInput,
+                        {
+                            backgroundColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)',
+                            borderColor: hasError ? '#E53935' : inputBorderColor,
+                            borderWidth: hasError ? 2 : 1,
+                            color: textPrimary,
+                        }
+                    ]}
+                    placeholder="Enter Your Price (AED)"
                     placeholderTextColor={textSecondary}
                     keyboardType="numeric"
                 />
+                {hasError && (
+                    <Text style={styles.fieldError}>{error}</Text>
+                )}
             </View>
         </TouchableOpacity>
     );
@@ -236,7 +248,7 @@ const OrganisationCard = ({ item, onSelect, isSelected }) => {
 };
 
 const ViewShippingOptions = () => {
-    const { itemType, setFinalShipmentData,finalShipmentData } = useShipmentStore()
+    const { itemType, setFinalShipmentData, finalShipmentData } = useShipmentStore();
     const colorScheme = useColorScheme() ?? 'light';
     const themeColors = Colors[colorScheme];
     const bgCard = colorScheme === 'dark' ? '#181A20' : '#FFF';
@@ -247,7 +259,27 @@ const ViewShippingOptions = () => {
     const [allShippingOptions, setAllShippingOptions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedItem, setSelectedItem] = useState(null);
-    
+    const [showErrors, setShowErrors] = useState(false);
+
+    const isOrganisationSelected = selectedItem != null && selectedItem.id != null;
+    const isOpenMarketSelected = selectedItem != null && (selectedItem.id == null || selectedItem.id === undefined);
+    const isOpenMarketPriceValid =
+        selectedItem?.totalPrice != null &&
+        Number.isFinite(Number(selectedItem.totalPrice)) &&
+        Number(selectedItem.totalPrice) > 0;
+    const isFormValid =
+        selectedItem != null &&
+        (isOrganisationSelected || (isOpenMarketSelected && isOpenMarketPriceValid));
+
+    const openMarketError =
+        isOpenMarketSelected && !isOpenMarketPriceValid
+            ? 'Please enter a valid price (greater than 0 AED).'
+            : null;
+    const selectionError =
+        showErrors && selectedItem == null
+            ? 'Please select a shipping option above or enter your price in the Open Market section.'
+            : null;
+
     const getallShippingOptions = async () => {
         try {
             const response = await axiosInstance.get(`/api/organisation/get-all-organisation-data`)
@@ -268,19 +300,26 @@ const ViewShippingOptions = () => {
 
     
 
-    const handleItemSelect = (itemId, totalPrice, basePrice, collectionPrice,shippingMarket) => {
-        console.log(itemId, totalPrice, basePrice, collectionPrice,shippingMarket,'--__--');
-        
+    const handleItemSelect = (itemId, totalPrice, basePrice, collectionPrice, shippingMarket) => {
         const isSelected = selectedItem?.id === itemId;
         setSelectedItem(isSelected ? null : { id: itemId, totalPrice });
         setFinalShipmentData({
             ...finalShipmentData,
             shippingMarket,
-            organisationId: itemId,
+            organisationId: itemId != null ? String(itemId) : '',
             totalPrice,
             basePrice,
-            collectionPrice
+            collectionPrice,
         });
+    };
+
+    const handleContinue = () => {
+        if (!isFormValid) {
+            setShowErrors(true);
+            return;
+        }
+        setShowErrors(false);
+        router.push('/home/createShipment/finalPreview');
     };
    
 
@@ -334,17 +373,27 @@ const ViewShippingOptions = () => {
                     OR
                 </Text>
 
-                <StaticData 
-                    onSelect={handleItemSelect} 
-                    isSelected={selectedItem === null}
+                <StaticData
+                    onSelect={handleItemSelect}
+                    isSelected={isOpenMarketSelected}
+                    error={openMarketError}
                 />
             </View>
 
-            <TouchableOpacity 
-                style={styles.selectedItemBanner}
-                onPress={()=>router.push('/home/createShipment/finalPreview')}
+            {selectionError ? (
+                <Text style={[styles.selectionError, { color: themeColors.text }]}>{selectionError}</Text>
+            ) : null}
+
+            <TouchableOpacity
+                style={[
+                    styles.selectedItemBanner,
+                    !isFormValid && styles.selectedItemBannerDisabled,
+                ]}
+                onPress={handleContinue}
+                activeOpacity={0.8}
+                disabled={!isFormValid}
             >
-                <Text style={styles.selectedItemText}>
+                <Text style={[styles.selectedItemText, !isFormValid && styles.selectedItemTextDisabled]}>
                     Preview Final Changes
                 </Text>
             </TouchableOpacity>
@@ -512,6 +561,25 @@ const styles = StyleSheet.create({
         paddingHorizontal: horizontalScale(16),
         fontSize: moderateScale(16),
         marginTop: verticalScale(8),
+    },
+    fieldError: {
+        color: '#E53935',
+        fontSize: moderateScale(12),
+        marginTop: verticalScale(6),
+        marginBottom: verticalScale(4),
+    },
+    selectionError: {
+        fontSize: moderateScale(13),
+        marginHorizontal: horizontalScale(20),
+        marginTop: verticalScale(8),
+        marginBottom: verticalScale(4),
+        opacity: 0.9,
+    },
+    selectedItemBannerDisabled: {
+        opacity: 0.5,
+    },
+    selectedItemTextDisabled: {
+        opacity: 0.9,
     },
     openMarketSection: {
         paddingHorizontal: horizontalScale(20),

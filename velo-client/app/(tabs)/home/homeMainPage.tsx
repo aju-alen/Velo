@@ -34,6 +34,8 @@ const HomeMainPage = () => {
     pending: 0
   });
   const [loadingShipments, setLoadingShipments] = useState(false);
+  const [agentShipments, setAgentShipments] = useState<any[]>([]);
+  const [loadingAgentShipments, setLoadingAgentShipments] = useState(false);
   
   const colorScheme = useColorScheme() ?? 'light';
   const themeColors = Colors[colorScheme];
@@ -64,6 +66,21 @@ const HomeMainPage = () => {
     }
   };
 
+  const getAgentShipments = async () => {
+    if (accountLoginData.role !== 'AGENT' || !accountLoginData.organisationId) return;
+    try {
+      setLoadingAgentShipments(true);
+      const response = await axiosInstance.get(`${ipURL}/api/shipment/agent/get-all-accepted-shipments/${accountLoginData.organisationId}`);
+      const list = response.data || [];
+      setAgentShipments(list);
+    } catch (error) {
+      console.error('Error fetching agent shipments:', error);
+      setAgentShipments([]);
+    } finally {
+      setLoadingAgentShipments(false);
+    }
+  };
+
   useEffect(() => {
     const getCategoryData = async () => {
       console.log('getCategoryData entered here');
@@ -80,7 +97,8 @@ const HomeMainPage = () => {
     };
     getCategoryData();
     getUserShipments();
-  }, [accountLoginData.id]);
+    getAgentShipments();
+  }, [accountLoginData.id, accountLoginData.role, accountLoginData.organisationId]);
 
   const handleLogout = async () => {
     try{
@@ -250,6 +268,47 @@ const HomeMainPage = () => {
             </TouchableOpacity>
           </View>
 
+          {/* Agent: Assigned Shipments quick action */}
+          {accountLoginData.role === 'AGENT' && (
+            <TouchableOpacity
+              onPress={() => router.push('/(tabs)/adminorderdetail/adminOrderDetailMain')}
+              activeOpacity={0.7}
+            >
+              <View style={[styles.createShipmentContainer, { backgroundColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)' }]}>
+                <LinearGradient
+                  colors={['#FFAC1C20', '#FFAC1C10']}
+                  style={styles.createShipmentGradient}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                >
+                  <View style={styles.createShipmentContent}>
+                    <View style={styles.createShipmentIconContainer}>
+                      <MaterialIcons name="local-shipping" size={48} color="#FFAC1C" />
+                    </View>
+                    <View style={styles.createShipmentTextContainer}>
+                      <Text style={[styles.createShipmentTitle, { color: themeColors.text }]}>
+                        Assigned Shipments
+                      </Text>
+                      <Text style={[styles.createShipmentSubtitle, { color: themeColors.text }]}>
+                        {loadingAgentShipments
+                          ? 'Loading...'
+                          : `${agentShipments.length} shipment${agentShipments.length !== 1 ? 's' : ''} to manage`}
+                      </Text>
+                    </View>
+                    <View style={styles.agentQuickActionRight}>
+                      {!loadingAgentShipments && agentShipments.length > 0 && (
+                        <View style={styles.agentCountBadge}>
+                          <Text style={styles.agentCountText}>{agentShipments.length}</Text>
+                        </View>
+                      )}
+                      <Ionicons name="arrow-forward-circle" size={32} color="#FFAC1C" />
+                    </View>
+                  </View>
+                </LinearGradient>
+              </View>
+            </TouchableOpacity>
+          )}
+
           {accountLoginData.role === "USER" && (
             <>
               {/* Create Shipment Section */}
@@ -412,6 +471,25 @@ const styles = StyleSheet.create({
   createShipmentSubtitle: {
     fontSize: moderateScale(13),
     opacity: 0.7,
+  },
+  agentQuickActionRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: horizontalScale(8),
+  },
+  agentCountBadge: {
+    backgroundColor: '#FFAC1C',
+    minWidth: moderateScale(28),
+    height: moderateScale(28),
+    borderRadius: moderateScale(14),
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: horizontalScale(6),
+  },
+  agentCountText: {
+    color: '#FFF',
+    fontSize: moderateScale(14),
+    fontWeight: '700',
   },
   statsSection: {
     marginBottom: verticalScale(24),

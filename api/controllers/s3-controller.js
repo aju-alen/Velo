@@ -1,6 +1,8 @@
 import dotenv from "dotenv";
+import { Readable } from 'stream';
 import { Upload } from '@aws-sdk/lib-storage';
 import { S3 } from '@aws-sdk/client-s3';
+import sharp from 'sharp';
 
 dotenv.config();
 
@@ -12,6 +14,25 @@ const s3 = new S3({
 
     region: process.env.AWS_REGION,
 });
+
+const IMAGE_MAX_WIDTH = 1200;
+const IMAGE_JPEG_QUALITY = 82;
+
+/**
+ * Returns a readable stream for S3 upload: either raw buffer stream (PDF) or
+ * Sharp resize+compress stream (images). Avoids buffering full compressed output.
+ */
+function createImageUploadStream(buffer, mimetype) {
+    if (!mimetype || !mimetype.startsWith('image/')) {
+        return { stream: Readable.from(buffer), contentType: mimetype || 'application/octet-stream' };
+    }
+    const sharpStream = sharp()
+        .resize(320,240)
+        .jpeg({ quality: IMAGE_JPEG_QUALITY });
+    Readable.from(buffer).pipe(sharpStream);
+    return { stream: sharpStream, contentType: 'image/jpeg' };
+}
+
 export const postProfileImageS3 = async (req, res, next) => {
     console.log(process.env.AWS_ACCESS_KEY_ID, process.env.AWS_SECRET_ACCESS_KEY, process.env.AWS_REGION);
 
@@ -28,22 +49,22 @@ export const postProfileImageS3 = async (req, res, next) => {
     console.log(file, 'file---');  // Log the uploaded file
     let params;
     // Define parameters for S3 upload
-    if(file.mimetype === 'application/pdf'){
-    params = {
-        Bucket: process.env.S3_BUCKET_NAME,
-        // Key: `${id}/verificationfiles/${file.originalname}`, // File name you want to save in S3
-        Key: `Account_verification/${id}-${name}/verificationfiles/verification.pdf`, // File name you want to save in S3
-        Body: file.buffer,
-        ContentType: file.mimetype,
-    };
-    }else{
+    if (file.mimetype === 'application/pdf') {
         params = {
             Bucket: process.env.S3_BUCKET_NAME,
-            // Key: `${id}/verificationfiles/${file.originalname}`, // File name you want to save in S3
-            Key: `Market_listing/${id}-${name}/${file.originalname}`, // File name you want to save in S3
+            Key: `Account_verification/${id}-${name}/verificationfiles/verification.pdf`,
             Body: file.buffer,
             ContentType: file.mimetype,
-        };  
+        };
+    } else {
+        const { stream, contentType } = createImageUploadStream(file.buffer, file.mimetype);
+        const imageName = file.originalname.replace(/\.[^.]+$/i, '.jpg');
+        params = {
+            Bucket: process.env.S3_BUCKET_NAME,
+            Key: `Market_listing/${id}-${name}/${imageName}`,
+            Body: stream,
+            ContentType: contentType,
+        };
     }
     // Define parameters for S3 upload
     
@@ -77,16 +98,15 @@ export const postUpdateShipmentS3 = async (req, res, next) => {
     
     if (!file) {
         return res.status(400).json({ error: 'No file uploaded' });
-    }  
-    
-    try {
+    }
 
+    try {
+        const { stream, contentType } = createImageUploadStream(file.buffer, file.mimetype);
         const params = {
             Bucket: process.env.S3_BUCKET_NAME,
-            // Key: `${id}/verificationfiles/${file.originalname}`, // File name you want to save in S3
-            Key: `Shipment_Status/${req.verifyOrganisationId}/${req.verifyUserId}/${shipmentId}/${shipmentStatus}/${AgentStatus}/image.jpg`, 
-            Body: file.buffer,
-            ContentType: file.mimetype,
+            Key: `Shipment_Status/${req.verifyOrganisationId}/${req.verifyUserId}/${shipmentId}/${shipmentStatus}/${AgentStatus}/image.jpg`,
+            Body: stream,
+            ContentType: contentType,
         };
         const uploadResult = await new Upload({
             client: s3,

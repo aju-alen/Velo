@@ -2,7 +2,7 @@
   "expo": {
     "name": "Velo International Shipping",
     "slug": "velo-international-shipping",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "orientation": "portrait",
     "icon": "./assets/images/appstore.png",
     "scheme": "velo-international-shipping",
@@ -29,7 +29,7 @@
           "backgroundColor": "#000000"
         }
       },
-      "buildNumber": "14"
+      "buildNumber": "20"
     },
     "android": {
       "googleServicesFile": "./google-services-velo.json",
@@ -87,16 +87,6 @@
           "url": "https://sentry.io/",
           "project": "velo-react-native",
           "organization": "rise-ltd"
-        }
-      ],
-      [
-        "expo-build-properties",
-        {
-          "android": {
-            "compileSdkVersion": 35,
-            "targetSdkVersion": 35,
-            "buildToolsVersion": "35.0.0"
-          }
         }
       ],
       "@sentry/react-native"

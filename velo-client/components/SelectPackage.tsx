@@ -80,9 +80,12 @@ const SelectPackage = ({ getPackageDetail, onButtonclick, itemType }) => {
     : '0';
 
   useEffect(() => {
-
     getPackageDetail(dimensions, packageDetail.numberOfPieces, weight);
   }, [onButtonclick]);
+
+  useEffect(() => {
+    getPackageDetail(dimensions, packageDetail.numberOfPieces, weight);
+  }, [dimensions, packageDetail.numberOfPieces, weight]);
 
 
 
