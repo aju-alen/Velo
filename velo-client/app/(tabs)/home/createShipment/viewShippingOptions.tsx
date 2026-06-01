@@ -4,12 +4,10 @@ import {
     FlatList,
     TouchableOpacity,
     LayoutAnimation,
-    Alert,
     TextInput,
     View,
     Text,
     useColorScheme,
-    SafeAreaView
 } from 'react-native'
 import axiosInstance from '@/constants/axiosHeader'
 import useShipmentStore from '@/store/shipmentStore'
@@ -18,6 +16,7 @@ import { router } from 'expo-router'
 import { Divider } from 'react-native-paper'
 import { Colors } from '@/constants/Colors'
 import { horizontalScale, moderateScale, verticalScale } from '@/constants/metrics'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 
 const StaticData = ({ onSelect, isSelected, error }) => {
@@ -170,7 +169,7 @@ const OrganisationCard = ({ item, onSelect, isSelected }) => {
                 {/* Minimal Initial Details */}
                 <View style={styles.minimalDetailsContainer}>
                     <View style={styles.minimalDetailItem}>
-                        <AntDesign name="clockcircleo" size={16} color={colorScheme === 'dark' ? '#FFAC1C' : '#666'} style={styles.minimalDetailIcon} />
+                        <AntDesign name="clock-circle" size={16} color={colorScheme === 'dark' ? '#FFAC1C' : '#666'} style={styles.minimalDetailIcon} />
                         <Text style={[styles.minimalDetail, { color: textPrimary }]}>
                             Deliver within {item.deliveryTimeline || 'N/A'} days
                         </Text>

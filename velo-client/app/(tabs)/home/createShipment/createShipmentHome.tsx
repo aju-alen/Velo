@@ -1,4 +1,4 @@
-import { StyleSheet,  Modal, TouchableOpacity, Dimensions, ScrollView, Platform,SafeAreaView, View, Text, useColorScheme } from 'react-native'
+import { StyleSheet, Modal, TouchableOpacity, Dimensions, ScrollView, Platform, View, Text, useColorScheme, KeyboardAvoidingView } from 'react-native'
 import React, { useEffect, useState,useCallback } from 'react'
 import { horizontalScale, moderateScale, verticalScale } from '@/constants/metrics'
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
@@ -11,8 +11,9 @@ import SelectPackage from '@/components/SelectPackage'
 import ShipmentDetailPayment from '@/components/ShipmentDetailPayment'
 import { router, useFocusEffect } from 'expo-router'
 import useShipmentStore from '@/store/shipmentStore'
-import { MaterialIcons } from '@expo/vector-icons'
 import { Colors } from '@/constants/Colors';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 
 
@@ -37,6 +38,7 @@ const CreateShipmentHome = () => {
   
   const colorScheme = useColorScheme() ?? 'light';
   const themeColors = Colors[colorScheme];
+  const insets = useSafeAreaInsets();
   const [userSecureStorage, setUserSecureStorage] = useState(false)
 
   const [userAddress, setUserAddress] = useState('')
@@ -252,13 +254,7 @@ const CreateShipmentHome = () => {
           <View style={[styles.modalContent, { backgroundColor: themeColors.background }]}>
             <View style={styles.shippingMethodHeadContainer}>
               <Text style={[styles.modalTitle, { color: themeColors.text }]}>Select Shipping Method</Text>
-              <TouchableOpacity
-                onPress={()=>{
-                  setCreateShipment(false)
-                  router.push('/home/homeMainPage')}}
-              >
-                <MaterialIcons name="close" size={24} color= {colorScheme === 'dark' ? '#fff' : '#000'} />
-              </TouchableOpacity>
+             
             </View>
 
             <PaymentOption
@@ -287,8 +283,20 @@ const CreateShipmentHome = () => {
         userId={userSecureStorage['id']}
       />
 
-{(!modalVisible || editData) && <ScrollView showsVerticalScrollIndicator={false} style={styles.contentContainer}>
-      <View >
+{(!modalVisible || editData) && (
+        <KeyboardAvoidingView
+          style={styles.keyboardAvoidingRoot}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top : 0}
+        >
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            style={styles.contentContainer}
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+            automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
+          >
+      <View>
         {/* Shipping Date Section */}
 
         {Platform.OS === 'ios' && <View style={[styles.section, { backgroundColor: themeColors.background }]}>
@@ -452,7 +460,9 @@ const CreateShipmentHome = () => {
           </TouchableOpacity>
         )}
       </View>
-      </ScrollView>}
+          </ScrollView>
+        </KeyboardAvoidingView>
+      )}
     </SafeAreaView>
     
   )
@@ -493,6 +503,7 @@ const styles = StyleSheet.create({
   section: {
     paddingHorizontal: horizontalScale(10),
     marginBottom: verticalScale(20),
+    marginTop: verticalScale(10),
   },
   iosDatePickerContainer: {
     padding: horizontalScale(12),
@@ -553,9 +564,9 @@ const styles = StyleSheet.create({
   // New and enhanced styles
   container: {
     flex: 1,
-
-    
-
+  },
+  keyboardAvoidingRoot: {
+    flex: 1,
   },
   contentContainer: {
     flex: 1,

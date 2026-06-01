@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { 
   StyleSheet, 
   TextInput, 
@@ -32,7 +32,8 @@ const ResetPassword = () => {
   const [loading, setLoading] = useState(false);
   const [verificationToken, setVerificationToken] = useState('');
   const [otpVerified, setOtpVerified] = useState(false);
-  
+  const verifyOtpInFlightRef = useRef(false);
+
   const colorScheme = useColorScheme() ?? 'light';
   const themeColors = Colors[colorScheme];
 
@@ -44,19 +45,25 @@ const ResetPassword = () => {
     }
   }, [email]);
 
-  const handleVerifyOTP = async () => {
-    if (!otp || otp.length !== 6) {
+  const handleVerifyOTP = useCallback(async (codeFromInput?: string) => {
+    const raw = typeof codeFromInput === 'string' ? codeFromInput : otp;
+    const otpCode = raw.replace(/\D/g, '').slice(0, 6);
+    if (!otpCode || otpCode.length !== 6) {
       Alert.alert('Error', 'Please enter the 6-digit OTP');
       return;
     }
+    if (verifyOtpInFlightRef.current) {
+      return;
+    }
+    verifyOtpInFlightRef.current = true;
 
     try {
       setLoading(true);
       const response = await axios.post(`${ipURL}/api/auth/verify-reset-otp`, {
         email: email,
-        otp: otp
+        otp: otpCode,
       });
-      
+
       setVerificationToken(response.data.verificationToken);
       setOtpVerified(true);
       Alert.alert('Success', 'OTP verified successfully. Please enter your new password.');
@@ -67,8 +74,9 @@ const ResetPassword = () => {
       setOtp('');
     } finally {
       setLoading(false);
+      verifyOtpInFlightRef.current = false;
     }
-  }
+  }, [email, otp]);
 
   const handleResetPassword = async () => {
     if (!newPassword || !confirmPassword) {
@@ -147,8 +155,9 @@ const ResetPassword = () => {
                     numberOfDigits={6}
                     onTextChange={(text) => {
                       setOtp(text);
-                      if (text.length === 6) {
-                        handleVerifyOTP();
+                      const digits = text.replace(/\D/g, '');
+                      if (digits.length === 6) {
+                        handleVerifyOTP(digits);
                       }
                     }}
                     focusColor="#FFAC1C"
@@ -170,8 +179,8 @@ const ResetPassword = () => {
                   <CustomButton 
                     buttonText='Verify OTP' 
                     buttonWidth={horizontalScale(300)} 
-                    handlePress={handleVerifyOTP}
-                    disableButton={loading || otp.length !== 6}
+                    handlePress={() => handleVerifyOTP()}
+                    disableButton={loading || otp.replace(/\D/g, '').length !== 6}
                   />
                 </View>
               </>

@@ -1,96 +1,98 @@
 import { StyleSheet, Text, Image, Animated, View, TouchableOpacity, ActivityIndicator } from 'react-native'
 import { router } from "expo-router";
-import React,{useEffect, useRef, useState} from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { verticalScale,horizontalScale,moderateScale } from '@/constants/metrics';
+import { verticalScale, horizontalScale, moderateScale } from '@/constants/metrics';
 import * as SecureStore from 'expo-secure-store';
 import useLoginAccountStore from '@/store/loginAccountStore';
 import { Colors } from '@/constants/Colors';
 
 const RootIndex = () => {
-  const {setAccountLoginData} = useLoginAccountStore()
-  const scaleValue = useRef(new Animated.Value(1)).current; // Initialize scale value
+  const { setAccountLoginData } = useLoginAccountStore()
+  const scaleValue = useRef(new Animated.Value(1)).current;
   const colorScheme = useColorScheme();
   const theme = colorScheme ?? 'light';
   const textColor = theme === 'dark' ? Colors.dark.text : Colors.light.text;
   const [isChecking, setIsChecking] = useState(true);
   const [shouldShowLanding, setShouldShowLanding] = useState(false);
 
-  const animateButton = () => {
-    // Scale the button down
+  const animateButton = useCallback(() => {
     Animated.sequence([
       Animated.timing(scaleValue, {
-        toValue: 0.85,  // Scale down to 95%
-        duration: 300,  // Animation duration
+        toValue: 0.85,
+        duration: 300,
         useNativeDriver: true,
       }),
-      // Scale back to normal size
       Animated.timing(scaleValue, {
-        toValue: 1,     // Scale back to 100%
+        toValue: 1,
         duration: 100,
         useNativeDriver: true,
       })
     ]).start(() => {
-      // Once animation is done, navigate to the next screen
-      router.push('/(auth)/chooseRole'); // Replace 'NextScreen' with your stack route
+      router.push('/(auth)/chooseRole');
     });
-  };
+  }, [scaleValue]);
 
   useEffect(() => {
+    let isMounted = true;
+
     const checkUser = async () => {
-      setIsChecking(true);
-      let user = await SecureStore.getItemAsync('registerDetail')
-      console.log(JSON.parse(user),'parsed user detail');
-      
-      if(!user){
-        setIsChecking(false);
-        setShouldShowLanding(true);
-        return
+      try {
+        const user = await SecureStore.getItemAsync('registerDetail');
+
+        if (!user) {
+          if (isMounted) {
+            setIsChecking(false);
+            setShouldShowLanding(true);
+          }
+          return;
+        }
+
+        const userData = JSON.parse(user);
+        setAccountLoginData(userData);
+
+        const { registerVerificationStatus, role } = userData;
+
+        // Incomplete registration -- send to finish the form
+        if (registerVerificationStatus === 'PARTIAL') {
+          router.replace('/(auth)/finalRegisterForm');
+          return;
+        }
+
+        // Fully or partially verified users -- send to home
+        const isVerifiedAgent =
+          role === 'AGENT' &&
+          (registerVerificationStatus === 'APPOINTMENT_BOOKED' || registerVerificationStatus === 'LOGGED_IN');
+        const isVerifiedUser = role === 'USER' && registerVerificationStatus === 'LOGGED_IN';
+        const isSuperAdmin = role === 'SUPERADMIN' && registerVerificationStatus === 'SUPERADMINLOGGEDIN';
+        const isSubAgent = role === 'SUB_AGENT' && registerVerificationStatus === 'LOGGED_IN';
+
+        if (isVerifiedAgent || isVerifiedUser || isSuperAdmin || isSubAgent) {
+          router.replace('/(tabs)/home/homeMainPage');
+          return;
+        }
+
+        // Unknown state -- fall through to landing page
+        if (isMounted) {
+          setIsChecking(false);
+          setShouldShowLanding(true);
+        }
+      } catch (error) {
+        // Malformed data in SecureStore -- clear it and show landing
+        console.warn('Failed to read stored user data:', error);
+        await SecureStore.deleteItemAsync('registerDetail');
+        if (isMounted) {
+          setIsChecking(false);
+          setShouldShowLanding(true);
+        }
       }
-      
-      const userData = JSON.parse(user)
-      setAccountLoginData(userData)
-      console.log(userData, 'userData------');
-      
-      let navigated = false;
-      
-      if(userData.registerVerificationStatus === 'PARTIAL' && userData.role === 'AGENT'){
-        router.push('/(auth)/finalRegisterForm')
-        navigated = true;
-      }
-      else if(userData.registerVerificationStatus === 'PARTIAL' && userData.role === 'USER'){
-        router.replace('/(auth)/finalRegisterForm')
-        navigated = true;
-      }
-      else if(userData.registerVerificationStatus === 'APPOINTMENT_BOOKED' && userData.role === 'AGENT'){
-        router.replace('/(tabs)/home/homeMainPage')
-        navigated = true;
-      }
-      else if(userData.registerVerificationStatus === 'LOGGED_IN' && userData.role === 'AGENT'){
-        router.replace('/(tabs)/home/homeMainPage')
-        navigated = true;
-      }
-      else if(userData.registerVerificationStatus === 'LOGGED_IN' && userData.role === 'USER'){
-        router.replace('/(tabs)/home/homeMainPage')
-        navigated = true;
-      }
-      else if(userData.registerVerificationStatus === 'SUPERADMINLOGGEDIN' && userData.role === 'SUPERADMIN'){
-        router.replace('/(tabs)/home/homeMainPage')
-        navigated = true;
-      }      
-      else if(userData.registerVerificationStatus === 'LOGGED_IN' && userData.role === 'SUB_AGENT'){
-        router.replace('/(tabs)/home/homeMainPage')
-        navigated = true;
-      }
-      
-      setIsChecking(false);
-      // Only show landing page if no navigation occurred
-      if(!navigated){
-        setShouldShowLanding(true);
-      }
-    }
+    };
 
     checkUser();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   // Show loading while checking user status
@@ -158,17 +160,12 @@ const styles = StyleSheet.create({
   loadingContainer: {
     justifyContent: 'center',
   },
-  logoText: {
-    marginTop: verticalScale(60),
-  },
-  logoContainer:{
-    display:"flex",
-    flexDirection:"column",
-    justifyContent:"center",
-    alignItems:"center",
-    paddingBottom:verticalScale(20),
-    width:"100%"
-    
+  logoContainer: {
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingBottom: verticalScale(20),
+    width: '100%',
   },
   logoImgContainer:{
     width:horizontalScale(100),
@@ -197,13 +194,6 @@ const styles = StyleSheet.create({
   heroTextLogoText: {
     color: '#FFAC1C',
     fontSize: moderateScale(30),
-  },
-  buttonContainer: {
-    marginTop: verticalScale(20),
-    backgroundColor: '#FFAC1C',
-    padding: moderateScale(10),
-    borderRadius: moderateScale(10),
-    width: horizontalScale(300),
   },
   customButton: {
     backgroundColor: '#FFAC1C',

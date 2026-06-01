@@ -47,6 +47,7 @@ const Login = () => {
         mobileCode: checkIfAlreadyRegistered.data.accountExists.mobileCode,
         mobileCountry: checkIfAlreadyRegistered.data.accountExists.mobileCountry,
         mobileNumber: checkIfAlreadyRegistered.data.accountExists.mobileNumber,
+        email: checkIfAlreadyRegistered.data.accountExists.email,
         name: checkIfAlreadyRegistered.data.accountExists.name,
         password: checkIfAlreadyRegistered.data.accountExists.password,
         registerVerificationStatus: checkIfAlreadyRegistered.data.accountExists.registerVerificationStatus,

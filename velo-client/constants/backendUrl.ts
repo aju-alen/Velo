@@ -2,4 +2,4 @@
 
 // export const ipURL = "https://velo-vackend.onrender.com" //http + ip + port
 
-export const ipURL = process.env.EXPO_PUBLIC_BACKEND_URL || "http://10.65.0.34:3001"
+export const ipURL = process.env.EXPO_PUBLIC_BACKEND_URL || "http://10.65.4.20:3001"

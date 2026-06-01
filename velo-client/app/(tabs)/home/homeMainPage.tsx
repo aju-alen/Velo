@@ -1,4 +1,4 @@
-import { StyleSheet, Text, TouchableOpacity, View, FlatList, Dimensions, ActivityIndicator, useColorScheme, SafeAreaView, ScrollView } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, FlatList, Dimensions, ActivityIndicator, useColorScheme, ScrollView } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import CustomButton from '@/components/CustomButton';
 import * as SecureStore from 'expo-secure-store';
@@ -14,6 +14,7 @@ import useShipmentStore from '@/store/shipmentStore';
 import axiosInstance, { setAuthorizationHeader } from '@/constants/axiosHeader';
 import { signOut, getAuth } from '@react-native-firebase/auth';
 import { Colors } from '@/constants/Colors';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = (width - horizontalScale(40) - horizontalScale(32)) / 3;
@@ -341,22 +342,7 @@ const HomeMainPage = () => {
               </TouchableOpacity>
 
               {/* Recent Shipments Section */}
-              {recentShipments.length > 0 && (
-                <View style={styles.recentShipmentsSection}>
-                  <View style={styles.sectionHeader}>
-                    <Text style={[styles.sectionTitle, { color: themeColors.text }]}>Recent Shipments</Text>
-                    <TouchableOpacity
-                      onPress={() => router.push('/(tabs)/shippinghistory/orderHistoryMainPage')}
-                      activeOpacity={0.7}
-                    >
-                      <Text style={[styles.viewAllLink, { color: '#FFAC1C' }]}>View All</Text>
-                    </TouchableOpacity>
-                  </View>
-                  <View style={styles.recentShipmentsList}>
-                    {recentShipments.map((item, index) => renderRecentShipment(item, index))}
-                  </View>
-                </View>
-              )}
+             
             </>
           )}
 

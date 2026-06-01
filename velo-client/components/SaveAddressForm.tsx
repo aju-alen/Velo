@@ -1,4 +1,4 @@
-import { StyleSheet, Modal, TouchableWithoutFeedback, ScrollView, TouchableOpacity, TextInput, Dimensions, FlatList, Platform, View, Text, useColorScheme } from 'react-native'
+import { StyleSheet, Modal, TouchableWithoutFeedback, ScrollView, TouchableOpacity, TextInput, Dimensions, FlatList, Platform, View, Text, useColorScheme, KeyboardAvoidingView, Keyboard, Pressable } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { horizontalScale, moderateScale, verticalScale } from '@/constants/metrics'
 import { MaterialIcons } from '@expo/vector-icons'
@@ -12,8 +12,9 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import useLoginAccountStore from '@/store/loginAccountStore'
 import axiosInstance from '@/constants/axiosHeader'
 import { Colors } from '@/constants/Colors';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-const { width } = Dimensions.get('window')
+const { height: windowHeight } = Dimensions.get('window');
 
 const SaveAddressForm = ({ addressModalVisible, onClose, userId }) => {
   const {  setSavedAddressData, resetShipmentData } = useShipmentStore()
@@ -22,6 +23,8 @@ const {accountLoginData} = useLoginAccountStore()
   const savedAddressData = useShipmentStore(state => state.savedAddressData)
   const colorScheme = useColorScheme() ?? 'light';
   const themeColors = Colors[colorScheme];
+  const insets = useSafeAreaInsets();
+  const sheetMaxHeight = Math.round(windowHeight * 0.92);
 
 
   console.log(savedAddressData,'savedAddressData------______');
@@ -230,26 +233,42 @@ console.log(savedAddressData,'savedAddressData------______');
         onRequestClose={onClose}
 
       >
-      
+        <KeyboardAvoidingView
+          style={styles.keyboardAvoidingRoot}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top : 0}
+        >
           <View style={[styles.modalOverlay, { backgroundColor: 'rgba(0,0,0,0.5)' }]}>
-            <TouchableWithoutFeedback>
-              <View style={[styles.modalContent, { backgroundColor: themeColors.background }]}>
-
-
-               
+            <Pressable
+              style={StyleSheet.absoluteFill}
+              onPress={Keyboard.dismiss}
+              accessibilityRole="button"
+              accessibilityLabel="Dismiss keyboard"
+            />
+            <View
+              style={[
+                styles.modalContent,
+                { backgroundColor: themeColors.background, maxHeight: sheetMaxHeight },
+              ]}
+            >
                   <View style={[styles.modalHeader, { backgroundColor: themeColors.background }]}>
-                    <TouchableOpacity onPress={()=>setContactModal(true)}>
-                    <AntDesign name="contacts" size={24} color={colorScheme === 'dark' ? 'white' : 'black'} />
+                    <TouchableOpacity onPress={() => setContactModal(true)}>
+                      <AntDesign name="contacts" size={24} color={colorScheme === 'dark' ? 'white' : 'black'} />
                     </TouchableOpacity>
                     <Text style={[styles.modalTitle, { color: themeColors.text }]}>Add New Address</Text>
-                    <TouchableOpacity
-                      onPress={onClose}
-                    >
-                      <MaterialIcons name="close" size={24} color= {colorScheme === 'dark' ? '#fff' : '#000'} />
+                    <TouchableOpacity onPress={onClose}>
+                      <MaterialIcons name="close" size={24} color={colorScheme === 'dark' ? '#fff' : '#000'} />
                     </TouchableOpacity>
                   </View>
-                  <ScrollView showsVerticalScrollIndicator={false}>
-                  <View style={[styles.formContainer, { backgroundColor: themeColors.background }]}>
+                  <ScrollView
+                    style={styles.formScroll}
+                    contentContainerStyle={styles.formScrollContent}
+                    showsVerticalScrollIndicator={false}
+                    keyboardShouldPersistTaps="handled"
+                    keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+                    automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
+                  >
+                    <View style={[styles.formContainer, { backgroundColor: themeColors.background }]}>
                     <TextInput
                       placeholder="Enter First And Last Name"
                       value={savedAddressData.name}
@@ -385,9 +404,9 @@ console.log(savedAddressData,'savedAddressData------______');
                     </View>
                   </View>
                 </ScrollView>
-              </View>
-            </TouchableWithoutFeedback>
+            </View>
           </View>
+        </KeyboardAvoidingView>
 
         {renderContactModal()}
       </Modal>
@@ -398,18 +417,22 @@ console.log(savedAddressData,'savedAddressData------______');
 export default SaveAddressForm
 
 const styles = StyleSheet.create({
+  keyboardAvoidingRoot: {
+    flex: 1,
+  },
   modalOverlay: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: verticalScale(150),
-
+    justifyContent: 'flex-end',
+    alignItems: 'stretch',
+    width: '100%',
   },
   modalContent: {
-    borderRadius: moderateScale(16),
-    width: width * 1.0,
-    height: '130%',
-    paddingVertical: verticalScale(24),
+    zIndex: 1,
+    borderTopLeftRadius: moderateScale(16),
+    borderTopRightRadius: moderateScale(16),
+    width: '100%',
+    paddingTop: verticalScale(24),
+    paddingBottom: verticalScale(12),
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -417,6 +440,15 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.1,
     shadowRadius: 8,
+    overflow: 'hidden',
+  },
+  formScroll: {
+    flexGrow: 1,
+    flexShrink: 1,
+  },
+  formScrollContent: {
+    flexGrow: 1,
+    paddingBottom: verticalScale(24),
   },
   modalTitle: {
     fontSize: 22,

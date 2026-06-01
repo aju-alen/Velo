@@ -1,5 +1,6 @@
 import React from 'react'
-import { ScrollView, StyleSheet, TouchableOpacity, View, Text, useColorScheme, SafeAreaView } from 'react-native'
+import { ScrollView, StyleSheet, TouchableOpacity, View, Text, useColorScheme } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import { verticalScale, horizontalScale, moderateScale } from '@/constants/metrics'
 import useShipmentStore from '@/store/shipmentStore'
 import useLoginAccountStore from '@/store/loginAccountStore'

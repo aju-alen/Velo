@@ -1,4 +1,4 @@
-import { SafeAreaView, StyleSheet, TouchableOpacity, TextInput, View, ScrollView,Alert, Text, useColorScheme } from 'react-native'
+import { SafeAreaView, StyleSheet, TouchableOpacity, TextInput, View, ScrollView, Alert, Text, useColorScheme, KeyboardAvoidingView, Platform } from 'react-native'
 import React, { useState } from 'react'
 import { horizontalScale, moderateScale, verticalScale } from '@/constants/metrics'
 import { Divider} from 'react-native-paper'
@@ -8,11 +8,12 @@ import TimePickerModal from '@/components/TimePickerModal'
 import PickupInstructionModal from '@/components/PickupInstructionModal'
 import { router } from 'expo-router'
 import { Colors } from '@/constants/Colors';
-
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const ShipmentSchedulePickup = () => {
   const colorScheme = useColorScheme() ?? 'light';
   const themeColors = Colors[colorScheme];
+  const insets = useSafeAreaInsets();
   const { savedAddressData, accountAddressData, deliveryServices, packageDetail, setDeliveryServices,itemType,setEditData,packageDescription } = useShipmentStore()
   const [checked, setChecked] = useState('yes')
   const [openTimeModal, setOpenTimeModal] = useState(false)
@@ -50,11 +51,19 @@ const ShipmentSchedulePickup = () => {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]}>
-      <ScrollView 
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
+      <KeyboardAvoidingView
+        style={styles.keyboardAvoidingRoot}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top : 0}
       >
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+          automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
+        >
 
         {/* Pickup Date Section */}
         <View style={[styles.sectionContainer, { backgroundColor: themeColors.background }]}>
@@ -164,7 +173,8 @@ const ShipmentSchedulePickup = () => {
             </Text>
           </TouchableOpacity>
         </View>
-      </ScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
 
       <TimePickerModal 
         openModal={openTimeModal} 
@@ -182,6 +192,9 @@ export default ShipmentSchedulePickup
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  keyboardAvoidingRoot: {
     flex: 1,
   },
   scrollView: {

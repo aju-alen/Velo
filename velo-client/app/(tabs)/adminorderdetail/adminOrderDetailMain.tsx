@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, FlatList, TouchableOpacity, RefreshControl, View, Text, useColorScheme, SafeAreaView, Platform } from 'react-native';
+import { StyleSheet, FlatList, TouchableOpacity, RefreshControl, View, Text, useColorScheme, Platform } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { ipURL } from '@/constants/backendUrl';
 import { router } from 'expo-router';

@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "Velo International Shipping",
+    "name": "Velo Shipping",
     "slug": "velo-international-shipping",
-    "version": "1.0.3",
+    "version": "1.0.5",
     "orientation": "portrait",
-    "icon": "./assets/images/appstore.png",
+    "icon": "./assets/images/android.png",
     "scheme": "velo-international-shipping",
     "userInterfaceStyle": "automatic",
     "splash": {
@@ -29,14 +29,14 @@
           "backgroundColor": "#000000"
         }
       },
-      "buildNumber": "20"
+      "buildNumber": "22"
     },
     "android": {
       "googleServicesFile": "./google-services-velo.json",
-      "versionCode": 6,
+      "versionCode": 8,
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/appstore.png",
-        "backgroundColor": "#000000"
+        "foregroundImage": "./assets/images/velo-android.png",
+        "backgroundColor": "#FFFFFF"
       },
       "package": "com.rise.velointernationalshipping",
       "permissions": [
@@ -56,7 +56,8 @@
         "expo-build-properties",
         {
           "ios": {
-            "useFrameworks": "static"
+            "useFrameworks": "static",
+            "forceStaticLinking": ["RNFBApp", "RNFBAuth"]
           }
         }
       ],
@@ -89,7 +90,16 @@
           "organization": "rise-ltd"
         }
       ],
-      "@sentry/react-native"
+      "@sentry/react-native",
+      "@react-native-community/datetimepicker",
+      "expo-font",
+      "expo-web-browser",
+      [
+        "@stripe/stripe-react-native",
+        {
+          "merchantIdentifier": "merchant.com.rise.velointernationalshipping"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

@@ -8,7 +8,6 @@ import {
   RefreshControl,
   Text,
   useColorScheme,
-  SafeAreaView
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { horizontalScale, verticalScale, moderateScale } from '@/constants/metrics';
@@ -18,6 +17,7 @@ import useLoginAccountStore from '@/store/loginAccountStore';
 import axiosInstance from '@/constants/axiosHeader';
 import { router } from 'expo-router';
 import { Colors } from '@/constants/Colors';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
 

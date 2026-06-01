@@ -4,6 +4,7 @@ import { useStripe } from '@stripe/stripe-react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Divider } from 'react-native-paper';
 import { router, useLocalSearchParams } from 'expo-router';
+import Constants from 'expo-constants';
 import { moderateScale, verticalScale, horizontalScale } from '@/constants/metrics';
 
 // Store imports
@@ -22,7 +23,7 @@ interface TotalAmount {
   servicesPrice: number;
 }
 
-const Payment = () => {
+const PaymentContent = () => {
   const { shipmentId } = useLocalSearchParams();
   console.log(shipmentId, 'payment___________');
 
@@ -46,6 +47,10 @@ const Payment = () => {
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [presentError, setPresentError] = useState<string | null>(null);
   const colorScheme = useColorScheme() ?? 'light';
+  const configScheme = Constants.expoConfig?.scheme;
+  const appScheme = Array.isArray(configScheme)
+    ? (configScheme[0] ?? 'velo-international-shipping')
+    : (configScheme ?? 'velo-international-shipping');
   const themeColors = Colors[colorScheme];
   const bgCard = colorScheme === 'dark' ? '#181A20' : '#FFF';
   const borderColor = colorScheme === 'dark' ? '#333' : '#E0E0E0';
@@ -93,6 +98,7 @@ const Payment = () => {
     if (!shipmentId || typeof shipmentId !== 'string') {
       throw new Error('Missing shipment information. Please go back and try again.');
     }
+    console.log(accountLoginData, 'accountLoginData--in--payment');
     if (!accountLoginData?.id || !accountLoginData?.email) {
       throw new Error('Account information is missing. Please sign in again.');
     }
@@ -148,7 +154,7 @@ const Payment = () => {
           email: accountLoginData.email,
           address: { country: accountLoginData.mobileCountry },
         },
-        returnURL: 'myapp://home',
+        returnURL: `${appScheme}://stripe-redirect`,
       });
 
       if (error) {
@@ -289,7 +295,6 @@ const Payment = () => {
   }
 
   return (
-    <StripeProviderWrapper>
     <View style={[styles.container, { backgroundColor: themeColors.background }]}>
       {/* Redesigned Header */}
       <View style={[styles.headerContainer, { backgroundColor: bgCard }]}>
@@ -337,6 +342,13 @@ const Payment = () => {
         {loading && <MaterialIcons name="arrow-forward" size={20} color="#000" />}
       </TouchableOpacity>
     </View>
+  );
+};
+
+const Payment = () => {
+  return (
+    <StripeProviderWrapper>
+      <PaymentContent />
     </StripeProviderWrapper>
   );
 };

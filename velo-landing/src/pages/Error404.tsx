@@ -191,7 +191,7 @@ const Error404 = () => {
               Professional shipping solutions for individuals and businesses worldwide
             </p>
             <div className="text-sm text-gray-500">
-              © 2024 Velo International Shipping. All rights reserved.
+              © 2024 Velo Shipping. All rights reserved.
             </div>
           </div>
         </div>

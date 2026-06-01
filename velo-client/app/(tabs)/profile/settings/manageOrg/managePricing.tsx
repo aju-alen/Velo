@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, TextInput, ScrollView, View, Text, useColorScheme, SafeAreaView } from 'react-native';
+import { StyleSheet, TextInput, ScrollView, View, Text, useColorScheme } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { TouchableOpacity } from 'react-native';
 import axiosInstance from '@/constants/axiosHeader';
 import { router } from 'expo-router';
@@ -25,7 +26,7 @@ const ManagePricingOption = () => {
             shipmentTimeline,
         }
         const savePricing = await axiosInstance.put(`/api/organisation/save-pricing`,formData)
-        router.replace('/profile/settings')
+        router.replace('/(tabs)/profile/settings/settingsHome')
         
     }
     catch(e){

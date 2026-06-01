@@ -1,4 +1,4 @@
-import { FlatList, StyleSheet, TouchableOpacity, Image, ActivityIndicator, TextInput, Alert, View, Text, useColorScheme, SafeAreaView, Platform, Animated } from 'react-native'
+import { FlatList, StyleSheet, TouchableOpacity, Image, ActivityIndicator, TextInput, Alert, View, Text, useColorScheme, Platform, Animated } from 'react-native'
 import React, { useEffect, useState, useRef } from 'react'
 import { verticalScale, horizontalScale, moderateScale } from '@/constants/metrics'
 import { router, useLocalSearchParams } from 'expo-router'
@@ -7,6 +7,7 @@ import { ipURL } from '@/constants/backendUrl'
 import MaterialIcons from '@expo/vector-icons/MaterialIcons'
 import * as SecureStore from 'expo-secure-store'
 import { Colors } from '@/constants/Colors';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const MarketHome = () => {
   const colorScheme = useColorScheme() ?? 'light';

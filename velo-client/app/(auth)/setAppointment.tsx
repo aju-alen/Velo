@@ -1,4 +1,4 @@
-import { SafeAreaView, StyleSheet, Platform, TouchableOpacity, View, Text, useColorScheme } from 'react-native';
+import { StyleSheet, Platform, TouchableOpacity, View, Text, useColorScheme } from 'react-native';
 import React, { useState } from 'react';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import CustomButton from '@/components/CustomButton';
@@ -8,6 +8,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import useLoginAccountStore from '@/store/loginAccountStore';
 import { Colors } from '@/constants/Colors';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const SetAppointment = () => {
   const { setAccountLoginData } = useLoginAccountStore();

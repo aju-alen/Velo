@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { StyleSheet, Text, View, Image, Animated, Easing, useColorScheme } from 'react-native';
 import { TouchableOpacity } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import CustomButton from '@/components/CustomButton';
 import { verticalScale, horizontalScale, moderateScale } from '@/constants/metrics';
@@ -14,6 +15,7 @@ const ChooseRole = () => {
   
   const colorScheme = useColorScheme() ?? 'light';
   const themeColors = Colors[colorScheme];
+  const insets = useSafeAreaInsets();
 
   const handleContinueRegister = () => {
     if (role === 'GUEST') {
@@ -89,7 +91,7 @@ const ChooseRole = () => {
           style={styles.reactLogo}
         />
       }>
-      <View style={[styles.container, { backgroundColor: themeColors.background }]}>
+      <View style={[styles.container, { backgroundColor: themeColors.background, paddingBottom: insets.bottom + verticalScale(16) }]}>
         <Text style={[styles.title, { color: themeColors.text }]}>Select Role</Text>
 
         <View style={styles.cardsContainer}>

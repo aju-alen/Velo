@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import { FlatList, TouchableOpacity, StyleSheet, Alert, View, Text, useColorScheme, SafeAreaView, ActivityIndicator } from 'react-native'
+import { FlatList, TouchableOpacity, StyleSheet, Alert, View, Text, useColorScheme, ActivityIndicator } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
 import useLoginAccountStore from '@/store/loginAccountStore'
 import axiosInstance from '@/constants/axiosHeader'

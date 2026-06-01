@@ -1,4 +1,5 @@
-import { StyleSheet, ScrollView, TouchableOpacity, FlatList, Image, ActivityIndicator, View, Text, useColorScheme, SafeAreaView, Platform } from 'react-native'
+import { StyleSheet, ScrollView, TouchableOpacity, FlatList, Image, ActivityIndicator, View, Text, useColorScheme, Platform } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import React, { useEffect, useState } from 'react'
 import { useLocalSearchParams, router } from 'expo-router'
 import axios from 'axios'

@@ -1,4 +1,5 @@
-import { StyleSheet, TextInput, TouchableOpacity, ScrollView, Platform, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, RefreshControl, Text, View, SafeAreaView, useColorScheme } from 'react-native'
+import { StyleSheet, TextInput, TouchableOpacity, ScrollView, Platform, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, Text, View, useColorScheme } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import React, { useEffect, useState } from 'react'
 import { verticalScale, horizontalScale, moderateScale } from '@/constants/metrics'
 import axios from 'axios'
@@ -8,6 +9,7 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons'
 import CustomButton from '@/components/CustomButton'
 import {Picker} from '@react-native-picker/picker';
 import { Colors } from '@/constants/Colors'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import axiosInstance from '@/constants/axiosHeader'
 import * as ImagePicker from 'expo-image-picker'
 import * as ImageManipulator from 'expo-image-manipulator'
@@ -16,7 +18,8 @@ import { Image, ActivityIndicator } from 'react-native'
 const CreateListing = () => {
   const colorScheme = useColorScheme() ?? 'light'
   const themeColors = Colors[colorScheme]
-  
+  const insets = useSafeAreaInsets()
+
   const { accountId } = useLocalSearchParams()
   const [categoryData, setCategoryData] = useState([])
   const [loading, setLoading] = useState(true)
@@ -207,17 +210,22 @@ const CreateListing = () => {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]}>
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={{ flex: 1 }}
+        style={styles.keyboardAvoidingRoot}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top : 0}
       >
         <TouchableWithoutFeedback onPress={() => {
           Keyboard.dismiss()
           setShowCategoryDropdown(false)
           setShowConditionDropdown(false)
         }}>
-          <ScrollView 
+          <ScrollView
+            style={styles.scrollView}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.scrollContent}
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+            automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
           >
             <View style={styles.header}>
               <TouchableOpacity onPress={() => router.back()} activeOpacity={0.7}>
@@ -421,6 +429,12 @@ export default CreateListing
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  keyboardAvoidingRoot: {
+    flex: 1,
+  },
+  scrollView: {
     flex: 1,
   },
   scrollContent: {

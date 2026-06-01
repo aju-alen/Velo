@@ -7,11 +7,14 @@ dotenv.config();
 
 import Stripe from 'stripe';
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+const stripeApiVersion = process.env.STRIPE_API_VERSION || '2024-06-20';
 const prisma = new PrismaClient();
 
 export const getKeys = async (req, res, next) => {
     try {
+      console.log(process.env.STRIPE_PUBLISHABLE_KEY, 'process.env.STRIPE_PUBLISHABLE_KEY');
         res.status(200).json({
+          
             publishableKey: process.env.STRIPE_PUBLISHABLE_KEY,
         });
     }
@@ -32,7 +35,7 @@ export const createPaymentIntent = async (req, res, next) => {
         const customer = await stripe.customers.create();
         const ephemeralKey = await stripe.ephemeralKeys.create(
             { customer: customer.id },
-            { apiVersion: '2020-08-27' }
+            { apiVersion: stripeApiVersion }
         );
         const paymentIntent = await stripe.paymentIntents.create({
             amount: Math.round(Number(amount) * 100),
