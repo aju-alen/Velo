@@ -1,6 +1,6 @@
 import express from "express";
 const router = express.Router()
-import{register,verifyAccountExist,bookAgentAppointment,loginAccount,checkMobileNumber,checkEmailExists,changePassword,deleteAccount,forgotPassword,verifyResetPasswordOTP,resetPassword} from '../controllers/auth-controller.js';
+import{register,verifyAccountExist,bookAgentAppointment,loginAccount,checkMobileNumber,checkEmailExists,changePassword,deleteAccount,abandonRegistration,forgotPassword,verifyResetPasswordOTP,resetPassword} from '../controllers/auth-controller.js';
 
 
 router.post('/register', register);
@@ -8,6 +8,7 @@ router.post('/book-appointment',bookAgentAppointment);
 router.post('/login',loginAccount)
 router.post('/change-password', changePassword);
 router.post('/delete-account', deleteAccount);
+router.post('/abandon-registration', abandonRegistration);
 router.post('/forgot-password', forgotPassword);
 router.post('/verify-reset-otp', verifyResetPasswordOTP);
 router.post('/reset-password', resetPassword);

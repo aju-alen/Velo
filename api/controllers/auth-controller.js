@@ -7,6 +7,7 @@ import { getPasswordResetOTPEmail } from "../utils/emailTemplates/passwordResetO
 import dotenv from "dotenv";
 import { log } from "console";
 import { get } from 'http';
+import { deleteFirebaseUserByPhone } from "../utils/firebaseAdmin.js";
 dotenv.config();
 
 const prisma = new PrismaClient();
@@ -361,6 +362,51 @@ export const changePassword = async (req, res) => {
   }
 };
 
+const INCOMPLETE_REGISTRATION_STATUSES = ["PARTIAL", "APPOINTMENT_BOOKED"];
+
+export const abandonRegistration = async (req, res) => {
+  const { userId } = req.body;
+
+  if (!userId) {
+    return res.status(400).json({ message: "userId is required" });
+  }
+
+  try {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+
+    if (user) {
+      if (!INCOMPLETE_REGISTRATION_STATUSES.includes(user.registerVerificationStatus)) {
+        return res.status(400).json({ message: "Only incomplete registrations can be abandoned" });
+      }
+
+      await prisma.user.delete({ where: { id: userId } });
+      await prisma.$disconnect();
+      return res.status(200).json({ message: "Registration abandoned successfully" });
+    }
+
+    const agent = await prisma.agent.findUnique({ where: { id: userId } });
+
+    if (agent) {
+      if (!INCOMPLETE_REGISTRATION_STATUSES.includes(agent.registerVerificationStatus)) {
+        return res.status(400).json({ message: "Only incomplete registrations can be abandoned" });
+      }
+
+      await prisma.organisation.deleteMany({
+        where: { organisationLeaderAgentId: userId },
+      });
+      await prisma.agent.delete({ where: { id: userId } });
+      await prisma.$disconnect();
+      return res.status(200).json({ message: "Registration abandoned successfully" });
+    }
+
+    return res.status(404).json({ message: "Account not found" });
+  } catch (err) {
+    console.log(err);
+    await prisma.$disconnect();
+    return res.status(500).json({ message: "Failed to abandon registration" });
+  }
+};
+
 export const deleteAccount = async (req, res) => {
   const { userId, password } = req.body;
   try {
@@ -379,6 +425,13 @@ export const deleteAccount = async (req, res) => {
     if (!isMatch) {
       return res.status(400).json({ message: 'Password is incorrect' });
     }
+    // Delete Firebase auth user so the phone number can be reused
+    try {
+      await deleteFirebaseUserByPhone(user.mobileCode, user.mobileNumber);
+    } catch (firebaseErr) {
+      console.error('Firebase user deletion failed:', firebaseErr);
+    }
+
     // Delete user/agent
     if (userType === 'user') {
       await prisma.user.delete({ where: { id: userId } });
