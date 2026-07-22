@@ -1,0 +1,50 @@
+import {
+  Archive,
+  BarChart3,
+  Box,
+  Building2,
+  Car,
+  FileText,
+  Globe,
+  Home,
+  Laptop,
+  MapPin,
+  Package,
+  Plane,
+  Radar,
+  Shirt,
+  Ship,
+  ShoppingBag,
+  Smartphone,
+  Truck,
+  Users,
+  Warehouse,
+  type LucideIcon,
+} from 'lucide-react';
+
+const iconMap: Record<string, LucideIcon> = {
+  MapPin,
+  Radar,
+  Truck,
+  Smartphone,
+  Plane,
+  Ship,
+  Package,
+  Box,
+  FileText,
+  Laptop,
+  Archive,
+  Building2,
+  Home,
+  Warehouse,
+  BarChart3,
+  Users,
+  Globe,
+  ShoppingBag,
+  Shirt,
+  Car,
+};
+
+export function getIcon(name: string): LucideIcon {
+  return iconMap[name] ?? Package;
+}

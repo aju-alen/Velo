@@ -23,7 +23,9 @@ app.use(cors({
         "http://localhost:19000",
         "http://10.65.4.65:19006",
         "http://localhost:5173",
-
+        "http://localhost:3000",
+        "https://velointl.com",
+        "https://www.velointl.com",
     ],
 })); 
 app.use(bodyParser.urlencoded({ extended: true }));
