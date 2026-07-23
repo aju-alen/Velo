@@ -25,4 +25,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 export const metadata = {
   metadataBase: new URL(siteConfig.url),
+  icons: {
+    icon: [{ url: '/logo.png', type: 'image/png' }],
+    shortcut: '/logo.png',
+    apple: '/logo.png',
+  },
 };
