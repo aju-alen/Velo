@@ -2,6 +2,7 @@ import { StyleSheet, Platform, TouchableOpacity, View, Text, useColorScheme } fr
 import React, { useState } from 'react';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import CustomButton from '@/components/CustomButton';
+import StartOverButton from '@/components/StartOverButton';
 import axios from 'axios';
 import { ipURL } from '@/constants/backendUrl';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -141,6 +142,7 @@ const SetAppointment = () => {
             buttonText="Confirm Appointment"
             buttonWidth={300}
           />
+          <StartOverButton />
         </View>
       </View>
     </SafeAreaView>

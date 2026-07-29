@@ -5,6 +5,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { OtpInput } from 'react-native-otp-entry';
 import * as SecureStore from 'expo-secure-store';
 import CustomButton from '@/components/CustomButton';
+import StartOverButton from '@/components/StartOverButton';
 import axios from 'axios';
 import { ipURL } from '@/constants/backendUrl';
 import { Colors } from '@/constants/Colors';
@@ -120,7 +121,7 @@ const OtpInputs = () => {
         handlePress={()=>handleVerifyNumber(otp)}
       />
 
-     
+      <StartOverButton />
     </View>
   );
 };

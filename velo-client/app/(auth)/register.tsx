@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { StyleSheet, TextInput, ScrollView, Platform, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, View, Text, useColorScheme } from 'react-native';
 import { verticalScale, horizontalScale, moderateScale } from '@/constants/metrics'
 import CustomButton from '@/components/CustomButton';
+import StartOverButton from '@/components/StartOverButton';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import axios from 'axios';
@@ -238,6 +239,7 @@ const Register = () => {
                   buttonText='Register'
                   handlePress={handleRegister}
                 />
+                <StartOverButton />
               </View>
             </View>
           </ScrollView>

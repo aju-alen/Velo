@@ -2,6 +2,7 @@ import { StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform
 import React, { useEffect, useState } from 'react';
 import { verticalScale, horizontalScale, moderateScale } from '@/constants/metrics';
 import CustomButton from '@/components/CustomButton';
+import StartOverButton from '@/components/StartOverButton';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import { Chip, Divider, RadioButton } from 'react-native-paper';
@@ -507,6 +508,7 @@ const FinalRegisterForm = () => {
                     handlePress={handleFinalRegisterForm}
                     disableButton={buttonDisable}
                   />
+                  <StartOverButton />
                 </View>
               </ScrollView>
             </View>

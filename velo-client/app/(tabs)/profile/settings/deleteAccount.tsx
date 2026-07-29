@@ -6,7 +6,7 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import useLoginAccountStore from '@/store/loginAccountStore';
 import axiosInstance from '@/constants/axiosHeader';
 import { router } from 'expo-router';
-import { getAuth, signOut } from '@react-native-firebase/auth';
+import { getAuth, signOut, deleteUser } from '@react-native-firebase/auth';
 import * as SecureStore from 'expo-secure-store';
 
 const DeleteAccount = () => {
@@ -40,14 +40,21 @@ const DeleteAccount = () => {
       setSuccess('Account deleted successfully.');
       setTimeout(async () => {
         await SecureStore.deleteItemAsync('registerDetail');
-      try {
-        await signOut(getAuth());
-      } catch (e) {
-        
-      }
-      resetAccountLoginData();
-      router.replace('/(auth)/login');
-        router.replace('/login');
+        const auth = getAuth();
+        try {
+          if (auth.currentUser) {
+            await deleteUser(auth.currentUser);
+          }
+        } catch (e) {
+          // Firebase user may already be deleted server-side or session expired
+        }
+        try {
+          await signOut(auth);
+        } catch (e) {
+          // No active Firebase session
+        }
+        resetAccountLoginData();
+        router.replace('/(auth)/login');
       }, 1200);
     } catch (err: any) {
       setError(err?.response?.data?.message || 'Failed to delete account.');

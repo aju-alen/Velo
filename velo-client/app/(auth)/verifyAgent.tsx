@@ -7,6 +7,7 @@ import { moderateScale, verticalScale, horizontalScale } from '@/constants/metri
 import * as SecureStore from 'expo-secure-store'
 import { router } from 'expo-router'
 import { Colors } from '@/constants/Colors'
+import StartOverButton from '@/components/StartOverButton'
 
 const VerifyAgent = () => {
   const colorScheme = useColorScheme() ?? 'light';
@@ -258,6 +259,8 @@ const VerifyAgent = () => {
           </TouchableOpacity>
         </Animated.View>
       )}
+
+      <StartOverButton />
     </View>
   )
 }

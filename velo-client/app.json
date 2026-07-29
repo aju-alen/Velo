@@ -2,7 +2,7 @@
   "expo": {
     "name": "Velo Shipping",
     "slug": "velo-international-shipping",
-    "version": "1.0.5",
+    "version": "1.1.13",
     "orientation": "portrait",
     "icon": "./assets/images/android.png",
     "scheme": "velo-international-shipping",
@@ -29,11 +29,11 @@
           "backgroundColor": "#000000"
         }
       },
-      "buildNumber": "22"
+      "buildNumber": "32"
     },
     "android": {
       "googleServicesFile": "./google-services-velo.json",
-      "versionCode": 8,
+      "versionCode": 33,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/velo-android.png",
         "backgroundColor": "#FFFFFF"
@@ -57,7 +57,10 @@
         {
           "ios": {
             "useFrameworks": "static",
-            "forceStaticLinking": ["RNFBApp", "RNFBAuth"]
+            "forceStaticLinking": [
+              "RNFBApp",
+              "RNFBAuth"
+            ]
           }
         }
       ],

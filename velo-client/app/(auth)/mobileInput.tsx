@@ -1,4 +1,5 @@
 import CustomButton from '@/components/CustomButton'
+import StartOverButton from '@/components/StartOverButton'
 import { ipURL } from '@/constants/backendUrl'
 import { Colors } from '@/constants/Colors'
 import { horizontalScale, moderateScale, verticalScale } from '@/constants/metrics'
@@ -209,6 +210,8 @@ const MobileInput = () => {
         >
           <Text style={styles.backText}>← Back to Mobile Input</Text>
         </TouchableOpacity>
+
+        <StartOverButton />
       </View>
     )
   }
@@ -275,6 +278,8 @@ const MobileInput = () => {
           handlePress={handleSignInWithPhoneNumber}
           disableButton={isLoading}
         />
+
+        <StartOverButton />
       </View>
     </TouchableWithoutFeedback>
   )

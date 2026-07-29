@@ -4,6 +4,7 @@ import { TouchableOpacity } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import CustomButton from '@/components/CustomButton';
+import StartOverButton from '@/components/StartOverButton';
 import { verticalScale, horizontalScale, moderateScale } from '@/constants/metrics';
 import { router } from 'expo-router';
 import { Colors } from '@/constants/Colors';
@@ -163,6 +164,7 @@ const ChooseRole = () => {
         </View>
 
         <CustomButton buttonText="Continue" handlePress={handleContinueRegister} />
+        <StartOverButton />
       </View>
     </ParallaxScrollView>
   );

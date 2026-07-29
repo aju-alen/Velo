@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, TouchableOpacity, View, Text, useColorScheme } from 'react-native';
 import { router } from 'expo-router';
 import { Colors } from '@/constants/Colors';
+import StartOverButton from '@/components/StartOverButton';
 
 const AgentRestriction = () => {
   const colorScheme = useColorScheme() ?? 'light';
@@ -39,6 +40,8 @@ const AgentRestriction = () => {
             Continue with Limited Access
           </Text>
         </TouchableOpacity>
+
+        <StartOverButton />
       </View>
     </View>
   );
