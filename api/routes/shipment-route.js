@@ -1,6 +1,6 @@
 import express from "express";
 const router = express.Router()
-import { createNewShipment, getAllPaidShipments, getAllOpenMarketShipments, getSinglePendingShipments, agentUpdateShipmentStatus,getAllAcceptedShipments,getTotalAmount,getSingleUserShipments,agentUpdateReadyPickupStatus,agentUpdatePickedUpStatus } from "../controllers/shipment-controller.js";
+import { createNewShipment, getAllPaidShipments, getAllOpenMarketShipments, getSinglePendingShipments, agentUpdateShipmentStatus,getAllAcceptedShipments,getTotalAmount,getSingleUserShipments,agentUpdateReadyPickupStatus,agentUpdatePickedUpStatus, trackShipmentByPublicId } from "../controllers/shipment-controller.js";
 import { verifyToken } from "../middlewares/jwtVerify.js";
 
 
@@ -14,6 +14,7 @@ router.get('/getTotalAmount/:organisationId/:shipmentId',verifyToken, getTotalAm
 
 router.get('/agent/get-single-pending-shipments/:singleShipmentId', verifyToken, getSinglePendingShipments); //get single pending shipments data for agents 
 router.get('/user/get-single-shipment/:singleShipmentId', verifyToken, getSingleUserShipments); //get single pending shipments data for agents 
+router.get('/user/track/:shipmentId', verifyToken, trackShipmentByPublicId); // track by public shipmentId
 
 router.get('/get-all-paid-shipments/:userId',verifyToken, getAllPaidShipments); //get all paid shipments of single user
 

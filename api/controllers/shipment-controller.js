@@ -1,8 +1,47 @@
 import { PrismaClient } from '@prisma/client';
+import { nanoid } from 'nanoid';
 import dotenv from "dotenv";
 dotenv.config();
 
 const prisma = new PrismaClient();
+
+const SHIPMENT_STATUS_ORDER = [
+    'PAYMENT_PENDING',
+    'ORDER_IN_MARKET',
+    'ORDER_PLACED',
+    'ORDER_CONFIRMED',
+    'SHIPMENT_PICKED',
+    'SHIPMENT_DROPPED',
+    'IN_TRANSIT_START',
+    'IN_TRANSIT_END',
+    'OUT_FOR_DELIVERY',
+    'DELIVERED',
+];
+
+const STATUS_IMAGE_KEY_MAP = {
+    SHIPMENT_PICKED: 'awsAgentShipmentPickedUrl',
+    SHIPMENT_DROPPED: 'awsAgentShipmentDroppedUrl',
+    IN_TRANSIT_START: 'awsAgentInTransitStartUrl',
+    IN_TRANSIT_END: 'awsAgentInTransitEndUrl',
+    OUT_FOR_DELIVERY: 'awsAgentOutForDeliveryUrl',
+    DELIVERED: 'awsAgentDeliveredUrl',
+};
+
+const buildShipmentTimeline = (shipment) => {
+    const currentStatus = shipment?.shipmentStatus;
+    const currentIndex = SHIPMENT_STATUS_ORDER.indexOf(currentStatus);
+
+    return SHIPMENT_STATUS_ORDER.map((status, index) => {
+        const imageKey = STATUS_IMAGE_KEY_MAP[status];
+        return {
+            status,
+            label: status.replace(/_/g, ' '),
+            completed: currentIndex >= 0 && index < currentIndex,
+            current: index === currentIndex,
+            imageUrl: imageKey ? shipment[imageKey] || null : null,
+        };
+    });
+};
 
 export const createNewShipment = async (req, res, next) => {
     const { 
@@ -106,11 +145,13 @@ export const getAllPaidShipments = async (req, res, next) => {
     const { userId } = req.params;
     try{
         if (req.verifyRole !== "USER" && req.verifyUserId !== userId) return res.status(403).send("You are not authorized to view paid shipments"); 
-        const allPaidShipments = await prisma.shipment.findMany({
-            where: {
-                userId,
-            }
-        });
+        const [activeShipments, completedShipments] = await Promise.all([
+            prisma.shipment.findMany({ where: { userId } }),
+            prisma.completedShipment.findMany({ where: { userId } }),
+        ]);
+        const allPaidShipments = [...activeShipments, ...completedShipments].sort(
+            (a, b) => new Date(b.shipmentDate) - new Date(a.shipmentDate)
+        );
         await prisma.$disconnect();
         return res.status(200).json(allPaidShipments);
                 
@@ -185,20 +226,79 @@ export const getSingleUserShipments = async (req, res, next) => {
 
     try{
         if (req.verifyRole !== "USER") return res.status(403).send("You are not authorized to view single user shipments"); 
-        const singleUserShipments = await prisma.shipment.findUnique({
+        let singleUserShipments = await prisma.shipment.findFirst({
             where:{
                 userId:req.verifyUserId,
                 id:singleShipmentId
             }
         });
+        let source = 'active';
+        if (!singleUserShipments) {
+            singleUserShipments = await prisma.completedShipment.findFirst({
+                where:{
+                    userId:req.verifyUserId,
+                    id:singleShipmentId
+                }
+            });
+            source = 'completed';
+        }
         await prisma.$disconnect();
-        return res.status(200).json(singleUserShipments);
+        if (!singleUserShipments) {
+            return res.status(404).json({ message: 'Shipment not found' });
+        }
+        return res.status(200).json({ ...singleUserShipments, source });
     }
     catch(err){
         console.log(err);
         next(err);
     }
 }
+
+export const trackShipmentByPublicId = async (req, res, next) => {
+    const { shipmentId } = req.params;
+    const publicId = (shipmentId || '').trim();
+
+    try {
+        // Read-only lookup: any authenticated user can track by public shipment ID
+        if (!req.verifyUserId) {
+            return res.status(403).send('You are not authorized to track shipments');
+        }
+        if (!publicId) {
+            return res.status(400).json({ message: 'Shipment ID is required' });
+        }
+
+        let shipment = await prisma.shipment.findFirst({
+            where: {
+                shipmentId: publicId,
+            },
+        });
+        let source = 'active';
+
+        if (!shipment) {
+            shipment = await prisma.completedShipment.findFirst({
+                where: {
+                    shipmentId: publicId,
+                },
+            });
+            source = 'completed';
+        }
+
+        await prisma.$disconnect();
+
+        if (!shipment) {
+            return res.status(404).json({ message: 'Shipment not found' });
+        }
+
+        return res.status(200).json({
+            ...shipment,
+            source,
+            timeline: buildShipmentTimeline(shipment),
+        });
+    } catch (err) {
+        console.log(err);
+        next(err);
+    }
+};
 
 export const agentUpdateShipmentStatus = async (req, res, next) => {
     const { shipmentId } = req.params;
@@ -227,12 +327,17 @@ export const agentUpdateReadyPickupStatus = async (req, res, next) => {
     const { shipmentId } = req.params;
     try{
         if (req.verifyRole !== "AGENT") return res.status(403).send("You are not authorized to update shipment status");
+        const existing = await prisma.shipment.findUnique({
+            where: { id: shipmentId },
+            select: { shipmentId: true },
+        });
         const updateShipment = await prisma.shipment.update({
             where: {
                 id: shipmentId
             },
             data:{
                 shipmentStatus:"ORDER_CONFIRMED",
+                ...(!existing?.shipmentId ? { shipmentId: nanoid(10) } : {}),
             }
         });
         await prisma.$disconnect();
@@ -252,23 +357,25 @@ export const agentUpdatePickedUpStatus = async (req, res, next) => {
     
 
     try {
-        const statusKeyMap = {
-
-            SHIPMENT_PICKED:"awsAgentShipmentPickedUrl",
-            SHIPMENT_DROPPED:"awsAgentShipmentDroppedUrl",
-            IN_TRANSIT_START:"awsAgentInTransitStartUrl",
-            IN_TRANSIT_END:"awsAgentInTransitEndUrl",
-            OUT_FOR_DELIVERY:"awsAgentOutForDeliveryUrl",
-            DELIVERED:"awsAgentDeliveredUrl",
-        };
-
-        const dynamicKey = statusKeyMap[shipmentStatus];
+        const dynamicKey = STATUS_IMAGE_KEY_MAP[shipmentStatus];
 
         if (!dynamicKey) {
             return res.status(400).json({ message: 'Invalid shipment status' });
         }
 
         const dynamicData = { [dynamicKey]: imageUrl };
+
+        const existingShipment = await prisma.shipment.findUnique({
+            where: { id: req.params.shipmentId },
+            select: { shipmentId: true },
+        });
+
+        // Ensure public tracking ID exists for paid / mid-lifecycle shipments
+        const ensurePublicId =
+            !existingShipment?.shipmentId &&
+            ['ORDER_PLACED', 'ORDER_CONFIRMED', 'SHIPMENT_PICKED', 'SHIPMENT_DROPPED', 'IN_TRANSIT_START', 'IN_TRANSIT_END', 'OUT_FOR_DELIVERY', 'DELIVERED'].includes(shipmentStatus)
+                ? { shipmentId: nanoid(10) }
+                : {};
 
         const updateShipment = await prisma.shipment.update({
             where: {
@@ -278,16 +385,19 @@ export const agentUpdatePickedUpStatus = async (req, res, next) => {
                 shipmentStatus,
                 imageStatus: status,
                 pickUpAgentId: req.verifyUserId,
-                ...dynamicData, // Spread the dynamic data
+                ...dynamicData,
+                ...ensurePublicId,
             },
         });
 
         if(shipmentStatus === "DELIVERED"){
+            const completedPayload = {
+                ...updateShipment,
+                id: req.params.shipmentId,
+                shipmentId: updateShipment.shipmentId || nanoid(10),
+            };
             await prisma.completedShipment.create({
-                data: {
-                  ...updateShipment,
-                  id: req.params.shipmentId,
-                },
+                data: completedPayload,
               });
           
               // Delete from Shipment table
