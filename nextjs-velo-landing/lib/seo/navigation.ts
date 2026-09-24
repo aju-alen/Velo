@@ -1,7 +1,7 @@
 import { getAllPages } from './pages';
 
 export type NavLink = { label: string; href: string };
-export type NavDropdown = { label: string; items: NavLink[] };
+export type NavDropdown = { label: string; href?: string; items: NavLink[] };
 export type NavItem = NavLink | NavDropdown;
 
 const servicesNavLabels: Record<string, string> = {
@@ -31,13 +31,17 @@ export function getNavDropdownItems(group: 'services' | 'routes'): NavLink[] {
 }
 
 export const mainNav: NavItem[] = [
-  { label: 'Services', items: getNavDropdownItems('services') },
-  { label: 'Routes', items: getNavDropdownItems('routes') },
-  { label: 'Business Shipping', href: '/business-shipping' },
-  { label: 'Pricing', href: '/pricing-calculator' },
   { label: 'Track Shipment', href: '/track-shipment' },
-  { label: 'App', href: '/download-app' },
+  {
+    label: 'Marketplace',
+    href: '/marketplace',
+    items: [
+      { label: 'For Senders', href: '/senders' },
+      { label: 'For Logistics Agents', href: '/agents' },
+      { label: 'For Guests', href: '/marketplace' },
+    ],
+  },
+  { label: 'How it Works', href: '/how-it-works' },
   { label: 'About', href: '/about' },
-  { label: 'Blog', href: '/blog' },
   { label: 'Contact', href: '/contact' },
 ];

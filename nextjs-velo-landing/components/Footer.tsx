@@ -1,33 +1,17 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { getFooterLinks } from '@/lib/seo';
+import { mainNav, type NavItem } from '@/lib/seo';
 
-function FooterColumn({ title, group }: { title: string; group: 'routes' | 'services' | 'company' | 'resources' }) {
-  const links = getFooterLinks(group);
-  if (links.length === 0) return null;
-
-  return (
-    <div>
-      <h4 className="text-white font-semibold mb-6">{title}</h4>
-      <ul className="space-y-3">
-        {links.map((page) => (
-          <li key={page.path}>
-            <Link href={page.path} className="hover:text-[#FFAC1C] transition-colors">
-              {page.footerLabel}
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
+function isDropdown(item: NavItem): item is Extract<NavItem, { items: unknown }> {
+  return 'items' in item;
 }
 
 export default function Footer() {
   return (
     <footer className="bg-black text-gray-300 py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-8 mb-12">
-          <div className="lg:col-span-2">
+        <div className="grid gap-10 md:grid-cols-[1.4fr_1fr] mb-12">
+          <div>
             <div className="flex items-center space-x-3 mb-6">
               <Image src="/logo.png" alt="logo" width={64} height={40} className="w-16 h-10" />
               <div>
@@ -39,16 +23,41 @@ export default function Footer() {
               Professional international shipping from Dubai to Kenya. Pickup, tracking, and delivery in one place.
             </p>
           </div>
-          <FooterColumn title="Routes" group="routes" />
-          <FooterColumn title="Services" group="services" />
-          <FooterColumn title="Company" group="company" />
-          <FooterColumn title="Resources" group="resources" />
+          <nav aria-label="Footer">
+            <ul className="space-y-3">
+              {mainNav.map((item) =>
+                isDropdown(item) ? (
+                  <li key={item.label}>
+                    {item.href ? (
+                      <Link href={item.href} className="text-white font-semibold hover:text-[#FFAC1C] transition-colors">
+                        {item.label}
+                      </Link>
+                    ) : (
+                      <p className="text-white font-semibold">{item.label}</p>
+                    )}
+                    <ul className="mt-3 space-y-3 pl-4">
+                      {item.items.map((link) => (
+                        <li key={link.href}>
+                          <Link href={link.href} className="hover:text-[#FFAC1C] transition-colors">
+                            {link.label}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </li>
+                ) : (
+                  <li key={item.href}>
+                    <Link href={item.href} className="text-white font-semibold hover:text-[#FFAC1C] transition-colors">
+                      {item.label}
+                    </Link>
+                  </li>
+                ),
+              )}
+            </ul>
+          </nav>
         </div>
-        <div className="border-t border-gray-800 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-gray-400 text-sm">
+        <div className="border-t border-gray-800 pt-8 text-gray-400 text-sm">
           <p>&copy; 2025 Velo Shipping. All rights reserved.</p>
-          <Link href="/account-delete-guide" className="hover:text-[#FFAC1C] transition-colors">
-            Account Delete Guide
-          </Link>
         </div>
       </div>
     </footer>

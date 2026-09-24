@@ -25,6 +25,16 @@ const homeFaqs = [
     answer:
       'Pricing depends on factors such as weight, dimensions, cargo type, and delivery requirements. Estimates are calculated through the platform.',
   },
+  {
+    question: "What's the Marketplace?",
+    answer:
+      'A place to find Logistics Agents who can source or ship what you need, and to compare what they offer before you commit.',
+  },
+  {
+    question: 'How do I become a Logistics Agent?',
+    answer:
+      'Register in the app as Solo or Org, list what you can source or ship, and manage requests from Senders directly.',
+  },
 ];
 
 function emptyContent(slug: string): PageContent {
@@ -257,33 +267,7 @@ const contentRegistry: Record<string, PageContent> = {
   },
   'track-shipment': {
     sections: {},
-    faqs: [
-      {
-        question: 'Can I track my shipment in real time?',
-        answer: 'Yes. Tracking updates are available throughout the shipping process.',
-      },
-      {
-        question: 'Do I need the app to track my cargo?',
-        answer: 'Tracking capabilities are available through the Velo platform.',
-      },
-      {
-        question: 'Can I track business shipments?',
-        answer: 'Yes. Both personal and commercial cargo can be tracked.',
-      },
-      {
-        question: 'Does tracking work outside Nairobi?',
-        answer: 'Yes. Deliveries are intended to cover destinations throughout Kenya.',
-      },
-      {
-        question: 'Can I track shipments after pickup?',
-        answer: 'Yes. Tracking begins once your shipment enters the process.',
-      },
-      {
-        question: 'What types of cargo can be tracked?',
-        answer:
-          'Everything from documents and personal parcels to commercial inventory and machinery.',
-      },
-    ],
+    faqs: [],
   },
   'pricing-calculator': {
     sections: {},
@@ -313,6 +297,111 @@ const contentRegistry: Record<string, PageContent> = {
       {
         question: 'Do you handle commercial cargo?',
         answer: 'Yes. Velo supports both personal and business shipments.',
+      },
+    ],
+  },
+  marketplace: {
+    sections: {},
+    faqs: [
+      {
+        question: 'Do I need an account to browse?',
+        answer: "No. Anyone can look at what's listed here without signing up for anything.",
+      },
+      {
+        question: 'Can I message an Agent from this page?',
+        answer: 'Not directly on the web — open the app to contact an Agent or request a shipment.',
+      },
+      {
+        question: 'How do I list something here myself?',
+        answer:
+          'Register as a Solo Agent or Organization in the app. Listings you create there appear here automatically.',
+      },
+      {
+        question: 'Are these listings verified?',
+        answer: 'See How It Works for what verification currently covers.',
+      },
+    ],
+  },
+  'marketplace-senders': {
+    sections: {},
+    faqs: [
+      {
+        question: 'How is this different from just using a Deira agent I already know?',
+        answer:
+          "You're not limited to one contact's availability. You get a tracker, a record of what you agreed, and a choice of who ships it.",
+      },
+      {
+        question: "What if I don't know what shipping option I need?",
+        answer: "You won't need to decide alone — the right option is matched to your shipment.",
+      },
+      {
+        question: "Can I send something I haven't bought yet?",
+        answer:
+          "Yes — that's what the Marketplace and Logistics Agents are for. Learn how sourcing works on How It Works.",
+      },
+      {
+        question: 'What if my item needs special handling?',
+        answer:
+          'Flag it when you schedule pickup — bulky, fragile, or high-value items are noted before collection, not discovered after.',
+      },
+    ],
+  },
+  'marketplace-agents': {
+    sections: {},
+    faqs: [
+      {
+        question: 'Do I need a registered business to join?',
+        answer:
+          "No — register as a Solo Agent if you're working independently. Organizations register separately if you're running a team.",
+      },
+      {
+        question: 'Do I have to stop using WhatsApp with my regulars?',
+        answer:
+          'No. Keep talking to your regulars however you already do. New Senders who find you through the Marketplace come in through the app, and any request you want tracked, priced, and paid through Velo runs through there too.',
+      },
+      {
+        question: 'Do I set my own prices?',
+        answer: "Yes. You list what you charge; Velo doesn't set your rates for you.",
+      },
+      {
+        question: 'What if a shipment goes wrong?',
+        answer: 'Unanswered — depends on the liability and dispute process still to be defined.',
+      },
+      {
+        question: 'Can I list more than one kind of item or service?',
+        answer: "Yes — list whatever you're able to source or ship; nothing limits you to one category.",
+      },
+    ],
+  },
+  'how-it-works': {
+    sections: {},
+    faqs: [
+      {
+        question: 'How long does shipping from Dubai to Kenya take?',
+        answer:
+          "Depends on the option you choose — air is faster, sea suits larger or less time-sensitive shipments. You'll see the estimated timeline before you confirm.",
+      },
+      {
+        question: 'Can I track my shipment in real time?',
+        answer: 'Yes, from collection through to delivery.',
+      },
+      {
+        question: 'What if I need something sourced, not just shipped?',
+        answer:
+          'Browse the Marketplace for a Logistics Agent who can source it, then the shipping process picks up once they have it.',
+      },
+      {
+        question: 'Do I have to be present for pickup?',
+        answer: 'No — just confirm the location and a time that works.',
+      },
+      {
+        question: 'What can be shipped this way?',
+        answer: 'Documents, personal parcels, commercial cargo, and heavy machinery.',
+      },
+      {
+        question: 'Is there a difference in process for personal vs. business shipments?',
+        answer:
+          'The steps are the same; businesses managing recurring shipments get added visibility across all of them. See For Senders for details.',
       },
     ],
   },

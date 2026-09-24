@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { ChevronDown, Menu, X } from 'lucide-react';
 import { mainNav, type NavDropdown, type NavItem } from '@/lib/seo/navigation';
@@ -46,16 +47,27 @@ function DesktopDropdown({
       }}
       onMouseLeave={onClose}
     >
-      <button
-        type="button"
-        className={`${linkClass} flex items-center gap-1`}
-        aria-expanded={isOpen}
-        aria-haspopup="true"
-        onClick={onToggle}
-      >
-        {dropdown.label}
-        <ChevronDown size={16} className={`transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-      </button>
+      <div className="flex items-center gap-1">
+        {dropdown.href ? (
+          <Link href={dropdown.href} className={linkClass} onClick={onClose}>
+            {dropdown.label}
+          </Link>
+        ) : (
+          <button type="button" className={linkClass} onClick={onToggle}>
+            {dropdown.label}
+          </button>
+        )}
+        <button
+          type="button"
+          className="text-gray-700 hover:text-black"
+          aria-expanded={isOpen}
+          aria-haspopup="true"
+          aria-label={`${dropdown.label} menu`}
+          onClick={onToggle}
+        >
+          <ChevronDown size={16} className={`transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        </button>
+      </div>
       {isOpen && (
         <div className="absolute top-full left-0 pt-2 z-50">
           <div className="min-w-[260px] bg-white border border-gray-200 rounded-lg shadow-lg py-2">
@@ -87,18 +99,44 @@ function MobileAccordion({
   onToggle: () => void;
   onLinkClick: () => void;
 }) {
+  const router = useRouter();
+
+  function openDropdownPage() {
+    if (!dropdown.href) return;
+    onLinkClick();
+    router.push(dropdown.href);
+  }
+
   return (
     <div className="border-b border-gray-100">
-      <button
-        type="button"
-        className={`${mobileLinkClass} w-full flex items-center justify-between border-b-0`}
-        aria-expanded={isExpanded}
-        aria-haspopup="true"
-        onClick={onToggle}
-      >
-        {dropdown.label}
-        <ChevronDown size={16} className={`transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
-      </button>
+      <div className="flex items-center justify-between">
+        {dropdown.href ? (
+          <Link
+            href={dropdown.href}
+            className={`${mobileLinkClass} flex-1 border-b-0`}
+            onClick={(event) => {
+              event.preventDefault();
+              openDropdownPage();
+            }}
+          >
+            {dropdown.label}
+          </Link>
+        ) : (
+          <button type="button" className={`${mobileLinkClass} border-b-0`} onClick={onToggle}>
+            {dropdown.label}
+          </button>
+        )}
+        <button
+          type="button"
+          className="p-3 text-gray-700"
+          aria-expanded={isExpanded}
+          aria-haspopup="true"
+          aria-label={`${dropdown.label} menu`}
+          onClick={onToggle}
+        >
+          <ChevronDown size={16} className={`transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+        </button>
+      </div>
       {isExpanded && (
         <div className="pb-2 pl-4">
           {dropdown.items.map((link) => (
