@@ -1,5 +1,5 @@
-import { StyleSheet, Text, TouchableOpacity, View, FlatList, Dimensions, ActivityIndicator, useColorScheme, ScrollView } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View, FlatList, Dimensions, ActivityIndicator, useColorScheme, ScrollView, RefreshControl } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
 import CustomButton from '@/components/CustomButton';
 import * as SecureStore from 'expo-secure-store';
 import { horizontalScale, moderateScale, verticalScale } from '@/constants/metrics';
@@ -37,6 +37,7 @@ const HomeMainPage = () => {
   const [loadingShipments, setLoadingShipments] = useState(false);
   const [agentShipments, setAgentShipments] = useState<any[]>([]);
   const [loadingAgentShipments, setLoadingAgentShipments] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   
   const colorScheme = useColorScheme() ?? 'light';
   const themeColors = Colors[colorScheme];
@@ -82,20 +83,28 @@ const HomeMainPage = () => {
     }
   };
 
-  useEffect(() => {
-    const getCategoryData = async () => {
-      console.log('getCategoryData entered here');
-      
-      const getAccountDetails = await SecureStore.getItemAsync('registerDetail');
-      console.log(getAccountDetails,'getAccountDetails----11----');
-      
+  const getCategoryData = async () => {
+    const getAccountDetails = await SecureStore.getItemAsync('registerDetail');
+    if (getAccountDetails) {
       setAccountName(JSON.parse(getAccountDetails).name);
+    }
 
-      setAuthorizationHeader(accountLoginData.token);
-      const getCategory = await axios.get(`${ipURL}/api/category/get-all-categories`);
-      setCategoryData(getCategory.data);
-      setLoading(false);
-    };
+    setAuthorizationHeader(accountLoginData.token);
+    const getCategory = await axios.get(`${ipURL}/api/category/get-all-categories`);
+    setCategoryData(getCategory.data);
+    setLoading(false);
+  };
+
+  const refreshDashboard = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await Promise.all([getCategoryData(), getUserShipments(), getAgentShipments()]);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [accountLoginData.id, accountLoginData.role, accountLoginData.organisationId, accountLoginData.token]);
+
+  useEffect(() => {
     getCategoryData();
     getUserShipments();
     getAgentShipments();
@@ -257,6 +266,14 @@ const HomeMainPage = () => {
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={refreshDashboard}
+              tintColor="#FFAC1C"
+              colors={['#FFAC1C']}
+            />
+          }
         >
           {/* Top Bar */}
           <View style={styles.topBar}>
@@ -268,6 +285,31 @@ const HomeMainPage = () => {
               <Ionicons name="log-out-outline" size={24} color="#FF6B6B" />
             </TouchableOpacity>
           </View>
+
+          <TouchableOpacity
+            onPress={() => router.push('/(tabs)/home/trackShipment')}
+            activeOpacity={0.7}
+          >
+            <View style={[styles.createShipmentContainer, { backgroundColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)' }]}>
+              <LinearGradient
+                colors={['#FFAC1C20', '#FFAC1C10']}
+                style={styles.createShipmentGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              >
+                <View style={styles.createShipmentContent}>
+                  <View style={styles.createShipmentIconContainer}>
+                    <MaterialIcons name="search" size={48} color="#FFAC1C" />
+                  </View>
+                  <View style={styles.createShipmentTextContainer}>
+                    <Text style={[styles.createShipmentTitle, { color: themeColors.text }]}>Track a Shipment</Text>
+                    <Text style={[styles.createShipmentSubtitle, { color: themeColors.text }]}>Look up a tracking number</Text>
+                  </View>
+                  <Ionicons name="arrow-forward-circle" size={32} color="#FFAC1C" />
+                </View>
+              </LinearGradient>
+            </View>
+          </TouchableOpacity>
 
           {/* Agent: Assigned Shipments quick action */}
           {accountLoginData.role === 'AGENT' && (

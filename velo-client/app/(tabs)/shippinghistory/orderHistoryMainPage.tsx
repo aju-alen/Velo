@@ -86,7 +86,7 @@ const OrderHistoryMainPage = () => {
             </View>
           </View>
           <Text style={[styles.trackingNumber, { color: themeColors.text }]}>
-              ABC-TKS772-927
+              {order.shipmentId || 'Tracking number pending'}
           </Text>
         </View>
       </View>

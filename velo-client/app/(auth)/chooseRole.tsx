@@ -13,6 +13,7 @@ const ChooseRole = () => {
   const [role, setRole] = useState('USER');
   const userBlobAnim = useRef(new Animated.Value(1)).current;
   const agentBlobAnim = useRef(new Animated.Value(0)).current;
+  const guestBlobAnim = useRef(new Animated.Value(0)).current;
   
   const colorScheme = useColorScheme() ?? 'light';
   const themeColors = Colors[colorScheme];
@@ -29,54 +30,23 @@ const ChooseRole = () => {
   const handlePress = (selectedRole) => {
     setRole(selectedRole);
 
-    if (selectedRole === 'USER') {
-      Animated.timing(userBlobAnim, {
-        toValue: 1,
+    const animations = {
+      USER: userBlobAnim,
+      AGENT: agentBlobAnim,
+      GUEST: guestBlobAnim,
+    };
+
+    Object.entries(animations).forEach(([key, anim]) => {
+      Animated.timing(anim, {
+        toValue: key === selectedRole ? 1 : 0,
         duration: 400,
         easing: Easing.out(Easing.exp),
-        useNativeDriver: false,
+        useNativeDriver: true,
       }).start();
-      Animated.timing(agentBlobAnim, {
-        toValue: 0,
-        duration: 400,
-        useNativeDriver: false,
-      }).start();
-    } else if (selectedRole === 'AGENT') {
-      Animated.timing(agentBlobAnim, {
-        toValue: 1,
-        duration: 400,
-        easing: Easing.out(Easing.exp),
-        useNativeDriver: false,
-      }).start();
-      Animated.timing(userBlobAnim, {
-        toValue: 0,
-        duration: 400,
-        useNativeDriver: false,
-      }).start();
-    } else if (selectedRole === 'GUEST') {
-      Animated.timing(agentBlobAnim, {
-        toValue: 1,
-        duration: 400,
-        easing: Easing.out(Easing.exp),
-        useNativeDriver: false,
-      }).start();
-      Animated.timing(userBlobAnim, {
-        toValue: 0,
-        duration: 400,
-        useNativeDriver: false,
-      }).start();
-    }
+    });
   };
 
   const blobStyle = (blobAnim) => ({
-    transform: [
-      {
-        scale: blobAnim.interpolate({
-          inputRange: [0, 1],
-          outputRange: [0, 1.0],
-        }),
-      },
-    ],
     opacity: blobAnim.interpolate({
       inputRange: [0, 1],
       outputRange: [0, 0.6],
@@ -104,8 +74,8 @@ const ChooseRole = () => {
             ]}
             onPress={() => handlePress('USER')}
           >
-            <Animated.View style={[styles.blobBackground, blobStyle(userBlobAnim)]} />
-            <View style={[styles.cardContent, { backgroundColor: themeColors.background }]}>
+            <Animated.View pointerEvents="none" style={[styles.blobBackground, blobStyle(userBlobAnim)]} />
+            <View collapsable={false} style={[styles.cardContent, { backgroundColor: themeColors.background }]}>
            
               <View style={styles.textContainer}>
                 <Text style={[styles.roleTitle, { color: themeColors.text }]}>
@@ -126,8 +96,8 @@ const ChooseRole = () => {
             ]}
             onPress={() => handlePress('AGENT')}
           >
-            <Animated.View style={[styles.blobBackground, blobStyle(agentBlobAnim)]} />
-            <View style={[styles.cardContent, { backgroundColor: themeColors.background }]}>
+            <Animated.View pointerEvents="none" style={[styles.blobBackground, blobStyle(agentBlobAnim)]} />
+            <View collapsable={false} style={[styles.cardContent, { backgroundColor: themeColors.background }]}>
             
               <View style={styles.textContainer}>
                 <Text style={[styles.roleTitle, { color: themeColors.text }]}>
@@ -148,8 +118,8 @@ const ChooseRole = () => {
             ]}
             onPress={() => handlePress('GUEST')}
           >
-            <Animated.View style={[styles.blobBackground, blobStyle(agentBlobAnim)]} />
-            <View style={[styles.cardContent, { backgroundColor: themeColors.background }]}>
+            <Animated.View pointerEvents="none" style={[styles.blobBackground, blobStyle(guestBlobAnim)]} />
+            <View collapsable={false} style={[styles.cardContent, { backgroundColor: themeColors.background }]}>
             
               <View style={styles.textContainer}>
                 <Text style={[styles.roleTitle, { color: themeColors.text }]}>
@@ -193,6 +163,8 @@ const styles = StyleSheet.create({
     width: '100%',
     marginBottom: verticalScale(20),
     borderRadius: moderateScale(16),
+    borderWidth: 2,
+    borderColor: 'transparent',
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     overflow: 'hidden',
     shadowColor: '#000',
@@ -204,7 +176,6 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   selectedCard: {
-    borderWidth: 2,
     borderColor: '#FFAC1C',
   },
   cardContent: {

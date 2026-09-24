@@ -4,3 +4,7 @@ export const API_BASE_URL =
 
 export const CONTACT_ENDPOINT = `${API_BASE_URL}/api/rise/send-contact`;
 export const MARKETPLACE_LISTINGS_ENDPOINT = `${API_BASE_URL}/api/listing/get-listing-by-category/undefined`;
+
+export function trackingEndpoint(shipmentId: string) {
+  return `${API_BASE_URL}/api/shipment/track/${encodeURIComponent(shipmentId)}`;
+}

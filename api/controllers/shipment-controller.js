@@ -43,6 +43,97 @@ const buildShipmentTimeline = (shipment) => {
     });
 };
 
+const PUBLIC_STATUS_LABELS = {
+    PAYMENT_PENDING: 'Payment pending',
+    ORDER_IN_MARKET: 'Waiting for an agent',
+    ORDER_PLACED: 'Booked',
+    ORDER_CONFIRMED: 'Booked',
+    SHIPMENT_PICKED: 'Collected',
+    SHIPMENT_DROPPED: 'Handed to shipping partner',
+    IN_TRANSIT_START: 'In transit',
+    IN_TRANSIT_END: 'In transit',
+    OUT_FOR_DELIVERY: 'Out for delivery',
+    DELIVERED: 'Delivered',
+};
+
+const PUBLIC_TRACKING_STEPS = [
+    { key: 'BOOKED', label: 'Booked', statuses: ['ORDER_PLACED', 'ORDER_CONFIRMED'] },
+    { key: 'COLLECTED', label: 'Collected', statuses: ['SHIPMENT_PICKED'] },
+    { key: 'HANDED_OVER', label: 'Handed to shipping partner', statuses: ['SHIPMENT_DROPPED'] },
+    { key: 'IN_TRANSIT', label: 'In transit', statuses: ['IN_TRANSIT_START', 'IN_TRANSIT_END'] },
+    { key: 'OUT_FOR_DELIVERY', label: 'Out for delivery', statuses: ['OUT_FOR_DELIVERY'] },
+    { key: 'DELIVERED', label: 'Delivered', statuses: ['DELIVERED'] },
+];
+
+const publicShipmentSelect = {
+    shipmentId: true,
+    shipmentStatus: true,
+    shipmentDate: true,
+    deliveryDate: true,
+    senderCity: true,
+    senderState: true,
+    receiverCity: true,
+    receiverState: true,
+};
+
+const buildPublicTracking = (shipment, source) => {
+    const currentIndex = PUBLIC_TRACKING_STEPS.findIndex((step) =>
+        step.statuses.includes(shipment.shipmentStatus)
+    );
+
+    return {
+        shipmentId: shipment.shipmentId,
+        status: shipment.shipmentStatus,
+        statusLabel: PUBLIC_STATUS_LABELS[shipment.shipmentStatus] || shipment.shipmentStatus,
+        shipmentDate: shipment.shipmentDate,
+        deliveryDate: shipment.deliveryDate,
+        from: [shipment.senderCity, shipment.senderState].filter(Boolean).join(', '),
+        to: [shipment.receiverCity, shipment.receiverState].filter(Boolean).join(', '),
+        source,
+        timeline: PUBLIC_TRACKING_STEPS.map((step, index) => ({
+            key: step.key,
+            label: step.label,
+            completed: currentIndex >= 0 && index < currentIndex,
+            current: index === currentIndex,
+        })),
+    };
+};
+
+export const getPublicShipmentTracking = async (req, res, next) => {
+    const publicId = (req.params.shipmentId || '').trim();
+
+    try {
+        if (!publicId) {
+            return res.status(400).json({ message: 'Tracking number is required' });
+        }
+
+        let shipment = await prisma.shipment.findFirst({
+            where: { shipmentId: publicId },
+            select: publicShipmentSelect,
+        });
+        let source = 'active';
+
+        if (!shipment) {
+            shipment = await prisma.completedShipment.findFirst({
+                where: { shipmentId: publicId },
+                select: publicShipmentSelect,
+            });
+            source = 'completed';
+        }
+
+        if (!shipment) {
+            return res.status(404).json({ message: 'Shipment not found' });
+        }
+
+        return res.status(200).json({
+            tracking: buildPublicTracking(shipment, source),
+        });
+    } catch (err) {
+        console.log(err);
+        next(err);
+    }
+};
+
 export const createNewShipment = async (req, res, next) => {
     const { 
         userId,

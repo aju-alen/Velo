@@ -277,6 +277,28 @@ export const loginAccount = async (req, res, next) => {
     }
 }
 
+export const getAccountStatus = async (req, res, next) => {
+  try {
+    const agent = await prisma.agent.findUnique({
+      where: { id: req.verifyUserId },
+      select: {
+        registerVerificationStatus: true,
+        organisationId: true,
+        role: true,
+      },
+    });
+
+    if (!agent) {
+      return res.status(404).json({ message: 'Account not found' });
+    }
+
+    return res.status(200).json({ account: agent });
+  } catch (err) {
+    console.log(err);
+    next(err);
+  }
+};
+
 export const checkMobileNumber = async (req, res, next) => {
     const { mobile } = req.query;
     console.log(mobile, 'mobile');

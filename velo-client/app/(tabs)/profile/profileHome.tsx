@@ -6,6 +6,7 @@ import { router } from 'expo-router';
 import { Colors } from '@/constants/Colors';
 
 const features = [
+  { label: 'Track Shipment', icon: 'locate-outline', route: '/(tabs)/home/trackShipment' },
   { label: 'Change Password', icon: 'lock-closed-outline', route: '/profile/settings/changePassword' },
   // { label: 'My Orders', icon: 'cube-outline', route: '/profile/settings/myOrders' },
   

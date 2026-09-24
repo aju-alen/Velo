@@ -1,6 +1,7 @@
 import express from "express";
 const router = express.Router()
-import{register,verifyAccountExist,bookAgentAppointment,loginAccount,checkMobileNumber,checkEmailExists,changePassword,deleteAccount,abandonRegistration,forgotPassword,verifyResetPasswordOTP,resetPassword} from '../controllers/auth-controller.js';
+import{register,verifyAccountExist,bookAgentAppointment,loginAccount,checkMobileNumber,checkEmailExists,changePassword,deleteAccount,abandonRegistration,forgotPassword,verifyResetPasswordOTP,resetPassword,getAccountStatus} from '../controllers/auth-controller.js';
+import { verifyToken } from '../middlewares/jwtVerify.js';
 
 
 router.post('/register', register);
@@ -15,6 +16,7 @@ router.post('/reset-password', resetPassword);
 router.get('/check-registered-account/:mobileCode/:mobileNumber',verifyAccountExist)
 router.get('/check-mobile-number',checkMobileNumber)
 router.get('/check-email',checkEmailExists)
+router.get('/account-status', verifyToken, getAccountStatus)
 
 
 export default router;

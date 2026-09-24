@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { StyleSheet, TextInput, ScrollView, Platform, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, View, Text, useColorScheme } from 'react-native';
+import React, { useEffect, useState } from 'react'
+import { StyleSheet, TextInput, ScrollView, Platform, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, View, Text, useColorScheme, ActivityIndicator } from 'react-native';
 import { verticalScale, horizontalScale, moderateScale } from '@/constants/metrics'
 import CustomButton from '@/components/CustomButton';
 import StartOverButton from '@/components/StartOverButton';
@@ -8,13 +8,18 @@ import * as SecureStore from 'expo-secure-store';
 import axios from 'axios';
 import { ipURL } from '@/constants/backendUrl';
 import { Colors } from '@/constants/Colors';
+import useLoginAccountStore from '@/store/loginAccountStore';
+import { destinationForStoredAccount } from '@/utils/accountDestination';
 
 const Register = () => {
   const colorScheme = useColorScheme() ?? 'light';
   const themeColors = Colors[colorScheme];
 
   const params = useLocalSearchParams();
-  const { role } = params;
+  const roleParam = params.role;
+  const role = Array.isArray(roleParam) ? roleParam[0] : roleParam;
+  const { setAccountLoginData } = useLoginAccountStore();
+  const [checkingAccount, setCheckingAccount] = useState(true);
   
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -42,6 +47,39 @@ const Register = () => {
   const validatePassword = (password) => {
     return password.length >= 8
   }
+
+  useEffect(() => {
+    let active = true;
+
+    const openExistingAccount = async () => {
+      try {
+        const stored = await SecureStore.getItemAsync('registerDetail');
+        if (!stored) {
+          if (active) setCheckingAccount(false);
+          return;
+        }
+
+        const userData = JSON.parse(stored);
+        const destination = destinationForStoredAccount(userData);
+        if (!destination) {
+          if (active) setCheckingAccount(false);
+          return;
+        }
+
+        setAccountLoginData(userData);
+        router.replace(destination);
+      } catch (error) {
+        console.warn('Failed to read stored user data:', error);
+        if (active) setCheckingAccount(false);
+      }
+    };
+
+    openExistingAccount();
+
+    return () => {
+      active = false;
+    };
+  }, [setAccountLoginData]);
 
   // Email verification function
   const checkEmailExists = async (emailToCheck) => {
@@ -132,6 +170,14 @@ const Register = () => {
     }
   }
 
+  if (checkingAccount) {
+    return (
+      <View style={[styles.mainContainer, styles.checkingContainer, { backgroundColor: themeColors.background }]}>
+        <ActivityIndicator size="large" color="#FFAC1C" />
+      </View>
+    );
+  }
+
   return (
     <View style={[styles.mainContainer, { backgroundColor: themeColors.background }]}>
       <KeyboardAvoidingView
@@ -143,7 +189,7 @@ const Register = () => {
             <View style={styles.headerContainer}>
               <Text style={[styles.logoText, { color: themeColors.text }]}>Velo</Text>
               <Text style={[styles.subheading, { color: themeColors.text }]}>
-                {role === "USER" ? "User" : "Agent"} Registration
+                {role === "AGENT" ? "Agent" : "Sender"} Registration
               </Text>
             </View>
 
@@ -281,6 +327,11 @@ mainContainer: {
   flex: 1,
   paddingTop: Platform.OS === 'ios' ? verticalScale(60) : verticalScale(40),
   paddingHorizontal: horizontalScale(24),
+},
+checkingContainer: {
+  alignItems: 'center',
+  justifyContent: 'center',
+  paddingTop: 0,
 },
 headerContainer: {
   alignItems: 'center',

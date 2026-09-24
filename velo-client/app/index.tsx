@@ -1,16 +1,30 @@
 import { StyleSheet, Text, Image, Animated, View, TouchableOpacity, ActivityIndicator } from 'react-native'
 import { router } from "expo-router";
+import * as Linking from 'expo-linking';
 import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { verticalScale, horizontalScale, moderateScale } from '@/constants/metrics';
 import * as SecureStore from 'expo-secure-store';
 import useLoginAccountStore from '@/store/loginAccountStore';
 import { Colors } from '@/constants/Colors';
+import { destinationForStoredAccount } from '@/utils/accountDestination';
+
+let didOpenRegistrationLink = false;
+
+function registrationRoleFromUrl(url: string | null) {
+  if (!url) return null;
+  const parsed = Linking.parse(url);
+  const route = `${parsed.hostname ?? ''}${parsed.path ?? ''}`;
+  if (!route.includes('register')) return null;
+  return parsed.queryParams?.role === 'AGENT' ? 'AGENT' : 'USER';
+}
 
 const RootIndex = () => {
   const { setAccountLoginData } = useLoginAccountStore()
   const scaleValue = useRef(new Animated.Value(1)).current;
   const colorScheme = useColorScheme();
+  const insets = useSafeAreaInsets();
   const theme = colorScheme ?? 'light';
   const textColor = theme === 'dark' ? Colors.dark.text : Colors.light.text;
   const [isChecking, setIsChecking] = useState(true);
@@ -38,9 +52,19 @@ const RootIndex = () => {
 
     const checkUser = async () => {
       try {
+        const registrationRole = didOpenRegistrationLink
+          ? null
+          : registrationRoleFromUrl(await Linking.getInitialURL());
+
         const user = await SecureStore.getItemAsync('registerDetail');
 
         if (!user) {
+          if (registrationRole) {
+            didOpenRegistrationLink = true;
+            router.replace({ pathname: '/(auth)/register', params: { role: registrationRole } });
+            return;
+          }
+
           if (isMounted) {
             setIsChecking(false);
             setShouldShowLanding(true);
@@ -50,6 +74,15 @@ const RootIndex = () => {
 
         const userData = JSON.parse(user);
         setAccountLoginData(userData);
+
+        if (registrationRole) {
+          didOpenRegistrationLink = true;
+          const linkedDestination = destinationForStoredAccount(userData);
+          if (linkedDestination) {
+            router.replace(linkedDestination);
+            return;
+          }
+        }
 
         const { registerVerificationStatus, role } = userData;
 
@@ -110,7 +143,7 @@ const RootIndex = () => {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingBottom: insets.bottom + verticalScale(12) }]}>
       <View style={styles.logoContainer}>
         {/* <Text style={styles.logoText}>Velo</Text> */}
         <Image
@@ -119,7 +152,7 @@ const RootIndex = () => {
         />
         <Text style={[styles.heroText, styles.heroTextLogoText]}>Velo</Text>
       </View>
-      <View>
+      <View style={styles.heroSlot}>
         <Image
           source={require('@/assets/images/heroImage.jpg')}
           style={styles.heroImgContainer}
@@ -173,11 +206,16 @@ const styles = StyleSheet.create({
     marginTop: verticalScale(60),
 
   },
-  heroImgContainer: {
+  heroSlot: {
+    flexShrink: 1,
     width: horizontalScale(300),
     height: verticalScale(300),
-    borderRadius: moderateScale(20),
     marginTop: verticalScale(20),
+  },
+  heroImgContainer: {
+    width: '100%',
+    height: '100%',
+    borderRadius: moderateScale(20),
   },
   heroTextcontainer: {
     marginTop: horizontalScale(20),

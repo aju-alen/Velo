@@ -1,9 +1,11 @@
-import { FlatList, StyleSheet, TouchableOpacity, Image, ActivityIndicator, TextInput, Alert, View, Text, useColorScheme, Platform, Animated } from 'react-native'
-import React, { useEffect, useState, useRef } from 'react'
+import { FlatList, StyleSheet, TouchableOpacity, Image, ActivityIndicator, TextInput, Alert, View, Text, useColorScheme, Platform, Animated, RefreshControl } from 'react-native'
+import React, { useEffect, useState, useRef, useCallback } from 'react'
 import { verticalScale, horizontalScale, moderateScale } from '@/constants/metrics'
-import { router, useLocalSearchParams } from 'expo-router'
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router'
 import axios from 'axios'
+import axiosInstance, { setAuthorizationHeader } from '@/constants/axiosHeader'
 import { ipURL } from '@/constants/backendUrl'
+import useLoginAccountStore from '@/store/loginAccountStore'
 import MaterialIcons from '@expo/vector-icons/MaterialIcons'
 import * as SecureStore from 'expo-secure-store'
 import { Colors } from '@/constants/Colors';
@@ -12,11 +14,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 const MarketHome = () => {
   const colorScheme = useColorScheme() ?? 'light';
   const themeColors = Colors[colorScheme];
+  const { setAccountLoginData } = useLoginAccountStore();
   const [accountDetails, setAccountDetails] = useState(null);
   const [accountLoaded, setAccountLoaded] = useState(false);
 
   const [getCatIdListing, setGetCatIdListing] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const { catId } = useLocalSearchParams();
   const loadingBarAnim = useRef(new Animated.Value(0)).current;
@@ -25,8 +29,32 @@ const MarketHome = () => {
   useEffect(() => {
     const checkUser = async () => {
       try {
-        const account = await SecureStore.getItemAsync('registerDetail');
-        setAccountDetails(account != null ? JSON.parse(account) : null);
+        const accountRaw = await SecureStore.getItemAsync('registerDetail');
+        let account = accountRaw != null ? JSON.parse(accountRaw) : null;
+
+        if (account?.token && account?.role === 'AGENT') {
+          try {
+            setAuthorizationHeader(account.token);
+            const response = await axiosInstance.get('/api/auth/account-status');
+            const freshStatus = response.data?.account?.registerVerificationStatus;
+            if (freshStatus) {
+              account = {
+                ...account,
+                registerVerificationStatus: freshStatus,
+                organisationId: response.data.account.organisationId ?? account.organisationId,
+              };
+              await SecureStore.setItemAsync('registerDetail', JSON.stringify(account));
+              setAccountLoginData({
+                registerVerificationStatus: freshStatus,
+                organisationId: account.organisationId ?? '',
+              });
+            }
+          } catch (statusError) {
+            console.warn('Could not refresh agent status:', statusError);
+          }
+        }
+
+        setAccountDetails(account);
       } catch (e) {
         setAccountDetails(null);
       } finally {
@@ -36,21 +64,29 @@ const MarketHome = () => {
     checkUser();
   }, []);
 
-  useEffect(() => {
-    if (!accountLoaded) return;
-    const getLisitingFromCatId = async () => {
-      setLoading(true);
-      try {
-        const res = await axios.get(`${ipURL}/api/listing/get-listing-by-category/${catId}`);
-        setGetCatIdListing(res.data?.listingData ?? []);
-      } catch (e) {
-        setGetCatIdListing([]);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const getLisitingFromCatId = useCallback(async () => {
+    try {
+      const res = await axios.get(`${ipURL}/api/listing/get-listing-by-category/${catId}`);
+      setGetCatIdListing(res.data?.listingData ?? []);
+    } catch (e) {
+      setGetCatIdListing([]);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, [catId]);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!accountLoaded) return;
+      getLisitingFromCatId();
+    }, [accountLoaded, getLisitingFromCatId])
+  );
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
     getLisitingFromCatId();
-  }, [catId, accountLoaded]);
+  }, [getLisitingFromCatId]);
 
   const filteredListings = getCatIdListing.filter(item =>
     item.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -69,6 +105,11 @@ const MarketHome = () => {
     } else if(accountDetails.registerVerificationStatus === 'LOGGED_IN'){
       const accountId = accountDetails.id;
       router.push({pathname:'/(tabs)/market/createListing', params:{accountId}});
+    } else {
+      Alert.alert(
+        'Action Disabled',
+        'The button has been disabled until you have been verified by the admin team.'
+      );
     }
   };
 
@@ -280,6 +321,14 @@ const MarketHome = () => {
           showsVerticalScrollIndicator={false}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
           ListEmptyComponent={renderEmptyComponent}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor="#FFAC1C"
+              colors={['#FFAC1C']}
+            />
+          }
         />
       </View>
     </SafeAreaView>

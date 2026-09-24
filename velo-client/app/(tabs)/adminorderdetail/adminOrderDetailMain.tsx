@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, FlatList, TouchableOpacity, RefreshControl, View, Text, useColorScheme, Platform } from 'react-native';
+import { StyleSheet, FlatList, TouchableOpacity, RefreshControl, View, Text, useColorScheme, Platform, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { ipURL } from '@/constants/backendUrl';
@@ -225,7 +225,17 @@ const AdminOrderDetailMain = () => {
               showsVerticalScrollIndicator={false}
             />
           ) : (
-            <View style={styles.emptyStateContainer}>
+            <ScrollView
+              contentContainerStyle={styles.emptyStateContainer}
+              refreshControl={
+                <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={getAdminPendingOrders}
+                  tintColor="#FFAC1C"
+                  colors={['#FFAC1C']}
+                />
+              }
+            >
               <Ionicons
                 name="cube-outline"
                 size={64}
@@ -241,7 +251,7 @@ const AdminOrderDetailMain = () => {
                   ? 'No accepted shipments yet'
                   : 'No completed shipments'}
               </Text>
-            </View>
+            </ScrollView>
           )}
         </View>
       ) : (
@@ -432,7 +442,7 @@ const styles = StyleSheet.create({
     lineHeight: moderateScale(20),
   },
   emptyStateContainer: {
-    flex: 1,
+    flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: verticalScale(80),

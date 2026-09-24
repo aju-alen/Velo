@@ -200,7 +200,7 @@ model Category{
 model Listing {
   id            String           @id @default(cuid())
   title         String
-  description   String
+  description   String           @db.LongText
   price         Float
   categoryId    String
   agentId       String

@@ -10,6 +10,7 @@ export default function HomeLayout() {
     return (
         <Stack>
             <Stack.Screen name='homeMainPage' options={{ headerShown: false, gestureEnabled:false }}/>
+            <Stack.Screen name='trackShipment' options={{ headerShown: false }}/>
             <Stack.Screen name='createShipment' options={{ headerShown: false }}/>
 
         </Stack>

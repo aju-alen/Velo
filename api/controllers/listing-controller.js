@@ -29,6 +29,38 @@ export const postListing = async (req, res, next) => {
     }
 }
 
+export const getPublicListings = async (req, res, next) => {
+  try {
+    const listings = await prisma.listing.findMany({
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        price: true,
+        condition: true,
+        imageUrl: true,
+        createdAt: true,
+        category: { select: { name: true } },
+        agent: {
+          select: {
+            name: true,
+            organisation: { select: { organisationName: true } },
+          },
+        },
+      },
+    });
+
+    res.status(200).json({
+      message: 'Listings fetched successfully',
+      listingData: listings,
+    });
+  } catch (err) {
+    console.log(err);
+    next(err);
+  }
+};
+
 export const getListingByCategory = async (req, res, next) => {
     try {
       console.log(req.params, 'req.params');
