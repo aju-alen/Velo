@@ -22,7 +22,7 @@ export const getContactFormEmail = ({ name, email, phoneNumber, subject, country
 
   return {
     from: process.env.EMAIL,
-    to: process.env.EMAIL,
+    to: process.env.SUPPORT_EMAIL || 'support@velointl.com',
     replyTo: email,
     subject: subject ? `New Contact Request: ${String(subject)}` : 'New Contact Request',
     html: `

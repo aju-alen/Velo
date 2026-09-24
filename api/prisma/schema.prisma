@@ -437,6 +437,16 @@ enum Condition {
   USED
 }
 
+model ContactInquiry {
+  id          String   @id @default(cuid())
+  name        String
+  email       String
+  phoneNumber String?
+  country     String?
+  message     String   @db.LongText
+  createdAt   DateTime @default(now())
+}
+
 enum ShipmentStatus {
   PAYMENT_PENDING
   ORDER_IN_MARKET

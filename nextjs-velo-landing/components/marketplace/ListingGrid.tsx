@@ -1,4 +1,5 @@
 import { MARKETPLACE_LISTINGS_ENDPOINT } from '@/lib/api';
+import ListingDescription from './ListingDescription';
 
 type PublicListing = {
   id: string;
@@ -64,7 +65,7 @@ export default async function ListingGrid() {
                 {listing.condition === 'USED' ? 'Used' : 'New'}
               </p>
               <h3 className="mb-2 text-2xl font-bold leading-8 text-[#11181C]">{listing.title}</h3>
-              <p className="text-[1.3rem] leading-8 text-[#687076]">{listing.description}</p>
+              <ListingDescription text={listing.description} />
               <div className="mt-4 flex items-center justify-between gap-3 text-[1.1rem] leading-7 text-[#11181C]">
                 <span className="font-semibold">{formatPrice(listing.price)}</span>
                 <span className="text-[#687076]">{formatDate(listing.createdAt)}</span>
