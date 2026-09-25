@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import OpenAppLink from '@/components/OpenAppLink';
 import type { RegistrationPath } from '@/lib/app-links';
@@ -178,14 +179,24 @@ export default function HomePage() {
       <JsonLd data={schemas} />
       <div className="min-h-screen overflow-x-hidden bg-[#F5F5F5] text-[1.3rem] leading-8 text-[#11181C]">
       {/* Hero */}
-      <section id="home-hero" className="bg-gradient-to-b from-white to-[#F5F5F5]">
-        <div className={`${wrap} pb-16 pt-10 lg:pt-24`}>
+      <section id="home-hero" className="relative overflow-hidden">
+        <Image
+          src="/hero-bg.png"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="pointer-events-none object-cover scale-125 blur-[70px]"
+          aria-hidden
+        />
+        <div className="absolute inset-0 bg-white/35" aria-hidden />
+        <div className={`relative ${wrap} pb-16 pt-10 lg:pt-24`}>
           <div className="max-w-3xl">
             <div>
               <h1 className="mb-6 text-3xl font-semibold leading-tight text-[#11181C] sm:text-4xl md:text-5xl md:leading-[1.25]">
                 Ship from Dubai to Kenya Without the Hassle
               </h1>
-              <div className={`mb-8 max-w-[65ch] space-y-4 ${lead}`}>
+              <div className="mb-8 max-w-[65ch] space-y-4 text-[1.3rem] leading-8 text-black">
                 <p>
                   Sending goods to Kenya shouldn&apos;t mean driving across the city, chasing updates, or relying on scattered conversations just to know what&apos;s happening.
                 </p>
@@ -218,11 +229,10 @@ export default function HomePage() {
       </section>
 
       {/* Who Velo Is For */}
-      <section className={section}>
+      <section className={`${section} bg-[#11181C]`}>
         <div className={wrap}>
           <div className="mb-10 max-w-3xl">
-            <SectionLabel>Built for everyone sending something home</SectionLabel>
-            <h2 className={heading}>Who Velo Is For</h2>
+            <h2 className={`${heading} text-white`}>Who Velo Is For</h2>
           </div>
           <div className="grid gap-4 md:grid-cols-3">
             {roles.map((role, index) => (
@@ -309,13 +319,13 @@ export default function HomePage() {
       </section>
 
       {/* Why Velo */}
-      <section id="why-velo" className={section}>
+      <section id="why-velo" className={`${section} bg-[#FFAC1C]`}>
         <div className={wrap}>
           <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
             <div className="lg:col-span-5">
               <h2 className={heading}>Why Customers Choose Velo</h2>
             </div>
-            <div className={`space-y-5 lg:col-span-7 ${lead}`}>
+            <div className="space-y-5 text-[1.3rem] leading-8 text-[#11181C] lg:col-span-7">
               <p>
                 People sending goods to Kenya have spent years adapting to systems that were never built around convenience.
               </p>
@@ -337,12 +347,12 @@ export default function HomePage() {
       </section>
 
       {/* Business */}
-      <section id="business" className={section}>
+      <section id="business" className={`${section} bg-[#11181C]`}>
         <div className={wrap}>
           <div>
             <div className="max-w-3xl">
-              <h2 className={`${heading} mb-6`}>Shipping Solutions for Businesses</h2>
-              <div className={`space-y-4 ${lead}`}>
+              <h2 className={`${heading} mb-6 text-white`}>Shipping Solutions for Businesses</h2>
+              <div className="space-y-4 text-[1.3rem] leading-8 text-white/75">
                 <p>Growing businesses don&apos;t just ship products. They depend on them.</p>
                 <p>
                   Velo gives businesses greater visibility and a more organized way to manage regular shipments, so you can spend less time following up and more time planning ahead.
