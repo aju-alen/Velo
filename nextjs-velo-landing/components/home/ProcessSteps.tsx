@@ -1,6 +1,4 @@
-'use client';
-
-import { useEffect, useRef, useState } from 'react';
+import { Check } from 'lucide-react';
 
 type Step = {
   step: string;
@@ -8,54 +6,32 @@ type Step = {
   description: string;
 };
 
-const badgeTones = ['bg-[#FFAC1C]', 'bg-[#FFAC1C]', 'bg-[#FFAC1C]', 'bg-[#FFAC1C]', 'bg-[#FFAC1C]'];
-
 export default function ProcessSteps({ steps }: { steps: Step[] }) {
-  const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const [active, setActive] = useState(0);
-
-  useEffect(() => {
-    const nodes = itemRefs.current.filter((node): node is HTMLDivElement => node !== null);
-    if (!nodes.length) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-        if (!visible) return;
-        const index = nodes.indexOf(visible.target as HTMLDivElement);
-        if (index >= 0) setActive(index);
-      },
-      { rootMargin: '-42% 0px -42% 0px', threshold: [0.25, 0.6, 1] },
-    );
-
-    nodes.forEach((node) => observer.observe(node));
-    return () => observer.disconnect();
-  }, [steps.length]);
+  const inset = `${100 / (steps.length * 2)}%`;
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
-      {steps.map((step, index) => {
-        const isActive = index === active;
-        return (
-          <div
-            key={step.step}
-            ref={(node) => {
-              itemRefs.current[index] = node;
-            }}
-            className={`rounded-2xl border bg-white p-5 ${isActive ? 'border-[#FFAC1C]' : 'border-[#E6E8EB]'}`}
-          >
-            <div
-              className={`mb-4 flex h-12 w-12 items-center justify-center rounded-lg text-[1.3rem] font-semibold leading-8 text-[#11181C] ${badgeTones[index % badgeTones.length]}`}
-            >
-              {step.step}
-            </div>
-            <h3 className="mb-2 text-2xl font-bold leading-8 text-[#11181C]">{step.title}</h3>
-            <p className="text-[1.3rem] leading-8 text-[#687076]">{step.description}</p>
-          </div>
-        );
-      })}
+    <div className="overflow-x-auto pb-2">
+      <ol className="relative grid min-w-[96rem] grid-cols-5 lg:min-w-0">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute top-[6px] h-[3px] rounded-full bg-[#FFAC1C]"
+          style={{ left: inset, right: inset }}
+        />
+        {steps.map((step) => (
+          <li key={step.step} className="flex flex-col items-center px-2">
+            <span className="relative z-10 mb-5 h-3.5 w-3.5 rounded-full border-2 border-white bg-white" />
+            <article className="flex h-full w-full flex-col rounded-2xl border border-[#E6E8EB] bg-white px-7 pb-6 pt-7">
+              <span className="mx-auto inline-flex rounded-full bg-[#F3F4F6] px-4 py-1 text-center text-[1.15rem] font-semibold leading-7 text-[#11181C]">
+                {step.title}
+              </span>
+              <p className="mt-5 flex items-start gap-2 text-left text-[1.15rem] leading-7 text-[#374151]">
+                <Check className="mt-1 h-4 w-4 shrink-0 text-[#0F766E]" strokeWidth={3} aria-hidden />
+                <span>{step.description}</span>
+              </p>
+            </article>
+          </li>
+        ))}
+      </ol>
     </div>
   );
 }

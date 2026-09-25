@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import DownloadAppLink from '@/components/DownloadAppLink';
 import { buildMetadata, buildSchemas, getPageConfig } from '@/lib/seo';
 import { getPageContent } from '@/content/pages';
 import JsonLd from '@/components/seo/JsonLd';
@@ -80,9 +81,7 @@ export default function MarketplacePage() {
             <p>When you&apos;re ready to send something or list something yourself, that happens in the app.</p>
           </div>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <Link href="/download-app" className={btnPrimary}>
-              Get the App
-            </Link>
+            <DownloadAppLink className={btnPrimary}>Get the App</DownloadAppLink>
             <Link href="/how-it-works" className={btnSecondary}>
               See How It Works
             </Link>
@@ -152,9 +151,7 @@ export default function MarketplacePage() {
             Browsing is free and open. Messaging an Agent or listing something yourself happens in the app.
           </p>
           <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-            <Link href="/download-app" className={btnOnAmber}>
-              Get the App
-            </Link>
+            <DownloadAppLink className={btnOnAmber}>Get the App</DownloadAppLink>
             <Link href="/how-it-works" className={btnOnAmberSecondary}>
               See How It Works
             </Link>

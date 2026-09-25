@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import DownloadAppLink from '@/components/DownloadAppLink';
 import { buildMetadata, buildSchemas, getPageConfig } from '@/lib/seo';
 import { getPageContent } from '@/content/pages';
 import JsonLd from '@/components/seo/JsonLd';
@@ -82,12 +82,9 @@ export default function TrackShipmentPage() {
             ))}
           </div>
           <div className="mt-10">
-            <Link
-              href="/download-app"
-              className="inline-flex items-center justify-center rounded-xl bg-[#FFAC1C] px-5 py-3 text-[1.3rem] leading-8 font-medium text-[#11181C] hover:bg-[#FFB84D] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFAC1C] focus-visible:ring-offset-2"
-            >
+            <DownloadAppLink className="inline-flex items-center justify-center rounded-xl bg-[#FFAC1C] px-5 py-3 text-[1.3rem] leading-8 font-medium text-[#11181C] hover:bg-[#FFB84D] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFAC1C] focus-visible:ring-offset-2">
               Get the App
-            </Link>
+            </DownloadAppLink>
           </div>
         </div>
       </section>

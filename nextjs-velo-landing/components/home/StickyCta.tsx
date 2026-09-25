@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ArrowRight, Download } from 'lucide-react';
+import DownloadAppLink from '@/components/DownloadAppLink';
 
 export default function StickyCta() {
   const [visible, setVisible] = useState(false);
@@ -59,14 +60,13 @@ export default function StickyCta() {
           Browse the Marketplace
           <ArrowRight className="ml-2 h-4 w-4" />
         </Link>
-        <Link
-          href="/download-app"
+        <DownloadAppLink
           tabIndex={visible ? 0 : -1}
           className="inline-flex items-center justify-center rounded-xl border border-[#11181C] bg-white px-5 py-3 text-[1.3rem] leading-8 font-medium text-[#11181C] hover:bg-[#11181C] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFAC1C] focus-visible:ring-offset-2"
         >
           <Download className="mr-2 h-4 w-4" />
           Download the App
-        </Link>
+        </DownloadAppLink>
       </div>
     </div>
   );

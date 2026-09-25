@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
+import DownloadAppLink from '@/components/DownloadAppLink';
 import SectionLabel from './SectionLabel';
 
 export default function CalculatorShell() {
@@ -84,12 +84,9 @@ export default function CalculatorShell() {
               Rates vary by shipper and the details of your cargo. For an accurate quote based on your
               shipment, download the Velo app and get pricing there.
             </p>
-            <Link
-              href="/download-app"
-              className="inline-flex items-center font-semibold text-black hover:text-[#FFAC1C] min-h-11"
-            >
+            <DownloadAppLink className="inline-flex items-center font-semibold text-black hover:text-[#FFAC1C] min-h-11">
               Download the App <ArrowRight className="w-4 h-4 ml-2" />
-            </Link>
+            </DownloadAppLink>
           </div>
         )}
       </div>

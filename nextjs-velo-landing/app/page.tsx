@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import DownloadAppLink from '@/components/DownloadAppLink';
 import OpenAppLink from '@/components/OpenAppLink';
 import type { RegistrationPath } from '@/lib/app-links';
 import {
@@ -21,6 +22,7 @@ import { buildMetadata, buildSchemas, getPageConfig } from '@/lib/seo';
 import { getPageContent } from '@/content/pages';
 import JsonLd from '@/components/seo/JsonLd';
 import StickyCta from '@/components/home/StickyCta';
+import StoreBadges from '@/components/home/StoreBadges';
 import ProcessSteps from '@/components/home/ProcessSteps';
 import HomeFaqs from '@/components/home/HomeFaqs';
 
@@ -202,10 +204,10 @@ export default function HomePage() {
                   Browse the Marketplace
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
-                <Link href="/download-app" className={btnSecondary}>
+                <DownloadAppLink className={btnSecondary}>
                   <Download className="mr-2 h-4 w-4" />
                   Download the App
-                </Link>
+                </DownloadAppLink>
               </div>
             </div>
           </div>
@@ -340,7 +342,7 @@ export default function HomePage() {
 
       {/* How It Works */}
       <section id="how-it-works" className={section}>
-        <div className={wrap}>
+        <div className="mx-auto w-full max-w-[96rem] px-6">
           <ProcessSteps steps={steps} />
         </div>
       </section>
@@ -395,32 +397,22 @@ export default function HomePage() {
       </section>
 
       {/* Final CTA */}
-      <section id="home-closing" className="bg-[#FFAC1C] py-20">
-        <div className={`${wrap} text-center`}>
-          <h2 className={`${heading} mx-auto mb-6 max-w-4xl`}>
-            Spend Less Time Following Up. Spend More Time Moving Forward.
-          </h2>
-          <div className="mb-4 flex flex-wrap justify-center gap-x-6 gap-y-2 text-[1.3rem] leading-8 text-[#11181C]">
-            <span>Start with a quote.</span>
-            <span className="hidden text-[#11181C]/40 sm:inline">·</span>
-            <span>Schedule a pickup.</span>
-            <span className="hidden text-[#11181C]/40 sm:inline">·</span>
-            <span>Track your shipment from collection to delivery.</span>
-          </div>
-          <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+      <section id="home-closing" className="bg-[#FFAC1C] py-16 sm:py-20 lg:py-24">
+        <div className={`${wrap} flex flex-col items-center gap-12 lg:flex-row lg:items-center lg:gap-20`}>
+          <StoreBadges />
+          <div className="w-full max-w-xl text-center lg:max-w-none lg:text-left">
+            <h2 className="text-balance text-3xl font-bold leading-[1.15] text-[#11181C] sm:text-4xl lg:text-5xl lg:leading-[1.12]">
+              Spend Less Time Following Up. Spend More Time Moving Forward.
+            </h2>
+            <p className="mx-auto mt-5 max-w-lg text-[1.3rem] leading-8 text-[#11181C] lg:mx-0">
+              Start with a quote. Schedule a pickup. Track your shipment from collection to delivery.
+            </p>
             <Link
               href="/contact"
-              className="inline-flex items-center justify-center rounded-xl bg-[#11181C] px-5 py-3 text-[1.3rem] leading-8 font-medium text-white hover:bg-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#11181C] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FFAC1C]"
+              className="mt-8 inline-flex items-center justify-center rounded-xl bg-[#11181C] px-5 py-3 text-[1.3rem] leading-8 font-medium text-white hover:bg-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#11181C] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FFAC1C]"
             >
               Request a Quote
               <ArrowRight className="ml-2 h-4 w-4" />
-            </Link>
-            <Link
-              href="/download-app"
-              className="inline-flex items-center justify-center rounded-xl border border-[#11181C] bg-white px-5 py-3 text-[1.3rem] leading-8 font-medium text-[#11181C] hover:bg-[#11181C] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#11181C] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FFAC1C]"
-            >
-              <Download className="mr-2 h-4 w-4" />
-              Download the App
             </Link>
           </div>
         </div>

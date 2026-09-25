@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import DownloadAppLink from '@/components/DownloadAppLink';
 import { buildMetadata, buildSchemas, getPageConfig } from '@/lib/seo';
 import { getPageContent } from '@/content/pages';
 import JsonLd from '@/components/seo/JsonLd';
@@ -52,9 +53,7 @@ export default function AboutPage() {
             <p>We&apos;re not the shipping company. We&apos;re the layer that was missing around it.</p>
           </div>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <Link href="/download-app" className={btnPrimary}>
-              Get the App
-            </Link>
+            <DownloadAppLink className={btnPrimary}>Get the App</DownloadAppLink>
             <Link href="/how-it-works" className={btnSecondary}>
               See How It Works
             </Link>

@@ -1,7 +1,7 @@
 'use client';
 
-import Link from 'next/link';
 import { ArrowRight, Search } from 'lucide-react';
+import DownloadAppLink from '@/components/DownloadAppLink';
 
 export default function TrackingShell() {
   return (
@@ -36,13 +36,10 @@ export default function TrackingShell() {
           <p className="text-sm text-gray-600 leading-relaxed mb-4">
             Web tracking is on the way. For now, track your shipments in the Velo app.
           </p>
-          <Link
-            href="/download-app"
-            className="inline-flex items-center justify-center min-h-11 text-sm font-semibold text-black hover:text-[#FFAC1C] transition-colors"
-          >
+          <DownloadAppLink className="inline-flex items-center justify-center min-h-11 text-sm font-semibold text-black hover:text-[#FFAC1C] transition-colors">
             Download the App
             <ArrowRight className="w-4 h-4 ml-2" />
-          </Link>
+          </DownloadAppLink>
         </div>
       </div>
     </div>
