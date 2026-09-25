@@ -184,42 +184,52 @@ export default function Navbar() {
   return (
     <header className="fixed top-0 left-0 right-0 bg-white/98 backdrop-blur-sm border-b border-gray-200 z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center py-4">
-          <Link href="/" className="flex items-center space-x-3 shrink-0" onClick={closeAll}>
-            <Image src="/logo.png" alt="Velo logo" width={64} height={40} className="w-16 h-10" />
-            <div>
-              <span className="text-2xl font-bold text-black">VELO</span>
-              <div className="text-xs text-gray-600 font-medium tracking-wide">INTERNATIONAL SHIPPING</div>
-            </div>
-          </Link>
+        <div className="flex items-center justify-between gap-4 py-4">
+          <div className="flex min-w-0 items-center gap-6 lg:gap-10">
+            <Link href="/" className="flex items-center space-x-3 shrink-0" onClick={closeAll}>
+              <Image src="/logo.png" alt="Velo logo" width={64} height={40} className="w-16 h-10" />
+              <div>
+                <span className="text-2xl font-bold text-black">VELO</span>
+                <div className="text-xs text-gray-600 font-medium tracking-wide">INTERNATIONAL SHIPPING</div>
+              </div>
+            </Link>
 
-          <nav className="hidden md:flex items-center space-x-6 lg:space-x-8">
-            {mainNav.map((item) =>
-              isDropdown(item) ? (
-                <DesktopDropdown
-                  key={item.label}
-                  dropdown={item}
-                  isOpen={openDropdown === item.label}
-                  onToggle={() => setOpenDropdown((current) => (current === item.label ? null : item.label))}
-                  onClose={() => setOpenDropdown(null)}
-                />
-              ) : (
-                <Link key={item.href} href={item.href} className={linkClass}>
-                  {item.label}
-                </Link>
-              ),
-            )}
-          </nav>
+            <nav className="hidden md:flex items-center space-x-6 lg:space-x-8">
+              {mainNav.map((item) =>
+                isDropdown(item) ? (
+                  <DesktopDropdown
+                    key={item.label}
+                    dropdown={item}
+                    isOpen={openDropdown === item.label}
+                    onToggle={() => setOpenDropdown((current) => (current === item.label ? null : item.label))}
+                    onClose={() => setOpenDropdown(null)}
+                  />
+                ) : (
+                  <Link key={item.href} href={item.href} className={linkClass}>
+                    {item.label}
+                  </Link>
+                ),
+              )}
+            </nav>
+          </div>
 
-          <button
-            type="button"
-            className="md:hidden p-2 text-gray-700 hover:text-black transition-colors"
-            aria-expanded={mobileOpen}
-            aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
-            onClick={() => setMobileOpen((open) => !open)}
-          >
-            {mobileOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+          <div className="flex items-center gap-3 shrink-0">
+            <Link
+              href="/marketplace"
+              className="hidden md:inline-flex items-center justify-center rounded-lg bg-[#FFAC1C] px-3.5 py-1.5 text-sm font-medium text-[#11181C] hover:bg-[#FFB84D] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFAC1C] focus-visible:ring-offset-2"
+            >
+              Browse the Marketplace
+            </Link>
+            <button
+              type="button"
+              className="md:hidden p-2 text-gray-700 hover:text-black transition-colors"
+              aria-expanded={mobileOpen}
+              aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+              onClick={() => setMobileOpen((open) => !open)}
+            >
+              {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -244,6 +254,13 @@ export default function Navbar() {
                 </Link>
               ),
             )}
+            <Link
+              href="/marketplace"
+              className="mt-3 mb-2 inline-flex w-full items-center justify-center rounded-xl bg-[#FFAC1C] px-5 py-3 text-[1.3rem] leading-8 font-medium text-[#11181C] hover:bg-[#FFB84D]"
+              onClick={closeAll}
+            >
+              Browse the Marketplace
+            </Link>
           </div>
         </nav>
       )}

@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import DownloadAppLink from '@/components/DownloadAppLink';
 import OpenAppLink from '@/components/OpenAppLink';
 import type { RegistrationPath } from '@/lib/app-links';
 import {
@@ -11,7 +10,6 @@ import {
   Plane,
   Ship,
   DoorOpen,
-  Download,
   ArrowRight,
   Calendar,
   Box,
@@ -199,16 +197,7 @@ export default function HomePage() {
                   From documents and personal parcels to commercial cargo and heavy machinery, you can manage your shipments without disrupting your day.
                 </p>
               </div>
-              <div className="flex flex-col gap-3 sm:flex-row">
-                <Link href="/marketplace" className={btnPrimary}>
-                  Browse the Marketplace
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-                <DownloadAppLink className={btnSecondary}>
-                  <Download className="mr-2 h-4 w-4" />
-                  Download the App
-                </DownloadAppLink>
-              </div>
+              <StoreBadges size="sm" layout="row" />
             </div>
           </div>
         </div>
