@@ -1,46 +1,157 @@
-import React from 'react';
-import { StyleSheet, TouchableOpacity, View, Text, useColorScheme } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { StyleSheet, TouchableOpacity, View, Text, useColorScheme, ActivityIndicator } from 'react-native';
 import { router } from 'expo-router';
 import { Colors } from '@/constants/Colors';
 import StartOverButton from '@/components/StartOverButton';
+import * as SecureStore from 'expo-secure-store';
+import axiosInstance, { setAuthorizationHeader } from '@/constants/axiosHeader';
+import useLoginAccountStore from '@/store/loginAccountStore';
+
+type VerificationUiStatus = 'pending' | 'approved' | 'rejected' | 'loading';
 
 const AgentRestriction = () => {
   const colorScheme = useColorScheme() ?? 'light';
   const themeColors = Colors[colorScheme];
+  const { setAccountLoginData } = useLoginAccountStore();
+  const [status, setStatus] = useState<VerificationUiStatus>('loading');
+
+  const refreshStatus = useCallback(async () => {
+    try {
+      const raw = await SecureStore.getItemAsync('registerDetail');
+      if (!raw) {
+        setStatus('pending');
+        return;
+      }
+      const account = JSON.parse(raw);
+      const localStatus = account.registerVerificationStatus;
+
+      if (localStatus === 'REJECTED') {
+        setStatus('rejected');
+        return;
+      }
+      if (localStatus === 'LOGGED_IN') {
+        setStatus('approved');
+        return;
+      }
+
+      if (account.token) {
+        setAuthorizationHeader(account.token);
+        const response = await axiosInstance.get('/api/auth/account-status');
+        const freshStatus = response.data?.account?.registerVerificationStatus;
+        if (freshStatus) {
+          const updated = {
+            ...account,
+            registerVerificationStatus: freshStatus,
+            organisationId: response.data.account.organisationId ?? account.organisationId,
+            verificationDocumentUrl:
+              response.data.account.verificationDocumentUrl ?? account.verificationDocumentUrl,
+          };
+          await SecureStore.setItemAsync('registerDetail', JSON.stringify(updated));
+          setAccountLoginData({
+            registerVerificationStatus: freshStatus,
+            organisationId: updated.organisationId ?? '',
+          });
+
+          if (freshStatus === 'LOGGED_IN') {
+            setStatus('approved');
+            return;
+          }
+          if (freshStatus === 'REJECTED') {
+            setStatus('rejected');
+            return;
+          }
+        }
+      }
+
+      setStatus('pending');
+    } catch (e) {
+      console.warn('Could not refresh verification status', e);
+      setStatus('pending');
+    }
+  }, [setAccountLoginData]);
+
+  useEffect(() => {
+    refreshStatus();
+    const interval = setInterval(refreshStatus, 15000);
+    return () => clearInterval(interval);
+  }, [refreshStatus]);
+
+  if (status === 'loading') {
+    return (
+      <View style={[styles.mainContainer, { backgroundColor: themeColors.background }]}>
+        <ActivityIndicator size="large" color="#FFAC1C" />
+      </View>
+    );
+  }
+
+  if (status === 'approved') {
+    return (
+      <View style={[styles.mainContainer, { backgroundColor: themeColors.background }]}>
+        <View style={styles.contentContainer}>
+          <Text style={[styles.title, { color: themeColors.text }]}>Verification Approved</Text>
+          <Text style={[styles.description, { color: themeColors.text }]}>
+            Your logistic agent account has been approved. You now have full access to agent features.
+          </Text>
+          <View style={[styles.statusCard, styles.approvedCard]}>
+            <Text style={[styles.statusTitle, { color: themeColors.text }]}>Current Status</Text>
+            <Text style={[styles.statusText, { color: '#4CAF50' }]}>Approved</Text>
+          </View>
+          <TouchableOpacity
+            onPress={() => router.replace('/(tabs)/home/homeMainPage')}
+            style={styles.buttonContainer}
+          >
+            <Text style={styles.buttonText}>Continue to App</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
+
+  if (status === 'rejected') {
+    return (
+      <View style={[styles.mainContainer, { backgroundColor: themeColors.background }]}>
+        <View style={styles.contentContainer}>
+          <Text style={[styles.title, { color: themeColors.text }]}>Verification Not Approved</Text>
+          <Text style={[styles.description, { color: themeColors.text }]}>
+            Your verification request was declined. You can start registration over or contact support for help.
+          </Text>
+          <View style={[styles.statusCard, styles.rejectedCard]}>
+            <Text style={[styles.statusTitle, { color: themeColors.text }]}>Current Status</Text>
+            <Text style={[styles.statusText, { color: '#F44336' }]}>Rejected</Text>
+          </View>
+          <StartOverButton />
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View style={[styles.mainContainer, { backgroundColor: themeColors.background }]}>
       <View style={styles.contentContainer}>
-        {/* Success Icon */}
-        <View style={styles.iconContainer}>
-          {/* <CheckCircle size={64} color="#FFAC1C" /> */}
-        </View>
-
-        {/* Main Message */}
         <Text style={[styles.title, { color: themeColors.text }]}>
           Appointment Scheduled!
         </Text>
-
-        {/* Description */}
         <Text style={[styles.description, { color: themeColors.text }]}>
-          Your appointment has been successfully booked and scheduled. You will have access to limited features until your verification is complete.
+          Your appointment is booked. A super administrator will review your documents and approve or reject your account. This screen refreshes automatically.
         </Text>
-
-        {/* Status Card */}
         <View style={styles.statusCard}>
           <Text style={[styles.statusTitle, { color: themeColors.text }]}>Current Status</Text>
           <Text style={[styles.statusText, { color: themeColors.text }]}>Pending Verification</Text>
         </View>
-
-        {/* Action Button */}
-        <TouchableOpacity 
-          onPress={() => router.replace('/(tabs)/home/homeMainPage')} 
+        <TouchableOpacity
+          onPress={refreshStatus}
+          style={[styles.buttonContainer, styles.secondaryButton]}
+        >
+          <Text style={styles.buttonText}>Check Status Now</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => router.replace('/(tabs)/home/homeMainPage')}
           style={styles.buttonContainer}
         >
           <Text style={styles.buttonText}>
             Continue with Limited Access
           </Text>
         </TouchableOpacity>
-
         <StartOverButton />
       </View>
     </View>
@@ -59,9 +170,6 @@ const styles = StyleSheet.create({
     maxWidth: 400,
     alignItems: 'center',
     padding: 20,
-  },
-  iconContainer: {
-    marginBottom: 24,
   },
   title: {
     fontSize: 24,
@@ -83,6 +191,12 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     alignItems: 'center',
   },
+  approvedCard: {
+    backgroundColor: 'rgba(76, 175, 80, 0.12)',
+  },
+  rejectedCard: {
+    backgroundColor: 'rgba(244, 67, 54, 0.12)',
+  },
   statusTitle: {
     fontSize: 14,
     marginBottom: 8,
@@ -99,9 +213,13 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     width: '100%',
     alignItems: 'center',
+    marginBottom: 12,
+  },
+  secondaryButton: {
+    backgroundColor: '#666',
   },
   buttonText: {
-    color: '#000000',
+    color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
   },

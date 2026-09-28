@@ -19,7 +19,9 @@ const FinalPreview = () => {
     accountAddressData,
     deliveryServices,
     itemType,
-    finalShipmentData
+    finalShipmentData,
+    draftId,
+    setDraftId,
   } = useShipmentStore();
   const { accountLoginData } = useLoginAccountStore();
   const [laoding, setLoading] = useState(false);
@@ -92,6 +94,15 @@ const FinalPreview = () => {
       
       const sendNewShipment = await axiosInstance.post(`${ipURL}/api/shipment/create-new-shipment`, formData);
       console.log(sendNewShipment.data,'______________________');
+
+      if (draftId) {
+        try {
+          await axiosInstance.delete(`/api/shipment/draft/${draftId}`);
+        } catch (draftErr) {
+          console.warn('Could not delete draft after confirm', draftErr);
+        }
+        setDraftId(null);
+      }
       
       setLoading(false);
       if(finalShipmentData.shippingMarket === 'OPEN_MARKET'){
@@ -144,7 +155,9 @@ const FinalPreview = () => {
           <Text style={[styles.cardTitle, { color: textPrimary }]}>Shipping Date</Text>
           <Divider style={[styles.cardDivider, { backgroundColor: borderColor }]} />
           <Text style={styles.highlightText}>
-            {savedAddressData.deliveryDate.toDateString()}
+            {savedAddressData.deliveryDate instanceof Date
+              ? savedAddressData.deliveryDate.toDateString()
+              : new Date(savedAddressData.deliveryDate).toDateString()}
           </Text>
         </View>
 

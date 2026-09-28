@@ -97,18 +97,19 @@ const MarketHome = () => {
   }
 
   const handleButtonPress = () => {
-    if (accountDetails.registerVerificationStatus === 'APPOINTMENT_BOOKED') {
-      Alert.alert(
-        'Action Disabled',
-        'The button has been disabled until you have been verified by the admin team.'
-      );
-    } else if(accountDetails.registerVerificationStatus === 'LOGGED_IN'){
+    if (accountDetails.registerVerificationStatus === 'LOGGED_IN'){
       const accountId = accountDetails.id;
       router.push({pathname:'/(tabs)/market/createListing', params:{accountId}});
+    } else if (accountDetails.registerVerificationStatus === 'REJECTED') {
+      Alert.alert(
+        'Verification Rejected',
+        'Your agent verification was not approved. Open your verification status screen or contact support.'
+      );
+      router.push('/(auth)/agentRestriction');
     } else {
       Alert.alert(
         'Action Disabled',
-        'The button has been disabled until you have been verified by the admin team.'
+        'Creating listings is disabled until a super administrator verifies your account.'
       );
     }
   };

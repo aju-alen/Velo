@@ -1,29 +1,46 @@
 import express from "express";
 const router = express.Router()
-import { createNewShipment, getAllPaidShipments, getAllOpenMarketShipments, getSinglePendingShipments, agentUpdateShipmentStatus,getAllAcceptedShipments,getTotalAmount,getSingleUserShipments,agentUpdateReadyPickupStatus,agentUpdatePickedUpStatus, trackShipmentByPublicId, getPublicShipmentTracking } from "../controllers/shipment-controller.js";
+import {
+  createNewShipment,
+  getAllPaidShipments,
+  getAllOpenMarketShipments,
+  getSinglePendingShipments,
+  agentUpdateShipmentStatus,
+  getAllAcceptedShipments,
+  getTotalAmount,
+  getSingleUserShipments,
+  agentUpdateReadyPickupStatus,
+  agentUpdatePickedUpStatus,
+  trackShipmentByPublicId,
+  getPublicShipmentTracking,
+  saveShipmentDraft,
+  getUserShipmentDrafts,
+  getShipmentDraft,
+  deleteShipmentDraft,
+} from "../controllers/shipment-controller.js";
 import { verifyToken } from "../middlewares/jwtVerify.js";
-
-
 
 router.post('/create-new-shipment', verifyToken, createNewShipment);
 
-router.get('/agent/get-all-open-market-shipments', verifyToken, getAllOpenMarketShipments); //get all pending shipments data for agents 
-router.get('/agent/get-all-accepted-shipments/:organisationId', verifyToken, getAllAcceptedShipments); //get all pending shipments data for agents 
+router.post('/draft', verifyToken, saveShipmentDraft);
+router.get('/drafts/:userId', verifyToken, getUserShipmentDrafts);
+router.get('/draft/:draftId', verifyToken, getShipmentDraft);
+router.delete('/draft/:draftId', verifyToken, deleteShipmentDraft);
 
-router.get('/getTotalAmount/:organisationId/:shipmentId',verifyToken, getTotalAmount); //get total amount of single shipment
+router.get('/agent/get-all-open-market-shipments', verifyToken, getAllOpenMarketShipments);
+router.get('/agent/get-all-accepted-shipments/:organisationId', verifyToken, getAllAcceptedShipments);
 
-router.get('/agent/get-single-pending-shipments/:singleShipmentId', verifyToken, getSinglePendingShipments); //get single pending shipments data for agents 
-router.get('/user/get-single-shipment/:singleShipmentId', verifyToken, getSingleUserShipments); //get single pending shipments data for agents 
-router.get('/track/:shipmentId', getPublicShipmentTracking); // open tracking lookup by public shipmentId
-router.get('/user/track/:shipmentId', verifyToken, trackShipmentByPublicId); // track by public shipmentId
+router.get('/getTotalAmount/:organisationId/:shipmentId', verifyToken, getTotalAmount);
 
-router.get('/get-all-paid-shipments/:userId',verifyToken, getAllPaidShipments); //get all paid shipments of single user
+router.get('/agent/get-single-pending-shipments/:singleShipmentId', verifyToken, getSinglePendingShipments);
+router.get('/user/get-single-shipment/:singleShipmentId', verifyToken, getSingleUserShipments);
+router.get('/track/:shipmentId', getPublicShipmentTracking);
+router.get('/user/track/:shipmentId', verifyToken, trackShipmentByPublicId);
 
-router.put('/agent-update-shipment-status-open-market/:shipmentId',verifyToken, agentUpdateShipmentStatus); //update shipment status by agent for open market shipments
+router.get('/get-all-paid-shipments/:userId', verifyToken, getAllPaidShipments);
 
-router.put('/agent-update-shipment-status-ready-for-pickup/:shipmentId',verifyToken, agentUpdateReadyPickupStatus); //update shipment status by agent for open market shipments
-
-router.put('/agent-update-shipment-status-picked-up/:shipmentId',verifyToken, agentUpdatePickedUpStatus); //update shipment status by agent for open market shipments
-
+router.put('/agent-update-shipment-status-open-market/:shipmentId', verifyToken, agentUpdateShipmentStatus);
+router.put('/agent-update-shipment-status-ready-for-pickup/:shipmentId', verifyToken, agentUpdateReadyPickupStatus);
+router.put('/agent-update-shipment-status-picked-up/:shipmentId', verifyToken, agentUpdatePickedUpStatus);
 
 export default router;

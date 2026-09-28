@@ -594,3 +594,102 @@ export const getTotalAmount = async (req, res, next) => {
     }
 }
 
+const assertDraftOwner = (req, userId) => {
+    if (req.verifyRole !== 'USER' || req.verifyUserId !== userId) {
+        return false;
+    }
+    return true;
+};
+
+export const saveShipmentDraft = async (req, res, next) => {
+    const { userId, payload, currentStep, draftId } = req.body;
+    try {
+        if (!assertDraftOwner(req, userId)) {
+            return res.status(403).json({ message: 'You are not authorized to save a draft' });
+        }
+        if (!payload || typeof payload !== 'object') {
+            return res.status(400).json({ message: 'Draft payload is required' });
+        }
+
+        let draft;
+        if (draftId) {
+            const existing = await prisma.shipmentDraft.findUnique({ where: { id: draftId } });
+            if (!existing || existing.userId !== userId) {
+                return res.status(404).json({ message: 'Draft not found' });
+            }
+            draft = await prisma.shipmentDraft.update({
+                where: { id: draftId },
+                data: {
+                    payload,
+                    currentStep: currentStep || existing.currentStep,
+                },
+            });
+        } else {
+            draft = await prisma.shipmentDraft.create({
+                data: {
+                    userId,
+                    payload,
+                    currentStep: currentStep || 'createShipmentHome',
+                },
+            });
+        }
+
+        return res.status(200).json({ message: 'Draft saved', draft });
+    } catch (err) {
+        console.log(err);
+        next(err);
+    }
+};
+
+export const getUserShipmentDrafts = async (req, res, next) => {
+    const { userId } = req.params;
+    try {
+        if (!assertDraftOwner(req, userId)) {
+            return res.status(403).json({ message: 'You are not authorized to view drafts' });
+        }
+        const drafts = await prisma.shipmentDraft.findMany({
+            where: { userId },
+            orderBy: { updatedAt: 'desc' },
+        });
+        return res.status(200).json({ drafts });
+    } catch (err) {
+        console.log(err);
+        next(err);
+    }
+};
+
+export const getShipmentDraft = async (req, res, next) => {
+    const { draftId } = req.params;
+    try {
+        const draft = await prisma.shipmentDraft.findUnique({ where: { id: draftId } });
+        if (!draft) {
+            return res.status(404).json({ message: 'Draft not found' });
+        }
+        if (!assertDraftOwner(req, draft.userId)) {
+            return res.status(403).json({ message: 'You are not authorized to view this draft' });
+        }
+        return res.status(200).json({ draft });
+    } catch (err) {
+        console.log(err);
+        next(err);
+    }
+};
+
+export const deleteShipmentDraft = async (req, res, next) => {
+    const { draftId } = req.params;
+    try {
+        const draft = await prisma.shipmentDraft.findUnique({ where: { id: draftId } });
+        if (!draft) {
+            return res.status(404).json({ message: 'Draft not found' });
+        }
+        if (!assertDraftOwner(req, draft.userId)) {
+            return res.status(403).json({ message: 'You are not authorized to delete this draft' });
+        }
+        await prisma.shipmentDraft.delete({ where: { id: draftId } });
+        return res.status(200).json({ message: 'Draft deleted', deleted: true });
+    } catch (err) {
+        console.log(err);
+        next(err);
+    }
+};
+

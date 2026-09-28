@@ -285,6 +285,8 @@ export const getAccountStatus = async (req, res, next) => {
         registerVerificationStatus: true,
         organisationId: true,
         role: true,
+        verificationDocumentUrl: true,
+        appointmentDate: true,
       },
     });
 
@@ -384,7 +386,7 @@ export const changePassword = async (req, res) => {
   }
 };
 
-const INCOMPLETE_REGISTRATION_STATUSES = ["PARTIAL", "APPOINTMENT_BOOKED"];
+const INCOMPLETE_REGISTRATION_STATUSES = ["PARTIAL", "APPOINTMENT_BOOKED", "REJECTED"];
 
 export const abandonRegistration = async (req, res) => {
   const { userId } = req.body;

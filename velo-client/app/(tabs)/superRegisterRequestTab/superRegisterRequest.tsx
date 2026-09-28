@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { FlatList, TouchableOpacity, StyleSheet, Alert, View, Text, useColorScheme, ActivityIndicator } from 'react-native'
+import { FlatList, TouchableOpacity, StyleSheet, Alert, View, Text, useColorScheme, ActivityIndicator, Linking } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
 import useLoginAccountStore from '@/store/loginAccountStore'
@@ -18,6 +18,7 @@ interface AppointmentRequest {
   registerVerificationStatus: string;
   createdAt: string;
   organisationId?: string;
+  verificationDocumentUrl?: string | null;
   organisation?: {
     organisationName?: string;
   };
@@ -68,7 +69,7 @@ const SuperRegisterRequest = () => {
   const handleDecline = async (id: string) => {
     Alert.alert(
       'Decline Request',
-      'Are you sure you want to decline this appointment request?',
+      'Are you sure you want to decline this appointment request? The agent will be notified.',
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -76,10 +77,11 @@ const SuperRegisterRequest = () => {
           style: 'destructive',
           onPress: async () => {
             try {
-              // Implement decline API call if available
-              console.log(`Declined request for ID: ${id}`)
-              setAppointmentBookedData(prev => prev.filter(item => item.id !== id))
-              Alert.alert('Request Declined', 'The appointment request has been declined.')
+              const response = await axiosInstance.put(`/api/test-routes/decline-agent-appointment/${id}`)
+              if (response.data.updateBool) {
+                setAppointmentBookedData(prev => prev.filter(item => item.id !== id))
+                Alert.alert('Request Declined', 'The agent has been notified of the rejection.')
+              }
             } catch (e) {
               console.log(e)
               Alert.alert('Error', 'Failed to decline request')
@@ -141,6 +143,20 @@ const SuperRegisterRequest = () => {
         {renderDetailRow('calendar-outline', 'Appointment Date', formatDate(item.appointmentDate))}
         {renderDetailRow('time-outline', 'Requested On', formatDate(item.createdAt))}
         {item.organisation?.organisationName && renderDetailRow('business-outline', 'Organisation', item.organisation.organisationName)}
+        {item.verificationDocumentUrl ? (
+          <TouchableOpacity
+            style={styles.detailRow}
+            onPress={() => Linking.openURL(item.verificationDocumentUrl as string)}
+          >
+            <Ionicons name="document-text-outline" size={18} color={colorScheme === 'dark' ? '#FFAC1C' : '#666'} />
+            <View style={styles.detailContent}>
+              <Text style={[styles.detailLabel, { color: themeColors.text }]}>Verification Document</Text>
+              <Text style={[styles.detailValue, { color: '#FFAC1C' }]}>Open PDF</Text>
+            </View>
+          </TouchableOpacity>
+        ) : (
+          renderDetailRow('document-text-outline', 'Verification Document', 'Not uploaded')
+        )}
       </View>
         
       <View style={styles.buttonContainer}>

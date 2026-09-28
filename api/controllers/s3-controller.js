@@ -3,8 +3,11 @@ import { Readable } from 'stream';
 import { Upload } from '@aws-sdk/lib-storage';
 import { S3 } from '@aws-sdk/client-s3';
 import sharp from 'sharp';
+import { PrismaClient } from '@prisma/client';
 
 dotenv.config();
+
+const prisma = new PrismaClient();
 
 const s3 = new S3({
     credentials: {
@@ -79,6 +82,17 @@ export const postProfileImageS3 = async (req, res, next) => {
 
         // Get the location of the uploaded file
         const fileLocation = uploadResult.Location;
+
+        if (file.mimetype === 'application/pdf' && id) {
+            try {
+                await prisma.agent.update({
+                    where: { id },
+                    data: { verificationDocumentUrl: fileLocation },
+                });
+            } catch (dbErr) {
+                console.error('Failed to persist verification document URL:', dbErr);
+            }
+        }
 
         // Send response with the uploaded file location
         res.status(200).json({ message: 'File uploaded successfully', data: fileLocation });

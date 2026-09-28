@@ -86,16 +86,29 @@ const RootIndex = () => {
 
         const { registerVerificationStatus, role } = userData;
 
-        // Incomplete registration -- send to finish the form
+        // Incomplete registration -- finish the correct next step
         if (registerVerificationStatus === 'PARTIAL') {
+          if (role === 'AGENT' && !userData.verificationDocumentUrl) {
+            router.replace('/(auth)/verifyAgent');
+            return;
+          }
           router.replace('/(auth)/finalRegisterForm');
+          return;
+        }
+
+        // Agent awaiting or denied verification -- status screen
+        if (
+          role === 'AGENT' &&
+          (registerVerificationStatus === 'APPOINTMENT_BOOKED' ||
+            registerVerificationStatus === 'REJECTED')
+        ) {
+          router.replace('/(auth)/agentRestriction');
           return;
         }
 
         // Fully or partially verified users -- send to home
         const isVerifiedAgent =
-          role === 'AGENT' &&
-          (registerVerificationStatus === 'APPOINTMENT_BOOKED' || registerVerificationStatus === 'LOGGED_IN');
+          role === 'AGENT' && registerVerificationStatus === 'LOGGED_IN';
         const isVerifiedUser = role === 'USER' && registerVerificationStatus === 'LOGGED_IN';
         const isSuperAdmin = role === 'SUPERADMIN' && registerVerificationStatus === 'SUPERADMINLOGGEDIN';
         const isSubAgent = role === 'SUB_AGENT' && registerVerificationStatus === 'LOGGED_IN';

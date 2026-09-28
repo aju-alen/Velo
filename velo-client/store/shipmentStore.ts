@@ -1,6 +1,5 @@
 import { create } from 'zustand'
 
-// Define interfaces for your state
 interface SavedAddressData {
   name: string
   companyName: string
@@ -16,8 +15,8 @@ interface SavedAddressData {
   countryCode: string
   zipCode: string
   gotDetails: boolean
-  shipmentDate: Date
-  deliveryDate: Date
+  shipmentDate: Date | string
+  deliveryDate: Date | string
 }
 
 interface AccountAddressData {
@@ -34,7 +33,6 @@ interface AccountAddressData {
   email: string
   mobileNumber: string
   countryCode: string
-
 }
 
 interface PackageDetail {
@@ -70,12 +68,22 @@ interface FinalShipmentData {
   shippingMarket: string
 }
 
-interface AgentShipmentData{
+interface AgentShipmentData {
   shipmentStatus: string
   shipmentId: string
 }
 
-// Define the store state interface
+export type ShipmentDraftPayload = {
+  savedAddressData: SavedAddressData
+  packageDetail: PackageDetail
+  packageDescription: string
+  accountAddressData: AccountAddressData
+  deliveryServices: DeliveryServices
+  cummilativeExpence: CummilativeExpence
+  finalShipmentData: FinalShipmentData
+  itemType: string
+}
+
 interface ShipmentState {
   savedAddressData: SavedAddressData
   packageDetail: PackageDetail
@@ -83,11 +91,12 @@ interface ShipmentState {
   accountAddressData: AccountAddressData
   deliveryServices: DeliveryServices
   cummilativeExpence: CummilativeExpence
-  finalShipmentData:FinalShipmentData
-  agentShipmentData:AgentShipmentData
+  finalShipmentData: FinalShipmentData
+  agentShipmentData: AgentShipmentData
   itemType: string
   createShipment: Boolean
   editData: Boolean
+  draftId: string | null
   setFinalShipmentData: (data: Partial<FinalShipmentData>) => void
   setAgentShipmentData: (data: Partial<AgentShipmentData>) => void
   setEditData: (data: Boolean) => void
@@ -99,229 +108,180 @@ interface ShipmentState {
   setDeliveryServices: (data: Partial<DeliveryServices>) => void
   setCuminativeExpence: (data: Partial<CummilativeExpence>) => void
   setItemType: (itemType: string) => void
+  setDraftId: (draftId: string | null) => void
+  getDraftPayload: () => ShipmentDraftPayload
+  hydrateFromDraft: (payload: Partial<ShipmentDraftPayload>, draftId?: string | null) => void
   resetShipmentData: () => void
 }
 
-// Create the store with types
-const useShipmentStore = create<ShipmentState>((set) => ({
-  // Address Data
-  savedAddressData: {
-    name: '',
-    companyName: '',
-    addressOne: '',
-    addressTwo: '',
-    city: '',
-    state: '',
-    email: '',
-    mobileNumber: '',
-    countryId: '',
-    residentAddress: false,
-    saveAddress: false,
-    countryCode: '+971',
-    zipCode: '',
-    gotDetails: false,
-    shipmentDate: new Date(),
-    deliveryDate: new Date()
+const emptySavedAddress = (): SavedAddressData => ({
+  name: '',
+  companyName: '',
+  addressOne: '',
+  addressTwo: '',
+  city: '',
+  state: '',
+  email: '',
+  mobileNumber: '',
+  countryId: '',
+  residentAddress: false,
+  saveAddress: false,
+  countryCode: '+971',
+  zipCode: '',
+  gotDetails: false,
+  shipmentDate: new Date(),
+  deliveryDate: new Date(),
+})
 
-  },
-  accountAddressData: {
-    addressOne:'',
-    addressTwo:'',
-    city:'',
-    countryId:'',
-    state:'',
-    country:{
-      name:"",
-      id:0
-    },
-    userName:'',
-    email:'',
-    mobileNumber:'',
-    countryCode:'',
+const emptyAccountAddress = (): AccountAddressData => ({
+  addressOne: '',
+  addressTwo: '',
+  city: '',
+  countryId: '',
+  state: '',
+  country: { name: '', id: 0 },
+  userName: '',
+  email: '',
+  mobileNumber: '',
+  countryCode: '',
+})
 
-  },
-  deliveryServices:{
-    verbalNotification:false,
-    adultSignature:false,
-    directSignature:false,
-    deliveryPickupTimeFrom:'9:30',
-    deliveryPickupTimeTo:'17:00',
-    pickupInstruction: '',
-    pickupSpecialInstruction: ''    
-  },
+const emptyPackage = (): PackageDetail => ({
+  packageName: '',
+  length: '',
+  height: '',
+  width: '',
+  numberOfPieces: '1',
+  weight: '',
+})
 
-  // Package Details
-  packageDetail: {
-    packageName:'',
-    length: '',
-    height: '',
-    width: '',
-    numberOfPieces: '1',
-    weight: ''
-  },
+const emptyDelivery = (): DeliveryServices => ({
+  verbalNotification: false,
+  adultSignature: false,
+  directSignature: false,
+  deliveryPickupTimeFrom: '9:30',
+  deliveryPickupTimeTo: '17:00',
+  pickupInstruction: '',
+  pickupSpecialInstruction: '',
+})
 
-  // Package Description
+const emptyExpense = (): CummilativeExpence => ({
+  adultSignature: 0,
+  directSignature: 0,
+  verbalNotification: 0,
+})
+
+const emptyFinal = (): FinalShipmentData => ({
+  totalPrice: 0,
+  organisationId: '',
+  basePrice: 0,
+  collectionPrice: 0,
+  shippingMarket: '',
+})
+
+const useShipmentStore = create<ShipmentState>((set, get) => ({
+  savedAddressData: emptySavedAddress(),
+  accountAddressData: emptyAccountAddress(),
+  deliveryServices: emptyDelivery(),
+  packageDetail: emptyPackage(),
   packageDescription: '',
   itemType: '',
   createShipment: false,
   editData: false,
+  draftId: null,
+  cummilativeExpence: emptyExpense(),
+  finalShipmentData: emptyFinal(),
+  agentShipmentData: { shipmentStatus: '', shipmentId: '' },
 
-  cummilativeExpence : {
-    adultSignature:0,
-    directSignature: 0,
-    verbalNotification: 0,
-  },
-  finalShipmentData:{
-    totalPrice:0,
-    organisationId:'',
-    basePrice:0,
-    collectionPrice:0,
-    shippingMarket:''
-  },
-  agentShipmentData:{
-    shipmentStatus:'',
-    shipmentId:''
-  },
   setFinalShipmentData: (data) =>
     set((state) => ({
-      finalShipmentData: {
-        ...state.finalShipmentData,
-        ...data
-      }
+      finalShipmentData: { ...state.finalShipmentData, ...data },
     })),
-  setSavedAddressData: (data) => 
+  setSavedAddressData: (data) =>
     set((state) => ({
-      savedAddressData: {
-        ...state.savedAddressData,
-        ...data
-      }
+      savedAddressData: { ...state.savedAddressData, ...data },
     })),
-
-    setAccountAddressData: (data) =>
+  setAccountAddressData: (data) =>
     set((state) => ({
-      accountAddressData: {
-        ...state.accountAddressData,
-        ...data
-      }
+      accountAddressData: { ...state.accountAddressData, ...data },
     })),
-
   setPackageDetail: (data) =>
     set((state) => ({
-      packageDetail: {
-        ...state.packageDetail,
-        ...data
-      }
+      packageDetail: { ...state.packageDetail, ...data },
     })),
-
-  setPackageDescription: (description) =>
-    set(() => ({
-      packageDescription: description
-    })),
-
+  setPackageDescription: (description) => set(() => ({ packageDescription: description })),
   setDeliveryServices: (data) =>
     set((state) => ({
-      deliveryServices: {
-        ...state.deliveryServices,
-        ...data
-      }
+      deliveryServices: { ...state.deliveryServices, ...data },
     })),
-
-    setCuminativeExpence: (data) =>
+  setCuminativeExpence: (data) =>
     set((state) => ({
-      cummilativeExpence: {
-        ...state.cummilativeExpence,
-        ...data
+      cummilativeExpence: { ...state.cummilativeExpence, ...data },
+    })),
+  setItemType: (itemType) => set(() => ({ itemType })),
+  setCreateShipment: (data) => set(() => ({ createShipment: data })),
+  setEditData: (data) => set(() => ({ editData: data })),
+  setAgentShipmentData: (data) =>
+    set((state) => ({
+      agentShipmentData: { ...state.agentShipmentData, ...data },
+    })),
+  setDraftId: (draftId) => set(() => ({ draftId })),
+
+  getDraftPayload: () => {
+    const state = get()
+    return {
+      savedAddressData: state.savedAddressData,
+      packageDetail: state.packageDetail,
+      packageDescription: state.packageDescription,
+      accountAddressData: state.accountAddressData,
+      deliveryServices: state.deliveryServices,
+      cummilativeExpence: state.cummilativeExpence,
+      finalShipmentData: state.finalShipmentData,
+      itemType: state.itemType,
+    }
+  },
+
+  hydrateFromDraft: (payload, draftId = null) => {
+    const reviveDates = (address?: Partial<SavedAddressData>) => {
+      if (!address) return emptySavedAddress()
+      return {
+        ...emptySavedAddress(),
+        ...address,
+        shipmentDate: address.shipmentDate ? new Date(address.shipmentDate) : new Date(),
+        deliveryDate: address.deliveryDate ? new Date(address.deliveryDate) : new Date(),
       }
-    })),
+    }
 
-  setItemType: (itemType) =>
     set(() => ({
-      itemType
-    })),
+      savedAddressData: reviveDates(payload.savedAddressData),
+      packageDetail: { ...emptyPackage(), ...(payload.packageDetail || {}) },
+      packageDescription: payload.packageDescription || '',
+      accountAddressData: { ...emptyAccountAddress(), ...(payload.accountAddressData || {}) },
+      deliveryServices: { ...emptyDelivery(), ...(payload.deliveryServices || {}) },
+      cummilativeExpence: { ...emptyExpense(), ...(payload.cummilativeExpence || {}) },
+      finalShipmentData: { ...emptyFinal(), ...(payload.finalShipmentData || {}) },
+      itemType: payload.itemType || '',
+      draftId: draftId || null,
+      createShipment: true,
+      editData: true,
+    }))
+  },
 
-  setCreateShipment: (data) =>
-    set(() => ({
-      createShipment: data
-    })),
-
-    setEditData: (data)=>
-      set(()=>({
-        editData:data
-      })),
-
-      setAgentShipmentData: (data) =>
-      set((state) => ({
-        agentShipmentData: {
-          ...state.agentShipmentData,
-          ...data
-        }
-      })),
-
-
-  // Reset all data
   resetShipmentData: () =>
     set(() => ({
-     savedAddressData: {
-    name: '',
-    companyName: '',
-    addressOne: '',
-    addressTwo: '',
-    city: '',
-    state: '',
-    email: '',
-    mobileNumber: '',
-    countryId: '',
-    residentAddress: false,
-    saveAddress: false,
-    countryCode: '',
-    zipCode: '',
-    gotDetails: false,
-    shipmentDate: new Date(),
-    deliveryDate: new Date()
-  },
-  accountAddressData: {
-    addressOne:'',
-    addressTwo:'',
-    city:'',
-    countryId:'',
-    state:'',
-    country:{
-      name:"",
-      id:0
-    },
-    userName:'',
-    email:'',
-    mobileNumber:'',
-    countryCode:'',
-
-  },
-  deliveryServices:{
-    verbalNotification:false,
-    adultSignature:false,
-    directSignature:false,
-    deliveryPickupTimeFrom:'',
-    deliveryPickupTimeTo:'',
-    pickupInstruction: '',
-    pickupSpecialInstruction: ''
-  },
-  packageDetail: {
-    packageName:'',
-    length: '',
-    height: '',
-    width: '',
-    numberOfPieces: '',
-    weight: '',
-   
-  },
-  packageDescription: '',
-
-  cummilativeExpence : {
-    adultSignature:0,
-    directSignature: 0,
-    verbalNotification: 0,
-  },
-
-    }))
+      savedAddressData: emptySavedAddress(),
+      accountAddressData: emptyAccountAddress(),
+      deliveryServices: emptyDelivery(),
+      packageDetail: emptyPackage(),
+      packageDescription: '',
+      cummilativeExpence: emptyExpense(),
+      finalShipmentData: emptyFinal(),
+      itemType: '',
+      draftId: null,
+      editData: false,
+      createShipment: false,
+      agentShipmentData: { shipmentStatus: '', shipmentId: '' },
+    })),
 }))
 
 export default useShipmentStore

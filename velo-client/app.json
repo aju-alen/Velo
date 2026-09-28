@@ -2,7 +2,7 @@
   "expo": {
     "name": "Velo Shipping",
     "slug": "velo-international-shipping",
-    "version": "1.1.13",
+    "version": "1.2.01",
     "orientation": "portrait",
     "icon": "./assets/images/android.png",
     "scheme": "velo-international-shipping",
@@ -29,7 +29,7 @@
           "backgroundColor": "#000000"
         }
       },
-      "buildNumber": "32"
+      "buildNumber": "35"
     },
     "android": {
       "googleServicesFile": "./google-services-velo.json",

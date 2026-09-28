@@ -146,22 +146,22 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
-    paddingHorizontal: horizontalScale(20),
-    marginTop: verticalScale(40),
+    paddingHorizontal: horizontalScale(12),
+    marginTop: verticalScale(8),
   },
   title: {
     fontSize: moderateScale(32),
-    lineHeight: moderateScale(44),
+    lineHeight: moderateScale(40),
     fontWeight: 'bold',
-    marginBottom: verticalScale(30),
+    marginBottom: verticalScale(12),
   },
   cardsContainer: {
     width: '100%',
-    marginBottom: verticalScale(30),
+    marginBottom: verticalScale(8),
   },
   card: {
     width: '100%',
-    marginBottom: verticalScale(20),
+    marginBottom: verticalScale(10),
     borderRadius: moderateScale(16),
     borderWidth: 2,
     borderColor: 'transparent',
@@ -211,10 +211,10 @@ const styles = StyleSheet.create({
     zIndex: 0,
   },
   reactLogo: {
-    height: verticalScale(198),
-    width: horizontalScale(290),
+    height: verticalScale(110),
+    width: horizontalScale(220),
     bottom: moderateScale(0),
-    left: moderateScale(50),
+    left: moderateScale(40),
     position: 'absolute',
   },
 });

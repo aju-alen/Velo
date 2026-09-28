@@ -347,7 +347,7 @@ const FinalRegisterForm = () => {
                             >
                               <Text style={{ color: country ? textPrimary : textSecondary, flex: 1 }}>
                                 {country
-                                  ? (countryList.find((item) => String(item.id) === country)?.name || '--Select--')
+                                  ? (countryList.find((item) => String(item.id) === String(country))?.name || '--Select--')
                                   : '--Select--'}
                               </Text>
                               <Ionicons
@@ -381,16 +381,16 @@ const FinalRegisterForm = () => {
                                   }}
                                 >
                                   <Picker
-                                    selectedValue={country}
+                                    selectedValue={String(country)}
                                     onValueChange={(itemValue) => {
-                                      setCountry(itemValue);
+                                      setCountry(itemValue == null ? '' : String(itemValue));
                                       setIosPickerVisible(false);
                                     }}
                                     style={{ color: textPrimary }}
                                   >
                                     <Picker.Item color={textSecondary} label="--Select--" value="" />
-                                    {countryList.map((item, index) => (
-                                      <Picker.Item color={textPrimary} key={index} label={item.name} value={item.id} />
+                                    {countryList.map((item) => (
+                                      <Picker.Item color={textPrimary} key={item.id} label={item.name} value={String(item.id)} />
                                     ))}
                                   </Picker>
                                 </View>
@@ -399,14 +399,14 @@ const FinalRegisterForm = () => {
                           </>
                         ) : (
                           <Picker
-                            selectedValue={country}
-                            onValueChange={setCountry}
+                            selectedValue={String(country)}
+                            onValueChange={(itemValue) => setCountry(itemValue == null ? '' : String(itemValue))}
                             style={[styles.picker, { color: textPrimary }]}
                             dropdownIconColor={textPrimary}
                           >
                             <Picker.Item color={textSecondary} label="--Select--" value="" />
-                            {countryList.map((item, index) => (
-                              <Picker.Item color={textPrimary} key={index} label={item.name} value={item.id} />
+                            {countryList.map((item) => (
+                              <Picker.Item color={textPrimary} key={item.id} label={item.name} value={String(item.id)} />
                             ))}
                           </Picker>
                         )}

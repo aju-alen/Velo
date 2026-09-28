@@ -53,7 +53,7 @@ export default function TabLayout() {
         options={{
           title: 'History',
           tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'newspaper' : 'newspaper-outline'} color={color} />
+            <TabBarIcon name={focused ? 'time' : 'time-outline'} color={color} />
           ),
           href: (accountLoginData.role === "USER")? "/shippinghistory" : null 
         }}
@@ -64,18 +64,18 @@ export default function TabLayout() {
           options={{
             title: 'Order',
             tabBarIcon: ({ color, focused }) => (
-              <TabBarIcon name={focused ? 'newspaper' : 'newspaper-outline'} color={color} />
+              <TabBarIcon name={focused ? 'cube' : 'cube-outline'} color={color} />
             ),
-            href: (accountLoginData.role === "AGENT")? "/adminorderdetail" : null 
+            href: (accountLoginData.role === "AGENT" || accountLoginData.role === "SUB_AGENT")? "/adminorderdetail" : null 
           
           }}
         />
         <Tabs.Screen
           name="superRegisterRequestTab"
           options={{
-            title: 'Register Request',
+            title: 'Requests',
             tabBarIcon: ({ color, focused }) => (
-              <TabBarIcon name={focused ? 'construct' : 'construct-outline'} color={color} />
+              <TabBarIcon name={focused ? 'clipboard' : 'clipboard-outline'} color={color} />
             ),
             href: (accountLoginData.role === "SUPERADMIN")? "/superRegisterRequestTab" : null 
           }}
@@ -84,7 +84,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="profile"
           options={{
-            title: 'My Profile',
+            title: 'Profile',
             tabBarIcon: ({ color, focused }) => (
               <TabBarIcon name={focused ? 'person-circle' : 'person-circle-outline'} color={color} />
             ) 

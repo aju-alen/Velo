@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken'
 export const verifyToken = (req,res,next)=>{
 console.log('Inside middleware');
 
-    const token = req.headers.authorization.split(" ")[1];
+    const token = req.headers.authorization?.split(" ")[1];
     console.log(token);
     
     
@@ -11,7 +11,7 @@ console.log('Inside middleware');
     jwt.verify(token,process.env.JWT_SECRET_KEY,async(err,payload)=>{
        console.log(payload,'jwt----payload');
        
-        if(err) return ResizeObserverSize.status(403).send("Token is not valid");
+        if(err) return res.status(403).send("Token is not valid");
         console.log(payload,'jwt----payload');
         req.verifyUserId = payload.id;
         req.verifyEmail = payload.email;
@@ -22,3 +22,10 @@ console.log('Inside middleware');
         next()
     });
 }
+
+export const requireSuperAdmin = (req, res, next) => {
+    if (req.verifyRole !== 'SUPERADMIN') {
+        return res.status(403).json({ message: 'Super admin access required' });
+    }
+    next();
+};

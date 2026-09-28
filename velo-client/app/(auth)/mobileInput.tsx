@@ -19,6 +19,42 @@ export type selectedArea = {
   flag: string
 }
 
+const OTP_ERROR_MESSAGES: Record<string, string> = {
+  'invalid-phone-number': 'That phone number is not valid. Check the country code and number.',
+  'missing-phone-number': 'Enter a phone number before requesting a code.',
+  'quota-exceeded': 'Too many verification texts were sent from this app. Try again later.',
+  'too-many-requests': 'Too many attempts. Wait a few minutes and try again.',
+  'app-not-authorized': 'This app is not authorized for phone sign-in. Firebase rejected the Android signing certificate.',
+  'invalid-app-credential': 'Firebase rejected this app credential. Check the SHA fingerprints and google-services file.',
+  'missing-client-identifier': 'Firebase could not identify this app. Reinstall the latest Android build.',
+  'captcha-check-failed': 'The verification check failed. Request a new code.',
+  'network-request-failed': 'No network connection. Check your internet and try again.',
+  'operation-not-allowed': 'Phone sign-in is turned off in Firebase.',
+  'invalid-verification-code': 'That code is wrong. Enter the 6-digit code from the text message.',
+  'invalid-verification-id': 'This verification session is no longer valid. Request a new code.',
+  'session-expired': 'That code has expired. Request a new code.',
+  'code-expired': 'That code has expired. Request a new code.',
+  'credential-already-in-use': 'This phone number is already linked to another account.',
+  'user-disabled': 'This phone number is disabled. Contact support.',
+  'internal-error': 'Firebase could not complete phone verification. Try again in a moment.',
+};
+
+function firebaseOtpErrorMessage(error: unknown, fallback: string) {
+  const code = typeof error === 'object' && error && 'code' in error
+    ? String((error as { code?: string }).code).replace(/^auth\//, '')
+    : '';
+  if (OTP_ERROR_MESSAGES[code]) return OTP_ERROR_MESSAGES[code];
+
+  const message = typeof error === 'object' && error && 'message' in error
+    ? String((error as { message?: string }).message).trim()
+    : '';
+  if (/unexpected end of stream/i.test(message)) {
+    return 'The connection to Firebase dropped before the code was sent. Check your internet and try again.';
+  }
+  if (message && message.length < 280 && code !== 'unknown') return message;
+  return fallback;
+}
+
 
 const MobileInput = () => {
   const colorScheme = useColorScheme() ?? 'light';
@@ -56,30 +92,58 @@ const MobileInput = () => {
 
   
 
+  async function saveRegistration() {
+    const tempRegisterData = {...tempRegister, mobile:mobile, code:selectedCountry.callingCode[0], country:selectedCountry.cca2}
+    const saveUserToDB = await axios.post(`${ipURL}/api/auth/register`, tempRegisterData);
+    console.log(saveUserToDB.data, 'saveUserToDB------');
+
+    await SecureStore.deleteItemAsync('tempRegister');
+    await SecureStore.deleteItemAsync('tempMobile');
+    await SecureStore.setItemAsync('registerDetail', JSON.stringify(saveUserToDB.data.userDetails));
+    if (tempRegister.role === 'AGENT') {
+      router.replace('/(auth)/verifyAgent');
+    } else {
+      router.replace('/(auth)/finalRegisterForm');
+    }
+  }
+
   // confirm the code
   async function confirmCode() { 
     try {
       setLoading(true)
       await confirm.confirm(otp);
-      // Handle successful verification`
-      const tempRegisterData = {...tempRegister, mobile:mobile, code:selectedCountry.callingCode[0], country:selectedCountry.cca2}
-      const saveUserToDB = await axios.post(`${ipURL}/api/auth/register`, tempRegisterData);
-      console.log(saveUserToDB.data, 'saveUserToDB------');
-      
-      await SecureStore.deleteItemAsync('tempRegister'); 
-      await SecureStore.deleteItemAsync('tempMobile');
-      await SecureStore.setItemAsync('registerDetail', JSON.stringify(saveUserToDB.data.userDetails));
-      if (tempRegister.role === 'AGENT') {
-        router.replace('/(auth)/verifyAgent');
-      } else {
-        router.replace('/(auth)/finalRegisterForm');
-      }
+      await saveRegistration();
       console.log('OTP Verified Successfully');
       setErrorMessage('')
     } catch (error) {
-      setErrorMessage('Invalid OTP. Please try again.');
+      setErrorMessage(firebaseOtpErrorMessage(error, 'The code could not be verified. Request a new code and try again.'));
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function skipPhoneVerification() {
+    if (!__DEV__) return
+    const cleanedMobile = mobile.replace(/\D/g, '');
+    if (!cleanedMobile || cleanedMobile.length < 7) {
+      alert('Please enter a valid mobile number (at least 7 digits)')
+      return
+    }
+    try {
+      setIsLoading(true)
+      const checkMobileNumber = await axios.get(`${ipURL}/api/auth/check-mobile-number?mobile=${mobile}`);
+      if (checkMobileNumber.data.continue === false) {
+        alert('Mobile number already registered. Please try again with different mobile number.');
+        return
+      }
+      await saveRegistration();
+    } catch (error) {
+      const message = axios.isAxiosError(error)
+        ? error.response?.data?.message
+        : '';
+      alert(message || 'Could not skip phone verification. Try again.');
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -128,7 +192,7 @@ const MobileInput = () => {
       setConfirm(confirmation);
     } catch (error) {
       console.error('Error sending OTP:', error);
-      alert('Error sending verification code. Please try again with different mobile number.');
+      alert(firebaseOtpErrorMessage(error, 'The verification code could not be sent. Try again.'));
     } finally {
       setIsLoading(false)
     }
@@ -188,6 +252,9 @@ const MobileInput = () => {
                 borderWidth: 1,
                 borderColor: colorScheme === 'dark' ? '#333' : '#d3d3d3',
               },
+              pinCodeTextStyle: {
+                color: themeColors.text,
+              },
             }}
           />
         </View>
@@ -195,10 +262,20 @@ const MobileInput = () => {
         {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
 
         <CustomButton
-          disableButton={loading}
+          disableButton={loading || isLoading}
           buttonText='Verify Number'
           handlePress={confirmCode}
         />
+
+        {__DEV__ ? (
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={skipPhoneVerification}
+            disabled={loading || isLoading}
+          >
+            <Text style={styles.backText}>Skip phone verification</Text>
+          </TouchableOpacity>
+        ) : null}
 
         <TouchableOpacity 
           style={styles.backButton}
@@ -278,6 +355,16 @@ const MobileInput = () => {
           handlePress={handleSignInWithPhoneNumber}
           disableButton={isLoading}
         />
+
+        {__DEV__ ? (
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={skipPhoneVerification}
+            disabled={isLoading}
+          >
+            <Text style={styles.backText}>Skip phone verification</Text>
+          </TouchableOpacity>
+        ) : null}
 
         <StartOverButton />
       </View>

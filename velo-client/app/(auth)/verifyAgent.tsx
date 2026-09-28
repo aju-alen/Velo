@@ -127,6 +127,14 @@ const VerifyAgent = () => {
         setDoc1(selectedDocument)
         const uploadedDocURL = await postDocuments(selectedDocument)
         setDocUrl(uploadedDocURL)
+        if (uploadedDocURL) {
+          const result = await SecureStore.getItemAsync('registerDetail')
+          if (result) {
+            const parsed = JSON.parse(result)
+            const updated = { ...parsed, verificationDocumentUrl: uploadedDocURL }
+            await SecureStore.setItemAsync('registerDetail', JSON.stringify(updated))
+          }
+        }
       }
     } catch (error) {
       console.error('Error picking document:', error)
@@ -371,7 +379,7 @@ const styles = StyleSheet.create({
   },
   nextButtonContainer: {
     position: 'absolute',
-    bottom: verticalScale(40),
+    bottom: verticalScale(88),
     right: horizontalScale(20),
   },
   nextButton: {

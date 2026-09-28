@@ -1,4 +1,4 @@
-import { StyleSheet, Text, TouchableOpacity, View, FlatList, Dimensions, ActivityIndicator, useColorScheme, ScrollView, RefreshControl } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, FlatList, Dimensions, ActivityIndicator, useColorScheme, ScrollView, RefreshControl, Alert } from 'react-native';
 import React, { useCallback, useEffect, useState } from 'react';
 import CustomButton from '@/components/CustomButton';
 import * as SecureStore from 'expo-secure-store';
@@ -20,7 +20,7 @@ const { width } = Dimensions.get('window');
 const CARD_WIDTH = (width - horizontalScale(40) - horizontalScale(32)) / 3;
 
 const HomeMainPage = () => {
-  const {setEditData} = useShipmentStore()
+  const { setEditData, resetShipmentData, hydrateFromDraft } = useShipmentStore()
   const {accountLoginData,resetAccountLoginData} = useLoginAccountStore();
   console.log(accountLoginData,'accountLoginData----11----');
   
@@ -38,6 +38,8 @@ const HomeMainPage = () => {
   const [agentShipments, setAgentShipments] = useState<any[]>([]);
   const [loadingAgentShipments, setLoadingAgentShipments] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [drafts, setDrafts] = useState<any[]>([]);
+  const [loadingDrafts, setLoadingDrafts] = useState(false);
   
   const colorScheme = useColorScheme() ?? 'light';
   const themeColors = Colors[colorScheme];
@@ -83,6 +85,44 @@ const HomeMainPage = () => {
     }
   };
 
+  const getUserDrafts = async () => {
+    if (accountLoginData.role !== 'USER' || !accountLoginData.id) return;
+    try {
+      setLoadingDrafts(true);
+      const response = await axiosInstance.get(`/api/shipment/drafts/${accountLoginData.id}`);
+      setDrafts(response.data?.drafts || []);
+    } catch (error) {
+      console.error('Error fetching drafts:', error);
+      setDrafts([]);
+    } finally {
+      setLoadingDrafts(false);
+    }
+  };
+
+  const continueDraft = (draft: any) => {
+    hydrateFromDraft(draft.payload || {}, draft.id);
+    const step = draft.currentStep || 'createShipmentHome';
+    router.push(`/(tabs)/home/createShipment/${step}` as any);
+  };
+
+  const deleteDraft = (draftId: string) => {
+    Alert.alert('Delete draft', 'Remove this saved shipment draft?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await axiosInstance.delete(`/api/shipment/draft/${draftId}`);
+            setDrafts((prev) => prev.filter((d) => d.id !== draftId));
+          } catch (e) {
+            Alert.alert('Error', 'Could not delete draft');
+          }
+        },
+      },
+    ]);
+  };
+
   const getCategoryData = async () => {
     const getAccountDetails = await SecureStore.getItemAsync('registerDetail');
     if (getAccountDetails) {
@@ -98,7 +138,7 @@ const HomeMainPage = () => {
   const refreshDashboard = useCallback(async () => {
     setRefreshing(true);
     try {
-      await Promise.all([getCategoryData(), getUserShipments(), getAgentShipments()]);
+      await Promise.all([getCategoryData(), getUserShipments(), getAgentShipments(), getUserDrafts()]);
     } finally {
       setRefreshing(false);
     }
@@ -108,6 +148,7 @@ const HomeMainPage = () => {
     getCategoryData();
     getUserShipments();
     getAgentShipments();
+    getUserDrafts();
   }, [accountLoginData.id, accountLoginData.role, accountLoginData.organisationId]);
 
   const handleLogout = async () => {
@@ -357,6 +398,7 @@ const HomeMainPage = () => {
               {/* Create Shipment Section */}
               <TouchableOpacity
                 onPress={() => {
+                  resetShipmentData();
                   setEditData(false);
                   router.push('/(tabs)/home/createShipment/createShipmentHome');
                 }}
@@ -383,8 +425,48 @@ const HomeMainPage = () => {
                 </View>
               </TouchableOpacity>
 
-              {/* Recent Shipments Section */}
-             
+              {(loadingDrafts || drafts.length > 0) && (
+                <View style={styles.draftsSection}>
+                  <Text style={[styles.marketplaceTitle, { color: themeColors.text, marginBottom: verticalScale(8) }]}>
+                    Saved drafts
+                  </Text>
+                  {loadingDrafts ? (
+                    <ActivityIndicator color="#FFAC1C" />
+                  ) : (
+                    drafts.map((draft) => {
+                      const receiverName = draft.payload?.savedAddressData?.name || 'Untitled shipment';
+                      const updated = draft.updatedAt
+                        ? new Date(draft.updatedAt).toLocaleString()
+                        : '';
+                      return (
+                        <View
+                          key={draft.id}
+                          style={[
+                            styles.draftCard,
+                            {
+                              backgroundColor: colorScheme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
+                              borderColor: colorScheme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
+                            },
+                          ]}
+                        >
+                          <TouchableOpacity style={{ flex: 1 }} onPress={() => continueDraft(draft)} activeOpacity={0.7}>
+                            <Text style={[styles.draftTitle, { color: themeColors.text }]}>{receiverName}</Text>
+                            <Text style={[styles.draftMeta, { color: themeColors.text }]}>
+                              Step: {draft.currentStep || 'createShipmentHome'}
+                            </Text>
+                            {!!updated && (
+                              <Text style={[styles.draftMeta, { color: themeColors.text }]}>Updated {updated}</Text>
+                            )}
+                          </TouchableOpacity>
+                          <TouchableOpacity onPress={() => deleteDraft(draft.id)} hitSlop={8}>
+                            <Ionicons name="trash-outline" size={22} color="#F44336" />
+                          </TouchableOpacity>
+                        </View>
+                      );
+                    })
+                  )}
+                </View>
+              )}
             </>
           )}
 
@@ -499,6 +581,28 @@ const styles = StyleSheet.create({
   createShipmentSubtitle: {
     fontSize: moderateScale(13),
     opacity: 0.7,
+  },
+  draftsSection: {
+    marginTop: verticalScale(8),
+    marginBottom: verticalScale(16),
+  },
+  draftCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: horizontalScale(12),
+    padding: horizontalScale(14),
+    borderRadius: moderateScale(12),
+    borderWidth: 1,
+    marginBottom: verticalScale(10),
+  },
+  draftTitle: {
+    fontSize: moderateScale(16),
+    fontWeight: '600',
+    marginBottom: verticalScale(4),
+  },
+  draftMeta: {
+    fontSize: moderateScale(12),
+    opacity: 0.65,
   },
   agentQuickActionRight: {
     flexDirection: 'row',

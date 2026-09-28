@@ -38,10 +38,24 @@ model User {
 
   savedAddresses              SavedAddress[]
   shipments                   Shipment[]
+  shipmentDrafts              ShipmentDraft[]
   completedShipments          CompletedShipment[]
 
 // agentShipments AgentShipment[]
 
+}
+
+model ShipmentDraft {
+  id          String   @id @default(cuid())
+  userId      String
+  payload     Json
+  currentStep String   @default("createShipmentHome")
+  updatedAt   DateTime @updatedAt
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model SuperAdmin{
@@ -98,6 +112,7 @@ model Agent {
   firstTimeLogin               Boolean    @default(true)
   registerVerificationStatus   String     @default("PARTIAL")
   appointmentDate              DateTime?
+  verificationDocumentUrl      String?
   verificationToken            String?
   resetPasswordToken String?
   resetPasswordTokenExpiry DateTime?

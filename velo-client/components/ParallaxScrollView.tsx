@@ -9,7 +9,7 @@ import Animated, {
 import { ThemedView } from '@/components/ThemedView';
 import { horizontalScale,verticalScale,moderateScale } from '@/constants/metrics';
 
-const HEADER_HEIGHT = verticalScale(250);
+const HEADER_HEIGHT = verticalScale(120);
 
 type Props = PropsWithChildren<{
   headerImage: ReactElement;
@@ -69,7 +69,8 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: moderateScale(32),
-    gap: moderateScale(16),
+    paddingHorizontal: moderateScale(8),
+    paddingTop: moderateScale(8),
+    paddingBottom: moderateScale(8),
   },
 });
