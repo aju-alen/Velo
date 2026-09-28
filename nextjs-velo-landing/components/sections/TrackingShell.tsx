@@ -1,7 +1,7 @@
 'use client';
 
-import { ArrowRight, Search } from 'lucide-react';
-import DownloadAppLink from '@/components/DownloadAppLink';
+import { Search } from 'lucide-react';
+import StoreBadges from '@/components/home/StoreBadges';
 
 export default function TrackingShell() {
   return (
@@ -30,16 +30,15 @@ export default function TrackingShell() {
 
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="rounded-2xl border border-gray-200 bg-white/95 backdrop-blur-sm shadow-sm px-6 py-5 text-center max-w-sm mx-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#FFAC1C] mb-2">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#0E5A6B] mb-2">
             Coming Soon
           </p>
           <p className="text-sm text-gray-600 leading-relaxed mb-4">
             Web tracking is on the way. For now, track your shipments in the Velo app.
           </p>
-          <DownloadAppLink className="inline-flex items-center justify-center min-h-11 text-sm font-semibold text-black hover:text-[#FFAC1C] transition-colors">
-            Download the App
-            <ArrowRight className="w-4 h-4 ml-2" />
-          </DownloadAppLink>
+          <div className="flex justify-center">
+            <StoreBadges size="sm" layout="row" />
+          </div>
         </div>
       </div>
     </div>

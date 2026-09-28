@@ -216,7 +216,7 @@ export default function Navbar() {
           <div className="flex items-center gap-3 shrink-0">
             <Link
               href="/marketplace"
-              className="hidden md:inline-flex items-center justify-center rounded-lg bg-[#FFAC1C] px-3.5 py-1.5 text-sm font-medium text-[#11181C] hover:bg-[#FFB84D] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFAC1C] focus-visible:ring-offset-2"
+              className="hidden md:inline-flex items-center justify-center rounded-lg bg-[#0E5A6B] px-3.5 py-1.5 text-sm font-medium text-white hover:bg-[#0A4A58] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E5A6B] focus-visible:ring-offset-2"
             >
               Browse the Marketplace
             </Link>
@@ -256,7 +256,7 @@ export default function Navbar() {
             )}
             <Link
               href="/marketplace"
-              className="mt-3 mb-2 inline-flex w-full items-center justify-center rounded-xl bg-[#FFAC1C] px-5 py-3 text-[1.3rem] leading-8 font-medium text-[#11181C] hover:bg-[#FFB84D]"
+              className="mt-3 mb-2 inline-flex w-full items-center justify-center rounded-xl bg-[#0E5A6B] px-5 py-3 text-[1.3rem] leading-8 font-medium text-white hover:bg-[#0A4A58]"
               onClick={closeAll}
             >
               Browse the Marketplace

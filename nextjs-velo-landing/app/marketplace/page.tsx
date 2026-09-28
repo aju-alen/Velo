@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import DownloadAppLink from '@/components/DownloadAppLink';
+import StoreBadges from '@/components/home/StoreBadges';
 import { buildMetadata, buildSchemas, getPageConfig } from '@/lib/seo';
 import { getPageContent } from '@/content/pages';
 import JsonLd from '@/components/seo/JsonLd';
@@ -10,20 +10,14 @@ const config = getPageConfig('marketplace');
 const content = getPageContent('marketplace');
 export const metadata = buildMetadata(config);
 
-const heading = 'text-3xl font-bold leading-tight text-[#11181C] sm:text-4xl md:text-5xl md:leading-[1.25]';
+const heading = 'text-3xl font-bold leading-tight text-[#0F202A] sm:text-4xl md:text-5xl md:leading-[1.25]';
 const lead = 'text-[1.3rem] leading-8 text-[#687076]';
-const cardTitle = 'mb-2 text-2xl font-bold leading-8 text-[#11181C]';
+const cardTitle = 'mb-2 text-2xl font-bold leading-8 text-[#0F202A]';
 const wrap = 'mx-auto max-w-6xl px-6';
 const section = 'py-20';
 const card = 'rounded-2xl border border-[#E6E8EB] bg-white p-6';
-const btnPrimary =
-  'inline-flex items-center justify-center rounded-xl bg-[#FFAC1C] px-5 py-3 text-[1.3rem] leading-8 font-medium text-[#11181C] hover:bg-[#FFB84D] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFAC1C] focus-visible:ring-offset-2';
 const btnSecondary =
-  'inline-flex items-center justify-center rounded-xl border border-[#11181C] bg-white px-5 py-3 text-[1.3rem] leading-8 font-medium text-[#11181C] hover:bg-[#11181C] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFAC1C] focus-visible:ring-offset-2';
-const btnOnAmber =
-  'inline-flex items-center justify-center rounded-xl bg-[#11181C] px-5 py-3 text-[1.3rem] leading-8 font-medium text-white hover:bg-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#11181C] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FFAC1C]';
-const btnOnAmberSecondary =
-  'inline-flex items-center justify-center rounded-xl border border-[#11181C] bg-white px-5 py-3 text-[1.3rem] leading-8 font-medium text-[#11181C] hover:bg-[#11181C] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#11181C] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FFAC1C]';
+  'inline-flex items-center justify-center rounded-xl border border-[#0E5A6B] bg-white px-5 py-3 text-[1.3rem] leading-8 font-medium text-[#0E5A6B] hover:bg-[#0E5A6B] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E5A6B] focus-visible:ring-offset-2';
 
 const audiences = [
   {
@@ -65,12 +59,12 @@ export default function MarketplacePage() {
   const schemas = buildSchemas(config, content);
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-[#F5F5F5] text-[1.3rem] leading-8 text-[#11181C]">
+    <div className="min-h-screen overflow-x-hidden bg-[#F8F8F8] text-[1.3rem] leading-8 text-[#0F202A]">
       <JsonLd data={schemas} />
 
-      <section className="bg-gradient-to-b from-white to-[#F5F5F5] pb-16 pt-16">
+      <section className="bg-gradient-to-b from-white to-[#F8F8F8] pb-16 pt-16">
         <div className={`${wrap} max-w-3xl`}>
-          <h1 className="text-3xl font-semibold leading-tight text-[#11181C] sm:text-4xl md:text-5xl md:leading-[1.25]">
+          <h1 className="text-3xl font-semibold leading-tight text-[#0F202A] sm:text-4xl md:text-5xl md:leading-[1.25]">
             See What&apos;s Moving Before You Commit to Anything
           </h1>
           <div className={`mt-6 space-y-4 ${lead}`}>
@@ -80,8 +74,8 @@ export default function MarketplacePage() {
             </p>
             <p>When you&apos;re ready to send something or list something yourself, that happens in the app.</p>
           </div>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <DownloadAppLink className={btnPrimary}>Get the App</DownloadAppLink>
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <StoreBadges size="sm" layout="row" />
             <Link href="/how-it-works" className={btnSecondary}>
               See How It Works
             </Link>
@@ -113,7 +107,7 @@ export default function MarketplacePage() {
                 <h3 className={cardTitle}>{item.title}</h3>
                 <p className={`flex-1 ${lead}`}>{item.description}</p>
                 {'href' in item && item.href ? (
-                  <Link href={item.href} className="mt-6 font-semibold text-[#11181C] underline">
+                  <Link href={item.href} className="mt-6 font-semibold text-[#0F202A] underline">
                     {item.linkLabel}
                   </Link>
                 ) : null}
@@ -144,15 +138,15 @@ export default function MarketplacePage() {
         </div>
       </section>
 
-      <section className="bg-[#FFAC1C] py-20">
+      <section className="bg-white py-20">
         <div className={`${wrap} max-w-3xl text-center`}>
           <h2 className={heading}>Ready to Act on What You&apos;ve Seen?</h2>
-          <p className="mx-auto mt-4 max-w-2xl text-[1.3rem] leading-8 text-[#11181C]">
+          <p className="mx-auto mt-4 max-w-2xl text-[1.3rem] leading-8 text-[#0F202A]">
             Browsing is free and open. Messaging an Agent or listing something yourself happens in the app.
           </p>
-          <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-            <DownloadAppLink className={btnOnAmber}>Get the App</DownloadAppLink>
-            <Link href="/how-it-works" className={btnOnAmberSecondary}>
+          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <StoreBadges size="sm" layout="row" />
+            <Link href="/how-it-works" className={btnSecondary}>
               See How It Works
             </Link>
           </div>

@@ -83,10 +83,10 @@ export default function ListingGrid() {
           role="tab"
           aria-selected={selectedCategoryId === ''}
           onClick={() => setSelectedCategoryId('')}
-          className={`shrink-0 rounded-xl px-4 py-2 text-[1.3rem] leading-8 font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFAC1C] focus-visible:ring-offset-2 ${
+          className={`shrink-0 rounded-xl px-4 py-2 text-[1.3rem] leading-8 font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E5A6B] focus-visible:ring-offset-2 ${
             selectedCategoryId === ''
-              ? 'bg-[#FFAC1C] text-[#11181C]'
-              : 'border border-[#E6E8EB] bg-white text-[#11181C] hover:border-[#FFAC1C]'
+              ? 'bg-[#0E5A6B] text-white'
+              : 'border border-[#E6E8EB] bg-white text-[#0F202A] hover:border-[#0E5A6B]'
           }`}
         >
           All
@@ -100,10 +100,10 @@ export default function ListingGrid() {
               role="tab"
               aria-selected={selected}
               onClick={() => setSelectedCategoryId(category.id)}
-              className={`shrink-0 rounded-xl px-4 py-2 text-[1.3rem] leading-8 font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFAC1C] focus-visible:ring-offset-2 ${
+              className={`shrink-0 rounded-xl px-4 py-2 text-[1.3rem] leading-8 font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E5A6B] focus-visible:ring-offset-2 ${
                 selected
-                  ? 'bg-[#FFAC1C] text-[#11181C]'
-                  : 'border border-[#E6E8EB] bg-white text-[#11181C] hover:border-[#FFAC1C]'
+                  ? 'bg-[#0E5A6B] text-white'
+                  : 'border border-[#E6E8EB] bg-white text-[#0F202A] hover:border-[#0E5A6B]'
               }`}
             >
               {category.name}
@@ -131,15 +131,15 @@ export default function ListingGrid() {
               {listing.imageUrl ? (
                 <img src={listing.imageUrl} alt={listing.title} className="h-48 w-full object-cover" />
               ) : (
-                <div className="flex h-48 w-full items-center justify-center bg-[#FFF3E0] text-[#FFAC1C]">No photo</div>
+                <div className="flex h-48 w-full items-center justify-center bg-[#E0E8ED] text-[#0E5A6B]">No photo</div>
               )}
               <div className="p-6">
-                <p className="mb-3 text-sm font-semibold text-[#FFAC1C]">
+                <p className="mb-3 text-sm font-semibold text-[#0E5A6B]">
                   {listing.condition === 'USED' ? 'Used' : 'New'}
                 </p>
-                <h3 className="mb-2 text-2xl font-bold leading-8 text-[#11181C]">{listing.title}</h3>
+                <h3 className="mb-2 text-2xl font-bold leading-8 text-[#0F202A]">{listing.title}</h3>
                 <ListingDescription text={listing.description} />
-                <div className="mt-4 flex items-center justify-between gap-3 text-[1.1rem] leading-7 text-[#11181C]">
+                <div className="mt-4 flex items-center justify-between gap-3 text-[1.1rem] leading-7 text-[#0F202A]">
                   <span className="font-semibold">{formatPrice(listing.price)}</span>
                   <span className="text-[#687076]">{formatDate(listing.createdAt)}</span>
                 </div>

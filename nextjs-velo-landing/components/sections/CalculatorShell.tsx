@@ -1,8 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ArrowRight } from 'lucide-react';
-import DownloadAppLink from '@/components/DownloadAppLink';
+import StoreBadges from '@/components/home/StoreBadges';
 import SectionLabel from './SectionLabel';
 
 export default function CalculatorShell() {
@@ -78,15 +77,15 @@ export default function CalculatorShell() {
           </div>
         </form>
         {submitted && (
-          <div className="mt-8 p-6 rounded-xl bg-white border border-[#FFAC1C]/30">
+          <div className="mt-8 p-6 rounded-xl bg-white border border-[#0E5A6B]/30">
             <p className="text-gray-700 mb-2 font-semibold">We don&apos;t show a fixed shipping cost here.</p>
             <p className="text-gray-600 mb-4 leading-relaxed">
               Rates vary by shipper and the details of your cargo. For an accurate quote based on your
               shipment, download the Velo app and get pricing there.
             </p>
-            <DownloadAppLink className="inline-flex items-center font-semibold text-black hover:text-[#FFAC1C] min-h-11">
-              Download the App <ArrowRight className="w-4 h-4 ml-2" />
-            </DownloadAppLink>
+            <div className="mt-2">
+              <StoreBadges size="sm" layout="row" />
+            </div>
           </div>
         )}
       </div>

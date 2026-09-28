@@ -7,11 +7,11 @@ type StoreBadgesProps = {
 };
 
 const badgeLink =
-  'inline-flex rounded-xl transition-transform duration-200 ease-out hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#11181C] focus-visible:ring-offset-4 focus-visible:ring-offset-[#FFAC1C]';
+  'inline-flex rounded-xl transition-transform duration-200 ease-out hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F202A] focus-visible:ring-offset-4 focus-visible:ring-offset-[#0E5A6B]';
 
 const sizeClass = {
-  sm: 'h-auto w-44 sm:w-52',
-  md: 'h-auto w-64 sm:w-72',
+  sm: 'h-10 sm:h-11 w-auto',
+  md: 'h-12 sm:h-14 w-auto',
 };
 
 export default function StoreBadges({ className = '', size = 'md', layout = 'stack' }: StoreBadgesProps) {

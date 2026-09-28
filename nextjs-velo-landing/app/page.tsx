@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import OpenAppLink from '@/components/OpenAppLink';
 import type { RegistrationPath } from '@/lib/app-links';
@@ -28,20 +27,25 @@ import HomeFaqs from '@/components/home/HomeFaqs';
 const homeConfig = getPageConfig('home');
 export const metadata = buildMetadata(homeConfig);
 
-const heading = 'text-3xl font-bold leading-tight text-[#11181C] sm:text-4xl md:text-5xl md:leading-[1.25]';
+const heading = 'text-3xl font-bold leading-tight text-[#0F202A] sm:text-4xl md:text-5xl md:leading-[1.25]';
 const lead = 'text-[1.3rem] leading-8 text-[#687076]';
 const body = 'text-[1.3rem] leading-8 text-[#687076]';
-const cardTitle = 'mb-2 text-2xl font-bold leading-8 text-[#11181C]';
+const cardTitle = 'mb-2 text-2xl font-bold leading-8 text-[#0F202A]';
+const trustTitle = 'mb-2 text-2xl font-bold leading-8 text-[#0E5A6B]';
 const wrap = 'mx-auto max-w-6xl px-6';
 const section = 'py-20';
 const card = 'rounded-2xl border border-[#E6E8EB] bg-white p-6';
 const btnPrimary =
-  'inline-flex items-center justify-center rounded-xl bg-[#FFAC1C] px-5 py-3 text-[1.3rem] leading-8 font-medium text-[#11181C] hover:bg-[#FFB84D] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFAC1C] focus-visible:ring-offset-2';
+  'inline-flex items-center justify-center rounded-xl bg-[#0E5A6B] px-5 py-3 text-[1.3rem] leading-8 font-medium text-white hover:bg-[#0A4A58] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E5A6B] focus-visible:ring-offset-2';
 const btnSecondary =
-  'inline-flex items-center justify-center rounded-xl border border-[#11181C] bg-white px-5 py-3 text-[1.3rem] leading-8 font-medium text-[#11181C] hover:bg-[#11181C] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFAC1C] focus-visible:ring-offset-2';
+  'inline-flex items-center justify-center rounded-xl border border-[#0E5A6B] bg-white px-5 py-3 text-[1.3rem] leading-8 font-medium text-[#0E5A6B] hover:bg-[#0E5A6B] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E5A6B] focus-visible:ring-offset-2';
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
-  return <p className="mb-3 text-[1.3rem] leading-8 font-medium text-[#FFAC1C]">{children}</p>;
+  return (
+    <p className="mb-3 inline-flex rounded-lg bg-[#E0E8ED] px-3 py-1 text-[1.3rem] leading-8 font-medium text-[#0E5A6B]">
+      {children}
+    </p>
+  );
 }
 
 export default function HomePage() {
@@ -114,7 +118,7 @@ export default function HomePage() {
       registrationPath: 'sender',
     },
     {
-      title: 'Logistics Agent — Solo or Org',
+      title: 'Logistics Agent',
       description:
         'List what you can source or ship. Manage every request from one place instead of a phone full of chats.',
       cta: 'Become an Agent',
@@ -177,26 +181,16 @@ export default function HomePage() {
   return (
     <>
       <JsonLd data={schemas} />
-      <div className="min-h-screen overflow-x-hidden bg-[#F5F5F5] text-[1.3rem] leading-8 text-[#11181C]">
+      <div className="min-h-screen overflow-x-hidden bg-[#F8F8F8] text-[1.3rem] leading-8 text-[#0F202A]">
       {/* Hero */}
       <section id="home-hero" className="relative overflow-hidden">
-        <Image
-          src="/hero-bg.png"
-          alt=""
-          fill
-          priority
-          sizes="100vw"
-          className="pointer-events-none object-cover scale-125 blur-[70px]"
-          aria-hidden
-        />
-        <div className="absolute inset-0 bg-white/35" aria-hidden />
         <div className={`relative ${wrap} pb-16 pt-10 lg:pt-24`}>
           <div className="max-w-3xl">
             <div>
-              <h1 className="mb-6 text-3xl font-semibold leading-tight text-[#11181C] sm:text-4xl md:text-5xl md:leading-[1.25]">
+              <h1 className="mb-6 text-3xl font-semibold leading-tight text-[#0F202A] sm:text-4xl md:text-5xl md:leading-[1.25]">
                 Ship from Dubai to Kenya Without the Hassle
               </h1>
-              <div className="mb-8 max-w-[65ch] space-y-4 text-[1.3rem] leading-8 text-black">
+              <div className="mb-8 max-w-[65ch] space-y-4 text-[1.3rem] leading-8 text-[#0F202A]">
                 <p>
                   Sending goods to Kenya shouldn&apos;t mean driving across the city, chasing updates, or relying on scattered conversations just to know what&apos;s happening.
                 </p>
@@ -220,7 +214,7 @@ export default function HomePage() {
           <div className="grid gap-4 sm:grid-cols-3">
             {trustBarItems.map((item) => (
               <div key={item.title} className={card}>
-                <h3 className={cardTitle}>{item.title}</h3>
+                <h3 className={trustTitle}>{item.title}</h3>
                 <p className={body}>{item.description}</p>
               </div>
             ))}
@@ -229,23 +223,23 @@ export default function HomePage() {
       </section>
 
       {/* Who Velo Is For */}
-      <section className={`${section} bg-[#11181C]`}>
+      <section className={section}>
         <div className={wrap}>
           <div className="mb-10 max-w-3xl">
-            <h2 className={`${heading} text-white`}>Who Velo Is For</h2>
+            <h2 className={heading}>Who Velo Is For</h2>
           </div>
           <div className="grid gap-4 md:grid-cols-3">
-            {roles.map((role, index) => (
-              <div key={role.title} className={`${card} flex flex-col`}>
+            {roles.map((role) => (
+              <div key={role.title} className={`${card} flex flex-col border-t-4 border-t-[#0E5A6B]`}>
                 <h3 className={cardTitle}>{role.title}</h3>
                 <p className={`mb-8 flex-1 ${body}`}>{role.description}</p>
                 {role.registrationPath ? (
-                  <OpenAppLink path={role.registrationPath} className={index === 0 ? btnPrimary : btnSecondary}>
+                  <OpenAppLink path={role.registrationPath} className={btnPrimary}>
                     {role.cta}
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </OpenAppLink>
                 ) : (
-                  <Link href={role.href} className={index === 0 ? btnPrimary : btnSecondary}>
+                  <Link href={role.href} className={btnPrimary}>
                     {role.cta}
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
@@ -277,18 +271,20 @@ export default function HomePage() {
       <section className={section}>
         <div className={wrap}>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {featureItems.map((item, index) => {
-              const tones = ['bg-[#FFAC1C]', 'bg-[#FFAC1C]', 'bg-[#FFAC1C]', 'bg-[#FFAC1C]', 'bg-[#FFAC1C]', 'bg-[#FFAC1C]'];
+            {featureItems.map((item) => {
               const isMarketplace = 'isNew' in item && item.isNew;
               return (
-                <div key={item.title} className={`relative ${card}`}>
+                <div
+                  key={item.title}
+                  className={`relative ${card} ${isMarketplace ? 'border-[#F2B705] bg-[#F8F0D8]' : ''}`}
+                >
                   {isMarketplace ? (
-                    <span className="absolute right-4 top-4 rounded-lg bg-[#FFAC1C] px-2 py-1 text-[1.3rem] leading-8 font-semibold text-[#11181C]">
+                    <span className="absolute right-4 top-4 rounded-lg bg-[#F2B705] px-2 py-1 text-[1.3rem] leading-8 font-semibold text-[#0F202A]">
                       New
                     </span>
                   ) : null}
-                  <div className={`mb-4 flex h-10 w-10 items-center justify-center rounded-lg ${tones[index]}`}>
-                    <item.icon className="h-5 w-5 text-[#11181C]" />
+                  <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-[#0E5A6B]">
+                    <item.icon className="h-5 w-5 text-white" />
                   </div>
                   <h3 className={cardTitle}>{item.title}</h3>
                   <p className={body}>{item.description}</p>
@@ -307,8 +303,8 @@ export default function HomePage() {
             {services.map((service) => (
               <article key={service.title} className={card}>
                 <Link href={service.href} className="block text-[1.3rem] leading-8">
-                  <div className="mb-5 flex h-10 w-10 items-center justify-center rounded-lg bg-[#FFAC1C]">
-                    <service.icon className="h-5 w-5 text-[#11181C]" />
+                  <div className="mb-5 flex h-10 w-10 items-center justify-center rounded-lg bg-[#0E5A6B]">
+                    <service.icon className="h-5 w-5 text-white" />
                   </div>
                   <h3 className={cardTitle}>{service.title}</h3>
                 </Link>
@@ -319,13 +315,13 @@ export default function HomePage() {
       </section>
 
       {/* Why Velo */}
-      <section id="why-velo" className={`${section} bg-[#FFAC1C]`}>
+      <section id="why-velo" className={section}>
         <div className={wrap}>
           <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
             <div className="lg:col-span-5">
               <h2 className={heading}>Why Customers Choose Velo</h2>
             </div>
-            <div className="space-y-5 text-[1.3rem] leading-8 text-[#11181C] lg:col-span-7">
+            <div className="space-y-5 text-[1.3rem] leading-8 text-[#0F202A] lg:col-span-7">
               <p>
                 People sending goods to Kenya have spent years adapting to systems that were never built around convenience.
               </p>
@@ -347,12 +343,12 @@ export default function HomePage() {
       </section>
 
       {/* Business */}
-      <section id="business" className={`${section} bg-[#11181C]`}>
+      <section id="business" className={section}>
         <div className={wrap}>
           <div>
             <div className="max-w-3xl">
-              <h2 className={`${heading} mb-6 text-white`}>Shipping Solutions for Businesses</h2>
-              <div className="space-y-4 text-[1.3rem] leading-8 text-white/75">
+              <h2 className={`${heading} mb-6`}>Shipping Solutions for Businesses</h2>
+              <div className="space-y-4 text-[1.3rem] leading-8 text-[#687076]">
                 <p>Growing businesses don&apos;t just ship products. They depend on them.</p>
                 <p>
                   Velo gives businesses greater visibility and a more organized way to manage regular shipments, so you can spend less time following up and more time planning ahead.
@@ -373,8 +369,8 @@ export default function HomePage() {
               <div className="grid gap-3 sm:grid-cols-2">
                 {appFeatures.map(({ icon: Icon, text }) => (
                   <div key={text} className="flex items-start gap-3 rounded-xl border border-[#E6E8EB] bg-white p-4">
-                    <Icon className="mt-0.5 h-5 w-5 shrink-0 text-[#11181C]" />
-                    <span className="text-[1.3rem] leading-8 font-medium text-[#11181C]">{text}</span>
+                    <Icon className="mt-0.5 h-5 w-5 shrink-0 text-[#0E5A6B]" />
+                    <span className="text-[1.3rem] leading-8 font-medium text-[#0F202A]">{text}</span>
                   </div>
                 ))}
               </div>
@@ -396,23 +392,22 @@ export default function HomePage() {
       </section>
 
       {/* Final CTA */}
-      <section id="home-closing" className="bg-[#FFAC1C] py-16 sm:py-20 lg:py-24">
-        <div className={`${wrap} flex flex-col items-center gap-12 lg:flex-row lg:items-center lg:gap-20`}>
-          <StoreBadges />
+      <section id="home-closing" className="bg-white py-16 sm:py-20 lg:py-24">
+        <div className={`${wrap} flex flex-col items-center gap-8 lg:items-start`}>
           <div className="w-full max-w-xl text-center lg:max-w-none lg:text-left">
-            <h2 className="text-balance text-3xl font-bold leading-[1.15] text-[#11181C] sm:text-4xl lg:text-5xl lg:leading-[1.12]">
+            <h2 className="text-balance text-3xl font-bold leading-[1.15] text-[#0F202A] sm:text-4xl lg:text-5xl lg:leading-[1.12]">
               Spend Less Time Following Up. Spend More Time Moving Forward.
             </h2>
-            <p className="mx-auto mt-5 max-w-lg text-[1.3rem] leading-8 text-[#11181C] lg:mx-0">
+            <p className="mx-auto mt-5 max-w-lg text-[1.3rem] leading-8 text-[#0F202A] lg:mx-0">
               Start with a quote. Schedule a pickup. Track your shipment from collection to delivery.
             </p>
-            <Link
-              href="/contact"
-              className="mt-8 inline-flex items-center justify-center rounded-xl bg-[#11181C] px-5 py-3 text-[1.3rem] leading-8 font-medium text-white hover:bg-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#11181C] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FFAC1C]"
-            >
-              Request a Quote
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Link>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center lg:justify-start">
+              <Link href="/contact" className={btnPrimary}>
+                Request a Quote
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+              <StoreBadges size="sm" layout="row" />
+            </div>
           </div>
         </div>
       </section>

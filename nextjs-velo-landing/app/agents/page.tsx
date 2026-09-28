@@ -9,20 +9,16 @@ const config = getPageConfig('marketplace-agents');
 const content = getPageContent('marketplace-agents');
 export const metadata = buildMetadata(config);
 
-const heading = 'text-3xl font-bold leading-tight text-[#11181C] sm:text-4xl md:text-5xl md:leading-[1.25]';
+const heading = 'text-3xl font-bold leading-tight text-[#0F202A] sm:text-4xl md:text-5xl md:leading-[1.25]';
 const lead = 'text-[1.3rem] leading-8 text-[#687076]';
-const cardTitle = 'mb-2 text-2xl font-bold leading-8 text-[#11181C]';
+const cardTitle = 'mb-2 text-2xl font-bold leading-8 text-[#0F202A]';
 const wrap = 'mx-auto max-w-6xl px-6';
 const section = 'py-20';
 const card = 'rounded-2xl border border-[#E6E8EB] bg-white p-6';
 const btnPrimary =
-  'inline-flex items-center justify-center rounded-xl bg-[#FFAC1C] px-5 py-3 text-[1.3rem] leading-8 font-medium text-[#11181C] hover:bg-[#FFB84D] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFAC1C] focus-visible:ring-offset-2';
+  'inline-flex items-center justify-center rounded-xl bg-[#0E5A6B] px-5 py-3 text-[1.3rem] leading-8 font-medium text-white hover:bg-[#0A4A58] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E5A6B] focus-visible:ring-offset-2';
 const btnSecondary =
-  'inline-flex items-center justify-center rounded-xl border border-[#11181C] bg-white px-5 py-3 text-[1.3rem] leading-8 font-medium text-[#11181C] hover:bg-[#11181C] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFAC1C] focus-visible:ring-offset-2';
-const btnOnAmber =
-  'inline-flex items-center justify-center rounded-xl bg-[#11181C] px-5 py-3 text-[1.3rem] leading-8 font-medium text-white hover:bg-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#11181C] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FFAC1C]';
-const btnOnAmberSecondary =
-  'inline-flex items-center justify-center rounded-xl border border-[#11181C] bg-white px-5 py-3 text-[1.3rem] leading-8 font-medium text-[#11181C] hover:bg-[#11181C] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#11181C] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FFAC1C]';
+  'inline-flex items-center justify-center rounded-xl border border-[#0E5A6B] bg-white px-5 py-3 text-[1.3rem] leading-8 font-medium text-[#0E5A6B] hover:bg-[#0E5A6B] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E5A6B] focus-visible:ring-offset-2';
 
 const changes = [
   {
@@ -47,12 +43,12 @@ export default function ForAgentsPage() {
   const schemas = buildSchemas(config, content);
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-[#F5F5F5] text-[1.3rem] leading-8 text-[#11181C]">
+    <div className="min-h-screen overflow-x-hidden bg-[#F8F8F8] text-[1.3rem] leading-8 text-[#0F202A]">
       <JsonLd data={schemas} />
 
-      <section className="bg-gradient-to-b from-white to-[#F5F5F5] pb-16 pt-16">
+      <section className="bg-gradient-to-b from-white to-[#F8F8F8] pb-16 pt-16">
         <div className={`${wrap} max-w-3xl`}>
-          <h1 className="text-3xl font-semibold leading-tight text-[#11181C] sm:text-4xl md:text-5xl md:leading-[1.25]">
+          <h1 className="text-3xl font-semibold leading-tight text-[#0F202A] sm:text-4xl md:text-5xl md:leading-[1.25]">
             Keep Doing What You Do — Just Stop Losing Track of It
           </h1>
           <div className={`mt-6 space-y-4 ${lead}`}>
@@ -110,7 +106,7 @@ export default function ForAgentsPage() {
                   {item.title.startsWith('Your reach') ? (
                     <>
                       Anyone browsing the{' '}
-                      <Link href="/marketplace" className="font-semibold text-[#11181C] underline">
+                      <Link href="/marketplace" className="font-semibold text-[#0F202A] underline">
                         Marketplace
                       </Link>{' '}
                       can find you — not just people who already have your number.
@@ -141,7 +137,7 @@ export default function ForAgentsPage() {
               <h3 className={cardTitle}>The same pickup-to-delivery process</h3>
               <p className={lead}>
                 Once agreed, it runs through Schedule Pickup → Collection → Shipping → Tracking → Delivery.{' '}
-                <Link href="/how-it-works#the-process-in-full" className="font-semibold text-[#11181C] underline">
+                <Link href="/how-it-works#the-process-in-full" className="font-semibold text-[#0F202A] underline">
                   Full process →
                 </Link>
               </p>
@@ -163,20 +159,20 @@ export default function ForAgentsPage() {
         </div>
       </section>
 
-      <section className="bg-[#FFAC1C] py-20">
+      <section className="bg-white py-20">
         <div className={`${wrap} max-w-3xl text-center`}>
           <h2 className={heading}>Ready to Put a System Behind What You Already Do?</h2>
-          <p className="mx-auto mt-4 max-w-2xl text-[1.3rem] leading-8 text-[#11181C]">
+          <p className="mx-auto mt-4 max-w-2xl text-[1.3rem] leading-8 text-[#0F202A]">
             List what you offer. Manage requests in one place. Keep doing business exactly how you already talk to people.
           </p>
           <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-            <OpenAppLink path="agent" className={btnOnAmber}>
+            <OpenAppLink path="agent" className={btnPrimary}>
               Become a Solo Agent
             </OpenAppLink>
-            <OpenAppLink path="agent" className={btnOnAmberSecondary}>
+            <OpenAppLink path="agent" className={btnSecondary}>
               Register an Organization
             </OpenAppLink>
-            <Link href="/how-it-works" className={btnOnAmberSecondary}>
+            <Link href="/how-it-works" className={btnSecondary}>
               See How It Works
             </Link>
           </div>

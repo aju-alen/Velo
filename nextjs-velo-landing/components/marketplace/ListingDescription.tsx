@@ -29,7 +29,7 @@ export default function ListingDescription({ text }: { text: string }) {
           type="button"
           aria-expanded={expanded}
           onClick={() => setExpanded((open) => !open)}
-          className="mt-2 text-[1.3rem] leading-8 font-semibold text-[#11181C] underline decoration-[#11181C]/30 underline-offset-4 hover:text-[#FFAC1C] hover:decoration-[#FFAC1C] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFAC1C] focus-visible:ring-offset-2"
+          className="mt-2 text-[1.3rem] leading-8 font-semibold text-[#0F202A] underline decoration-[#0F202A]/30 underline-offset-4 hover:text-[#0E5A6B] hover:decoration-[#0E5A6B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E5A6B] focus-visible:ring-offset-2"
         >
           {expanded ? 'Show less' : 'Read more'}
         </button>

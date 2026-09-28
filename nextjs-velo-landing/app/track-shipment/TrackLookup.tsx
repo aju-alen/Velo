@@ -67,7 +67,7 @@ export default function TrackLookup() {
 
   return (
     <form className="mt-8 max-w-xl" onSubmit={handleSubmit}>
-      <label htmlFor="tracking-number" className="mb-2 block text-[1.3rem] font-semibold leading-8 text-[#11181C]">
+      <label htmlFor="tracking-number" className="mb-2 block text-[1.3rem] font-semibold leading-8 text-[#0F202A]">
         Tracking number
       </label>
       <div className="flex flex-col gap-3 sm:flex-row">
@@ -78,12 +78,12 @@ export default function TrackLookup() {
           onChange={(event) => setNumber(event.target.value)}
           placeholder="Enter tracking number"
           required
-          className="min-w-0 flex-1 rounded-xl border border-[#E6E8EB] bg-white px-4 py-3 text-[1.3rem] leading-8 text-[#11181C] placeholder:text-[#687076] focus:border-[#FFAC1C] focus:outline-none focus:ring-2 focus:ring-[#FFAC1C]"
+          className="min-w-0 flex-1 rounded-xl border border-[#E6E8EB] bg-white px-4 py-3 text-[1.3rem] leading-8 text-[#0F202A] placeholder:text-[#687076] focus:border-[#0E5A6B] focus:outline-none focus:ring-2 focus:ring-[#0E5A6B]"
         />
         <button
           type="submit"
           disabled={loading}
-          className="inline-flex items-center justify-center rounded-xl bg-[#FFAC1C] px-5 py-3 text-[1.3rem] leading-8 font-medium text-[#11181C] hover:bg-[#FFB84D] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFAC1C] focus-visible:ring-offset-2 disabled:opacity-60"
+          className="inline-flex items-center justify-center rounded-xl bg-[#0E5A6B] px-5 py-3 text-[1.3rem] leading-8 font-medium text-white hover:bg-[#0A4A58] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E5A6B] focus-visible:ring-offset-2 disabled:opacity-60"
         >
           {loading ? 'Tracking...' : 'Track Shipment'}
         </button>
@@ -91,9 +91,9 @@ export default function TrackLookup() {
       {message ? <p className="mt-4 text-[1.3rem] leading-8 text-[#687076]">{message}</p> : null}
       {result ? (
         <article className="mt-6 rounded-2xl border border-[#E6E8EB] bg-white p-6">
-          <p className="text-[1.3rem] font-semibold leading-8 text-[#11181C]">{result.shipmentId}</p>
-          <p className="text-[1.3rem] font-semibold leading-8 text-[#FFAC1C]">{result.statusLabel}</p>
-          <p className="mt-2 text-[1.3rem] leading-8 text-[#11181C]">
+          <p className="text-[1.3rem] font-semibold leading-8 text-[#0F202A]">{result.shipmentId}</p>
+          <p className="text-[1.3rem] font-semibold leading-8 text-[#0E5A6B]">{result.statusLabel}</p>
+          <p className="mt-2 text-[1.3rem] leading-8 text-[#0F202A]">
             {result.from || 'Origin'} to {result.to || 'Destination'}
           </p>
           <p className="text-[1.3rem] leading-8 text-[#687076]">
@@ -103,7 +103,7 @@ export default function TrackLookup() {
             {result.timeline.map((step) => (
               <li
                 key={step.key}
-                className={`text-[1.3rem] leading-8 ${step.current ? 'font-semibold text-[#11181C]' : 'text-[#687076]'}`}
+                className={`text-[1.3rem] leading-8 ${step.current ? 'font-semibold text-[#0F202A]' : 'text-[#687076]'}`}
               >
                 {step.completed || step.current ? '●' : '○'} {step.label}
               </li>

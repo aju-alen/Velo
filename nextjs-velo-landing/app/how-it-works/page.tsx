@@ -9,15 +9,15 @@ import HomeFaqs from '@/components/home/HomeFaqs';
 const config = getPageConfig('how-it-works');
 export const metadata = buildMetadata(config);
 
-const heading = 'text-3xl font-bold leading-tight text-[#11181C] sm:text-4xl md:text-5xl md:leading-[1.25]';
+const heading = 'text-3xl font-bold leading-tight text-[#0F202A] sm:text-4xl md:text-5xl md:leading-[1.25]';
 const lead = 'text-[1.3rem] leading-8 text-[#687076]';
 const wrap = 'mx-auto max-w-6xl px-6';
 const section = 'py-20';
 const card = 'rounded-2xl border border-[#E6E8EB] bg-white p-6';
 const btnPrimary =
-  'inline-flex items-center justify-center rounded-xl bg-[#FFAC1C] px-5 py-3 text-[1.3rem] leading-8 font-medium text-[#11181C] hover:bg-[#FFB84D] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFAC1C] focus-visible:ring-offset-2';
+  'inline-flex items-center justify-center rounded-xl bg-[#0E5A6B] px-5 py-3 text-[1.3rem] leading-8 font-medium text-white hover:bg-[#0A4A58] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E5A6B] focus-visible:ring-offset-2';
 const btnSecondary =
-  'inline-flex items-center justify-center rounded-xl border border-[#11181C] bg-white px-5 py-3 text-[1.3rem] leading-8 font-medium text-[#11181C] hover:bg-[#11181C] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFAC1C] focus-visible:ring-offset-2';
+  'inline-flex items-center justify-center rounded-xl border border-[#0E5A6B] bg-white px-5 py-3 text-[1.3rem] leading-8 font-medium text-[#0E5A6B] hover:bg-[#0E5A6B] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E5A6B] focus-visible:ring-offset-2';
 
 const changes = [
   {
@@ -113,10 +113,10 @@ export default function HowItWorksPage() {
   return (
     <>
       <JsonLd data={schemas} />
-      <div className="min-h-screen overflow-x-hidden bg-[#F5F5F5] text-[1.3rem] leading-8 text-[#11181C]">
-        <section className="bg-gradient-to-b from-white to-[#F5F5F5]">
+      <div className="min-h-screen overflow-x-hidden bg-[#F8F8F8] text-[1.3rem] leading-8 text-[#0F202A]">
+        <section className="bg-gradient-to-b from-white to-[#F8F8F8]">
           <div className={`${wrap} max-w-3xl pb-16 pt-10 lg:pt-24`}>
-            <h1 className="mb-6 text-3xl font-semibold leading-tight text-[#11181C] sm:text-4xl md:text-5xl md:leading-[1.25]">
+            <h1 className="mb-6 text-3xl font-semibold leading-tight text-[#0F202A] sm:text-4xl md:text-5xl md:leading-[1.25]">
               Shipping to Kenya, Without the Guesswork
             </h1>
             <div className={`mb-8 space-y-4 ${lead}`}>
@@ -141,20 +141,20 @@ export default function HowItWorksPage() {
           <div className={wrap}>
             <h2 className={`${heading} mb-10`}>What Changes</h2>
             <div className="hidden grid-cols-[1.1fr_1fr_1fr] gap-4 px-6 pb-4 sm:grid">
-              <p className="font-semibold text-[#11181C]" />
-              <p className="font-semibold text-[#11181C]">THE OLD WAY</p>
-              <p className="font-semibold text-[#11181C]">WITH VELO</p>
+              <p className="font-semibold text-[#0F202A]" />
+              <p className="font-semibold text-[#0F202A]">THE OLD WAY</p>
+              <p className="font-semibold text-[#0F202A]">WITH VELO</p>
             </div>
             <div className="space-y-4">
               {changes.map((row) => (
                 <article key={row.topic} className={`${card} grid gap-4 sm:grid-cols-[1.1fr_1fr_1fr] sm:items-start`}>
-                  <h3 className="text-2xl font-bold leading-8 text-[#11181C]">{row.topic}</h3>
+                  <h3 className="text-2xl font-bold leading-8 text-[#0F202A]">{row.topic}</h3>
                   <p className={lead}>
-                    <span className="mb-1 block font-semibold text-[#11181C] sm:hidden">THE OLD WAY</span>
+                    <span className="mb-1 block font-semibold text-[#0F202A] sm:hidden">THE OLD WAY</span>
                     {row.oldWay}
                   </p>
                   <p className={lead}>
-                    <span className="mb-1 block font-semibold text-[#11181C] sm:hidden">WITH VELO</span>
+                    <span className="mb-1 block font-semibold text-[#0F202A] sm:hidden">WITH VELO</span>
                     {row.withVelo}
                   </p>
                 </article>
@@ -168,13 +168,13 @@ export default function HowItWorksPage() {
             <h2 className={`${heading} mb-10`}>Two Ways to Start</h2>
             <div className="grid gap-4 md:grid-cols-2">
               <article className={card}>
-                <h3 className="mb-3 text-2xl font-bold leading-8 text-[#11181C]">You already have something to send.</h3>
+                <h3 className="mb-3 text-2xl font-bold leading-8 text-[#0F202A]">You already have something to send.</h3>
                 <p className={lead}>
                   Documents, parcels, commercial cargo, even heavy machinery — schedule a pickup and it moves through the process below.
                 </p>
               </article>
               <article className={card}>
-                <h3 className="mb-3 text-2xl font-bold leading-8 text-[#11181C]">You need something found first.</h3>
+                <h3 className="mb-3 text-2xl font-bold leading-8 text-[#0F202A]">You need something found first.</h3>
                 <p className={lead}>
                   Browse the Marketplace for a Logistics Agent who sources what you&apos;re after, agree the details, and the same process picks up once they have it in hand.
                 </p>
@@ -192,10 +192,10 @@ export default function HowItWorksPage() {
             <div className="space-y-4">
               {steps.map((step) => (
                 <article key={step.step} className={card}>
-                  <p className="mb-3 font-semibold text-[#FFAC1C]">{step.step}</p>
-                  <h3 className="mb-3 text-2xl font-bold leading-8 text-[#11181C]">{step.title}</h3>
+                  <p className="mb-3 font-semibold text-[#0E5A6B]">{step.step}</p>
+                  <h3 className="mb-3 text-2xl font-bold leading-8 text-[#0F202A]">{step.title}</h3>
                   <p className={lead}>{step.description}</p>
-                  <p className="mt-4 font-medium text-[#11181C]">{step.why}</p>
+                  <p className="mt-4 font-medium text-[#0F202A]">{step.why}</p>
                 </article>
               ))}
             </div>
@@ -214,7 +214,7 @@ export default function HowItWorksPage() {
               <p>
                 Logistics Agents, Solo or Org, list what they can source. You review listings, agree the details with the Agent directly in the app, and once they have it, it moves into the same five-step process on the previous page.
               </p>
-              <p className="font-medium text-[#11181C]">
+              <p className="font-medium text-[#0F202A]">
                 Why it matters: sourcing and shipping stop being two separate, disconnected problems.
               </p>
             </div>
@@ -230,14 +230,14 @@ export default function HowItWorksPage() {
             <div className="grid gap-4 md:grid-cols-2">
               {priceFactors.map((factor) => (
                 <article key={factor.title} className={card}>
-                  <h3 className="mb-3 text-2xl font-bold leading-8 text-[#11181C]">{factor.title}</h3>
+                  <h3 className="mb-3 text-2xl font-bold leading-8 text-[#0F202A]">{factor.title}</h3>
                   <p className={lead}>{factor.description}</p>
                 </article>
               ))}
             </div>
             <p className={`mt-8 max-w-3xl ${lead}`}>
               You&apos;ll get an estimate before you confirm anything — never a surprise total at the end.{' '}
-              <Link href="/pricing-calculator" className="font-medium text-[#FFAC1C] underline underline-offset-4">
+              <Link href="/pricing-calculator" className="font-medium text-[#0E5A6B] underline underline-offset-4">
                 Try the Pricing Calculator
               </Link>
             </p>
@@ -253,27 +253,18 @@ export default function HowItWorksPage() {
           </div>
         </section>
 
-        <section className="bg-[#FFAC1C] py-20">
+        <section className="bg-white py-20">
           <div className={`${wrap} text-center`}>
             <h2 className={`${heading} mx-auto mb-6 max-w-4xl`}>Ready to Send Something, or List What You Offer?</h2>
-            <p className="mb-8 text-[1.3rem] leading-8 text-[#11181C]">Two ways in, one process behind both of them.</p>
+            <p className="mb-8 text-[1.3rem] leading-8 text-[#0F202A]">Two ways in, one process behind both of them.</p>
             <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <OpenAppLink
-                path="sender"
-                className="inline-flex items-center justify-center rounded-xl bg-[#11181C] px-5 py-3 text-[1.3rem] leading-8 font-medium text-white hover:bg-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#11181C] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FFAC1C]"
-              >
+              <OpenAppLink path="sender" className={btnPrimary}>
                 Get Started as a Sender
               </OpenAppLink>
-              <OpenAppLink
-                path="agent"
-                className="inline-flex items-center justify-center rounded-xl border border-[#11181C] bg-white px-5 py-3 text-[1.3rem] leading-8 font-medium text-[#11181C] hover:bg-[#11181C] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#11181C] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FFAC1C]"
-              >
+              <OpenAppLink path="agent" className={btnSecondary}>
                 Become a Logistics Agent
               </OpenAppLink>
-              <Link
-                href="/marketplace"
-                className="inline-flex items-center justify-center rounded-xl border border-[#11181C] bg-white px-5 py-3 text-[1.3rem] leading-8 font-medium text-[#11181C] hover:bg-[#11181C] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#11181C] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FFAC1C]"
-              >
+              <Link href="/marketplace" className={btnSecondary}>
                 Browse the Marketplace
               </Link>
             </div>

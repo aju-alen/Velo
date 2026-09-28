@@ -1,4 +1,4 @@
-import DownloadAppLink from '@/components/DownloadAppLink';
+import StoreBadges from '@/components/home/StoreBadges';
 import { buildMetadata, buildSchemas, getPageConfig } from '@/lib/seo';
 import { getPageContent } from '@/content/pages';
 import JsonLd from '@/components/seo/JsonLd';
@@ -8,7 +8,7 @@ const config = getPageConfig('track-shipment');
 const content = getPageContent('track-shipment');
 export const metadata = buildMetadata(config);
 
-const heading = 'text-3xl font-bold leading-tight text-[#11181C] sm:text-4xl md:text-5xl md:leading-[1.25]';
+const heading = 'text-3xl font-bold leading-tight text-[#0F202A] sm:text-4xl md:text-5xl md:leading-[1.25]';
 const lead = 'text-[1.3rem] leading-8 text-[#687076]';
 const wrap = 'mx-auto max-w-6xl px-6';
 const card = 'rounded-2xl border border-[#E6E8EB] bg-white p-6';
@@ -50,12 +50,12 @@ export default function TrackShipmentPage() {
   const schemas = buildSchemas(config, content);
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-[#F5F5F5] text-[1.3rem] leading-8 text-[#11181C]">
+    <div className="min-h-screen overflow-x-hidden bg-[#F8F8F8] text-[1.3rem] leading-8 text-[#0F202A]">
       <JsonLd data={schemas} />
 
-      <section className="bg-gradient-to-b from-white to-[#F5F5F5] pb-16 pt-16">
+      <section className="bg-gradient-to-b from-white to-[#F8F8F8] pb-16 pt-16">
         <div className={`${wrap} max-w-3xl`}>
-          <h1 className="text-3xl font-semibold leading-tight text-[#11181C] sm:text-4xl md:text-5xl md:leading-[1.25]">
+          <h1 className="text-3xl font-semibold leading-tight text-[#0F202A] sm:text-4xl md:text-5xl md:leading-[1.25]">
             Track Your Shipment
           </h1>
           <p className={`mt-6 ${lead}`}>
@@ -72,19 +72,17 @@ export default function TrackShipmentPage() {
           <div className="grid gap-4">
             {steps.map((item) => (
               <article key={item.step} className={`${card} grid gap-3 sm:grid-cols-[auto_1fr_auto] sm:items-start sm:gap-6`}>
-                <p className="text-2xl font-bold leading-8 text-[#FFAC1C]">{item.step}</p>
+                <p className="text-2xl font-bold leading-8 text-[#0E5A6B]">{item.step}</p>
                 <div>
-                  <h3 className="text-2xl font-bold leading-8 text-[#11181C]">{item.title}</h3>
+                  <h3 className="text-2xl font-bold leading-8 text-[#0F202A]">{item.title}</h3>
                   <p className={`mt-2 ${lead}`}>{item.description}</p>
                 </div>
-                <p className="text-[1.3rem] font-semibold leading-8 text-[#11181C]">{item.tag}</p>
+                <p className="text-[1.3rem] font-semibold leading-8 text-[#0F202A]">{item.tag}</p>
               </article>
             ))}
           </div>
           <div className="mt-10">
-            <DownloadAppLink className="inline-flex items-center justify-center rounded-xl bg-[#FFAC1C] px-5 py-3 text-[1.3rem] leading-8 font-medium text-[#11181C] hover:bg-[#FFB84D] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFAC1C] focus-visible:ring-offset-2">
-              Get the App
-            </DownloadAppLink>
+            <StoreBadges size="sm" layout="row" />
           </div>
         </div>
       </section>

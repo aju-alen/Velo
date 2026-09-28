@@ -9,13 +9,13 @@ const config = getPageConfig('contact');
 const content = getPageContent('contact');
 export const metadata = buildMetadata(config);
 
-const heading = 'text-3xl font-bold leading-tight text-[#11181C] sm:text-4xl md:text-5xl md:leading-[1.25]';
+const heading = 'text-3xl font-bold leading-tight text-[#0F202A] sm:text-4xl md:text-5xl md:leading-[1.25]';
 const lead = 'text-[1.3rem] leading-8 text-[#687076]';
-const cardTitle = 'mb-2 text-2xl font-bold leading-8 text-[#11181C]';
+const cardTitle = 'mb-2 text-2xl font-bold leading-8 text-[#0F202A]';
 const wrap = 'mx-auto max-w-6xl px-6';
 const card = 'rounded-2xl border border-[#E6E8EB] bg-white p-6';
 const btnSecondary =
-  'inline-flex items-center justify-center rounded-xl border border-[#11181C] bg-white px-5 py-3 text-[1.3rem] leading-8 font-medium text-[#11181C] hover:bg-[#11181C] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFAC1C] focus-visible:ring-offset-2';
+  'inline-flex items-center justify-center rounded-xl border border-[#0E5A6B] bg-white px-5 py-3 text-[1.3rem] leading-8 font-medium text-[#0E5A6B] hover:bg-[#0E5A6B] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E5A6B] focus-visible:ring-offset-2';
 
 const hasRealPhone = siteConfig.phone !== '+971-000-0000';
 
@@ -23,12 +23,12 @@ export default function ContactPage() {
   const schemas = buildSchemas(config, content);
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-[#F5F5F5] text-[1.3rem] leading-8 text-[#11181C]">
+    <div className="min-h-screen overflow-x-hidden bg-[#F8F8F8] text-[1.3rem] leading-8 text-[#0F202A]">
       <JsonLd data={schemas} />
 
-      <section className="bg-gradient-to-b from-white to-[#F5F5F5] pb-16 pt-16">
+      <section className="bg-gradient-to-b from-white to-[#F8F8F8] pb-16 pt-16">
         <div className={`${wrap} max-w-3xl`}>
-          <h1 className="text-3xl font-semibold leading-tight text-[#11181C] sm:text-4xl md:text-5xl md:leading-[1.25]">
+          <h1 className="text-3xl font-semibold leading-tight text-[#0F202A] sm:text-4xl md:text-5xl md:leading-[1.25]">
             Get in Touch
           </h1>
           <p className={`mt-6 ${lead}`}>
@@ -44,21 +44,21 @@ export default function ContactPage() {
             <article className={card}>
               <h3 className={cardTitle}>WhatsApp</h3>
               {hasRealPhone ? (
-                <p className="mb-2 text-[1.3rem] font-semibold leading-8 text-[#11181C]">{siteConfig.phone}</p>
+                <p className="mb-2 text-[1.3rem] font-semibold leading-8 text-[#0F202A]">{siteConfig.phone}</p>
               ) : null}
               <p className={lead}>Fastest way to reach us during business hours.</p>
             </article>
             <article className={card}>
               <h3 className={cardTitle}>Phone</h3>
               {hasRealPhone ? (
-                <p className="mb-2 text-[1.3rem] font-semibold leading-8 text-[#11181C]">{siteConfig.phone}</p>
+                <p className="mb-2 text-[1.3rem] font-semibold leading-8 text-[#0F202A]">{siteConfig.phone}</p>
               ) : null}
               <p className={lead}>UAE business hours.</p>
             </article>
             <article className={card}>
               <h3 className={cardTitle}>Email</h3>
               <p className="mb-2 text-[1.3rem] leading-8">
-                <a href={`mailto:${siteConfig.email}`} className="font-semibold text-[#11181C] underline">
+                <a href={`mailto:${siteConfig.email}`} className="font-semibold text-[#0F202A] underline">
                   {siteConfig.email}
                 </a>
               </p>
@@ -73,15 +73,15 @@ export default function ContactPage() {
           <h2 className={heading}>Before You Reach Out</h2>
           <p className={`mt-4 ${lead}`}>
             Most questions are already answered on{' '}
-            <Link href="/how-it-works" className="font-semibold text-[#11181C] underline">
+            <Link href="/how-it-works" className="font-semibold text-[#0F202A] underline">
               How It Works
             </Link>
             ,{' '}
-            <Link href="/senders" className="font-semibold text-[#11181C] underline">
+            <Link href="/senders" className="font-semibold text-[#0F202A] underline">
               For Senders
             </Link>
             , or{' '}
-            <Link href="/agents" className="font-semibold text-[#11181C] underline">
+            <Link href="/agents" className="font-semibold text-[#0F202A] underline">
               For Logistics Agents
             </Link>{' '}
             — worth a quick check before messaging, especially for pricing and process questions.
@@ -90,7 +90,7 @@ export default function ContactPage() {
             {hasRealPhone ? (
               <a
                 href={`https://wa.me/${siteConfig.phone.replace(/\D/g, '')}`}
-                className="inline-flex items-center justify-center rounded-xl bg-[#FFAC1C] px-5 py-3 text-[1.3rem] leading-8 font-medium text-[#11181C] hover:bg-[#FFB84D] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFAC1C] focus-visible:ring-offset-2"
+                className="inline-flex items-center justify-center rounded-xl bg-[#0E5A6B] px-5 py-3 text-[1.3rem] leading-8 font-medium text-white hover:bg-[#0A4A58] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E5A6B] focus-visible:ring-offset-2"
               >
                 Message on WhatsApp
               </a>

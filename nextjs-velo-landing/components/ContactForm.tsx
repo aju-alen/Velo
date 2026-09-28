@@ -5,8 +5,8 @@ import { Send } from 'lucide-react';
 import { CONTACT_ENDPOINT } from '@/lib/api';
 
 const fieldClass =
-  'w-full rounded-xl border border-[#E6E8EB] bg-white px-4 py-3 text-[1.3rem] leading-8 text-[#11181C] placeholder:text-[#687076] focus:border-[#FFAC1C] focus:outline-none focus:ring-2 focus:ring-[#FFAC1C]';
-const labelClass = 'mb-2 block text-[1.3rem] font-semibold leading-8 text-[#11181C]';
+  'w-full rounded-xl border border-[#E6E8EB] bg-white px-4 py-3 text-[1.3rem] leading-8 text-[#0F202A] placeholder:text-[#687076] focus:border-[#0E5A6B] focus:outline-none focus:ring-2 focus:ring-[#0E5A6B]';
+const labelClass = 'mb-2 block text-[1.3rem] font-semibold leading-8 text-[#0F202A]';
 
 export default function ContactForm() {
   const [formData, setFormData] = useState({
@@ -61,7 +61,7 @@ export default function ContactForm() {
 
   if (succeeded) {
     return (
-      <div className="rounded-2xl border border-[#E6E8EB] bg-white p-6 text-[1.3rem] leading-8 text-[#11181C]">
+      <div className="rounded-2xl border border-[#E6E8EB] bg-white p-6 text-[1.3rem] leading-8 text-[#0F202A]">
         Thanks for contacting us. We&apos;ll get back to you soon.
       </div>
     );
@@ -151,7 +151,7 @@ export default function ContactForm() {
       </div>
 
       {error ? (
-        <p className="text-[1.3rem] leading-8 text-[#11181C]" role="alert">
+        <p className="text-[1.3rem] leading-8 text-[#0F202A]" role="alert">
           {error}
         </p>
       ) : null}
@@ -159,7 +159,7 @@ export default function ContactForm() {
       <button
         type="submit"
         disabled={submitting}
-        className="inline-flex items-center justify-center rounded-xl bg-[#FFAC1C] px-5 py-3 text-[1.3rem] leading-8 font-medium text-[#11181C] hover:bg-[#FFB84D] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFAC1C] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+        className="inline-flex items-center justify-center rounded-xl bg-[#0E5A6B] px-5 py-3 text-[1.3rem] leading-8 font-medium text-white hover:bg-[#0A4A58] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E5A6B] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
       >
         <Send className="mr-2 h-5 w-5" />
         {submitting ? 'Sending...' : 'Request a Quote'}

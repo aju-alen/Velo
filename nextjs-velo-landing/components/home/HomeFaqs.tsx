@@ -31,7 +31,7 @@ function renderAnswer(answer: string, links?: Record<string, string>) {
     }
     if (earliest > 0) nodes.push(rest.slice(0, earliest));
     nodes.push(
-      <Link key={key} href={links[phrase]} className="font-semibold text-[#11181C] underline">
+      <Link key={key} href={links[phrase]} className="font-semibold text-[#0F202A] underline">
         {phrase}
       </Link>,
     );
@@ -54,11 +54,11 @@ export default function HomeFaqs({ faqs, links }: { faqs: Faq[]; links?: Record<
               node.dataset.primed = '1';
             }
           }}
-          className="group rounded-2xl border border-[#E6E8EB] bg-white open:border-[#FFAC1C]"
+          className="group rounded-2xl border border-[#E6E8EB] bg-white open:border-[#0E5A6B]"
         >
-          <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-6 py-5 text-[1.3rem] font-semibold leading-8 text-[#11181C] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFAC1C] focus-visible:ring-inset">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-6 py-5 text-[1.3rem] font-semibold leading-8 text-[#0F202A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E5A6B] focus-visible:ring-inset">
             {faq.question}
-            <span className="text-2xl leading-none text-[#FFAC1C] group-open:rotate-45 transition-transform">+</span>
+            <span className="text-2xl leading-none text-[#0E5A6B] group-open:rotate-45 transition-transform">+</span>
           </summary>
           <div className="px-6 pb-5 text-[1.3rem] leading-8 text-[#687076]">{renderAnswer(faq.answer, links)}</div>
         </details>
