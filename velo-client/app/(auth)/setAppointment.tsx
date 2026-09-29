@@ -1,231 +1,156 @@
-import { StyleSheet, Platform, TouchableOpacity, View, Text, useColorScheme } from 'react-native';
+import { StyleSheet, Platform, TouchableOpacity, View } from 'react-native';
 import React, { useState } from 'react';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import CustomButton from '@/components/CustomButton';
 import StartOverButton from '@/components/StartOverButton';
 import axios from 'axios';
 import { ipURL } from '@/constants/backendUrl';
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import useLoginAccountStore from '@/store/loginAccountStore';
-import { Colors } from '@/constants/Colors';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { resetTo } from '@/utils/resetNavigation';
+import { AuthScreen } from '@/components/forms/AuthScreen';
+import { AppText } from '@/components/AppText';
+import { useAppTheme } from '@/hooks/useAppTheme';
+import { Spacing } from '@/constants/Colors';
+import { AGENT_REG_STEPS } from '@/constants/flowSteps';
 
 const SetAppointment = () => {
   const { setAccountLoginData } = useLoginAccountStore();
   const params = useLocalSearchParams();
   const { accountId } = params;
-  const colorScheme = useColorScheme() ?? 'light';
-  const themeColors = Colors[colorScheme];
+  const { colors, radius, brand } = useAppTheme();
 
   const [date, setDate] = useState(new Date());
-  const [mode, setMode] = useState('date');
-  const [show, setShow] = useState(Platform.OS === 'ios'? true : false);
+  const [mode, setMode] = useState<'date' | 'time'>('date');
+  const [show, setShow] = useState(Platform.OS === 'ios');
+  const [saving, setSaving] = useState(false);
 
-  const onChange = (event, selectedDate) => {
-    const currentDate = selectedDate;
-    setDate(currentDate);
-    setShow(Platform.OS === 'ios'? true : false);
-  };
-
-  const showMode = (currentMode) => {
-    setShow(true);
-    setMode(currentMode);
+  const onChange = (_event: any, selectedDate?: Date) => {
+    if (selectedDate) setDate(selectedDate);
+    setShow(Platform.OS === 'ios');
   };
 
   const handleConfirmBooking = async () => {
     try {
-      const postData = {
+      setSaving(true);
+      const setAppointmentDate = await axios.post(`${ipURL}/api/auth/book-appointment`, {
         appointmentDate: date,
         agentId: accountId,
-      };
-      const setAppointmentDate = await axios.post(
-        `${ipURL}/api/auth/book-appointment`,
-        postData
-      );
+      });
+      const agentInfo = setAppointmentDate.data.agentInfo;
       setAccountLoginData({
-        id: setAppointmentDate.data.agentInfo.id,
-        mobileCode: setAppointmentDate.data.agentInfo.mobileCode,
-        mobileCountry: setAppointmentDate.data.agentInfo.mobileCountry,
-        mobileNumber: setAppointmentDate.data.agentInfo.mobileNumber,
-        name: setAppointmentDate.data.agentInfo.name,
-        password: setAppointmentDate.data.agentInfo.password,
-        registerVerificationStatus: setAppointmentDate.data.agentInfo.registerVerificationStatus,
-        role: setAppointmentDate.data.agentInfo.role,
-        updatedAt: setAppointmentDate.data.agentInfo.updatedAt,
-        token: setAppointmentDate.data.agentInfo.token,
-        modeOfWork: setAppointmentDate.data.agentInfo.modeOfWork? setAppointmentDate.data.agentInfo.modeOfWork : null,
-        organisationId: setAppointmentDate.data.agentInfo.organisationId? setAppointmentDate.data.agentInfo.organisationId : '',
-      })
-      await SecureStore.setItemAsync(
-        'registerDetail',
-        JSON.stringify(setAppointmentDate.data.agentInfo)
-      );
-      router.replace('/(auth)/agentRestriction');
+        id: agentInfo.id,
+        mobileCode: agentInfo.mobileCode,
+        mobileCountry: agentInfo.mobileCountry,
+        mobileNumber: agentInfo.mobileNumber,
+        name: agentInfo.name,
+        password: agentInfo.password,
+        registerVerificationStatus: agentInfo.registerVerificationStatus,
+        role: agentInfo.role,
+        updatedAt: agentInfo.updatedAt,
+        token: agentInfo.token,
+        modeOfWork: agentInfo.modeOfWork ? agentInfo.modeOfWork : null,
+        organisationId: agentInfo.organisationId ? agentInfo.organisationId : '',
+      });
+      await SecureStore.setItemAsync('registerDetail', JSON.stringify(agentInfo));
+      resetTo('/(auth)/agentRestriction');
     } catch (err) {
       console.log(err, 'err--');
+    } finally {
+      setSaving(false);
     }
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={[styles.container, { backgroundColor: themeColors.background }]}>
-        {/* Header Section */}
-        <View style={styles.headerSection}>
-          <Text style={[styles.headerTitle, { color: themeColors.text }]}>
-            Book Appointment
-          </Text>
-          <Text style={[styles.headerSubtitle, { color: themeColors.text }]}>
-            Select a date and time for your appointment
-          </Text>
-        </View>
-
-        {/* Date Time Selection Section */}
-        <View style={styles.dateTimeSection}>
-          <View style={styles.selectionButtons}>
-            <TouchableOpacity 
-              onPress={() => showMode('date')}
-              style={[styles.selectionButton, mode === 'date' && styles.activeButton]}
-            >
-              <Text style={[styles.buttonText, mode === 'date' && styles.activeButtonText, { color: themeColors.text }]}>
-                Select Date
-              </Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity 
-              onPress={() => showMode('time')}
-              style={[styles.selectionButton, mode === 'time' && styles.activeButton]}
-            >
-              <Text style={[styles.buttonText, mode === 'time' && styles.activeButtonText, { color: themeColors.text }]}>
-                Select Time
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Selected DateTime Display */}
-          <View style={[styles.selectedDateContainer, { backgroundColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)' }]}>
-            <Text style={[styles.selectedDateLabel, { color: themeColors.text }]}>Selected Date & Time</Text>
-            <Text style={[styles.selectedDateTime, { color: themeColors.text }]}>
-              {date.toLocaleString([], {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-              })}
-            </Text>
-          </View>
-
-          {/* DateTime Picker */}
-          {show && (
-            <View style={[styles.pickerContainer, { backgroundColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)' }]}>
-              <DateTimePicker
-                testID="dateTimePicker"
-                value={date}
-                mode={mode}
-                is24Hour={true}
-                onChange={onChange}
-                display="spinner"
-                themeVariant={colorScheme}
-                minimumDate={new Date()}
-                maximumDate={new Date(new Date().setDate(new Date().getDate() + 365))}
-              />
-            </View>
-          )}
-        </View>
-
-        {/* Confirm Button */}
-        <View style={styles.buttonContainer}>
+    <AuthScreen
+      title="Book an appointment"
+      subtitle="Choose a date and time for verification. You’ll get email confirmation."
+      step={5}
+      total={AGENT_REG_STEPS.length}
+      stepLabel={AGENT_REG_STEPS[4].label}
+      footer={
+        <>
           <CustomButton
+            buttonText="Confirm appointment"
             handlePress={handleConfirmBooking}
-            buttonText="Confirm Appointment"
-            buttonWidth={300}
+            disableButton={saving}
           />
           <StartOverButton />
-        </View>
+        </>
+      }
+    >
+      <View style={styles.modeRow}>
+        {(['date', 'time'] as const).map((m) => {
+          const active = mode === m;
+          return (
+            <TouchableOpacity
+              key={m}
+              onPress={() => {
+                setMode(m);
+                setShow(true);
+              }}
+              accessibilityRole="button"
+              accessibilityState={{ selected: active }}
+              style={[
+                styles.modeBtn,
+                {
+                  borderColor: active ? brand.amber : colors.border,
+                  backgroundColor: colors.surface,
+                  borderRadius: radius.md,
+                  borderWidth: active ? 2 : 1,
+                },
+              ]}
+            >
+              <AppText variant="label">{m === 'date' ? 'Date' : 'Time'}</AppText>
+            </TouchableOpacity>
+          );
+        })}
       </View>
-    </SafeAreaView>
+
+      <View
+        style={[
+          styles.summary,
+          { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radius.md },
+        ]}
+      >
+        <AppText variant="label">Selected</AppText>
+        <AppText variant="h3">
+          {date.toLocaleString([], {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+          })}
+        </AppText>
+      </View>
+
+      {show ? (
+        <DateTimePicker
+          value={date}
+          mode={mode}
+          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+          onChange={onChange}
+        />
+      ) : null}
+    </AuthScreen>
   );
 };
 
 export default SetAppointment;
 
 const styles = StyleSheet.create({
-  safeArea: {
+  modeRow: { flexDirection: 'row', gap: Spacing.md },
+  modeBtn: {
     flex: 1,
-  },
-  container: {
-    flex: 1,
-    paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'android' ? 40 : 0,
-  },
-  headerSection: {
+    paddingVertical: Spacing.lg,
     alignItems: 'center',
-    marginBottom: 30,
   },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  headerSubtitle: {
-    fontSize: 16,
-    opacity: 0.8,
-    textAlign: 'center',
-  },
-  dateTimeSection: {
-    flex: 1,
-    width: '100%',
-  },
-  selectionButtons: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 20,
-    marginBottom: 30,
-  },
-  selectionButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  summary: {
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  activeButton: {
-    backgroundColor: 'rgba(255, 172, 28, 0.2)',
-    borderColor: '#FFAC1C',
-  },
-  buttonText: {
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  activeButtonText: {
-    color: '#FFAC1C',
-  },
-  selectedDateContainer: {
-    alignItems: 'center',
-    marginBottom: 20,
-    padding: 20,
-    borderRadius: 16,
-  },
-  selectedDateLabel: {
-    fontSize: 14,
-    opacity: 0.7,
-    marginBottom: 8,
-  },
-  selectedDateTime: {
-    fontSize: 18,
-    fontWeight: '500',
-    textAlign: 'center',
-  },
-  pickerContainer: {
-    borderRadius: 16,
-    padding: 10,
-    marginBottom: 20,
-  },
-  buttonContainer: {
-    paddingBottom: 20,
-    alignItems: 'center',
+    padding: Spacing.xl,
+    gap: Spacing.sm,
   },
 });

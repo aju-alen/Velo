@@ -1,282 +1,185 @@
-import React, { useState } from 'react'
-import { 
-  StyleSheet, 
-  TextInput, 
-  Platform, 
-  KeyboardAvoidingView, 
+import React, { useState } from 'react';
+import {
+  StyleSheet,
+  Platform,
+  KeyboardAvoidingView,
   ScrollView,
   TouchableWithoutFeedback,
   Alert,
   View,
-  Text,
-  useColorScheme
+  TouchableOpacity,
 } from 'react-native';
-import { verticalScale, horizontalScale, moderateScale } from '@/constants/metrics'
 import CustomButton from '@/components/CustomButton';
+import { FormField } from '@/components/forms/FormField';
+import { AppText } from '@/components/AppText';
 import { router } from 'expo-router';
 import axios from 'axios';
 import { ipURL } from '@/constants/backendUrl';
 import * as SecureStore from 'expo-secure-store';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import useLoginAccountStore from '@/store/loginAccountStore';
-import { Colors } from '@/constants/Colors';
-
+import { resetTo } from '@/utils/resetNavigation';
+import { useAppTheme } from '@/hooks/useAppTheme';
+import { Spacing } from '@/constants/Colors';
 
 const Login = () => {
   const { setAccountLoginData } = useLoginAccountStore();
+  const { colors } = useAppTheme();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  
-  const colorScheme = useColorScheme() ?? 'light';
-  const themeColors = Colors[colorScheme];
 
-  const handleLogin = async() => {
+  const handleLogin = async () => {
     try {
-      setLoading(true)
-      const formData = {
-        email: email,
-        password: password
-      }
-      const checkIfAlreadyRegistered = await axios.post(`${ipURL}/api/auth/login`, formData);
-      console.log(checkIfAlreadyRegistered.data, 'checkIfAlreadyRegistered');
-      
+      setLoading(true);
+      const checkIfAlreadyRegistered = await axios.post(`${ipURL}/api/auth/login`, {
+        email,
+        password,
+      });
+
+      const account = checkIfAlreadyRegistered.data.accountExists;
       setAccountLoginData({
-        id: checkIfAlreadyRegistered.data.accountExists.id,
-        mobileCode: checkIfAlreadyRegistered.data.accountExists.mobileCode,
-        mobileCountry: checkIfAlreadyRegistered.data.accountExists.mobileCountry,
-        mobileNumber: checkIfAlreadyRegistered.data.accountExists.mobileNumber,
-        email: checkIfAlreadyRegistered.data.accountExists.email,
-        name: checkIfAlreadyRegistered.data.accountExists.name,
-        password: checkIfAlreadyRegistered.data.accountExists.password,
-        registerVerificationStatus: checkIfAlreadyRegistered.data.accountExists.registerVerificationStatus,
-        role: checkIfAlreadyRegistered.data.accountExists.role,
-        updatedAt: checkIfAlreadyRegistered.data.accountExists.updatedAt,
-        token: checkIfAlreadyRegistered.data.accountExists.token,
-        modeOfWork: checkIfAlreadyRegistered.data.accountExists.modeOfWork? checkIfAlreadyRegistered.data.accountExists.modeOfWork : null,
-        organisationId: checkIfAlreadyRegistered.data.accountExists.organisationId? checkIfAlreadyRegistered.data.accountExists.organisationId : '',
-      })
-      
-      if (checkIfAlreadyRegistered.data.accountExists.registerVerificationStatus === "PARTIAL" && checkIfAlreadyRegistered.data.accountExists.role === "AGENT") {
-        await SecureStore.setItemAsync('registerDetail', JSON.stringify(checkIfAlreadyRegistered.data.accountExists))
-        if (checkIfAlreadyRegistered.data.accountExists.verificationDocumentUrl) {
-          router.replace('/(auth)/finalRegisterForm')
-        } else {
-          router.replace('/verifyAgent')
-        }
+        id: account.id,
+        mobileCode: account.mobileCode,
+        mobileCountry: account.mobileCountry,
+        mobileNumber: account.mobileNumber,
+        email: account.email,
+        name: account.name,
+        password: account.password,
+        registerVerificationStatus: account.registerVerificationStatus,
+        role: account.role,
+        updatedAt: account.updatedAt,
+        token: account.token,
+        modeOfWork: account.modeOfWork ? account.modeOfWork : null,
+        organisationId: account.organisationId ? account.organisationId : '',
+      });
+
+      await SecureStore.setItemAsync('registerDetail', JSON.stringify(account));
+
+      if (account.registerVerificationStatus === 'PARTIAL' && account.role === 'AGENT') {
+        resetTo(
+          account.verificationDocumentUrl
+            ? '/(auth)/finalRegisterForm'
+            : '/(auth)/verifyAgent'
+        );
+      } else if (
+        (account.registerVerificationStatus === 'APPOINTMENT_BOOKED' ||
+          account.registerVerificationStatus === 'REJECTED') &&
+        account.role === 'AGENT'
+      ) {
+        resetTo('/(auth)/agentRestriction');
+      } else if (
+        account.registerVerificationStatus === 'LOGGED_IN' &&
+        (account.role === 'AGENT' || account.role === 'USER' || account.role === 'SUB_AGENT')
+      ) {
+        resetTo('/(tabs)/home/homeMainPage');
+      } else if (account.registerVerificationStatus === 'PARTIAL' && account.role === 'USER') {
+        resetTo('/(auth)/finalRegisterForm');
+      } else if (
+        account.registerVerificationStatus === 'SUPERADMINLOGGEDIN' &&
+        account.role === 'SUPERADMIN'
+      ) {
+        resetTo('/(tabs)/home/homeMainPage');
+      } else {
+        Alert.alert('Error', 'Something went wrong');
       }
-      else if(checkIfAlreadyRegistered.data.accountExists.registerVerificationStatus === "APPOINTMENT_BOOKED" && checkIfAlreadyRegistered.data.accountExists.role === "AGENT" ){
-        await SecureStore.setItemAsync('registerDetail', JSON.stringify(checkIfAlreadyRegistered.data.accountExists))
-        router.replace('/(auth)/agentRestriction')
-      }
-      else if(checkIfAlreadyRegistered.data.accountExists.registerVerificationStatus === "REJECTED" && checkIfAlreadyRegistered.data.accountExists.role === "AGENT" ){
-        await SecureStore.setItemAsync('registerDetail', JSON.stringify(checkIfAlreadyRegistered.data.accountExists))
-        router.replace('/(auth)/agentRestriction')
-      }
-      else if(checkIfAlreadyRegistered.data.accountExists.registerVerificationStatus === "LOGGED_IN" && checkIfAlreadyRegistered.data.accountExists.role === "AGENT" ){
-        await SecureStore.setItemAsync('registerDetail', JSON.stringify(checkIfAlreadyRegistered.data.accountExists))
-        router.replace('/(tabs)/home/homeMainPage')
-      }
-      else if (checkIfAlreadyRegistered.data.accountExists.registerVerificationStatus === "PARTIAL" && checkIfAlreadyRegistered.data.accountExists.role === "USER" ) {
-        await SecureStore.setItemAsync('registerDetail', JSON.stringify(checkIfAlreadyRegistered.data.accountExists))
-        router.replace('/(auth)/finalRegisterForm')
-      }
-      else if (checkIfAlreadyRegistered.data.accountExists.registerVerificationStatus === "LOGGED_IN" && checkIfAlreadyRegistered.data.accountExists.role === "USER" ) {
-        await SecureStore.setItemAsync('registerDetail', JSON.stringify(checkIfAlreadyRegistered.data.accountExists))
-        router.replace('/(tabs)/home/homeMainPage')
-      }
-      else if (checkIfAlreadyRegistered.data.accountExists.registerVerificationStatus === "SUPERADMINLOGGEDIN" && checkIfAlreadyRegistered.data.accountExists.role === "SUPERADMIN" ) {
-        await SecureStore.setItemAsync('registerDetail', JSON.stringify(checkIfAlreadyRegistered.data.accountExists))
-        router.replace('/(tabs)/home/homeMainPage')
-      }
-      else if (checkIfAlreadyRegistered.data.accountExists.registerVerificationStatus === "LOGGED_IN" && checkIfAlreadyRegistered.data.accountExists.role === "SUB_AGENT" ) {
-        await SecureStore.setItemAsync('registerDetail', JSON.stringify(checkIfAlreadyRegistered.data.accountExists))
-        router.replace('/(tabs)/home/homeMainPage')
-      }
-      else {
-        Alert.alert('Error', 'Something went wrong')
-      }
-      setLoading(false)
-    }
-    catch(err: any) {
-      console.log(err, 'error--');
-      const errorMessage = err?.response?.data?.message || err?.message || 'An error occurred. Please try again.';
+      setLoading(false);
+    } catch (err: any) {
+      const errorMessage =
+        err?.response?.data?.message || err?.message || 'An error occurred. Please try again.';
       Alert.alert('Error', errorMessage);
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
-    <View style={[styles.container, { backgroundColor: themeColors.background }]}>
     <KeyboardAvoidingView
-      behavior="padding"
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+      style={[styles.root, { backgroundColor: colors.background }]}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView
+        contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{ flexGrow: 1 }}
         showsVerticalScrollIndicator={false}
       >
-          <View style={styles.headerContainer}>
-            <Text style={[styles.logoText, { color: '#FFAC1C' }]}>Velo</Text>
-            <Text style={[styles.welcomeText, { color: themeColors.text }]}>Welcome back!</Text>
-            <Text style={[styles.subtitleText, { color: themeColors.text }]}>Please sign in to continue</Text>
+        <AppText variant="display" color={colors.tint} style={styles.brand}>
+          Velo
+        </AppText>
+        <AppText variant="h1" style={styles.title}>
+          Welcome back
+        </AppText>
+        <AppText variant="body" secondary style={styles.subtitle}>
+          Sign in to continue shipping.
+        </AppText>
+
+        <View style={styles.form}>
+          <FormField
+            label="Email"
+            placeholder="you@example.com"
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            keyboardType="email-address"
+            autoComplete="email"
+          />
+          <FormField
+            label="Password"
+            placeholder="Your password"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry={!showPassword}
+            rightSlot={
+              <TouchableOpacity onPress={() => setShowPassword((v) => !v)} hitSlop={8}>
+                <AppText variant="label" color={colors.tint}>
+                  {showPassword ? 'Hide' : 'Show'}
+                </AppText>
+              </TouchableOpacity>
+            }
+          />
+
+          <TouchableWithoutFeedback onPress={() => router.push('/(auth)/forgotPassword')}>
+            <AppText variant="link" color={colors.tint} style={styles.forgot}>
+              Forgot password?
+            </AppText>
+          </TouchableWithoutFeedback>
+
+          <CustomButton buttonText="Sign in" handlePress={handleLogin} disableButton={loading} />
+
+          <View style={styles.signupRow}>
+            <AppText variant="bodySmall" muted>
+              Don’t have an account?{' '}
+            </AppText>
+            <TouchableWithoutFeedback onPress={() => router.replace('/(auth)/chooseRole')}>
+              <AppText variant="link" color={colors.tint}>
+                Sign up
+              </AppText>
+            </TouchableWithoutFeedback>
           </View>
-
-          <View style={styles.formContainer}>
-            <View style={styles.inputContainer}>
-              <Text style={[styles.label, { color: themeColors.text }]}>Email</Text>
-              <View style={[styles.inputWrapper, { borderColor: themeColors.text }]}>
-                <MaterialIcons name="email" size={20} color="gray" style={styles.inputIcon} />
-                <TextInput
-                  placeholder="Enter your email"
-                  placeholderTextColor="gray"
-                  value={email}
-                  autoCapitalize='none'
-                  onChangeText={setEmail}
-                  keyboardType='email-address'
-                  autoComplete='email'
-                  style={[styles.input, { color: themeColors.text }]}
-                />
-              </View>
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={[styles.label, { color: themeColors.text }]}>Password</Text>
-              <View style={[styles.inputWrapper, { borderColor: themeColors.text }]}>
-                <MaterialIcons name="lock" size={20} color="gray" style={styles.inputIcon} />
-                <TextInput
-                  placeholder="Enter your password"
-                  placeholderTextColor="gray"
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry={!showPassword}
-                  style={[styles.input, { flex: 1, color: themeColors.text }]}
-                />
-                <TouchableWithoutFeedback onPress={() => setShowPassword(!showPassword)}>
-                  <MaterialIcons 
-                    name={showPassword ? "visibility" : "visibility-off"} 
-                    size={20} 
-                    color="gray" 
-                  />
-                </TouchableWithoutFeedback>
-              </View>
-            </View>
-
-            <View style={styles.forgotPasswordContainer}>
-              <TouchableWithoutFeedback onPress={() => router.push('/(auth)/forgotPassword')}>
-                <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-              </TouchableWithoutFeedback>
-            </View>
-
-            <View style={styles.buttonContainer}>
-              <CustomButton 
-                buttonText='Sign In' 
-                buttonWidth={horizontalScale(300)} 
-                handlePress={handleLogin}
-                disableButton={loading}
-              />
-            </View>
-
-            <View style={styles.signupContainer}>
-              <Text style={[styles.signupText, { color: themeColors.text }]}>Don't have an account? </Text>
-              <TouchableWithoutFeedback onPress={() => router.push('/(auth)/chooseRole')}>
-                <Text style={styles.signupLink}>Sign Up</Text>
-              </TouchableWithoutFeedback>
-            </View>
-          </View>
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
-    </View>
-  )
-}
+  );
+};
 
-export default Login
+export default Login;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingTop: verticalScale(10),
-    paddingHorizontal: horizontalScale(20),
+  root: { flex: 1 },
+  content: {
+    flexGrow: 1,
+    paddingHorizontal: Spacing.xl,
+    paddingTop: Spacing.xxxl * 2,
+    paddingBottom: Spacing.xxxl,
   },
-  scrollContainer: {
-
-    paddingHorizontal: horizontalScale(24),
-  },
-  headerContainer: {
-    marginTop: verticalScale(60),
-    
-  },
-  logoText: {
-    fontSize: moderateScale(40),
-    lineHeight: moderateScale(56),
-    fontWeight: 'bold',
-    marginBottom: verticalScale(16),
-  },
-  welcomeText: {
-    fontSize: moderateScale(24),
-    lineHeight: moderateScale(28),
-    fontWeight: 'bold',
-    marginBottom: verticalScale(8),
-  },
-  subtitleText: {
-    fontSize: moderateScale(16),
-    lineHeight: moderateScale(22),
-    color: 'gray',
-  },
-  formContainer: {
-    marginTop: verticalScale(40),
-
-  },
-  inputContainer: {
-    marginBottom: verticalScale(20),
-  },
-  label: {
-    marginBottom: verticalScale(8),
-    fontSize: moderateScale(16),
-    lineHeight: moderateScale(22),
-    fontWeight: '500',
-  },
-  inputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderRadius: moderateScale(12),
-    paddingHorizontal: horizontalScale(16),
-    height: verticalScale(48),
-  },
-  inputIcon: {
-    marginRight: horizontalScale(12),
-  },
-  input: {
-    flex: 1,
-    fontSize: moderateScale(16),
-  },
-  forgotPasswordContainer: {
-    alignItems: 'flex-end',
-    marginBottom: verticalScale(24),
-  },
-  forgotPasswordText: {
-    color: '#FFAC1C',
-    fontSize: moderateScale(14),
-  },
-  buttonContainer: {
-    alignItems: 'center',
-    marginBottom: verticalScale(24),
-  },
-  signupContainer: {
+  brand: { marginBottom: Spacing.lg },
+  title: { marginBottom: Spacing.sm },
+  subtitle: { marginBottom: Spacing.xxxl },
+  form: { gap: Spacing.lg },
+  forgot: { alignSelf: 'flex-end', marginTop: -Spacing.sm },
+  signupRow: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  signupText: {
-    fontSize: moderateScale(14),
-    color: 'gray',
-  },
-  signupLink: {
-    fontSize: moderateScale(14),
-    color: '#FFAC1C',
-    fontWeight: '600',
+    marginTop: Spacing.md,
   },
 });

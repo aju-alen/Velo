@@ -56,7 +56,7 @@ const PaymentSuccess = () => {
   }
 
   const AnimatedDetailsRow = ({ icon, label, value }) => (
-    <View style={[styles.detailRow, { backgroundColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)' }]}>
+    <View style={[styles.detailRow, { backgroundColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.05)' }]}>
       <MaterialIcons name={icon} size={24} color="#FFAC1C" />
       <View style={styles.detailTextContainer}>
         <Text style={[styles.detailLabel, { color: themeColors.text }]}>{label}</Text>
@@ -70,7 +70,7 @@ const PaymentSuccess = () => {
       <Animated.View 
         style={[
           styles.successContainer,
-          { backgroundColor: colorScheme === 'dark' ? '#181A20' : '#FFF' },
+          { backgroundColor: colorScheme === 'dark' ? '#262A33' : '#FFF' },
           {
             transform: [
               { scale: scaleValue },

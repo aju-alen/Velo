@@ -137,20 +137,20 @@ const styles = StyleSheet.create({
     marginTop: verticalScale(60),
   },
   logoText: {
-    fontSize: moderateScale(40),
+    fontSize: moderateScale(32),
     lineHeight: moderateScale(56),
     fontWeight: 'bold',
     marginBottom: verticalScale(16),
   },
   welcomeText: {
     fontSize: moderateScale(24),
-    lineHeight: moderateScale(28),
+    lineHeight: moderateScale(24),
     fontWeight: 'bold',
     marginBottom: verticalScale(8),
   },
   subtitleText: {
     fontSize: moderateScale(16),
-    lineHeight: moderateScale(22),
+    lineHeight: moderateScale(20),
     color: 'gray',
   },
   formContainer: {
@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
   label: {
     marginBottom: verticalScale(8),
     fontSize: moderateScale(16),
-    lineHeight: moderateScale(22),
+    lineHeight: moderateScale(20),
     fontWeight: '500',
   },
   inputWrapper: {

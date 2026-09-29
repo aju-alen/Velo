@@ -15,6 +15,8 @@ import axiosInstance, { setAuthorizationHeader } from '@/constants/axiosHeader';
 import { signOut, getAuth } from '@react-native-firebase/auth';
 import { Colors } from '@/constants/Colors';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { resetTo } from '@/utils/resetNavigation';
+import { resumeShipmentWizard } from '@/utils/resumeShipmentWizard';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = (width - horizontalScale(40) - horizontalScale(32)) / 3;
@@ -101,8 +103,7 @@ const HomeMainPage = () => {
 
   const continueDraft = (draft: any) => {
     hydrateFromDraft(draft.payload || {}, draft.id);
-    const step = draft.currentStep || 'createShipmentHome';
-    router.push(`/(tabs)/home/createShipment/${step}` as any);
+    resumeShipmentWizard(draft.currentStep || 'createShipmentHome');
   };
 
   const deleteDraft = (draftId: string) => {
@@ -160,7 +161,7 @@ const HomeMainPage = () => {
         
       }
       resetAccountLoginData();
-      router.replace('/(auth)/login');
+      resetTo('/(auth)/login');
     }
     catch(err){
       console.log(err);
@@ -538,7 +539,7 @@ const styles = StyleSheet.create({
     marginTop: verticalScale(4),
   },
   deleteButton: {
-    padding: moderateScale(10),
+    padding: moderateScale(12),
     backgroundColor: 'rgba(255, 107, 107, 0.1)',
     borderRadius: moderateScale(12),
   },
@@ -611,8 +612,8 @@ const styles = StyleSheet.create({
   },
   agentCountBadge: {
     backgroundColor: '#FFAC1C',
-    minWidth: moderateScale(28),
-    height: moderateScale(28),
+    minWidth: moderateScale(24),
+    height: moderateScale(24),
     borderRadius: moderateScale(14),
     alignItems: 'center',
     justifyContent: 'center',
@@ -712,7 +713,7 @@ const styles = StyleSheet.create({
   },
   recentStatusText: {
     color: 'white',
-    fontSize: moderateScale(10),
+    fontSize: moderateScale(12),
     fontWeight: '600',
     textTransform: 'capitalize',
   },
@@ -754,7 +755,7 @@ const styles = StyleSheet.create({
   quickActionIconContainer: {
     width: moderateScale(56),
     height: moderateScale(56),
-    borderRadius: moderateScale(28),
+    borderRadius: moderateScale(24),
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: verticalScale(12),

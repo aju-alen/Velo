@@ -365,7 +365,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
   },
   shipmentId: {
-    fontSize: moderateScale(18),
+    fontSize: moderateScale(17),
     fontWeight: '700',
     flex: 1,
   },
@@ -376,7 +376,7 @@ const styles = StyleSheet.create({
   },
   statusText: {
     color: 'white',
-    fontSize: moderateScale(11),
+    fontSize: moderateScale(12),
     fontWeight: '600',
     textTransform: 'capitalize',
   },
@@ -400,7 +400,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   senderTitle: {
-    fontSize: moderateScale(11),
+    fontSize: moderateScale(12),
     fontWeight: '500',
     marginBottom: verticalScale(4),
     textTransform: 'uppercase',
@@ -408,7 +408,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   senderText: {
-    fontSize: moderateScale(15),
+    fontSize: moderateScale(14),
     fontWeight: '600',
     lineHeight: moderateScale(20),
   },
@@ -429,7 +429,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   locationTitle: {
-    fontSize: moderateScale(11),
+    fontSize: moderateScale(12),
     fontWeight: '500',
     marginBottom: verticalScale(4),
     textTransform: 'uppercase',
@@ -437,7 +437,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   locationText: {
-    fontSize: moderateScale(15),
+    fontSize: moderateScale(14),
     fontWeight: '600',
     lineHeight: moderateScale(20),
   },

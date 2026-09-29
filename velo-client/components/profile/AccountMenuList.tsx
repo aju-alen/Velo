@@ -1,8 +1,11 @@
 import React from 'react';
-import { StyleSheet, TouchableOpacity, View, Text, Linking, useColorScheme, Alert } from 'react-native';
+import { StyleSheet, TouchableOpacity, View, Linking, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { Colors } from '@/constants/Colors';
+import { useAppTheme } from '@/hooks/useAppTheme';
+import { Spacing } from '@/constants/Colors';
+import { AppText } from '@/components/AppText';
+import { resetTo } from '@/utils/resetNavigation';
 
 export type AccountMenuItem = {
   label: string;
@@ -44,12 +47,7 @@ const AccountMenuList = ({
   hasAccountId = false,
   items = DEFAULT_ITEMS,
 }: AccountMenuListProps) => {
-  const colorScheme = useColorScheme() ?? 'light';
-  const bgCard = colorScheme === 'dark' ? '#181A20' : '#FFF';
-  const textPrimary = colorScheme === 'dark' ? '#FFF' : '#222';
-  const textSecondary = colorScheme === 'dark' ? '#AAA' : '#666';
-  const borderColor = colorScheme === 'dark' ? '#23242A' : '#E0E0E0';
-  const accent = Colors[colorScheme].tint;
+  const { colors, radius } = useAppTheme();
 
   const visibleItems = items.filter((item) => {
     if (item.guestOnly) return isGuest;
@@ -61,7 +59,7 @@ const AccountMenuList = ({
     if (item.requiresAccount && (isGuest || !hasAccountId)) {
       Alert.alert('Account required', 'Please sign up or log in to use this feature.', [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Sign Up', onPress: () => router.replace('/(auth)/chooseRole') },
+        { text: 'Sign Up', onPress: () => resetTo('/(auth)/chooseRole') },
       ]);
       return;
     }
@@ -70,29 +68,44 @@ const AccountMenuList = ({
       return;
     }
     if (item.route) {
+      if (item.route.startsWith('/(auth)')) {
+        resetTo(item.route as any);
+        return;
+      }
       router.push(item.route as any);
     }
   };
 
-  if (visibleItems.length === 0) {
-    return null;
-  }
+  if (visibleItems.length === 0) return null;
 
   return (
-    <View style={[styles.card, { backgroundColor: bgCard, borderColor }]}>
+    <View
+      style={[
+        styles.card,
+        {
+          backgroundColor: colors.surface,
+          borderColor: colors.border,
+          borderRadius: radius.lg,
+        },
+      ]}
+    >
       {visibleItems.map((item, idx) => (
         <TouchableOpacity
           key={item.label}
           style={[
-            styles.featureRow,
-            idx !== visibleItems.length - 1 && { borderBottomColor: borderColor, borderBottomWidth: 1 },
+            styles.row,
+            idx !== visibleItems.length - 1 && {
+              borderBottomColor: colors.borderSubtle,
+              borderBottomWidth: StyleSheet.hairlineWidth,
+            },
           ]}
-          activeOpacity={0.7}
+          activeOpacity={0.65}
           onPress={() => handlePress(item)}
         >
-          <Ionicons name={item.icon} size={20} color={accent} style={{ marginRight: 16 }} />
-          <Text style={[styles.featureLabel, { color: textPrimary }]}>{item.label}</Text>
-          <Ionicons name="chevron-forward" size={18} color={textSecondary} style={{ marginLeft: 'auto' }} />
+          <AppText variant="bodyStrong" style={styles.label}>
+            {item.label}
+          </AppText>
+          <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
         </TouchableOpacity>
       ))}
     </View>
@@ -101,22 +114,22 @@ const AccountMenuList = ({
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 16,
-    paddingHorizontal: 20,
-    marginBottom: 24,
-    alignItems: 'center',
+    marginBottom: Spacing.xl,
     borderWidth: 1,
     width: '100%',
+    overflow: 'hidden',
   },
-  featureRow: {
+  row: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 16,
+    justifyContent: 'space-between',
+    paddingVertical: 15,
+    paddingHorizontal: Spacing.lg,
     width: '100%',
   },
-  featureLabel: {
-    fontSize: 16,
-    fontWeight: '500',
+  label: {
+    flex: 1,
+    paddingRight: Spacing.md,
   },
 });
 

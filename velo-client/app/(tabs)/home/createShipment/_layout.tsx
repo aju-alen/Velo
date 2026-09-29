@@ -8,7 +8,7 @@ import { TouchableOpacity } from 'react-native';
 import SaveDraftButton from '@/components/SaveDraftButton';
 
 export default function CreateShipmentLayout() {
-    const { createShipment, setCreateShipment } = useShipmentStore();
+    const { setCreateShipment } = useShipmentStore();
     const colorScheme = useColorScheme();
     const headerTint = colorScheme === 'dark' ? 'white' : 'black';
 
@@ -24,8 +24,8 @@ export default function CreateShipmentLayout() {
             <Stack.Screen
                 name="createShipmentHome"
                 options={{
-                    headerShown: createShipment ? true : false,
-                    title: 'Shipment Details',
+                    headerShown: true,
+                    title: 'Details',
                     headerLeft: () => (
                         <TouchableOpacity onPress={handleGoBackHome}>
                             <AntDesign name="arrow-left" size={24} color={headerTint} />
@@ -36,29 +36,29 @@ export default function CreateShipmentLayout() {
             />
             <Stack.Screen
                 name="shippingOptions"
-                options={{ headerShown: true, title: 'Shipping Options', headerRight: draftHeaderRight }}
+                options={{ headerShown: true, title: 'Addresses', headerRight: draftHeaderRight }}
             />
             <Stack.Screen
                 name="shippingOptionalService"
-                options={{ headerShown: true, title: 'Additional Service', headerRight: draftHeaderRight }}
+                options={{ headerShown: true, title: 'Services', headerRight: draftHeaderRight }}
             />
             <Stack.Screen
                 name="shipmentSchedulePickup"
-                options={{ headerShown: true, title: 'Schedule Pickup', headerRight: draftHeaderRight }}
+                options={{ headerShown: true, title: 'Pickup', headerRight: draftHeaderRight }}
             />
             <Stack.Screen
                 name="finalPreview"
-                options={{ headerShown: true, title: 'Shipment Preview', headerRight: draftHeaderRight }}
+                options={{ headerShown: true, title: 'Review', headerRight: draftHeaderRight }}
             />
-            <Stack.Screen name="payment" options={{ title: 'Payment Summary', gestureEnabled: false }} />
+            <Stack.Screen name="payment" options={{ title: 'Payment', gestureEnabled: false }} />
             <Stack.Screen name="paymentSuccess" options={{ headerShown: true, gestureEnabled: false }} />
             <Stack.Screen
                 name="viewShippingOptions"
-                options={{ headerShown: true, title: 'Shipping Options', gestureEnabled: false, headerRight: draftHeaderRight }}
+                options={{ headerShown: true, title: 'Carrier', headerRight: draftHeaderRight }}
             />
             <Stack.Screen
                 name="open-market-confrim"
-                options={{ headerShown: true, title: 'Shipping Confirmed', gestureEnabled: false }}
+                options={{ headerShown: true, title: 'Confirmed', gestureEnabled: false }}
             />
         </Stack>
     );

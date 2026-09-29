@@ -288,7 +288,7 @@ const styles = StyleSheet.create({
     marginBottom: verticalScale(6),
   },
   statusBadge: {
-    fontSize: moderateScale(11),
+    fontSize: moderateScale(12),
     fontWeight: '600',
     paddingHorizontal: horizontalScale(10),
     paddingVertical: verticalScale(4),
@@ -309,7 +309,7 @@ const styles = StyleSheet.create({
     marginLeft: horizontalScale(12),
   },
   detailLabel: {
-    fontSize: moderateScale(11),
+    fontSize: moderateScale(12),
     fontWeight: '500',
     textTransform: 'uppercase',
     marginBottom: verticalScale(4),
@@ -317,7 +317,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   detailValue: {
-    fontSize: moderateScale(15),
+    fontSize: moderateScale(14),
     fontWeight: '600',
     lineHeight: moderateScale(20),
   },
@@ -334,7 +334,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingVertical: verticalScale(12),
     paddingHorizontal: horizontalScale(16),
-    borderRadius: moderateScale(10),
+    borderRadius: moderateScale(12),
     alignItems: 'center',
     justifyContent: 'center',
     gap: horizontalScale(8),
@@ -353,7 +353,7 @@ const styles = StyleSheet.create({
   buttonText: {
     color: 'white',
     fontWeight: '600',
-    fontSize: moderateScale(15),
+    fontSize: moderateScale(14),
   },
   emptyContainer: {
     flex: 1,

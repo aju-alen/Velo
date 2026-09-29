@@ -1,9 +1,9 @@
 import * as SecureStore from 'expo-secure-store';
 import { Alert } from 'react-native';
-import { router } from 'expo-router';
 import axios from 'axios';
 import { ipURL } from '@/constants/backendUrl';
 import { getAuth, signOut } from '@react-native-firebase/auth';
+import { resetTo } from '@/utils/resetNavigation';
 
 const REGISTRATION_STORE_KEYS = ['registerDetail', 'tempRegister', 'tempMobile'] as const;
 
@@ -46,7 +46,7 @@ export async function abandonRegistrationAndRestart(
   }
 
   resetAccountLoginData();
-  router.replace('/');
+  resetTo('/');
 }
 
 export function confirmAbandonRegistration(resetAccountLoginData: () => void) {

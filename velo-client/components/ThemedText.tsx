@@ -1,12 +1,28 @@
+import React from 'react';
 import { Text, type TextProps, StyleSheet } from 'react-native';
-import { verticalScale,horizontalScale,moderateScale } from '@/constants/metrics';
-
+import { Brand } from '@/constants/Colors';
+import { Type } from '@/constants/typography';
 import { useThemeColor } from '@/hooks/useThemeColor';
+
+/**
+ * Maps legacy ThemedText `type` values onto the locked type scale.
+ */
+const TYPE_MAP = {
+  default: 'body',
+  defaultSemiBold: 'bodyStrong',
+  title: 'h1',
+  subtitle: 'h2',
+  link: 'link',
+  custom: 'h2',
+  logoText: 'display',
+  mini: 'caption',
+  catText: 'caption',
+} as const;
 
 export type ThemedTextProps = TextProps & {
   lightColor?: string;
   darkColor?: string;
-  type?: 'default' | 'title' | 'defaultSemiBold' | 'subtitle' | 'link' |'custom' | 'logoText' | 'mini' | 'catText';
+  type?: keyof typeof TYPE_MAP;
 };
 
 export function ThemedText({
@@ -17,20 +33,16 @@ export function ThemedText({
   ...rest
 }: ThemedTextProps) {
   const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
+  const variant = TYPE_MAP[type] ?? 'body';
+  const scale = Type[variant];
 
   return (
     <Text
       style={[
-        { color },
-        type === 'default' ? styles.default : undefined,
-        type === 'title' ? styles.title : undefined,
-        type === 'defaultSemiBold' ? styles.defaultSemiBold : undefined,
-        type === 'subtitle' ? styles.subtitle : undefined,
-        type === 'link' ? styles.link : undefined,
-        type === 'custom' ? styles.custom : undefined,
-        type === 'logoText' ? styles.logoText : undefined,
-        type === 'mini' ? styles.mini : undefined,
-        type === 'catText' ? styles.catText : undefined,
+        scale,
+        {
+          color: type === 'link' ? Brand.amber : type === 'logoText' ? Brand.amber : color,
+        },
         style,
       ]}
       {...rest}
@@ -38,48 +50,15 @@ export function ThemedText({
   );
 }
 
-const styles = StyleSheet.create({
-  default: {
-    fontSize: moderateScale(16),
-    lineHeight: moderateScale(22),
-  },
-  defaultSemiBold: {
-    fontSize: moderateScale(16),
-    lineHeight: moderateScale(22),
-    fontWeight: '600',
-  },
-  title: {
-    fontSize: moderateScale(32),
-    fontWeight: 'bold',
-    lineHeight: moderateScale(44),
-  },
-  subtitle: {
-    fontSize: moderateScale(20),
-    lineHeight: moderateScale(28),
-    fontWeight: 'bold',
-  },
-  link: {
-    fontSize: moderateScale(16),
-    lineHeight: moderateScale(22),
-    color: '#0a7ea4',
-  },
-  custom: {
-    fontSize: moderateScale(26),
-    lineHeight: moderateScale(36),
-    fontWeight: 'bold',
-  },
-  logoText: {
-    fontSize: moderateScale(40),
-    lineHeight: moderateScale(56),
-    fontWeight: 'bold',
-    color: '#FFAC1C',
-  },
-  mini:{
-    fontSize: moderateScale(12),
-    lineHeight: moderateScale(16),
-  },
-  catText:{
-    fontSize: moderateScale(13),
-    lineHeight: moderateScale(16),
-  }
+/** @deprecated Prefer importing Type / AppText — kept for compatibility */
+export const themedTextStyles = StyleSheet.create({
+  default: Type.body,
+  defaultSemiBold: Type.bodyStrong,
+  title: Type.h1,
+  subtitle: Type.h2,
+  link: Type.link,
+  custom: Type.h2,
+  logoText: Type.display,
+  mini: Type.caption,
+  catText: Type.caption,
 });

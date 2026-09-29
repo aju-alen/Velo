@@ -287,7 +287,7 @@ const styles = StyleSheet.create({
         width: moderateScale(24),
     },
     pageTitle: {
-        fontSize: moderateScale(22),
+        fontSize: moderateScale(20),
         fontWeight: '700',
     },
     scrollContainer: {
@@ -313,7 +313,7 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
     },
     shipmentId: {
-        fontSize: moderateScale(18),
+        fontSize: moderateScale(17),
         fontWeight: '700',
         flex: 1,
     },
@@ -324,7 +324,7 @@ const styles = StyleSheet.create({
     },
     statusText: {
         color: 'white',
-        fontSize: moderateScale(11),
+        fontSize: moderateScale(12),
         fontWeight: '600',
         textTransform: 'capitalize',
     },
@@ -340,7 +340,7 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
     },
     sectionTitle: {
-        fontSize: moderateScale(18),
+        fontSize: moderateScale(17),
         fontWeight: '700',
     },
     detailRow: {
@@ -349,8 +349,8 @@ const styles = StyleSheet.create({
         marginBottom: verticalScale(16),
     },
     detailIcon: {
-        width: moderateScale(40),
-        height: moderateScale(40),
+        width: moderateScale(32),
+        height: moderateScale(32),
         borderRadius: moderateScale(12),
         justifyContent: 'center',
         alignItems: 'center',
@@ -360,7 +360,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     detailTitle: {
-        fontSize: moderateScale(11),
+        fontSize: moderateScale(12),
         fontWeight: '500',
         textTransform: 'uppercase',
         marginBottom: verticalScale(4),
@@ -368,7 +368,7 @@ const styles = StyleSheet.create({
         letterSpacing: 0.5,
     },
     detailValue: {
-        fontSize: moderateScale(15),
+        fontSize: moderateScale(14),
         fontWeight: '600',
         lineHeight: moderateScale(20),
     },

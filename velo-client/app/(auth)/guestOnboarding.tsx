@@ -1,253 +1,96 @@
-import { StyleSheet, Text, View, TouchableOpacity, useColorScheme } from 'react-native'
-import React from 'react'
-import { MaterialIcons, Ionicons } from '@expo/vector-icons'
-import { router } from 'expo-router'
-import { Colors } from '@/constants/Colors'
-import { verticalScale, horizontalScale, moderateScale } from '@/constants/metrics'
-import * as SecureStore from 'expo-secure-store'
+import React, { useState } from 'react';
+import { StyleSheet, View, TouchableOpacity } from 'react-native';
+import CustomButton from '@/components/CustomButton';
+import { AuthScreen } from '@/components/forms/AuthScreen';
+import { AppText } from '@/components/AppText';
+import * as SecureStore from 'expo-secure-store';
+import { resetTo } from '@/utils/resetNavigation';
+import { useAppTheme } from '@/hooks/useAppTheme';
+import { Spacing } from '@/constants/Colors';
 
-const guestOnboarding = () => {
-  const colorScheme = useColorScheme() ?? 'light'
-  const themeColors = Colors[colorScheme]
-  const bgCard = colorScheme === 'dark' ? '#181A20' : '#FFF'
-  const borderColor = colorScheme === 'dark' ? '#333' : '#E0E0E0'
-
-  type AvailableFeatures = {
-    icon: keyof typeof MaterialIcons.glyphMap
-    title: string
-    description: string
-    available: boolean
-  }
-
-  const availableFeatures: AvailableFeatures[] = [
-    {
-      icon: 'visibility',
-      title: 'Browse Market',
-      description: 'View available listings and products',
-      available: true
-    },
-    {
-      icon: 'info',
-      title: 'View Product Details',
-      description: 'See detailed information about items',
-      available: true
-    },
-    {
-      icon: 'shopping-cart',
-      title: 'Create Shipments',
-      description: 'Book and manage your shipments',
-      available: false
-    },
-    {
-      icon: 'history',
-      title: 'Order History',
-      description: 'View your shipping history',
-      available: false
-    },
-    {
-      icon: 'account-circle',
-      title: 'Profile Management',
-      description: 'Manage your account settings',
-      available: false
-    }
-  ]
+const GuestOnboarding = () => {
+  const { colors, radius } = useAppTheme();
+  const [busy, setBusy] = useState(false);
 
   const handleContinue = async () => {
-    await SecureStore.setItemAsync('registerDetail', JSON.stringify({
-      role: 'GUEST',
-      registerVerificationStatus: 'GUEST',
-    }));
-    router.replace('/(tabs)/home/homeMainPage')
-  }
-
-  const handleSignUp = () => {
-    router.replace('/(auth)/chooseRole')
-  }
+    setBusy(true);
+    await SecureStore.setItemAsync(
+      'registerDetail',
+      JSON.stringify({
+        role: 'GUEST',
+        registerVerificationStatus: 'GUEST',
+      })
+    );
+    resetTo('/(tabs)/home/homeMainPage');
+  };
 
   return (
-    <View style={[styles.container, { backgroundColor: themeColors.background }]}>
-      <View style={styles.content}>
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={[styles.iconContainer, { backgroundColor: themeColors.tint }]}>
-            <MaterialIcons name="person-outline" size={moderateScale(40)} color="#FFF" />
-          </View>
-          <Text style={[styles.title, { color: themeColors.text }]}>
-            Guest Mode
-          </Text>
-          <Text style={[styles.subtitle, { color: themeColors.text }]}>
-            You're browsing as a guest
-          </Text>
-        </View>
-
-        {/* Info Card */}
-        <View style={[styles.infoCard, { backgroundColor: bgCard, borderColor }]}>
-          <View style={styles.infoHeader}>
-            <Ionicons name="information-circle" size={moderateScale(24)} color={themeColors.tint} />
-            <Text style={[styles.infoTitle, { color: themeColors.text }]}>
-              Limited Access
-            </Text>
-          </View>
-          <Text style={[styles.infoText, { color: themeColors.text }]}>
-            As a guest, you have limited access to features. To unlock all functionality, 
-            please create an account or sign in.
-          </Text>
-        </View>
-
-       
-
-        {/* Action Buttons */}
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity 
-            style={[styles.primaryButton, { backgroundColor: themeColors.tint }]}
-            onPress={handleContinue}
+    <AuthScreen
+      title="Continue as guest"
+      subtitle="You can browse the marketplace. Creating shipments and order history need a full account."
+      footer={
+        <>
+          <CustomButton
+            buttonText="Browse marketplace"
+            handlePress={handleContinue}
+            disableButton={busy}
+          />
+          <TouchableOpacity
+            onPress={() => resetTo('/(auth)/chooseRole')}
+            accessibilityRole="button"
+            style={styles.linkBtn}
           >
-            <Text style={styles.primaryButtonText}>
-              Continue as Guest
-            </Text>
+            <AppText variant="link" color={colors.tint} style={styles.linkCenter}>
+              Create an account instead
+            </AppText>
           </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={[styles.secondaryButton, { borderColor: themeColors.tint }]}
-            onPress={handleSignUp}
-          >
-            <Text style={[styles.secondaryButtonText, { color: themeColors.tint }]}>
-              Create Account
-            </Text>
-          </TouchableOpacity>
-        </View>
+        </>
+      }
+    >
+      <View
+        style={[
+          styles.panel,
+          { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radius.md },
+        ]}
+      >
+        <AppText variant="label" style={styles.panelTitle}>
+          Included
+        </AppText>
+        <AppText variant="body" secondary>
+          Browse listings and open product details.
+        </AppText>
+        <View style={[styles.rule, { backgroundColor: colors.borderSubtle }]} />
+        <AppText variant="label" style={styles.panelTitle}>
+          Not included
+        </AppText>
+        <AppText variant="body" secondary>
+          Create shipments, order history, and account settings.
+        </AppText>
       </View>
-    </View>
-  )
-}
+    </AuthScreen>
+  );
+};
 
-export default guestOnboarding
+export default GuestOnboarding;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: horizontalScale(20),
-    paddingTop: verticalScale(60),
-    paddingBottom: verticalScale(40),
-  },
-  header: {
-    alignItems: 'center',
-    marginBottom: verticalScale(30),
-  },
-  iconContainer: {
-    width: moderateScale(80),
-    height: moderateScale(80),
-    borderRadius: moderateScale(40),
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: verticalScale(20),
-  },
-  title: {
-    fontSize: moderateScale(28),
-    fontWeight: 'bold',
-    marginBottom: verticalScale(8),
-  },
-  subtitle: {
-    fontSize: moderateScale(16),
-    opacity: 0.7,
-  },
-  infoCard: {
-    padding: horizontalScale(20),
-    borderRadius: moderateScale(12),
+  panel: {
     borderWidth: 1,
-    marginBottom: verticalScale(30),
+    padding: Spacing.xl,
+    gap: Spacing.sm,
   },
-  infoHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: verticalScale(12),
+  panelTitle: {
+    marginTop: Spacing.sm,
   },
-  infoTitle: {
-    fontSize: moderateScale(18),
-    fontWeight: '600',
-    marginLeft: horizontalScale(10),
+  rule: {
+    height: StyleSheet.hairlineWidth,
+    marginVertical: Spacing.md,
   },
-  infoText: {
-    fontSize: moderateScale(14),
-    lineHeight: moderateScale(20),
-    opacity: 0.8,
-  },
-  featuresContainer: {
-    marginBottom: verticalScale(30),
-  },
-  featuresTitle: {
-    fontSize: moderateScale(20),
-    fontWeight: '600',
-    marginBottom: verticalScale(20),
-  },
-  featureItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: horizontalScale(16),
-    borderRadius: moderateScale(8),
-    borderWidth: 1,
-    marginBottom: verticalScale(12),
-  },
-  featureLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  featureIcon: {
-    width: moderateScale(40),
-    height: moderateScale(40),
-    borderRadius: moderateScale(20),
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: horizontalScale(12),
-  },
-  featureText: {
-    flex: 1,
-  },
-  featureTitle: {
-    fontSize: moderateScale(16),
-    fontWeight: '500',
-    marginBottom: verticalScale(4),
-  },
-  featureDescription: {
-    fontSize: moderateScale(12),
-    opacity: 0.7,
-  },
-  statusBadge: {
-    paddingHorizontal: horizontalScale(12),
-    paddingVertical: verticalScale(6),
-    borderRadius: moderateScale(12),
-  },
-  statusText: {
-    color: '#FFF',
-    fontSize: moderateScale(12),
-    fontWeight: '500',
-  },
-  buttonContainer: {
-    gap: verticalScale(16),
-  },
-  primaryButton: {
-    paddingVertical: verticalScale(16),
-    borderRadius: moderateScale(8),
+  linkBtn: {
+    paddingVertical: Spacing.md,
     alignItems: 'center',
   },
-  primaryButtonText: {
-    color: '#FFF',
-    fontSize: moderateScale(16),
-    fontWeight: '600',
+  linkCenter: {
+    textAlign: 'center',
   },
-  secondaryButton: {
-    paddingVertical: verticalScale(16),
-    borderRadius: moderateScale(8),
-    alignItems: 'center',
-    borderWidth: 1,
-  },
-  secondaryButtonText: {
-    fontSize: moderateScale(16),
-    fontWeight: '600',
-  },
-})
+});

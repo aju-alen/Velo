@@ -12,6 +12,7 @@ import { ipURL } from '@/constants/backendUrl';
 import useLoginAccountStore from '@/store/loginAccountStore';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '@/constants/Colors';
+import { resetTo } from '@/utils/resetNavigation';
 
 const styles = StyleSheet.create({
   outerContainer: {
@@ -46,7 +47,7 @@ const styles = StyleSheet.create({
     marginBottom: verticalScale(10),
     width: horizontalScale(60),
     height: verticalScale(60),
-    borderRadius: moderateScale(30),
+    borderRadius: moderateScale(24),
     justifyContent: 'center',
     alignItems: 'center',
     shadowOffset: { width: 0, height: 2 },
@@ -58,7 +59,7 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(32),
   },
   title: {
-    fontSize: moderateScale(22),
+    fontSize: moderateScale(20),
     fontWeight: 'bold',
     marginBottom: verticalScale(4),
     textAlign: 'center',
@@ -217,7 +218,7 @@ const FinalRegisterForm = () => {
           modeOfWork: response.data.newUserData.modeOfWork ? response.data.newUserData.modeOfWork : null,
         });
         await SecureStore.setItemAsync('registerDetail', JSON.stringify(response.data.newUserData));
-        router.replace('/(tabs)/home' as any);
+        resetTo('/(tabs)/home/homeMainPage');
       } else if (accountRole === 'AGENT') {
         const formData = {
           userId: accountId,
@@ -229,7 +230,7 @@ const FinalRegisterForm = () => {
           organisationWebsiteUrl,
         };
         const response = await axios.post(`${ipURL}/api/address/create-agent-address`, formData);
-        router.push({ pathname: '/(auth)/setAppointment', params: { accountId } });
+        router.replace({ pathname: '/(auth)/setAppointment', params: { accountId } });
         setButtonDisable(false);
       }
     } catch (e) {
@@ -238,13 +239,13 @@ const FinalRegisterForm = () => {
   };
 
   // Dynamic colors for dark/light mode
-  const bgCard = colorScheme === 'dark' ? '#181A20' : '#FAFAFA';
-  const bgOuter = colorScheme === 'dark' ? '#101014' : '#FFF';
+  const bgCard = colorScheme === 'dark' ? '#262A33' : '#FAFAFA';
+  const bgOuter = colorScheme === 'dark' ? '#1C1F26' : '#FFF';
   const textPrimary = colorScheme === 'dark' ? '#FFF' : '#222';
   const textSecondary = colorScheme === 'dark' ? '#AAA' : '#666';
   const borderColor = colorScheme === 'dark' ? '#333' : '#E0E0E0';
-  const inputBg = colorScheme === 'dark' ? '#23242A' : '#FFF';
-  const chipBg = colorScheme === 'dark' ? '#23242A' : '#F5F5F5';
+  const inputBg = colorScheme === 'dark' ? '#323740' : '#FFF';
+  const chipBg = colorScheme === 'dark' ? '#323740' : '#F5F5F5';
   const chipSelected = '#FFAC1C';
 
   return (
@@ -267,11 +268,14 @@ const FinalRegisterForm = () => {
               >
                 <View style={[styles.card, { backgroundColor: bgCard, shadowColor: colorScheme === 'dark' ? '#000' : '#000' }]}> 
                   <View style={styles.headerContainer}>
-                    <View style={[styles.iconContainer, { backgroundColor: colorScheme === 'dark' ? '#23242A' : '#FFF3E0' }]}> 
-                      <Text style={[styles.icon, { color: textPrimary }]}>📝</Text>
-                    </View>
-                    <Text style={[styles.title, { color: textPrimary }]}>Final Steps</Text>
-                    <Text style={[styles.subtitle, { color: textSecondary }]}>Complete your registration</Text>
+                    <Text style={[styles.title, { color: textPrimary }]}>
+                      {accountRole === 'AGENT' ? 'Business details' : 'Your address'}
+                    </Text>
+                    <Text style={[styles.subtitle, { color: textSecondary }]}>
+                      {accountRole === 'AGENT'
+                        ? 'Tell us how you operate so we can finish verification.'
+                        : 'Add the address we’ll pick up from.'}
+                    </Text>
                   </View>
                   {accountRole === 'USER' && (
                     <>

@@ -262,14 +262,14 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: moderateScale(16),
-    lineHeight: moderateScale(22),
+    lineHeight: moderateScale(20),
     textAlign: 'center',
   },
   retryButton: {
     backgroundColor: '#FFAC1C',
     paddingHorizontal: horizontalScale(24),
     paddingVertical: verticalScale(12),
-    borderRadius: moderateScale(10),
+    borderRadius: moderateScale(12),
     marginTop: verticalScale(8),
   },
   retryButtonText: {
@@ -321,8 +321,8 @@ const styles = StyleSheet.create({
     marginBottom: verticalScale(12),
   },
   price: {
-    fontSize: moderateScale(28),
-    lineHeight: moderateScale(36),
+    fontSize: moderateScale(24),
+    lineHeight: moderateScale(32),
     fontWeight: '700',
   },
   infoContainer: {
@@ -356,8 +356,8 @@ const styles = StyleSheet.create({
   },
   infoText: {
     flex: 1,
-    fontSize: moderateScale(15),
-    lineHeight: moderateScale(22),
+    fontSize: moderateScale(14),
+    lineHeight: moderateScale(20),
   },
   infoValue: {
     fontWeight: '600',
@@ -380,7 +380,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: moderateScale(20),
-    lineHeight: moderateScale(28),
+    lineHeight: moderateScale(24),
     fontWeight: '700',
     marginBottom: verticalScale(12),
   },
@@ -412,7 +412,7 @@ const styles = StyleSheet.create({
   },
   contactButtonText: {
     color: '#FFF',
-    fontSize: moderateScale(18),
+    fontSize: moderateScale(17),
     fontWeight: '600',
   },
   similarItemsContainer: {
@@ -464,7 +464,7 @@ const styles = StyleSheet.create({
   },
   similarItemPrice: {
     fontSize: moderateScale(16),
-    lineHeight: moderateScale(22),
+    lineHeight: moderateScale(20),
     fontWeight: '700',
   },
 })

@@ -2,7 +2,6 @@ import { StyleSheet, Modal, TouchableOpacity, Dimensions, ScrollView, Platform, 
 import React, { useEffect, useState,useCallback } from 'react'
 import { horizontalScale, moderateScale, verticalScale } from '@/constants/metrics'
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
-import { Divider, RadioButton } from 'react-native-paper';
 import * as SecureStore from 'expo-secure-store';
 import axios from 'axios'
 import { ipURL } from '@/constants/backendUrl'
@@ -14,6 +13,13 @@ import useShipmentStore from '@/store/shipmentStore'
 import { Colors } from '@/constants/Colors';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { FlowProgress } from '@/components/wizard/FlowProgress'
+import { SelectableRow } from '@/components/forms/SelectableRow'
+import { AppText } from '@/components/AppText'
+import { SHIPMENT_STEPS, shipmentStepKeyAt } from '@/constants/flowSteps'
+import CustomButton from '@/components/CustomButton'
+import { Spacing } from '@/constants/Colors'
+import { goToShipmentStep } from '@/utils/resumeShipmentWizard'
 
 
 
@@ -31,6 +37,8 @@ const CreateShipmentHome = () => {
     setItemType,
     setCreateShipment,
     editData,
+    draftId,
+    itemType,
     packageDetail,
     packageDescription,
   } = useShipmentStore();
@@ -80,8 +88,27 @@ const CreateShipmentHome = () => {
   useEffect(()=>{
     if(editData){
       setModalVisible(false)
+      if (itemType === 'DOCUMENT' || itemType === 'PACKAGE') {
+        setChecked(itemType)
+      }
+      // Ensure address/package sections stay visible when resuming a draft
+      if (!savedAddressData.gotDetails && (savedAddressData.name || packageDetail.numberOfPieces)) {
+        setSavedAddressData({ gotDetails: true })
+      }
     }
-  },[])
+  },[editData, itemType])
+
+  const clearPackageFieldsOnly = () => {
+    setPackageDetail({
+      packageName: '',
+      length: '',
+      height: '',
+      width: '',
+      numberOfPieces: '1',
+      weight: '',
+    })
+    setPackageDescription('')
+  }
 
   const validateForm = (): { valid: boolean; errors: { package?: string; description?: string } } => {
     const errors: { package?: string; description?: string } = {};
@@ -119,6 +146,10 @@ const CreateShipmentHome = () => {
     if (!valid) {
       setFormErrors(errors);
       return;
+    }
+    // Critical: itemType must be in the store before carrier quotes are fetched
+    if (checked === 'DOCUMENT' || checked === 'PACKAGE') {
+      setItemType(checked);
     }
     setFormErrors({});
     setAccountAddressData({
@@ -224,13 +255,15 @@ const CreateShipmentHome = () => {
   const PaymentOption = ({ title, description, buttonText, isSecondary, onPress }) => (
     <View style={styles.paymentOptionContainer}>
       <View style={styles.paymentOptionHeader}>
-        <Text style={[styles.paymentOptionTitle, { color: themeColors.text }]}>{title}</Text>
-        <Text style={[styles.paymentOptionDescription, { color: themeColors.text }]}>{description}</Text>
+        <AppText variant="h3">{title}</AppText>
+        <AppText variant="bodySmall" secondary style={{ marginTop: 6 }}>{description}</AppText>
       </View>
       <TouchableOpacity
         style={[styles.paymentOptionButton, isSecondary && styles.paymentOptionSecondaryButton]}
         onPress={onPress}
         activeOpacity={0.7}
+        accessibilityRole="button"
+        accessibilityLabel={buttonText}
       >
         <Text style={[styles.paymentOptionButtonText, isSecondary && styles.paymentOptionSecondaryButtonText, { color: isSecondary ? '#FFAC1C' : 'white' }]}>
           {buttonText}
@@ -253,24 +286,28 @@ const CreateShipmentHome = () => {
         <View style={[styles.modalOverlay, { backgroundColor: 'rgba(0,0,0,0.5)' }]}>
           <View style={[styles.modalContent, { backgroundColor: themeColors.background }]}>
             <View style={styles.shippingMethodHeadContainer}>
-              <Text style={[styles.modalTitle, { color: themeColors.text }]}>Select Shipping Method</Text>
-             
+              <AppText variant="h2" style={styles.headTitle}>
+                How will you pay?
+              </AppText>
+              <AppText variant="bodySmall" secondary style={styles.headSubtitle}>
+                You can change this later before confirming.
+              </AppText>
             </View>
 
             <PaymentOption
-              title="Ship and pay online"
-              description="Pay securely using your credit/debit card or digital wallet"
-              buttonText="Pay Online"
+              title="Pay online"
+              description="Card or digital wallet when you confirm the shipment."
+              buttonText="Pay online"
               isSecondary={false}
               onPress={() => handleOptionSelect({ id: 1, text: 'Online Payment' })}
             />
 
-            <View style={[styles.divider, { backgroundColor: themeColors.text }]} />
+            <View style={[styles.divider, { backgroundColor: themeColors.border }]} />
 
             <PaymentOption
-              title="Ship and pay on collection"
-              description="Pay with cash or card when your package is picked up"
-              buttonText="Pay Later"
+              title="Pay on collection"
+              description="Cash or card when the package is picked up."
+              buttonText="Pay later"
               isSecondary
               onPress={() => handleOptionSelect({ id: 2, text: 'Payment during pickup' })}
             />
@@ -295,153 +332,277 @@ const CreateShipmentHome = () => {
             keyboardShouldPersistTaps="handled"
             keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
             automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
+            contentContainerStyle={{ paddingHorizontal: Spacing.md, paddingBottom: Spacing.xxxl }}
           >
+      <FlowProgress
+        step={1}
+        total={SHIPMENT_STEPS.length}
+        label={SHIPMENT_STEPS[0].label}
+        nextLabel={SHIPMENT_STEPS[1].label}
+        onStepPress={
+          editData || draftId
+            ? (n) => {
+                const key = shipmentStepKeyAt(n);
+                if (key) goToShipmentStep(key);
+              }
+            : undefined
+        }
+      />
+      <AppText variant="h1" style={{ marginBottom: Spacing.sm }}>Shipment details</AppText>
+      <AppText variant="body" secondary style={{ marginBottom: Spacing.xl }}>
+        Set the date, type, addresses, and package info.
+      </AppText>
       <View>
         {/* Shipping Date Section */}
 
-        {Platform.OS === 'ios' && <View style={[styles.section, { backgroundColor: themeColors.background }]}>
-          <Text style={[styles.sectionHeaderText, { color: themeColors.text, marginBottom: verticalScale(12) }]}>Shipping Date</Text>
-          <View style={[styles.iosDatePickerContainer, { backgroundColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)' }]}>
-            {show && <DateTimePicker
-              testID="dateTimePicker"
-              value={savedAddressData.shipmentDate || date}
-              mode={'date'}
-              onChange={onChange}
-              minimumDate={new Date()}
-              maximumDate={new Date(new Date().setDate(new Date().getDate() + 7))}
-            />}
+        {Platform.OS === 'ios' && (
+          <View style={[styles.section, { backgroundColor: themeColors.background }]}>
+            <AppText variant="label" style={{ marginBottom: Spacing.sm }}>
+              Shipping date
+            </AppText>
+            <View
+              style={[
+                styles.iosDatePickerContainer,
+                {
+                  backgroundColor: themeColors.surface,
+                  borderColor: themeColors.border,
+                },
+              ]}
+            >
+              {show && (
+                <DateTimePicker
+                  testID="dateTimePicker"
+                  value={savedAddressData.shipmentDate || date}
+                  mode="date"
+                  display="spinner"
+                  themeVariant={colorScheme === 'dark' ? 'dark' : 'light'}
+                  onChange={onChange}
+                  minimumDate={new Date()}
+                  maximumDate={new Date(new Date().setDate(new Date().getDate() + 7))}
+                  style={styles.iosDatePicker}
+                />
+              )}
+            </View>
           </View>
-        </View>}
+        )}
 
-        {Platform.OS === 'android' && <View style={[styles.section, { backgroundColor: themeColors.background }]}>
-          <Text style={[styles.sectionHeaderText, { color: themeColors.text, marginBottom: verticalScale(12) }]}>Shipping Date</Text>
-          <TouchableOpacity onPress={showDatepicker} style={styles.androidDateButton}>
-            <Text style={{ color: 'white', fontSize: moderateScale(16), fontWeight: '500' }}>{date.toDateString()}</Text>
-          </TouchableOpacity>
-        </View>}
+        {Platform.OS === 'android' && (
+          <View style={[styles.section, { backgroundColor: themeColors.background }]}>
+            <AppText variant="label" style={{ marginBottom: Spacing.sm }}>
+              Shipping date
+            </AppText>
+            <TouchableOpacity
+              onPress={showDatepicker}
+              style={styles.androidDateButton}
+              accessibilityRole="button"
+            >
+              <Text style={styles.androidDateButtonText} numberOfLines={1}>
+                {date.toDateString()}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
         {/* Shipping Type Section */}
-        <View style={[styles.section, { backgroundColor: themeColors.background }]}>
-
-          <View style={styles.shippingTypeContainer}>
-            <TouchableOpacity
-              style={[
-                styles.shippingTypeOption,
-                checked === 'DOCUMENT' && styles.shippingTypeSelected,
-                { 
-                  borderColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
-                  backgroundColor: checked === 'DOCUMENT' 
-                    ? (colorScheme === 'dark' ? 'rgba(255, 172, 28, 0.1)' : 'rgba(255, 172, 28, 0.05)')
-                    : 'transparent'
-                }
-              ]}
-              onPress={() => {
-                setChecked('DOCUMENT');
-                setItemType('DOCUMENT');
-                resetShipmentData();
-                setFormErrors((e) => ({ ...e, package: undefined }));
-              }}
-            >
-              <RadioButton
-                value="DOCUMENT"
-                status={checked === 'DOCUMENT' ? 'checked' : 'unchecked'}
-                onPress={() => {
-                  setChecked('DOCUMENT');
-                  setItemType('DOCUMENT');
-                  resetShipmentData();
-                  setFormErrors((e) => ({ ...e, package: undefined }));
-                }}
-              />
-              <Text style={[styles.shippingTypeText, { color: themeColors.text }]}>Document</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.shippingTypeOption,
-                checked === 'PACKAGE' && styles.shippingTypeSelected,
-                { 
-                  borderColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
-                  backgroundColor: checked === 'PACKAGE' 
-                    ? (colorScheme === 'dark' ? 'rgba(255, 172, 28, 0.1)' : 'rgba(255, 172, 28, 0.05)')
-                    : 'transparent'
-                }
-              ]}
-              onPress={() => {
-                setChecked('PACKAGE');
-                setItemType('PACKAGE');
-                resetShipmentData();
-                setFormErrors((e) => ({ ...e, package: undefined }));
-              }}
-            >
-              <RadioButton
-                value="PACKAGE"
-                status={checked === 'PACKAGE' ? 'checked' : 'unchecked'}
-                onPress={() => {
-                  setChecked('PACKAGE');
-                  setItemType('PACKAGE');
-                  resetShipmentData();
-                  setFormErrors((e) => ({ ...e, package: undefined }));
-                }}
-              />
-              <Text style={[styles.shippingTypeText, { color: themeColors.text }]}>Package</Text>
-            </TouchableOpacity>
-          </View>
+        <View style={[styles.section, { backgroundColor: themeColors.background, gap: 12 }]}>
+          <AppText variant="label">What are you shipping?</AppText>
+          <SelectableRow
+            title="Document"
+            description="Letters, IDs, and paperwork"
+            selected={checked === 'DOCUMENT'}
+            onPress={() => {
+              if (checked === 'DOCUMENT') return;
+              setChecked('DOCUMENT');
+              setItemType('DOCUMENT');
+              // Never call resetShipmentData here — it wipes itemType and draft state
+              clearPackageFieldsOnly();
+              setCreateShipment(true);
+              setFormErrors((e) => ({ ...e, package: undefined }));
+            }}
+          />
+          <SelectableRow
+            title="Package"
+            description="Boxes and parcels with dimensions"
+            selected={checked === 'PACKAGE'}
+            onPress={() => {
+              if (checked === 'PACKAGE') return;
+              setChecked('PACKAGE');
+              setItemType('PACKAGE');
+              clearPackageFieldsOnly();
+              setCreateShipment(true);
+              setFormErrors((e) => ({ ...e, package: undefined }));
+            }}
+          />
         </View>
 
-        {/* Shipping Address Section */}
-        {checked !== 'false'  && 
-         ( <>
-            <View style={[styles.section, { backgroundColor: themeColors.background }]}>
+        {/* Shipping route: From → To */}
+        {checked !== 'false' && (
+          <View style={styles.section}>
+            <AppText variant="label" style={{ marginBottom: Spacing.sm }}>
+              Route
+            </AppText>
 
-              <Text style={[styles.sectionHeaderText, { color: themeColors.text, marginBottom: verticalScale(12) }]}>Shipping From</Text>
-              <View style={[styles.addressCard, { backgroundColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)' }]}>
-                <Text style={[styles.addressName, { color: themeColors.text }]}>{userSecureStorage['name']}</Text>
-                <Text style={[styles.addressText, { color: themeColors.text }]}>{accountAddressData.addressOne}</Text>
-                <Text style={[styles.addressText, { color: themeColors.text }]}>{accountAddressData.addressTwo}</Text>
-                <Text style={[styles.addressText, { color: themeColors.text }]}>
-                  {accountAddressData.city}, {accountAddressData.country.name}
-                </Text>
-                <View style={[styles.contactInfo, { borderTopColor: themeColors.text }]}>
-                  <Text style={[styles.contactText, { color: themeColors.text }]}>{userSecureStorage['email']}</Text>
-                  <Text style={[styles.contactText, { color: themeColors.text }]}>
-                    {userSecureStorage['mobileCode']} {userSecureStorage['mobileNumber']}
-                  </Text>
+            <View
+              style={[
+                styles.routeCard,
+                {
+                  backgroundColor: themeColors.surface,
+                  borderColor: themeColors.border,
+                },
+              ]}
+            >
+              {/* FROM */}
+              <View style={styles.routeBlock}>
+                <View style={styles.routeLabelRow}>
+                  <View style={[styles.routeBadge, { backgroundColor: themeColors.tintMuted }]}>
+                    <AppText variant="caption" color={themeColors.tint}>
+                      From
+                    </AppText>
+                  </View>
+                  <AppText variant="caption" muted style={styles.routeLabelHint}>
+                    Your pickup address
+                  </AppText>
                 </View>
+                {accountAddressData?.addressOne ? (
+                  <>
+                    <AppText variant="h3" style={styles.routeName}>
+                      {userSecureStorage?.['name'] || accountAddressData.userName || 'You'}
+                    </AppText>
+                    <AppText variant="bodySmall" secondary style={styles.routeLineText}>
+                      {[accountAddressData.addressOne, accountAddressData.addressTwo]
+                        .filter(Boolean)
+                        .join(', ')}
+                    </AppText>
+                    <AppText variant="bodySmall" secondary style={styles.routeLineText}>
+                      {[
+                        accountAddressData.city,
+                        accountAddressData.state,
+                        accountAddressData.country?.name,
+                      ]
+                        .filter(Boolean)
+                        .join(', ')}
+                    </AppText>
+                    <AppText variant="caption" muted style={styles.routeMeta}>
+                      {[
+                        userSecureStorage?.['email'] || accountAddressData.email,
+                        [
+                          userSecureStorage?.['mobileCode'] || accountAddressData.countryCode,
+                          userSecureStorage?.['mobileNumber'] || accountAddressData.mobileNumber,
+                        ]
+                          .filter(Boolean)
+                          .join(' '),
+                      ]
+                        .filter(Boolean)
+                        .join('  ·  ')}
+                    </AppText>
+                  </>
+                ) : (
+                  <AppText variant="bodySmall" secondary>
+                    Loading your address…
+                  </AppText>
+                )}
+              </View>
+
+              <View style={[styles.routeDivider, { backgroundColor: themeColors.borderSubtle }]}>
+                <View style={[styles.routeDot, { backgroundColor: themeColors.tint }]} />
+                <View style={[styles.routeLine, { backgroundColor: themeColors.border }]} />
+                <View
+                  style={[
+                    styles.routeDot,
+                    {
+                      backgroundColor: savedAddressData.gotDetails
+                        ? themeColors.tint
+                        : themeColors.border,
+                    },
+                  ]}
+                />
+              </View>
+
+              {/* TO */}
+              <View style={styles.routeBlock}>
+                <View style={styles.routeLabelRow}>
+                  <View style={[styles.routeBadge, { backgroundColor: themeColors.tintMuted }]}>
+                    <AppText variant="caption" color={themeColors.tint}>
+                      To
+                    </AppText>
+                  </View>
+                  <AppText variant="caption" muted style={styles.routeLabelHint}>
+                    Delivery address
+                  </AppText>
+                </View>
+
+                {savedAddressData.gotDetails ? (
+                  <>
+                    <AppText variant="h3" style={styles.routeName}>
+                      {savedAddressData.name}
+                    </AppText>
+                    {savedAddressData.companyName ? (
+                      <AppText variant="bodySmall" secondary style={styles.routeLineText}>
+                        {savedAddressData.companyName}
+                      </AppText>
+                    ) : null}
+                    <AppText variant="bodySmall" secondary style={styles.routeLineText}>
+                      {[savedAddressData.addressOne, savedAddressData.addressTwo]
+                        .filter(Boolean)
+                        .join(', ')}
+                    </AppText>
+                    <AppText variant="bodySmall" secondary style={styles.routeLineText}>
+                      {[
+                        savedAddressData.city,
+                        savedAddressData.state,
+                        savedAddressData.zipCode ? `ZIP ${savedAddressData.zipCode}` : null,
+                      ]
+                        .filter(Boolean)
+                        .join(', ')}
+                    </AppText>
+                    <AppText variant="caption" muted style={styles.routeMeta}>
+                      {[
+                        savedAddressData.email,
+                        [savedAddressData.countryCode, savedAddressData.mobileNumber]
+                          .filter(Boolean)
+                          .join(' '),
+                      ]
+                        .filter(Boolean)
+                        .join('  ·  ')}
+                    </AppText>
+                    <TouchableOpacity
+                      onPress={() => setAddressModalVisible(true)}
+                      accessibilityRole="button"
+                      accessibilityLabel="Change delivery address"
+                      hitSlop={8}
+                      style={styles.changeLink}
+                    >
+                      <AppText variant="link" color={themeColors.tint}>
+                        Change delivery address
+                      </AppText>
+                    </TouchableOpacity>
+                  </>
+                ) : (
+                  <TouchableOpacity
+                    onPress={() => setAddressModalVisible(true)}
+                    accessibilityRole="button"
+                    accessibilityLabel="Add delivery address"
+                    style={[
+                      styles.emptyTo,
+                      {
+                        borderColor: themeColors.border,
+                        backgroundColor: themeColors.background,
+                      },
+                    ]}
+                  >
+                    <AppText variant="bodyStrong" color={themeColors.tint}>
+                      Add delivery address
+                    </AppText>
+                    <AppText variant="caption" secondary style={{ marginTop: 4 }}>
+                      Enter recipient details or pick a saved address
+                    </AppText>
+                  </TouchableOpacity>
+                )}
               </View>
             </View>
+          </View>
+        )}
 
-            <View style={[styles.section, { backgroundColor: themeColors.background }]}>
-
-              <Text style={[styles.sectionHeaderText, { color: themeColors.text, marginBottom: verticalScale(12) }]}>Shipping To</Text>
-              
-              <View style={[styles.addressCard, { backgroundColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)' }]}>
-                {savedAddressData.gotDetails &&
-                <>
-                <Text style={[styles.addressName, { color: themeColors.text }]}>{savedAddressData.name}</Text>
-                <Text style={[styles.addressText, { color: themeColors.text }]}>{savedAddressData.addressOne}</Text>
-                <Text style={[styles.addressText, { color: themeColors.text }]}>{savedAddressData.addressTwo}</Text>
-                <Text style={[styles.addressText, { color: themeColors.text }]}>
-                  {savedAddressData.city}, {savedAddressData.countryId}
-                </Text>
-                <Text style={[styles.addressText, { color: themeColors.text }]}>
-                  ZipCode:{savedAddressData.zipCode}
-                </Text>
-                <View style={[styles.contactInfo, { borderTopColor: themeColors.text }]}>
-                  <Text style={[styles.contactText, { color: themeColors.text }]}>{savedAddressData.email}</Text>
-                  <Text style={[styles.contactText, { color: themeColors.text }]}>{savedAddressData.countryCode} {savedAddressData.mobileNumber}
-                  </Text>
-                </View>
-                </>
-              }
-                <TouchableOpacity style={styles.addAddressContainer} onPress={() => setAddressModalVisible(true)}>
-
-                  <Text style={[styles.addressName, { color: themeColors.text }]}>Add New Address</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-            <Divider style={{ marginVertical: verticalScale(16) }} />
-          </>) 
-        }
        
        
        {savedAddressData.gotDetails && <SelectPackage itemType={checked} getPackageDetail={handlePackagedetail} onButtonclick={buttonClick} />}
@@ -455,9 +616,7 @@ const CreateShipmentHome = () => {
         ) : null}
 
        {savedAddressData.gotDetails && (
-          <TouchableOpacity style={[styles.actionButton, styles.continueButton]} onPress={handleContinuePackageDetail}>
-            <Text style={styles.buttonText}>Continue</Text>
-          </TouchableOpacity>
+          <CustomButton buttonText="Continue to addresses" handlePress={handleContinuePackageDetail} />
         )}
       </View>
           </ScrollView>
@@ -488,34 +647,49 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
   },
-  shippingMethodHeadContainer:{
-    display:"flex",
-    flexDirection:"row",
-    justifyContent:"space-between",
-    alignItems:"center",
-    marginBottom:verticalScale(20),
+  shippingMethodHeadContainer: {
+    flexDirection: 'column',
+    alignItems: 'stretch',
+    gap: Spacing.sm,
+    marginBottom: verticalScale(20),
+  },
+  headTitle: {
+    flexShrink: 1,
+  },
+  headSubtitle: {
+    flexShrink: 1,
   },
   modalTitle: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: '700',
- 
   },
   section: {
-    paddingHorizontal: horizontalScale(10),
     marginBottom: verticalScale(20),
-    marginTop: verticalScale(10),
+    marginTop: verticalScale(4),
   },
   iosDatePickerContainer: {
-    padding: horizontalScale(12),
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.sm,
     borderRadius: moderateScale(12),
+    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  iosDatePicker: {
+    width: '100%',
+    height: 140,
+  },
+  androidDateButtonText: {
+    color: 'white',
+    fontSize: moderateScale(16),
+    fontWeight: '500',
   },
   sectionHeader: {
     marginBottom: verticalScale(16),
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: '600',
     marginBottom: verticalScale(4),
   },
@@ -552,9 +726,10 @@ const styles = StyleSheet.create({
   fieldError: {
     color: '#E53935',
     fontSize: moderateScale(13),
-    marginHorizontal: horizontalScale(10),
-    marginTop: verticalScale(-8),
-    marginBottom: verticalScale(8),
+    lineHeight: moderateScale(18),
+    marginTop: verticalScale(4),
+    marginBottom: verticalScale(12),
+    flexShrink: 1,
   },
   divider: {
     height: 1,
@@ -570,8 +745,6 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     flex: 1,
-    paddingHorizontal: horizontalScale(20),
-    paddingBottom:verticalScale(80)
   },
   androidDateButton:{
     backgroundColor: '#FFAC1C',
@@ -583,7 +756,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   sectionHeaderText: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: '600',
 
   },
@@ -622,8 +795,72 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
+  routeCard: {
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: Spacing.lg,
+    gap: Spacing.md,
+  },
+  routeBlock: {
+    gap: 4,
+    minWidth: 0,
+  },
+  routeLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: Spacing.sm,
+    marginBottom: Spacing.sm,
+  },
+  routeBadge: {
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 2,
+    borderRadius: 6,
+    flexShrink: 0,
+  },
+  routeLabelHint: {
+    flexShrink: 1,
+  },
+  routeName: {
+    marginBottom: 2,
+    flexShrink: 1,
+  },
+  routeLineText: {
+    flexShrink: 1,
+  },
+  routeMeta: {
+    marginTop: Spacing.sm,
+    flexShrink: 1,
+  },
+  routeDivider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    paddingVertical: Spacing.xs,
+    minWidth: 0,
+  },
+  routeDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  routeLine: {
+    flex: 1,
+    height: StyleSheet.hairlineWidth,
+  },
+  emptyTo: {
+    marginTop: Spacing.xs,
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderRadius: 12,
+    padding: Spacing.lg,
+  },
+  changeLink: {
+    marginTop: Spacing.md,
+    alignSelf: 'flex-start',
+  },
   addressName: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: '600',
     marginBottom: verticalScale(8),
   },
@@ -653,7 +890,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   countryList: {
-    padding: moderateScale(15),
+    padding: moderateScale(14),
   },
 
   countryCode: {
@@ -697,7 +934,7 @@ const styles = StyleSheet.create({
     marginBottom: verticalScale(12),
   },
   paymentOptionTitle: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: '600',
     marginBottom: verticalScale(4),
   },

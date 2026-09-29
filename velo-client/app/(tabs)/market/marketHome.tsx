@@ -10,6 +10,7 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons'
 import * as SecureStore from 'expo-secure-store'
 import { Colors } from '@/constants/Colors';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { resetTo } from '@/utils/resetNavigation';
 
 const MarketHome = () => {
   const colorScheme = useColorScheme() ?? 'light';
@@ -105,7 +106,7 @@ const MarketHome = () => {
         'Verification Rejected',
         'Your agent verification was not approved. Open your verification status screen or contact support.'
       );
-      router.push('/(auth)/agentRestriction');
+      resetTo('/(auth)/agentRestriction');
     } else {
       Alert.alert(
         'Action Disabled',
@@ -377,7 +378,7 @@ const styles = StyleSheet.create({
   },
   logoText: {
     fontSize: moderateScale(32),
-    lineHeight: moderateScale(40),
+    lineHeight: moderateScale(32),
     fontWeight: 'bold',
   },
   createAdButton: {
@@ -386,7 +387,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: horizontalScale(16),
     paddingVertical: verticalScale(10),
-    borderRadius: moderateScale(10),
+    borderRadius: moderateScale(12),
     ...Platform.select({
       ios: {
         shadowColor: '#FFAC1C',
@@ -528,7 +529,7 @@ const styles = StyleSheet.create({
   },
   overlayTitle: {
     color: '#FFF',
-    fontSize: moderateScale(18),
+    fontSize: moderateScale(17),
     fontWeight: '700',
     lineHeight: moderateScale(24),
     textShadowColor: 'rgba(0, 0, 0, 0.5)',
@@ -555,7 +556,7 @@ const styles = StyleSheet.create({
     borderRadius: moderateScale(6),
   },
   conditionText: {
-    fontSize: moderateScale(11),
+    fontSize: moderateScale(12),
     lineHeight: moderateScale(14),
     fontWeight: '600',
     textTransform: 'uppercase',
@@ -571,7 +572,7 @@ const styles = StyleSheet.create({
     gap: verticalScale(12),
   },
   emptyText: {
-    fontSize: moderateScale(18),
+    fontSize: moderateScale(17),
     fontWeight: '600',
     marginTop: verticalScale(8),
   },

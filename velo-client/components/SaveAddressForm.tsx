@@ -1,122 +1,96 @@
-import { StyleSheet, Modal, TouchableWithoutFeedback, ScrollView, TouchableOpacity, TextInput, Dimensions, FlatList, Platform, View, Text, useColorScheme, KeyboardAvoidingView, Keyboard, Pressable } from 'react-native'
-import React, { useEffect, useState } from 'react'
-import { horizontalScale, moderateScale, verticalScale } from '@/constants/metrics'
-import { MaterialIcons } from '@expo/vector-icons'
-import CustomButton from './CustomButton'
-import { Checkbox } from 'react-native-paper';
-import { Picker } from '@react-native-picker/picker'
-import axios from 'axios'
-import { ipURL } from '@/constants/backendUrl'
-import useShipmentStore from '@/store/shipmentStore'
-import AntDesign from '@expo/vector-icons/AntDesign';
-import useLoginAccountStore from '@/store/loginAccountStore'
-import axiosInstance from '@/constants/axiosHeader'
-import { Colors } from '@/constants/Colors';
+import {
+  StyleSheet,
+  Modal,
+  ScrollView,
+  TouchableOpacity,
+  FlatList,
+  Platform,
+  View,
+  Dimensions,
+  KeyboardAvoidingView,
+  Keyboard,
+  Pressable,
+} from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Picker } from '@react-native-picker/picker';
+import axios from 'axios';
+import { ipURL } from '@/constants/backendUrl';
+import useShipmentStore from '@/store/shipmentStore';
+import useLoginAccountStore from '@/store/loginAccountStore';
+import axiosInstance from '@/constants/axiosHeader';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useAppTheme } from '@/hooks/useAppTheme';
+import { Spacing, Radius } from '@/constants/Colors';
+import { AppText } from '@/components/AppText';
+import { FormField } from '@/components/forms/FormField';
+import CustomButton from '@/components/CustomButton';
 
 const { height: windowHeight } = Dimensions.get('window');
 
-const SaveAddressForm = ({ addressModalVisible, onClose, userId }) => {
-  const {  setSavedAddressData, resetShipmentData } = useShipmentStore()
-const {accountLoginData} = useLoginAccountStore()
+type SaveAddressFormProps = {
+  addressModalVisible: boolean;
+  onClose: () => void;
+  userId: string;
+};
 
-  const savedAddressData = useShipmentStore(state => state.savedAddressData)
-  const colorScheme = useColorScheme() ?? 'light';
-  const themeColors = Colors[colorScheme];
+const SaveAddressForm = ({ addressModalVisible, onClose, userId }: SaveAddressFormProps) => {
+  const { setSavedAddressData, resetShipmentData } = useShipmentStore();
+  const savedAddressData = useShipmentStore((state) => state.savedAddressData);
+  const { accountLoginData } = useLoginAccountStore();
+  const { colors, brand, radius } = useAppTheme();
   const insets = useSafeAreaInsets();
-  const sheetMaxHeight = Math.round(windowHeight * 0.92);
+  const sheetMaxHeight = Math.round(windowHeight * 0.94);
 
-
-  console.log(savedAddressData,'savedAddressData------______');
-  
-
-
-
-  const [countryList, setCountryList] = useState([]);
-  const [contactModal, setContactModal] = useState(false)
-  const [savedContact, setSavedContact] = useState([])
-  console.log(savedContact,'savedContact');
-  
-console.log(savedAddressData,'savedAddressData------______');
-
-
-
- 
+  const [countryList, setCountryList] = useState<any[]>([]);
+  const [contactModal, setContactModal] = useState(false);
+  const [savedContact, setSavedContact] = useState<any[]>([]);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    // Initialize default country code if not set
     if (!savedAddressData.countryCode) {
-      setSavedAddressData({ countryCode: "+971" });
+      setSavedAddressData({ countryCode: '+971' });
     }
   }, []);
 
   useEffect(() => {
     const getAllSavedAddress = async () => {
       try {
-        console.log('userId:', userId);
-
-        
-        const savedAddress = await axiosInstance.get(`/api/address/get-external-user-address/${accountLoginData['id']}`);
-
-        setSavedContact(savedAddress.data.data)
+        const savedAddress = await axiosInstance.get(
+          `/api/address/get-external-user-address/${accountLoginData.id}`
+        );
+        setSavedContact(savedAddress.data.data || []);
       } catch (error) {
-        console.error('Error fetching saved addresses:', error)
+        console.error('Error fetching saved addresses:', error);
       }
-    }
-    getAllSavedAddress()
-  }, [contactModal])
-  
+    };
+    if (contactModal) getAllSavedAddress();
+  }, [contactModal, accountLoginData.id]);
 
   useEffect(() => {
     if (!addressModalVisible) return;
-
     const getAllCountries = async () => {
       try {
         const allCountry = await axiosInstance.get(`/api/country/get-all-countries`);
-        setCountryList(allCountry.data);
+        setCountryList(allCountry.data || []);
       } catch (error) {
         console.error('Error fetching countries:', error);
       }
     };
-
     getAllCountries();
   }, [addressModalVisible]);
 
-  const CheckboxItem = ({ label, status, onPress }) => (
-    <View style={[styles.checkboxTextContainer, { backgroundColor: themeColors.background }]}>
-      <View style={[styles.checboxContainer,{
-         borderRadius: Platform.OS === 'ios' ? moderateScale(4) : moderateScale(0),
-         borderWidth:Platform.OS === 'ios' ? moderateScale(2) : moderateScale(0),
-
-      }]}>
-
-        <Checkbox
-          status={status ? 'checked' : 'unchecked'}
-          onPress={onPress}
-          color="#FFAC1C"
-        />
-      </View>
-      <Text style={[styles.checkboxLabel, { color: themeColors.text }]}>{label}</Text>
-    </View>
-  )
-
   const handleClear = () => {
     try {
-      resetShipmentData()
-
+      resetShipmentData();
+    } catch (error) {
+      console.error('Error clearing form:', error);
     }
-    catch (error) {
-      console.error('Error clearing form:', error)
-    }
-  }
+  };
 
   const handleSave = async () => {
-
-
     try {
+      setSaving(true);
       if (savedAddressData.saveAddress) {
-        console.log(savedAddressData,'savedAddressData----- in saveHandle function');
-        
         const addressData = {
           name: savedAddressData.name,
           companyName: savedAddressData.companyName,
@@ -130,115 +104,97 @@ console.log(savedAddressData,'savedAddressData------______');
           residentAddress: savedAddressData.residentAddress,
           saveAddress: savedAddressData.saveAddress,
           userId,
-          countryCode: savedAddressData.countryCode === ''? "+971" : savedAddressData.countryCode,
-          zipCode: savedAddressData.zipCode
-        }
+          countryCode: savedAddressData.countryCode === '' ? '+971' : savedAddressData.countryCode,
+          zipCode: savedAddressData.zipCode,
+        };
         try {
-          const saveAddressToDB = await axios.post(`${ipURL}/api/address/save-external-user-address`, addressData)
-          console.log('Address saved:', saveAddressToDB.data)
-        }
-        catch (error) {
-          console.error('Error saving address:', error)
+          await axios.post(`${ipURL}/api/address/save-external-user-address`, addressData);
+        } catch (error) {
+          console.error('Error saving address:', error);
         }
       }
-      onClose()
-      setSavedAddressData({gotDetails: true})
+      setSavedAddressData({ gotDetails: true });
+      onClose();
+    } catch (error) {
+      console.error('Error saving address:', error);
+    } finally {
+      setSaving(false);
     }
-    catch (error) {
-      console.error('Error saving address:', error)
-    }
-  }
+  };
 
+  const applySavedContact = (item: any) => {
+    setSavedAddressData({
+      name: item.name,
+      companyName: item.companyName,
+      addressOne: item.addressOne,
+      addressTwo: item.addressTwo,
+      city: item.city,
+      state: item.state,
+      email: item.email,
+      mobileNumber: item.mobileNumber,
+      countryId: item.countryId,
+      residentAddress: item.residentAddress,
+      saveAddress: false,
+      countryCode: item.countryCode,
+      zipCode: item.zipCode,
+    });
+    setContactModal(false);
+  };
 
-  const savedContactFlatlist = ({ item }) => (
-    
+  const ToggleRow = ({
+    label,
+    value,
+    onToggle,
+  }: {
+    label: string;
+    value: boolean;
+    onToggle: () => void;
+  }) => (
     <TouchableOpacity
-      style={[styles.contactItemContainer, { backgroundColor: themeColors.background }]}
-      onPress={() => {
-        setSavedAddressData({
-          name: item.name,
-          companyName: item.companyName,
-          addressOne: item.addressOne,
-          addressTwo: item.addressTwo,
-          city: item.city,
-          state: item.state,
-          email: item.email,
-          mobileNumber: item.mobileNumber,
-          countryId: item.countryId,
-          residentAddress: item.residentAddress,
-          saveAddress: false,
-          countryCode: item.countryCode,
-          zipCode: item.zipCode
-        })
-        setContactModal(false)
-      }}
+      onPress={onToggle}
+      activeOpacity={0.85}
+      accessibilityRole="checkbox"
+      accessibilityState={{ checked: value }}
+      accessibilityLabel={label}
+      style={[
+        styles.toggleRow,
+        {
+          backgroundColor: colors.surface,
+          borderColor: value ? brand.amber : colors.border,
+          borderRadius: radius.md,
+          borderWidth: value ? 2 : 1,
+        },
+      ]}
     >
-      <View style={[styles.contactInfoContainer, { backgroundColor: themeColors.background }]}>
-        <View style={styles.contactHeader}>
-          <Text style={[styles.contactName, { color: themeColors.text }]} numberOfLines={1}>
-            {item.name}
-          </Text>
-      
-        </View>
-        
-        <View style={styles.contactDetails}>
-          <View style={styles.contactDetailRow}>
-            <MaterialIcons name="location-on" size={16} color="#FFAC1C" />
-            <Text style={[styles.contactDetailText, { color: themeColors.text }]} numberOfLines={2}>
-              {item.addressOne}
-            </Text>
-          </View>
-          
-          <View style={styles.contactDetailRow}>
-            <MaterialIcons name="phone" size={16} color="#FFAC1C" />
-            <Text style={[styles.contactDetailText, { color: themeColors.text }]}>
-              {`${item.countryCode} ${item.mobileNumber}`}
-            </Text>
-          </View>
-        </View>
-      </View>
+      <AppText variant="body" style={styles.toggleLabel}>
+        {label}
+      </AppText>
+      <View
+        style={[
+          styles.toggleMark,
+          {
+            borderColor: value ? brand.amber : colors.border,
+            backgroundColor: value ? brand.amber : 'transparent',
+          },
+        ]}
+      />
     </TouchableOpacity>
-  )
-
-
-  const renderContactModal = () => (
-    <Modal
-      animationType="slide"
-      transparent={true}
-      visible={contactModal}
-    >
-      <TouchableWithoutFeedback onPress={() => setContactModal(false)}>
-        
-        <View style={[styles.modalOverlay, { backgroundColor: 'rgba(0,0,0,0.5)' }]}>
-        
-          <View style={[styles.modalContent, { backgroundColor: themeColors.background }]}>
-            <FlatList
-              data={savedContact}
-              renderItem={savedContactFlatlist}
-              keyExtractor={(item) => item.id}
-              style={styles.countryList}
-            />
-          </View>
-        </View>
-      </TouchableWithoutFeedback>
-    </Modal>
-  )
+  );
 
   return (
     <View>
       <Modal
         animationType="slide"
-        transparent={true}
+        transparent
         visible={addressModalVisible}
         onRequestClose={onClose}
-
       >
         <KeyboardAvoidingView
-          style={styles.keyboardAvoidingRoot}
+          style={styles.root}
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top : 0}
         >
-          <View style={[styles.modalOverlay, { backgroundColor: 'rgba(0,0,0,0.5)' }]}>
+          <View style={styles.overlay}>
             <Pressable
               style={StyleSheet.absoluteFill}
               onPress={Keyboard.dismiss}
@@ -247,289 +203,424 @@ console.log(savedAddressData,'savedAddressData------______');
             />
             <View
               style={[
-                styles.modalContent,
-                { backgroundColor: themeColors.background, maxHeight: sheetMaxHeight },
+                styles.sheet,
+                {
+                  backgroundColor: colors.background,
+                  maxHeight: sheetMaxHeight,
+                  paddingBottom: Math.max(insets.bottom, Spacing.md),
+                },
               ]}
             >
-                  <View style={[styles.modalHeader, { backgroundColor: themeColors.background }]}>
-                    <TouchableOpacity onPress={() => setContactModal(true)}>
-                      <AntDesign name="contacts" size={24} color={colorScheme === 'dark' ? 'white' : 'black'} />
-                    </TouchableOpacity>
-                    <Text style={[styles.modalTitle, { color: themeColors.text }]}>Add New Address</Text>
-                    <TouchableOpacity onPress={onClose}>
-                      <MaterialIcons name="close" size={24} color={colorScheme === 'dark' ? '#fff' : '#000'} />
-                    </TouchableOpacity>
+              <View style={styles.handleWrap}>
+                <View style={[styles.handle, { backgroundColor: colors.border }]} />
+              </View>
+
+              <View style={styles.header}>
+                <View style={styles.headerText}>
+                  <AppText variant="h2" accessibilityRole="header">
+                    Delivery address
+                  </AppText>
+                  <AppText variant="bodySmall" secondary>
+                    Who should receive this shipment?
+                  </AppText>
+                </View>
+                <TouchableOpacity
+                  onPress={onClose}
+                  hitSlop={12}
+                  accessibilityRole="button"
+                  accessibilityLabel="Close"
+                >
+                  <AppText variant="link" color={colors.textSecondary}>
+                    Close
+                  </AppText>
+                </TouchableOpacity>
+              </View>
+
+              <TouchableOpacity
+                onPress={() => setContactModal(true)}
+                style={[
+                  styles.savedBtn,
+                  {
+                    backgroundColor: colors.surface,
+                    borderColor: colors.border,
+                    borderRadius: radius.md,
+                  },
+                ]}
+                accessibilityRole="button"
+                accessibilityLabel="Use a saved address"
+              >
+                <AppText variant="bodyStrong">Use a saved address</AppText>
+                <AppText variant="caption" secondary>
+                  {savedContact.length
+                    ? `${savedContact.length} saved`
+                    : 'Fill faster from contacts you’ve saved'}
+                </AppText>
+              </TouchableOpacity>
+
+              <ScrollView
+                style={styles.scroll}
+                contentContainerStyle={styles.scrollContent}
+                showsVerticalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled"
+                keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+                automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
+              >
+                <AppText variant="label" style={styles.sectionLabel}>
+                  Contact
+                </AppText>
+                <FormField
+                  label="Full name"
+                  placeholder="First and last name"
+                  value={savedAddressData.name}
+                  onChangeText={(text) => setSavedAddressData({ name: text })}
+                  autoComplete="name"
+                  autoCapitalize="words"
+                />
+                <FormField
+                  label="Company (optional)"
+                  placeholder="Company name"
+                  value={savedAddressData.companyName}
+                  onChangeText={(text) => setSavedAddressData({ companyName: text })}
+                />
+                <FormField
+                  label="Email"
+                  placeholder="name@example.com"
+                  value={savedAddressData.email}
+                  onChangeText={(text) => setSavedAddressData({ email: text })}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoComplete="email"
+                />
+                <View style={styles.phoneRow}>
+                  <View style={styles.codeCol}>
+                    <FormField
+                      label="Code"
+                      placeholder="+971"
+                      value={savedAddressData.countryCode}
+                      onChangeText={(text) => setSavedAddressData({ countryCode: text })}
+                      keyboardType="phone-pad"
+                    />
                   </View>
-                  <ScrollView
-                    style={styles.formScroll}
-                    contentContainerStyle={styles.formScrollContent}
-                    showsVerticalScrollIndicator={false}
-                    keyboardShouldPersistTaps="handled"
-                    keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
-                    automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
-                  >
-                    <View style={[styles.formContainer, { backgroundColor: themeColors.background }]}>
-                    <TextInput
-                      placeholder="Enter First And Last Name"
-                      value={savedAddressData.name}
-                      onChangeText={(text) => setSavedAddressData({ name: text })}
-                      style={[styles.input,{color: themeColors.text,backgroundColor: colorScheme ==='dark'?'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)'}]}
-                      keyboardType="default"
+                  <View style={styles.phoneCol}>
+                    <FormField
+                      label="Mobile number"
+                      placeholder="5X XXX XXXX"
+                      value={savedAddressData.mobileNumber}
+                      onChangeText={(text) => setSavedAddressData({ mobileNumber: text })}
+                      keyboardType="phone-pad"
+                      maxLength={12}
                     />
+                  </View>
+                </View>
 
-                    <TextInput
-                      placeholder="Enter Company Name"
-                      value={savedAddressData.companyName}
-                      onChangeText={(text) => setSavedAddressData({ companyName: text })}
-                      style={[styles.input,{color: themeColors.text,backgroundColor: colorScheme ==='dark'?'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)' }]}
-                      keyboardType="default"
-                    />
-
-
-                    <TextInput
-                      placeholder="Address Line One"
-                      value={savedAddressData.addressOne}
-                      onChangeText={(text) => setSavedAddressData({ addressOne: text })}
-                       style={[styles.input,{color: themeColors.text,backgroundColor: colorScheme ==='dark'?'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)' }]}
-                      keyboardType="default"
-                    />
-
-                    <TextInput
-                      placeholder="Address Line Two"
-                      value={savedAddressData.addressTwo}
-                      onChangeText={(text) => setSavedAddressData({ addressTwo: text })}
-                       style={[styles.input,{color: themeColors.text,backgroundColor: colorScheme ==='dark'?'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)' }]}
-                      keyboardType="default"
-                    />
-
-                    <TextInput
+                <AppText variant="label" style={styles.sectionLabel}>
+                  Address
+                </AppText>
+                <FormField
+                  label="Address line 1"
+                  placeholder="Street, building, villa"
+                  value={savedAddressData.addressOne}
+                  onChangeText={(text) => setSavedAddressData({ addressOne: text })}
+                />
+                <FormField
+                  label="Address line 2"
+                  placeholder="Apartment, floor, landmark"
+                  value={savedAddressData.addressTwo}
+                  onChangeText={(text) => setSavedAddressData({ addressTwo: text })}
+                />
+                <View style={styles.phoneRow}>
+                  <View style={styles.half}>
+                    <FormField
+                      label="City"
                       placeholder="City"
                       value={savedAddressData.city}
                       onChangeText={(text) => setSavedAddressData({ city: text })}
-                       style={[styles.input,{color: themeColors.text,backgroundColor: colorScheme ==='dark'?'rgba(255, 255, 255, 0.1)' :  'rgba(255, 255, 255, 0.9)'}]}
-                      keyboardType="default"
                     />
-
-                    <TextInput
-                      placeholder="State"
+                  </View>
+                  <View style={styles.half}>
+                    <FormField
+                      label="State"
+                      placeholder="State / emirate"
                       value={savedAddressData.state}
                       onChangeText={(text) => setSavedAddressData({ state: text })}
-                       style={[styles.input,{color: themeColors.text,backgroundColor: colorScheme ==='dark'?'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)' }]}
-                      keyboardType="default"
                     />
-
-                    <TextInput
-                      placeholder="Zip Code"
-                      value={savedAddressData.zipCode}
-                      onChangeText={(text) => setSavedAddressData({ zipCode: text })}
-                       style={[styles.input,{color: themeColors.text,backgroundColor: colorScheme ==='dark'?'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)' }]}
-                      keyboardType="default"
-                    />
-
-                    <TextInput
-                      placeholder="Email Address"
-                      value={savedAddressData.email}
-                      onChangeText={(text) => setSavedAddressData({ email: text })}
-                       style={[styles.input,{color: themeColors.text,backgroundColor: colorScheme ==='dark'?'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)'  }]}
-                      keyboardType="email-address"
-                      autoCapitalize='none'
-                    />
-
-
-                    <TextInput
-                      placeholder="Country Code (e.g., +971)"
-                      value={savedAddressData.countryCode}
-                      onChangeText={(text) => setSavedAddressData({ countryCode: text })}
-                      style={[styles.input,{color: themeColors.text,backgroundColor: colorScheme ==='dark'?'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)' }]}
-                      keyboardType="phone-pad"
-                      autoCapitalize='none'
-                    />
-
-                    <TextInput
-                      placeholder="Mobile Number"
-                      value={savedAddressData.mobileNumber}
-                      onChangeText={(text) => setSavedAddressData({ mobileNumber: text })}
-                      style={[styles.input,{color: themeColors.text,backgroundColor: colorScheme ==='dark'?'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)' }]}
-                      keyboardType="numeric"
-                      maxLength={12}
-                    />
-
-                    <View style={[styles.pickerContainer, {height:Platform.OS === 'ios'? verticalScale(130) : verticalScale(40), backgroundColor: colorScheme ==='dark'?'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)'}]}>
-                      <Picker
-
-                        selectedValue={savedAddressData.countryId}
-                        onValueChange={(itemValue, itemIndex) => setSavedAddressData({ countryId: itemValue })}
-                        mode='dropdown'
-                        style={{ color: themeColors.text }}
-                      >
-                        <Picker.Item color="red" label="Select Country" value="" />
-                        {countryList?.map((country, index) => (
-                          <Picker.Item
-                            
-                            key={index}
-                            label={country.name}
-                            value={country.id}
-                          />
-                        ))}
-                      </Picker>
-                    </View>
-
-                    <CheckboxItem
-                      label="This is a residential address"
-                      status={savedAddressData.residentAddress}
-                      onPress={() => setSavedAddressData({ residentAddress: !savedAddressData.residentAddress })}
-
-                    />
-
-                    <CheckboxItem
-                      label="Save this address for future use"
-                      status={savedAddressData.saveAddress}
-                      onPress={() => setSavedAddressData({ saveAddress: !savedAddressData.saveAddress })}
-                    />
-
-                    <View style={[styles.buttonContainer, { backgroundColor: themeColors.background }]}>
-
-                      <CustomButton
-                        buttonText="Clear"
-                        handlePress={handleClear}
-                        buttonWidth={130}
-
-
-                      />
-                      <CustomButton
-                        buttonText="Save Address"
-                        handlePress={handleSave}
-                        buttonWidth={150}
-                      />
-                    </View>
                   </View>
-                </ScrollView>
+                </View>
+                <FormField
+                  label="Zip / postal code"
+                  placeholder="Zip code"
+                  value={savedAddressData.zipCode}
+                  onChangeText={(text) => setSavedAddressData({ zipCode: text })}
+                />
+
+                <AppText variant="label" style={styles.sectionLabel}>
+                  Country
+                </AppText>
+                <View
+                  style={[
+                    styles.pickerWrap,
+                    {
+                      backgroundColor: colors.surface,
+                      borderColor: colors.border,
+                      borderRadius: radius.md,
+                      height: Platform.OS === 'ios' ? 140 : 52,
+                    },
+                  ]}
+                >
+                  <Picker
+                    selectedValue={savedAddressData.countryId}
+                    onValueChange={(itemValue) => setSavedAddressData({ countryId: itemValue })}
+                    mode="dropdown"
+                    style={{ color: colors.text }}
+                    accessibilityLabel="Select country"
+                  >
+                    <Picker.Item label="Select country" value="" color={colors.textMuted} />
+                    {countryList.map((country) => (
+                      <Picker.Item
+                        key={String(country.id)}
+                        label={country.name}
+                        value={country.id}
+                        color={colors.text}
+                      />
+                    ))}
+                  </Picker>
+                </View>
+
+                <AppText variant="label" style={styles.sectionLabel}>
+                  Options
+                </AppText>
+                <ToggleRow
+                  label="This is a residential address"
+                  value={!!savedAddressData.residentAddress}
+                  onToggle={() =>
+                    setSavedAddressData({
+                      residentAddress: !savedAddressData.residentAddress,
+                    })
+                  }
+                />
+                <ToggleRow
+                  label="Save this address for next time"
+                  value={!!savedAddressData.saveAddress}
+                  onToggle={() =>
+                    setSavedAddressData({ saveAddress: !savedAddressData.saveAddress })
+                  }
+                />
+              </ScrollView>
+
+              <View
+                style={[
+                  styles.footer,
+                  { borderTopColor: colors.border, backgroundColor: colors.surface },
+                ]}
+              >
+                <TouchableOpacity
+                  onPress={handleClear}
+                  style={styles.clearBtn}
+                  accessibilityRole="button"
+                  accessibilityLabel="Clear form"
+                >
+                  <AppText variant="link" color={colors.textSecondary}>
+                    Clear
+                  </AppText>
+                </TouchableOpacity>
+                <View style={styles.saveBtn}>
+                  <CustomButton
+                    buttonText={saving ? 'Saving…' : 'Use this address'}
+                    handlePress={handleSave}
+                    disableButton={saving}
+                  />
+                </View>
+              </View>
             </View>
           </View>
         </KeyboardAvoidingView>
 
-        {renderContactModal()}
+        <Modal
+          animationType="slide"
+          transparent
+          visible={contactModal}
+          onRequestClose={() => setContactModal(false)}
+        >
+          <View style={styles.overlay}>
+            <Pressable
+              style={StyleSheet.absoluteFill}
+              onPress={() => setContactModal(false)}
+            />
+            <View
+              style={[
+                styles.sheet,
+                {
+                  backgroundColor: colors.background,
+                  maxHeight: sheetMaxHeight * 0.85,
+                  paddingBottom: Math.max(insets.bottom, Spacing.md),
+                },
+              ]}
+            >
+              <View style={styles.handleWrap}>
+                <View style={[styles.handle, { backgroundColor: colors.border }]} />
+              </View>
+              <View style={styles.header}>
+                <AppText variant="h2">Saved addresses</AppText>
+                <TouchableOpacity onPress={() => setContactModal(false)} hitSlop={12}>
+                  <AppText variant="link" color={colors.textSecondary}>
+                    Close
+                  </AppText>
+                </TouchableOpacity>
+              </View>
+              <FlatList
+                data={savedContact}
+                keyExtractor={(item) => String(item.id)}
+                contentContainerStyle={styles.contactList}
+                ListEmptyComponent={
+                  <AppText variant="body" secondary style={styles.empty}>
+                    No saved addresses yet. Fill the form and turn on “Save this address”.
+                  </AppText>
+                }
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    onPress={() => applySavedContact(item)}
+                    style={[
+                      styles.contactCard,
+                      {
+                        backgroundColor: colors.surface,
+                        borderColor: colors.border,
+                        borderRadius: radius.md,
+                      },
+                    ]}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Use address for ${item.name}`}
+                  >
+                    <AppText variant="h3">{item.name}</AppText>
+                    {item.companyName ? (
+                      <AppText variant="bodySmall" secondary>
+                        {item.companyName}
+                      </AppText>
+                    ) : null}
+                    <AppText variant="bodySmall" secondary>
+                      {[item.addressOne, item.city].filter(Boolean).join(', ')}
+                    </AppText>
+                    <AppText variant="caption" muted>
+                      {item.countryCode} {item.mobileNumber}
+                    </AppText>
+                  </TouchableOpacity>
+                )}
+              />
+            </View>
+          </View>
+        </Modal>
       </Modal>
     </View>
-  )
-}
+  );
+};
 
-export default SaveAddressForm
+export default SaveAddressForm;
 
 const styles = StyleSheet.create({
-  keyboardAvoidingRoot: {
-    flex: 1,
-  },
-  modalOverlay: {
+  root: { flex: 1 },
+  overlay: {
     flex: 1,
     justifyContent: 'flex-end',
-    alignItems: 'stretch',
-    width: '100%',
+    backgroundColor: 'rgba(0,0,0,0.45)',
   },
-  modalContent: {
-    zIndex: 1,
-    borderTopLeftRadius: moderateScale(16),
-    borderTopRightRadius: moderateScale(16),
+  sheet: {
     width: '100%',
-    paddingTop: verticalScale(24),
-    paddingBottom: verticalScale(12),
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
+    borderTopLeftRadius: Radius.lg,
+    borderTopRightRadius: Radius.lg,
     overflow: 'hidden',
   },
-  formScroll: {
+  handleWrap: {
+    alignItems: 'center',
+    paddingTop: Spacing.sm,
+    paddingBottom: Spacing.xs,
+  },
+  handle: {
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    paddingHorizontal: Spacing.md,
+    paddingBottom: Spacing.md,
+    gap: Spacing.md,
+  },
+  headerText: {
+    flex: 1,
+    gap: 4,
+  },
+  savedBtn: {
+    marginHorizontal: Spacing.md,
+    marginBottom: Spacing.md,
+    borderWidth: 1,
+    padding: Spacing.lg,
+    gap: 4,
+  },
+  scroll: {
     flexGrow: 1,
     flexShrink: 1,
   },
-  formScrollContent: {
-    flexGrow: 1,
-    paddingBottom: verticalScale(24),
+  scrollContent: {
+    paddingHorizontal: Spacing.md,
+    paddingBottom: Spacing.xxl,
+    gap: Spacing.md,
   },
-  modalTitle: {
-    fontSize: 22,
-    fontWeight: '700',
+  sectionLabel: {
+    marginTop: Spacing.sm,
+  },
+  phoneRow: {
+    flexDirection: 'row',
+    gap: Spacing.md,
+  },
+  codeCol: { width: '30%' },
+  phoneCol: { flex: 1 },
+  half: { flex: 1 },
+  pickerWrap: {
+    borderWidth: 1,
+    overflow: 'hidden',
+    justifyContent: 'center',
+  },
+  toggleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: Spacing.lg,
+    paddingHorizontal: Spacing.lg,
+    gap: Spacing.md,
+  },
+  toggleLabel: { flex: 1 },
+  toggleMark: {
+    width: 22,
+    height: 22,
+    borderRadius: 6,
+    borderWidth: 2,
+  },
+  footer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+    paddingHorizontal: Spacing.md,
+    paddingTop: Spacing.md,
+    borderTopWidth: StyleSheet.hairlineWidth,
+  },
+  clearBtn: {
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.sm,
+  },
+  saveBtn: { flex: 1 },
+  contactList: {
+    paddingHorizontal: Spacing.md,
+    paddingBottom: Spacing.xxl,
+    gap: Spacing.md,
+  },
+  contactCard: {
+    borderWidth: 1,
+    padding: Spacing.lg,
+    gap: 4,
+    marginBottom: Spacing.md,
+  },
+  empty: {
+    paddingVertical: Spacing.xxl,
     textAlign: 'center',
-
-    paddingHorizontal: horizontalScale(20),
   },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingHorizontal: horizontalScale(20),
-    marginBottom: verticalScale(20),
-  },
-
-  formContainer: {
-    paddingHorizontal: horizontalScale(20),
-    paddingBottom: verticalScale(100),
-  },
-  input: {
-    height: verticalScale(50),
-    borderRadius: moderateScale(12),
-    paddingHorizontal: horizontalScale(15),
-    marginBottom: verticalScale(15),
-    fontSize: moderateScale(16),
-
-  },
-  pickerContainer: {
-    borderRadius: moderateScale(12),
-    marginBottom: verticalScale(25),
-    overflow: 'hidden',
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  countryList: {
-    padding: moderateScale(15),
-  },
-  checkboxTextContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: verticalScale(15),
-  },
-  checboxContainer: {
-    borderColor:  '#FFAC1C',
-  },
-  checkboxLabel: {
-    marginLeft: horizontalScale(8),
-    fontSize: moderateScale(12),
-    lineHeight: moderateScale(16),
-  },
-  contactItemContainer: {
-    marginBottom: verticalScale(15),
-    overflow: 'hidden',
-  },
-  contactInfoContainer: {
-  },
-  contactHeader: {
-    marginBottom: verticalScale(10),
-  },
-  contactName: {
-    fontSize: moderateScale(18),
-    fontWeight: '700',
-    marginBottom: verticalScale(5),
-  },
-  companyName: {
-    fontSize: moderateScale(14),
-    color: 'gray',
-  },
-  contactDetails: {
-    marginBottom: verticalScale(10),
-  },
-  contactDetailRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: verticalScale(5),
-  },
-  contactDetailText: {
-    marginLeft: horizontalScale(10),
-    fontSize: moderateScale(14),
-    flex: 1,
-  },
-})
+});

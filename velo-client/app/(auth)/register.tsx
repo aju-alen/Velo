@@ -1,56 +1,49 @@
-import React, { useEffect, useState } from 'react'
-import { StyleSheet, TextInput, ScrollView, Platform, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, View, Text, useColorScheme, ActivityIndicator } from 'react-native';
-import { verticalScale, horizontalScale, moderateScale } from '@/constants/metrics'
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, View, ActivityIndicator, TouchableOpacity } from 'react-native';
 import CustomButton from '@/components/CustomButton';
 import StartOverButton from '@/components/StartOverButton';
+import { AuthScreen } from '@/components/forms/AuthScreen';
+import { FormField } from '@/components/forms/FormField';
+import { AppText } from '@/components/AppText';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import axios from 'axios';
 import { ipURL } from '@/constants/backendUrl';
-import { Colors } from '@/constants/Colors';
 import useLoginAccountStore from '@/store/loginAccountStore';
 import { destinationForStoredAccount } from '@/utils/accountDestination';
+import { resetTo } from '@/utils/resetNavigation';
+import { useAppTheme } from '@/hooks/useAppTheme';
+import { AGENT_REG_STEPS, SENDER_REG_STEPS } from '@/constants/flowSteps';
 
 const Register = () => {
-  const colorScheme = useColorScheme() ?? 'light';
-  const themeColors = Colors[colorScheme];
-
+  const { colors } = useAppTheme();
   const params = useLocalSearchParams();
   const roleParam = params.role;
   const role = Array.isArray(roleParam) ? roleParam[0] : roleParam;
+  const isAgent = role === 'AGENT';
+  const steps = isAgent ? AGENT_REG_STEPS : SENDER_REG_STEPS;
   const { setAccountLoginData } = useLoginAccountStore();
   const [checkingAccount, setCheckingAccount] = useState(true);
-  
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [reEnterPassword, setreEnterPassword] = useState('')
-  const [buttonLoading, setButtonLoading] = useState(false)
-  
-  // Add error states
+
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [reEnterPassword, setreEnterPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [buttonLoading, setButtonLoading] = useState(false);
+  const [emailVerifying, setEmailVerifying] = useState(false);
   const [errors, setErrors] = useState({
     name: '',
     email: '',
     password: '',
-    reEnterPassword: ''
-  })
-  
-  // Add loading state for email verification
-  const [emailVerifying, setEmailVerifying] = useState(false)
+    reEnterPassword: '',
+  });
 
-  // Validation functions
-  const validateEmail = (email) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    return emailRegex.test(email)
-  }
-
-  const validatePassword = (password) => {
-    return password.length >= 8
-  }
+  const validateEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+  const validatePassword = (value: string) => value.length >= 8;
 
   useEffect(() => {
     let active = true;
-
     const openExistingAccount = async () => {
       try {
         const stored = await SecureStore.getItemAsync('registerDetail');
@@ -58,346 +51,188 @@ const Register = () => {
           if (active) setCheckingAccount(false);
           return;
         }
-
         const userData = JSON.parse(stored);
         const destination = destinationForStoredAccount(userData);
         if (!destination) {
           if (active) setCheckingAccount(false);
           return;
         }
-
         setAccountLoginData(userData);
-        router.replace(destination);
-      } catch (error) {
-        console.warn('Failed to read stored user data:', error);
+        resetTo(destination as any);
+      } catch {
         if (active) setCheckingAccount(false);
       }
     };
-
     openExistingAccount();
-
     return () => {
       active = false;
     };
   }, [setAccountLoginData]);
 
-  // Email verification function
-  const checkEmailExists = async (emailToCheck) => {
+  const checkEmailExists = async (emailToCheck: string) => {
     if (!emailToCheck || !validateEmail(emailToCheck)) {
-      setErrors(prev => ({...prev, email: 'Please enter a valid email'}))
-      return
+      setErrors((prev) => ({ ...prev, email: 'Enter a valid email address' }));
+      return;
     }
-    
-    setEmailVerifying(true)
+    setEmailVerifying(true);
     try {
       const response = await axios.get(`${ipURL}/api/auth/check-email`, {
-        params: { email: emailToCheck }
-      })
-      
+        params: { email: emailToCheck },
+      });
       if (response.data.exists) {
-        setErrors(prev => ({...prev, email: 'This email is already registered. Please use a different email or login.'}))
+        setErrors((prev) => ({
+          ...prev,
+          email: 'This email is already registered. Sign in instead.',
+        }));
       } else {
-        setErrors(prev => ({...prev, email: ''}))
+        setErrors((prev) => ({ ...prev, email: '' }));
       }
-    } catch (error) {
-      console.error('Error checking email:', error)
-      // Don't show error to user for API failures, just log it
+    } catch {
+      // ignore network check failures
     } finally {
-      setEmailVerifying(false)
+      setEmailVerifying(false);
     }
-  }
+  };
 
   const validateForm = () => {
-    let isValid = true
-    const newErrors = {
-      name: '',
-      email: '',
-      password: '',
-      reEnterPassword: ''
-    }
-
-    // Name validation
+    const next = { name: '', email: '', password: '', reEnterPassword: '' };
+    let ok = true;
     if (name.trim().length < 2) {
-      newErrors.name = 'Name must be at least 2 characters'
-      isValid = false
+      next.name = 'Name must be at least 2 characters';
+      ok = false;
     }
-
-    // Email validation
     if (!validateEmail(email)) {
-      newErrors.email = 'Please enter a valid email'
-      isValid = false
+      next.email = 'Enter a valid email address';
+      ok = false;
     }
-
-    // Password validation
     if (!validatePassword(password)) {
-      newErrors.password = 'Password must be at least 8 characters'
-      isValid = false
+      next.password = 'Password must be at least 8 characters';
+      ok = false;
     }
-
-    // Re-enter password validation
     if (password !== reEnterPassword) {
-      newErrors.reEnterPassword = 'Passwords do not match'
-      isValid = false
+      next.reEnterPassword = 'Passwords do not match';
+      ok = false;
     }
-
-    setErrors(newErrors)
-    return isValid
-  }
-  
-  // Check if form is valid and ready to submit
-  const isFormValid = () => {
-    return (
-      name.trim().length >= 2 &&
-      validateEmail(email) &&
-      validatePassword(password) &&
-      password === reEnterPassword &&
-      Object.values(errors).every(error => error === '') &&
-      !emailVerifying
-    )
-  }
+    setErrors(next);
+    return ok;
+  };
 
   const handleRegister = async () => {
-    if (validateForm()) {
-      setButtonLoading(true)
-      await SecureStore.setItemAsync('tempRegister', JSON.stringify({
-        name,
-        email,
-        password,
-        role
-      }))
-      router.replace('/(auth)/mobileInput')
-      setButtonLoading(false)
-    }
-  }
+    if (!validateForm()) return;
+    setButtonLoading(true);
+    await SecureStore.setItemAsync(
+      'tempRegister',
+      JSON.stringify({ name, email, password, role })
+    );
+    router.replace('/(auth)/mobileInput');
+    setButtonLoading(false);
+  };
 
   if (checkingAccount) {
     return (
-      <View style={[styles.mainContainer, styles.checkingContainer, { backgroundColor: themeColors.background }]}>
-        <ActivityIndicator size="large" color="#FFAC1C" />
+      <View style={[styles.loading, { backgroundColor: colors.background }]}>
+        <ActivityIndicator size="large" color={colors.tint} />
       </View>
     );
   }
 
   return (
-    <View style={[styles.mainContainer, { backgroundColor: themeColors.background }]}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={{ flex: 1 }}
-      >
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <ScrollView showsVerticalScrollIndicator={false}>
-            <View style={styles.headerContainer}>
-              <Text style={[styles.logoText, { color: themeColors.text }]}>Velo</Text>
-              <Text style={[styles.subheading, { color: themeColors.text }]}>
-                {role === "AGENT" ? "Agent" : "Sender"} Registration
-              </Text>
-            </View>
-
-            <View style={styles.formContainer}>
-              <InputField
-                label="Name"
-                placeholder="Enter Your Name"
-                value={name}
-                onChangeText={(text) => {
-                  setName(text)
-                  setErrors(prev => ({...prev, name: ''}))
-                }}
-                error={errors.name}
-                autoComplete='name'
-                keyboardType='default'
-                colorScheme={colorScheme}
-                themeColors={themeColors}
-              />
-
-              <InputField
-                label="Email"
-                placeholder="Enter Your Email"
-                value={email}
-                onChangeText={(text) => {
-                  setEmail(text)
-                  setErrors(prev => ({...prev, email: ''}))
-                }}
-                onBlur={() => checkEmailExists(email)}
-                error={errors.email}
-                autoCapitalize='none'
-                keyboardType='email-address'
-                autoComplete='email'
-                loading={emailVerifying}
-                colorScheme={colorScheme}
-                themeColors={themeColors}
-              />
-
-              <InputField
-                label="Password"
-                placeholder="Enter Your Password"
-                value={password}
-                onChangeText={(text) => {
-                  setPassword(text)
-                  if (text && text.length < 8) {
-                    setErrors(prev => ({...prev, password: 'Password must be at least 8 characters'}))
-                  } else {
-                    setErrors(prev => ({...prev, password: ''}))
-                  }
-                  // Also check password confirmation
-                  if (reEnterPassword && text !== reEnterPassword) {
-                    setErrors(prev => ({...prev, reEnterPassword: 'Passwords do not match'}))
-                  } else if (reEnterPassword) {
-                    setErrors(prev => ({...prev, reEnterPassword: ''}))
-                  }
-                }}
-                onBlur={() => {
-                  if (password && password.length < 8) {
-                    setErrors(prev => ({...prev, password: 'Password must be at least 8 characters'}))
-                  }
-                }}
-                error={errors.password}
-                secureTextEntry
-                colorScheme={colorScheme}
-                themeColors={themeColors}
-              />
-
-              <InputField
-                label="Re-Enter Password"
-                placeholder="Re-Enter Your Password"
-                value={reEnterPassword}
-                onChangeText={(text) => {
-                  setreEnterPassword(text)
-                  if (text && password !== text) {
-                    setErrors(prev => ({...prev, reEnterPassword: 'Passwords do not match'}))
-                  } else {
-                    setErrors(prev => ({...prev, reEnterPassword: ''}))
-                  }
-                }}
-                onBlur={() => {
-                  if (reEnterPassword && password !== reEnterPassword) {
-                    setErrors(prev => ({...prev, reEnterPassword: 'Passwords do not match'}))
-                  }
-                }}
-                error={errors.reEnterPassword}
-                secureTextEntry
-                colorScheme={colorScheme}
-                themeColors={themeColors}
-              />
-
-              <View style={styles.buttonWrapper}>
-                <CustomButton 
-                  disableButton={buttonLoading }
-                  buttonText='Register'
-                  handlePress={handleRegister}
-                />
-                <StartOverButton />
-              </View>
-            </View>
-          </ScrollView>
-        </TouchableWithoutFeedback>
-      </KeyboardAvoidingView>
-    </View>
+    <AuthScreen
+      title={isAgent ? 'Create agent account' : 'Create sender account'}
+      subtitle="We’ll use this to secure your account and reach you about shipments."
+      step={1}
+      total={steps.length}
+      stepLabel={steps[0].label}
+      footer={
+        <>
+          <CustomButton
+            disableButton={buttonLoading || emailVerifying}
+            buttonText="Continue"
+            handlePress={handleRegister}
+          />
+          <StartOverButton />
+        </>
+      }
+    >
+      <FormField
+        label="Full name"
+        placeholder="Your name"
+        value={name}
+        onChangeText={(text) => {
+          setName(text);
+          setErrors((prev) => ({ ...prev, name: '' }));
+        }}
+        error={errors.name}
+        autoComplete="name"
+        autoCapitalize="words"
+      />
+      <FormField
+        label="Email"
+        placeholder="you@example.com"
+        value={email}
+        onChangeText={(text) => {
+          setEmail(text);
+          setErrors((prev) => ({ ...prev, email: '' }));
+        }}
+        onBlur={() => checkEmailExists(email)}
+        error={errors.email}
+        hint={emailVerifying ? 'Checking availability…' : undefined}
+        autoCapitalize="none"
+        keyboardType="email-address"
+        autoComplete="email"
+      />
+      <FormField
+        label="Password"
+        placeholder="At least 8 characters"
+        value={password}
+        onChangeText={(text) => {
+          setPassword(text);
+          setErrors((prev) => ({
+            ...prev,
+            password: text && text.length < 8 ? 'Password must be at least 8 characters' : '',
+            reEnterPassword:
+              reEnterPassword && text !== reEnterPassword ? 'Passwords do not match' : '',
+          }));
+        }}
+        error={errors.password}
+        secureTextEntry={!showPassword}
+        rightSlot={
+          <TouchableOpacity
+            onPress={() => setShowPassword((v) => !v)}
+            accessibilityRole="button"
+            accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
+            hitSlop={8}
+          >
+            <AppText variant="label" color={colors.tint}>
+              {showPassword ? 'Hide' : 'Show'}
+            </AppText>
+          </TouchableOpacity>
+        }
+      />
+      <FormField
+        label="Confirm password"
+        placeholder="Re-enter password"
+        value={reEnterPassword}
+        onChangeText={(text) => {
+          setreEnterPassword(text);
+          setErrors((prev) => ({
+            ...prev,
+            reEnterPassword: text && password !== text ? 'Passwords do not match' : '',
+          }));
+        }}
+        error={errors.reEnterPassword}
+        secureTextEntry={!showPassword}
+      />
+    </AuthScreen>
   );
 };
 
-// Enhanced Input Field Component with error handling
-const InputField = ({ label, error, loading = false, colorScheme, themeColors, ...props }) => (
-  <View style={styles.inputContainer}>
-    <View style={styles.labelContainer}>
-      <Text style={[styles.inputLabel, { color: themeColors.text }]}>{label}</Text>
-      {loading && (
-        <Text style={styles.loadingText}>Checking...</Text>
-      )}
-    </View>
-    <View style={[
-      styles.inputWrapper,
-      { borderColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)' },
-      error && styles.inputWrapperError
-    ]}>
-      <TextInput
-        {...props}
-        placeholderTextColor="rgba(128, 128, 128, 0.6)"
-        keyboardAppearance={colorScheme === 'dark' ? 'dark' : 'light'}
-        style={[styles.input, { color: themeColors.text }]}
-      />
-    </View>
-    {error ? (
-      <Text style={styles.errorText}>{error}</Text>
-    ) : null}
-  </View>
-);
+export default Register;
 
 const styles = StyleSheet.create({
-mainContainer: {
-  flex: 1,
-  paddingTop: Platform.OS === 'ios' ? verticalScale(60) : verticalScale(40),
-  paddingHorizontal: horizontalScale(24),
-},
-checkingContainer: {
-  alignItems: 'center',
-  justifyContent: 'center',
-  paddingTop: 0,
-},
-headerContainer: {
-  alignItems: 'center',
-  marginBottom: verticalScale(40),
-},
-inputWrapper: {
-  backgroundColor: 'rgba(255, 255, 255, 0.05)',
-  borderRadius: moderateScale(12),
-  borderWidth: 1,
-  
-  overflow: 'hidden',
-  height: verticalScale(52),
-},
-inputWrapperError: {
-  borderColor: '#FF6B6B', // Error color
-  borderWidth: 1,
-},
-errorText: {
-  color: '#FF6B6B',
-  fontSize: moderateScale(12),
-  marginTop: verticalScale(4),
-  marginLeft: horizontalScale(4),
-},
-input: {
-  flex: 1,
-  paddingHorizontal: horizontalScale(16),
-  fontSize: moderateScale(16),
-  height: '100%',
-},
-logoText: {
-  fontSize: moderateScale(42),
-  marginBottom: verticalScale(16),
-},
-subheading: {
-  fontSize: moderateScale(24),
-  opacity: 0.9,
-},
-formContainer: {
-  paddingHorizontal: horizontalScale(8),
-},
-inputContainer: {
-  marginBottom: verticalScale(20),
-},
-inputLabel: {
-  fontSize: moderateScale(14),
-  marginBottom: verticalScale(8),
-  letterSpacing: 0.5,
-  opacity: 0.9,
-},
-
-buttonWrapper: {
-  marginTop: verticalScale(32),
-  alignItems: 'center',
-  paddingBottom: verticalScale(20),
-},
-labelContainer: {
-  flexDirection: 'row',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  marginBottom: verticalScale(8),
-},
-loadingText: {
-  fontSize: moderateScale(12),
-  color: '#4CAF50',
-  fontStyle: 'italic',
-},
+  loading: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 });
-
-export default Register;

@@ -164,7 +164,7 @@ const ResetPassword = () => {
                     focusStickBlinkingDuration={400}
                     theme={{
                       pinCodeContainerStyle: {
-                        backgroundColor: colorScheme === 'dark' ? '#23242A' : '#f9f9f9',
+                        backgroundColor: colorScheme === 'dark' ? '#323740' : '#f9f9f9',
                         width: horizontalScale(50),
                         height: verticalScale(50),
                         borderRadius: 12,
@@ -265,20 +265,20 @@ const styles = StyleSheet.create({
     marginTop: verticalScale(60),
   },
   logoText: {
-    fontSize: moderateScale(40),
+    fontSize: moderateScale(32),
     lineHeight: moderateScale(56),
     fontWeight: 'bold',
     marginBottom: verticalScale(16),
   },
   welcomeText: {
     fontSize: moderateScale(24),
-    lineHeight: moderateScale(28),
+    lineHeight: moderateScale(24),
     fontWeight: 'bold',
     marginBottom: verticalScale(8),
   },
   subtitleText: {
     fontSize: moderateScale(16),
-    lineHeight: moderateScale(22),
+    lineHeight: moderateScale(20),
     color: 'gray',
     marginBottom: verticalScale(8),
   },
@@ -296,7 +296,7 @@ const styles = StyleSheet.create({
   label: {
     marginBottom: verticalScale(8),
     fontSize: moderateScale(16),
-    lineHeight: moderateScale(22),
+    lineHeight: moderateScale(20),
     fontWeight: '500',
   },
   inputWrapper: {

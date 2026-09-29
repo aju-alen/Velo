@@ -1,21 +1,14 @@
-import { Alert, StyleSheet, View } from 'react-native';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { Ionicons } from '@expo/vector-icons';
-import { TouchableOpacity } from 'react-native';
+import { Alert, StyleSheet, View, TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
 import useLoginAccountStore from '@/store/loginAccountStore';
 import React from 'react';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { useAppTheme } from '@/hooks/useAppTheme';
+import { Spacing } from '@/constants/Colors';
+import { AppText } from '@/components/AppText';
 
 const OrganisationManagement = () => {
   const { accountLoginData } = useLoginAccountStore();
-  const colorScheme = useColorScheme();
-  const bgCard = colorScheme === 'dark' ? '#181A20' : '#FFF';
-  const borderColor = colorScheme === 'dark' ? '#23242A' : '#E0E0E0';
-  const textPrimary = colorScheme === 'dark' ? '#FFF' : '#222';
-  const textSecondary = colorScheme === 'dark' ? '#AAA' : '#666';
-  const accent = '#FFAC1C';
+  const { colors, radius } = useAppTheme();
 
   const handleManageTeam = () => {
     if (accountLoginData.modeOfWork === 'ORGANISATION' && accountLoginData.role === 'AGENT') {
@@ -31,55 +24,41 @@ const OrganisationManagement = () => {
   };
 
   return (
-    <ThemedView style={[styles.card, { backgroundColor: bgCard, borderColor }]}> 
-      <ThemedText style={[styles.headerTitle, { color: textPrimary }]}>Organisation Management</ThemedText>
+    <View
+      style={[
+        styles.card,
+        {
+          backgroundColor: colors.surface,
+          borderColor: colors.border,
+          borderRadius: radius.lg,
+        },
+      ]}
+    >
       {accountLoginData.role === 'AGENT' && accountLoginData.modeOfWork === 'ORGANISATION' && (
         <TouchableOpacity
-          style={[styles.menuItem, { backgroundColor: colorScheme === 'dark' ? '#23242A' : '#F9FAFB', borderColor }]}
+          style={[styles.row, { borderBottomColor: colors.borderSubtle }]}
           onPress={handleManageTeam}
-          activeOpacity={0.8}
+          activeOpacity={0.65}
         >
-          <ThemedView style={styles.menuItemContent}>
-            <Ionicons
-              name="people-outline"
-              size={22}
-              color={accent}
-              style={styles.icon}
-            />
-            <ThemedText style={[styles.menuItemText, { color: textPrimary }]}>Manage Team</ThemedText>
-            <Ionicons
-              name="chevron-forward"
-              size={20}
-              color={textSecondary}
-              style={styles.chevronIcon}
-            />
-          </ThemedView>
+          <AppText variant="bodyStrong" style={styles.rowText}>
+            Manage Team
+          </AppText>
+          <AppText variant="h2" muted>
+            ›
+          </AppText>
         </TouchableOpacity>
       )}
       {accountLoginData.role === 'AGENT' && (
-        <TouchableOpacity
-          style={[styles.menuItem, { backgroundColor: colorScheme === 'dark' ? '#23242A' : '#F9FAFB', borderColor }]}
-          onPress={handlePricingOption}
-          activeOpacity={0.8}
-        >
-          <ThemedView style={styles.menuItemContent}>
-            <Ionicons
-              name="pricetag-outline"
-              size={22}
-              color={accent}
-              style={styles.icon}
-            />
-            <ThemedText style={[styles.menuItemText, { color: textPrimary }]}>Manage Pricing and Timeline</ThemedText>
-            <Ionicons
-              name="chevron-forward"
-              size={20}
-              color={textSecondary}
-              style={styles.chevronIcon}
-            />
-          </ThemedView>
+        <TouchableOpacity style={styles.row} onPress={handlePricingOption} activeOpacity={0.65}>
+          <AppText variant="bodyStrong" style={styles.rowText}>
+            Pricing & Timeline
+          </AppText>
+          <AppText variant="h2" muted>
+            ›
+          </AppText>
         </TouchableOpacity>
       )}
-    </ThemedView>
+    </View>
   );
 };
 
@@ -87,41 +66,19 @@ export default OrganisationManagement;
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 24,
-    borderWidth: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    marginBottom: 18,
-    letterSpacing: 0.1,
-  },
-  menuItem: {
-    borderRadius: 12,
-    marginBottom: 14,
+    marginBottom: Spacing.xl,
     borderWidth: 1,
     overflow: 'hidden',
   },
-  menuItemContent: {
+  row: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
+    justifyContent: 'space-between',
+    paddingVertical: 15,
+    paddingHorizontal: Spacing.lg,
+    borderBottomWidth: StyleSheet.hairlineWidth,
   },
-  icon: {
-    marginRight: 16,
-  },
-  menuItemText: {
+  rowText: {
     flex: 1,
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  chevronIcon: {
-    marginLeft: 10,
   },
 });

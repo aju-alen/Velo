@@ -105,14 +105,22 @@ export const addAgentAddress = async (req, res, next) => {
             skipDuplicates: true, // Optional: Skip duplicates if they already exist
           });
         
-        const createorganisation = await prisma.organisation.create({
-            data: {
+        // One agent can only lead one org — upsert so retries / re-submits don't hit P2002
+        await prisma.organisation.upsert({
+            where: { organisationLeaderAgentId: userId },
+            update: {
                 organisationName,
                 organisationAddress,
                 organisationWebsiteUrl,
                 modeOfWork,
-                organisationLeaderAgentId:userId,
-            }
+            },
+            create: {
+                organisationName,
+                organisationAddress,
+                organisationWebsiteUrl,
+                modeOfWork,
+                organisationLeaderAgentId: userId,
+            },
         });
         
         const agentCategoryRecord = selectedCategories.map(categoryId => ({

@@ -1,54 +1,50 @@
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native'
-import React from 'react'
-import { ThemedView } from './ThemedView'
-import { ThemedText } from './ThemedText'
-import { TouchableOpacity } from 'react-native'
-import { horizontalScale, verticalScale, moderateScale } from '@/constants/metrics'
+import { ActivityIndicator, StyleSheet, TouchableOpacity } from 'react-native';
+import React from 'react';
+import { horizontalScale, verticalScale } from '@/constants/metrics';
+import { Brand, Radius } from '@/constants/Colors';
+import { AppText } from '@/components/AppText';
 
-
-
-export type CustomButton = {
+export type CustomButtonProps = {
   buttonText?: string;
   handlePress: () => void;
   buttonWidth?: number;
   disableButton?: boolean;
 };
 
-const CustomButton = ({ buttonText, handlePress, buttonWidth, disableButton }: CustomButton) => {
+const CustomButton = ({ buttonText, handlePress, buttonWidth, disableButton }: CustomButtonProps) => {
   return (
     <TouchableOpacity
-    onPress={handlePress}
-    activeOpacity={0.7}
-    disabled={disableButton ? true : false}
-  >
-    <ThemedView style={[styles.buttonContainer, { width: buttonWidth ? horizontalScale(buttonWidth) : horizontalScale(300) }]}>
-     
-        {disableButton ?(
-          <ActivityIndicator size="small" color="white" />
-        ):<ThemedText style={styles.heroText}>
+      onPress={handlePress}
+      activeOpacity={0.85}
+      disabled={!!disableButton}
+      style={[
+        styles.buttonContainer,
+        buttonWidth
+          ? { width: horizontalScale(buttonWidth), alignSelf: 'center' }
+          : { width: '100%', alignSelf: 'stretch' },
+        { opacity: disableButton ? 0.55 : 1 },
+      ]}
+    >
+      {disableButton ? (
+        <ActivityIndicator size="small" color="#FFFFFF" />
+      ) : (
+        <AppText variant="button" color="#FFFFFF">
           {buttonText}
-        </ThemedText>}
-    </ThemedView>
-      </TouchableOpacity>
-  )
-}
+        </AppText>
+      )}
+    </TouchableOpacity>
+  );
+};
 
-export default CustomButton
+export default CustomButton;
 
 const styles = StyleSheet.create({
   buttonContainer: {
-    backgroundColor: '#FFAC1C',
-    padding: moderateScale(12),
-    borderRadius: moderateScale(8),
-    width: '100%',
-    overflow: 'hidden',
-
+    backgroundColor: Brand.amber,
+    paddingVertical: verticalScale(14),
+    paddingHorizontal: 20,
+    borderRadius: Radius.md,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  heroText: {
-    color: 'white',
-    fontSize: moderateScale(16),
-    fontWeight: '600',
-  }
-})
+});

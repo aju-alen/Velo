@@ -27,7 +27,7 @@ const FinalPreview = () => {
   const [laoding, setLoading] = useState(false);
   const colorScheme = useColorScheme() ?? 'light';
   const themeColors = Colors[colorScheme];
-  const bgCard = colorScheme === 'dark' ? '#181A20' : '#FFF';
+  const bgCard = colorScheme === 'dark' ? '#262A33' : '#FFF';
   const borderColor = colorScheme === 'dark' ? '#333' : '#E0E0E0';
   const textPrimary = colorScheme === 'dark' ? '#FFF' : '#000';
   const textSecondary = colorScheme === 'dark' ? '#B0B0B0' : '#666';
@@ -241,7 +241,7 @@ export default FinalPreview;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: horizontalScale(16),
+    paddingHorizontal: horizontalScale(12),
   },
   section: {
     marginBottom: verticalScale(24),
@@ -258,7 +258,7 @@ const styles = StyleSheet.create({
     marginBottom: verticalScale(12),
   },
   sectionTitle: {
-    fontSize: moderateScale(18),
+    fontSize: moderateScale(17),
     fontWeight: '600',
     marginLeft: horizontalScale(8),
   },
@@ -298,7 +298,7 @@ const styles = StyleSheet.create({
     marginBottom: verticalScale(32),
     paddingVertical: verticalScale(12),
     backgroundColor: '#FFAC1C',
-    borderRadius: moderateScale(10),
+    borderRadius: moderateScale(12),
   },
   buttonContainer: {
     backgroundColor: '#FFAC1C',

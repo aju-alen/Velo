@@ -209,7 +209,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   receiverName: {
-    fontSize: moderateScale(18),
+    fontSize: moderateScale(17),
     fontWeight: '600',
     flex: 1,
     marginRight: horizontalScale(10),
@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
   },
   statusText: {
     color: 'white',
-    fontSize: moderateScale(11),
+    fontSize: moderateScale(12),
     fontWeight: '600',
     textTransform: 'capitalize',
   },
@@ -245,7 +245,7 @@ const styles = StyleSheet.create({
     gap: verticalScale(6),
   },
   detailLabel: {
-    fontSize: moderateScale(11),
+    fontSize: moderateScale(12),
     fontWeight: '500',
     textTransform: 'uppercase',
     opacity: 0.7,

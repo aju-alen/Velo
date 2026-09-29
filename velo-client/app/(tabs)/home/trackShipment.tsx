@@ -174,13 +174,13 @@ const styles = StyleSheet.create({
     width: horizontalScale(36),
   },
   title: {
-    fontSize: moderateScale(28),
+    fontSize: moderateScale(24),
     fontWeight: '700',
   },
   subtitle: {
     marginTop: verticalScale(8),
     marginBottom: verticalScale(20),
-    fontSize: moderateScale(15),
+    fontSize: moderateScale(14),
     opacity: 0.7,
   },
   input: {
@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
   },
   message: {
     marginTop: verticalScale(16),
-    fontSize: moderateScale(15),
+    fontSize: moderateScale(14),
   },
   card: {
     marginTop: verticalScale(20),
@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
     padding: moderateScale(16),
   },
   shipmentId: {
-    fontSize: moderateScale(18),
+    fontSize: moderateScale(17),
     fontWeight: '700',
   },
   status: {
@@ -224,7 +224,7 @@ const styles = StyleSheet.create({
   },
   route: {
     marginTop: verticalScale(10),
-    fontSize: moderateScale(15),
+    fontSize: moderateScale(14),
   },
   dates: {
     marginTop: verticalScale(6),
@@ -241,6 +241,6 @@ const styles = StyleSheet.create({
     gap: horizontalScale(10),
   },
   stepLabel: {
-    fontSize: moderateScale(15),
+    fontSize: moderateScale(14),
   },
 });

@@ -236,7 +236,8 @@ const useShipmentStore = create<ShipmentState>((set, get) => ({
       accountAddressData: state.accountAddressData,
       deliveryServices: state.deliveryServices,
       cummilativeExpence: state.cummilativeExpence,
-      finalShipmentData: state.finalShipmentData,
+      // Never persist carrier quotes — org rates change; always recompute live
+      finalShipmentData: emptyFinal(),
       itemType: state.itemType,
     }
   },
@@ -244,12 +245,20 @@ const useShipmentStore = create<ShipmentState>((set, get) => ({
   hydrateFromDraft: (payload, draftId = null) => {
     const reviveDates = (address?: Partial<SavedAddressData>) => {
       if (!address) return emptySavedAddress()
-      return {
+      const merged = {
         ...emptySavedAddress(),
         ...address,
         shipmentDate: address.shipmentDate ? new Date(address.shipmentDate) : new Date(),
         deliveryDate: address.deliveryDate ? new Date(address.deliveryDate) : new Date(),
       }
+      // Show package/address sections when resuming mid-flow
+      if (
+        !merged.gotDetails &&
+        (merged.name || merged.addressOne || payload.packageDetail?.numberOfPieces)
+      ) {
+        merged.gotDetails = true
+      }
+      return merged
     }
 
     set(() => ({
@@ -259,7 +268,8 @@ const useShipmentStore = create<ShipmentState>((set, get) => ({
       accountAddressData: { ...emptyAccountAddress(), ...(payload.accountAddressData || {}) },
       deliveryServices: { ...emptyDelivery(), ...(payload.deliveryServices || {}) },
       cummilativeExpence: { ...emptyExpense(), ...(payload.cummilativeExpence || {}) },
-      finalShipmentData: { ...emptyFinal(), ...(payload.finalShipmentData || {}) },
+      // Drop any stale quotes stored in older drafts
+      finalShipmentData: emptyFinal(),
       itemType: payload.itemType || '',
       draftId: draftId || null,
       createShipment: true,

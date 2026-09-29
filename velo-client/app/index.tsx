@@ -1,5 +1,4 @@
 import { StyleSheet, Text, Image, Animated, View, TouchableOpacity, ActivityIndicator } from 'react-native'
-import { router } from "expo-router";
 import * as Linking from 'expo-linking';
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -9,6 +8,7 @@ import * as SecureStore from 'expo-secure-store';
 import useLoginAccountStore from '@/store/loginAccountStore';
 import { Colors } from '@/constants/Colors';
 import { destinationForStoredAccount } from '@/utils/accountDestination';
+import { resetTo } from '@/utils/resetNavigation';
 
 let didOpenRegistrationLink = false;
 
@@ -26,7 +26,8 @@ const RootIndex = () => {
   const colorScheme = useColorScheme();
   const insets = useSafeAreaInsets();
   const theme = colorScheme ?? 'light';
-  const textColor = theme === 'dark' ? Colors.dark.text : Colors.light.text;
+  const themeColors = Colors[theme];
+  const textColor = themeColors.text;
   const [isChecking, setIsChecking] = useState(true);
   const [shouldShowLanding, setShouldShowLanding] = useState(false);
 
@@ -43,7 +44,7 @@ const RootIndex = () => {
         useNativeDriver: true,
       })
     ]).start(() => {
-      router.push('/(auth)/chooseRole');
+      resetTo('/(auth)/chooseRole');
     });
   }, [scaleValue]);
 
@@ -61,7 +62,7 @@ const RootIndex = () => {
         if (!user) {
           if (registrationRole) {
             didOpenRegistrationLink = true;
-            router.replace({ pathname: '/(auth)/register', params: { role: registrationRole } });
+            resetTo({ pathname: '/(auth)/register', params: { role: registrationRole } });
             return;
           }
 
@@ -79,7 +80,7 @@ const RootIndex = () => {
           didOpenRegistrationLink = true;
           const linkedDestination = destinationForStoredAccount(userData);
           if (linkedDestination) {
-            router.replace(linkedDestination);
+            resetTo(linkedDestination);
             return;
           }
         }
@@ -89,10 +90,10 @@ const RootIndex = () => {
         // Incomplete registration -- finish the correct next step
         if (registerVerificationStatus === 'PARTIAL') {
           if (role === 'AGENT' && !userData.verificationDocumentUrl) {
-            router.replace('/(auth)/verifyAgent');
+            resetTo('/(auth)/verifyAgent');
             return;
           }
-          router.replace('/(auth)/finalRegisterForm');
+          resetTo('/(auth)/finalRegisterForm');
           return;
         }
 
@@ -102,7 +103,7 @@ const RootIndex = () => {
           (registerVerificationStatus === 'APPOINTMENT_BOOKED' ||
             registerVerificationStatus === 'REJECTED')
         ) {
-          router.replace('/(auth)/agentRestriction');
+          resetTo('/(auth)/agentRestriction');
           return;
         }
 
@@ -114,7 +115,7 @@ const RootIndex = () => {
         const isSubAgent = role === 'SUB_AGENT' && registerVerificationStatus === 'LOGGED_IN';
 
         if (isVerifiedAgent || isVerifiedUser || isSuperAdmin || isSubAgent) {
-          router.replace('/(tabs)/home/homeMainPage');
+          resetTo('/(tabs)/home/homeMainPage');
           return;
         }
 
@@ -144,8 +145,8 @@ const RootIndex = () => {
   // Show loading while checking user status
   if(isChecking){
     return (
-      <View style={[styles.container, styles.loadingContainer]}>
-        <ActivityIndicator size="large" color="#FFAC1C" />
+      <View style={[styles.container, styles.loadingContainer, { backgroundColor: themeColors.background }]}>
+        <ActivityIndicator size="large" color={themeColors.tint} />
       </View>
     );
   }
@@ -156,7 +157,7 @@ const RootIndex = () => {
   }
 
   return (
-    <View style={[styles.container, { paddingBottom: insets.bottom + verticalScale(12) }]}>
+    <View style={[styles.container, { backgroundColor: themeColors.background, paddingBottom: insets.bottom + verticalScale(12) }]}>
       <View style={styles.logoContainer}>
         {/* <Text style={styles.logoText}>Velo</Text> */}
         <Image
@@ -188,7 +189,7 @@ const RootIndex = () => {
           </TouchableOpacity>
         </Animated.View>
         <Text style={[styles.defaultText, { color: textColor }]}>
-          Already have an account? <Text style={styles.linkText} onPress={() => router.replace('/(auth)/login')}>Sign In</Text>
+          Already have an account? <Text style={styles.linkText} onPress={() => resetTo('/(auth)/login')}>Sign In</Text>
         </Text>
       </View>
     </View>
@@ -244,13 +245,13 @@ const styles = StyleSheet.create({
   },
   heroTextLogoText: {
     color: '#FFAC1C',
-    fontSize: moderateScale(30),
+    fontSize: moderateScale(24),
   },
   customButton: {
     backgroundColor: '#FFAC1C',
     paddingVertical: verticalScale(15),
     paddingHorizontal: horizontalScale(30),
-    borderRadius: moderateScale(10),
+    borderRadius: moderateScale(12),
     width: horizontalScale(250),
     alignItems: 'center',
     justifyContent: 'center',

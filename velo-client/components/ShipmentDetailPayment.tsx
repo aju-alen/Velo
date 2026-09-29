@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   label: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: '700',
     marginBottom: 6,
 
@@ -87,7 +87,7 @@ const styles = StyleSheet.create({
     borderColor: '#e0e0e0',
     borderRadius: 10,
     padding: 16,
-    fontSize: 15,
+    fontSize: 14,
     minHeight: 120,
   },
 });

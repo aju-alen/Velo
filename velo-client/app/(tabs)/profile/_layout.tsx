@@ -1,27 +1,32 @@
 import React from 'react';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { router, Stack } from 'expo-router';
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { Stack } from 'expo-router';
+import { useAppTheme } from '@/hooks/useAppTheme';
+import { Type } from '@/constants/typography';
 
 export default function ProfileLayout() {
-    const colorScheme = useColorScheme();
+  const { colors } = useAppTheme();
 
-    return (
-        <Stack>
-            <Stack.Screen name='profileHome' options={{ headerShown: true,
-            title: 'My Profile',    
-            gestureEnabled:false,
-            headerRight: () => (
-                <Ionicons 
-                name="settings-outline"
-                size={24}
-                color={colorScheme === 'dark'? '#fff' : '#000' }
-                onPress={()=>router.push('/(tabs)/profile/settings/settingsHome')}
-                />
-            )
-            }}/>
-
-            <Stack.Screen name='settings' options={{ headerShown: false}}/>
-        </Stack>
-    );
+  return (
+    <Stack
+      screenOptions={{
+        headerStyle: { backgroundColor: colors.surface },
+        headerTintColor: colors.text,
+        headerTitleStyle: {
+          fontSize: Type.h3.fontSize,
+          fontWeight: '600',
+        },
+        headerShadowVisible: false,
+        contentStyle: { backgroundColor: colors.background },
+      }}
+    >
+      <Stack.Screen
+        name="profileHome"
+        options={{
+          title: 'Profile',
+          gestureEnabled: false,
+        }}
+      />
+      <Stack.Screen name="settings" options={{ headerShown: false }} />
+    </Stack>
+  );
 }

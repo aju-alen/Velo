@@ -79,13 +79,37 @@ const SelectPackage = ({ getPackageDetail, onButtonclick, itemType }) => {
     ? (Number(packageDetail.numberOfPieces) * Number(weight)).toFixed(1)
     : '0';
 
+  const [hydrated, setHydrated] = useState(false);
+
   useEffect(() => {
+    const pd = packageDetail;
+    if (pd && (pd.length || pd.width || pd.height || pd.weight || pd.numberOfPieces)) {
+      setDimensions({
+        length: pd.length || '',
+        height: pd.height || '',
+        width: pd.width || '',
+      });
+      const pieces = Number(pd.numberOfPieces) || 1;
+      const total = Number(pd.weight) || 0;
+      // Store keeps total weight (pieces × unit); local field is per-piece
+      const unit = pieces > 0 && total > 0 ? Number((total / pieces).toFixed(2)) : total;
+      setWeight(unit ? String(unit) : '');
+      if (pd.length || pd.weight) setShowPackageDetail(true);
+    }
+    setHydrated(true);
+    // Intentionally once on mount (draft resume / edit)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
     getPackageDetail(dimensions, packageDetail.numberOfPieces, weight);
   }, [onButtonclick]);
 
   useEffect(() => {
+    if (!hydrated) return;
     getPackageDetail(dimensions, packageDetail.numberOfPieces, weight);
-  }, [dimensions, packageDetail.numberOfPieces, weight]);
+  }, [dimensions, packageDetail.numberOfPieces, weight, hydrated]);
 
 
 
@@ -358,7 +382,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   summaryValue: {
-    fontSize: moderateScale(18),
+    fontSize: moderateScale(17),
     fontWeight: '600',
     color: '#2D3748',
   },

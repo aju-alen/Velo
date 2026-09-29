@@ -3,38 +3,30 @@ import {
   StyleSheet,
   TouchableOpacity,
   View,
-  Text,
-  useColorScheme,
   ScrollView,
   ActivityIndicator,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
 import useLoginAccountStore from '@/store/loginAccountStore';
 import AccountInfoCard from '@/components/profile/AccountInfoCard';
 import AccountMenuList from '@/components/profile/AccountMenuList';
 import { getProfileMenuItems } from '@/components/profile/getProfileMenuItems';
 import OrganisationManagement from '@/components/settings/organisationManagementMenu/OrganisationManagement';
-import { Colors } from '@/constants/Colors';
 import { getAuth, signOut } from '@react-native-firebase/auth';
 import * as SecureStore from 'expo-secure-store';
+import { AppText } from '@/components/AppText';
 import axios from 'axios';
 import { ipURL } from '@/constants/backendUrl';
+import { useAppTheme } from '@/hooks/useAppTheme';
+import { Spacing } from '@/constants/Colors';
+import { resetTo } from '@/utils/resetNavigation';
 
 type ProfileShellProps = {
-  /** Extra content after role menu (rarely needed) */
   children?: React.ReactNode;
 };
 
-/**
- * Shared profile / settings layout for all roles.
- * Role differences are limited to menu shortcuts + agent organisation block.
- */
 const ProfileShell = ({ children }: ProfileShellProps) => {
   const { accountLoginData, resetAccountLoginData } = useLoginAccountStore();
-  const colorScheme = useColorScheme() ?? 'light';
-  const themeColors = Colors[colorScheme];
-  const accent = Colors[colorScheme].tint;
+  const { colors, brand, radius } = useAppTheme();
   const role = accountLoginData.role;
   const isGuest = role === 'GUEST' || !accountLoginData.id;
   const [addressLine, setAddressLine] = useState<string | null>(null);
@@ -83,10 +75,10 @@ const ProfileShell = ({ children }: ProfileShellProps) => {
       try {
         await signOut(getAuth());
       } catch {
-        // Firebase may not be signed in for all flows
+        // ignore
       }
       resetAccountLoginData();
-      router.replace(isGuest ? '/(auth)/chooseRole' : '/(auth)/login');
+      resetTo(isGuest ? '/(auth)/chooseRole' : '/(auth)/login');
     } catch (err) {
       console.log(err);
     }
@@ -96,11 +88,10 @@ const ProfileShell = ({ children }: ProfileShellProps) => {
 
   return (
     <ScrollView
-      style={[styles.container, { backgroundColor: themeColors.background }]}
+      style={[styles.container, { backgroundColor: colors.background }]}
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}
     >
-      <Text style={[styles.sectionTitle, { color: themeColors.text }]}>Account</Text>
       <AccountInfoCard
         name={accountLoginData.name}
         email={accountLoginData.email}
@@ -111,12 +102,12 @@ const ProfileShell = ({ children }: ProfileShellProps) => {
         isGuest={isGuest}
       />
       {loadingAddress && (
-        <ActivityIndicator color={accent} style={{ marginBottom: 12 }} />
+        <ActivityIndicator color={brand.amber} style={{ marginBottom: Spacing.md }} />
       )}
 
-      <Text style={[styles.sectionTitle, { color: themeColors.text }]}>
-        {isGuest ? 'Guest options' : 'Account management'}
-      </Text>
+      <AppText variant="label" muted style={styles.sectionTitle}>
+        {isGuest ? 'Options' : 'Manage'}
+      </AppText>
       <AccountMenuList
         isGuest={isGuest}
         hasAccountId={!!accountLoginData.id}
@@ -125,23 +116,24 @@ const ProfileShell = ({ children }: ProfileShellProps) => {
 
       {role === 'AGENT' && (
         <>
-          <Text style={[styles.sectionTitle, { color: themeColors.text }]}>Organisation</Text>
+          <AppText variant="label" muted style={styles.sectionTitle}>
+            Organisation
+          </AppText>
           <OrganisationManagement />
         </>
       )}
 
       {children}
 
-      <View style={styles.logoutContainer}>
-        <TouchableOpacity
-          style={[styles.logoutButton, { backgroundColor: accent }]}
-          onPress={handleLogout}
-          activeOpacity={0.85}
-        >
-          <Ionicons name="log-out-outline" size={20} color="#FFF" style={{ marginRight: 8 }} />
-          <Text style={styles.logoutButtonText}>{isGuest ? 'Exit Guest' : 'Logout'}</Text>
-        </TouchableOpacity>
-      </View>
+      <TouchableOpacity
+        style={[styles.logoutButton, { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radius.md }]}
+        onPress={handleLogout}
+        activeOpacity={0.85}
+      >
+        <AppText variant="bodyStrong" color={colors.danger}>
+          {isGuest ? 'Exit Guest' : 'Log out'}
+        </AppText>
+      </TouchableOpacity>
     </ScrollView>
   );
 };
@@ -151,35 +143,20 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 40,
+    paddingHorizontal: Spacing.xl,
+    paddingTop: Spacing.xl,
+    paddingBottom: Spacing.xxxl + 8,
   },
   sectionTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 10,
-    opacity: 0.7,
+    marginBottom: Spacing.sm,
+    marginTop: Spacing.xs,
     textTransform: 'uppercase',
-    letterSpacing: 0.4,
-  },
-  logoutContainer: {
-    paddingTop: 8,
-    alignItems: 'center',
   },
   logoutButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
+    marginTop: Spacing.md,
     paddingVertical: 14,
-    borderRadius: 8,
-  },
-  logoutButtonText: {
-    color: 'white',
-    fontWeight: '700',
-    fontSize: 16,
-    letterSpacing: 0.2,
+    alignItems: 'center',
+    borderWidth: 1,
   },
 });
 

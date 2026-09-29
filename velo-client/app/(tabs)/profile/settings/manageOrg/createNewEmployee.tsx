@@ -30,9 +30,9 @@ const CreateNewEmployeeSignup = () => {
   };
 
   // Theme-aware colors
-  const bgCard = colorScheme === 'dark' ? '#181A20' : '#FFF';
+  const bgCard = colorScheme === 'dark' ? '#262A33' : '#FFF';
   const borderColor = colorScheme === 'dark' ? '#333' : '#E0E0E0';
-  const inputBg = colorScheme === 'dark' ? '#23242A' : '#F9FAFB';
+  const inputBg = colorScheme === 'dark' ? '#323740' : '#F9FAFB';
   const textPrimary = colorScheme === 'dark' ? '#FFF' : '#222';
   const textSecondary = colorScheme === 'dark' ? '#AAA' : '#666';
   const placeholderColor = colorScheme === 'dark' ? '#888' : '#888';
@@ -40,7 +40,7 @@ const CreateNewEmployeeSignup = () => {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <ThemedView style={[styles.outer, { backgroundColor: colorScheme === 'dark' ? '#101014' : '#F5F6FA' }]}> 
+      <ThemedView style={[styles.outer, { backgroundColor: colorScheme === 'dark' ? '#1C1F26' : '#F5F6FA' }]}> 
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={{ flex: 1, width: '100%', justifyContent: 'center', alignItems: 'center' }}
@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   title: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: '700',
     marginBottom: 24,
     textAlign: 'center',
@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 16,
     borderRadius: 8,
-    fontSize: 15,
+    fontSize: 14,
   },
   mobileContainer: {
     flexDirection: 'row',
@@ -147,14 +147,14 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     width: '25%',
     marginRight: 8,
-    fontSize: 15,
+    fontSize: 14,
   },
   mobileNumber: {
     borderWidth: 1,
     padding: 12,
     borderRadius: 8,
     width: '72%',
-    fontSize: 15,
+    fontSize: 14,
   },
   signupButton: {
     marginTop: 8,

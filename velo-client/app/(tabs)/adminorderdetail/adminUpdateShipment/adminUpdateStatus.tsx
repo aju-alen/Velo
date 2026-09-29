@@ -34,7 +34,7 @@ const AdminUpdateStatus = () => {
 
   const colorScheme = useColorScheme() ?? 'light';
   const themeColors = Colors[colorScheme];
-  const pickerBg = colorScheme === 'dark' ? '#23242A' : '#FFF';
+  const pickerBg = colorScheme === 'dark' ? '#323740' : '#FFF';
   const pickerBorder = colorScheme === 'dark' ? '#333' : '#E0E0E0';
   const pickerText = colorScheme === 'dark' ? '#FFF' : '#222';
 
@@ -390,7 +390,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: 'white',
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: 'bold',
   },
   message: {

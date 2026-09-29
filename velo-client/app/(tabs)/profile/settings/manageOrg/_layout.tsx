@@ -13,7 +13,7 @@ export default function ManageOrgLayout() {
             gestureEnabled:false }}/>
             
              <Stack.Screen name='managePricing' options={{ headerShown: true,  
-             title: 'Manage Pricing',
+             title: 'Pricing',
             gestureEnabled:false }}/>
 
              <Stack.Screen name='createNewEmployee' options={{ headerShown: true,

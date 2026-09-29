@@ -11,7 +11,7 @@
 
 | # | Theme | Severity | Current state | Primary gap | Workstream |
 |---|--------|----------|---------------|-------------|------------|
-| 1 | UI/UX polish | High | OS light/dark; thin tokens; harsh dark; mixed icons | Design system + high-traffic polish | **W1** (last) |
+| 1 | UI/UX polish | High | Soft dark tokens, Montserrat, quieter menus, splash fixed | Keep adopting tokens on remaining screens | **W1** (done) |
 | 2 | Sender profile / account | Critical | Profile + Settings show identity and account actions | Cross-role shell polish → W5 | **W2** (done) |
 | 3 | Shipment drafts | High | ShipmentDraft API + Save/resume on Home | — | **W3** (done) |
 | 4 | Agent verification | Critical | Appointment + SUPERADMIN accept/decline; PDF URL on Agent; status screen | — | **W4** (done) |
@@ -26,24 +26,14 @@
 ### Expected
 Clean, intuitive, consistent interface meeting modern mobile expectations.
 
-### Actual
-- Theme follows device (`userInterfaceStyle: automatic`); not forced black, but dark mode uses near-black (`Colors.dark.background` `#151718`) plus ad-hoc surfaces (`#101014`, `#181A20`, `#23242A`).
-- Splash background is `#000000`.
-- Brand orange `#FFAC1C` hardcoded in 40+ files; [Colors.ts](../velo-client/constants/Colors.ts) is minimal.
-- Montserrat is loaded in root layout but not applied (`fontFamily` unused).
-- Icons mix Ionicons, MaterialIcons, AntDesign, etc.; History (USER) and Order (AGENT) share `newspaper` icons.
-- Expo template leftovers (parallax / chooseRole colors).
-- [themeStore.ts](../velo-client/store/themeStore.ts) is unused.
-- No product design docs in `velo-client/README.md` (default Expo starter).
-
-### Gap
-No cohesive design tokens, typography, tab/header chrome, or icon policy. Dark mode and splash amplify a “black / unfinished” impression.
-
-### Dependencies
-Do **after** feature workstreams so UI is not reworked twice. Minimal incidental styling only when required by W2–W4.
+### Actual (after W1)
+- Soft dark palette (`#1C1F26` / `#262A33`) — not pure black; warm light `#F3F2EF`.
+- Expanded tokens in [Colors.ts](../velo-client/constants/Colors.ts); Montserrat app-wide; navigation/Paper themed.
+- Quieter profile menus (text + chevron, no orange icon rows); choose-role rebuilt without Expo parallax template.
+- Splash updated; tab bar uses themed surfaces; bulk soften of harsh dark hexes across screens.
 
 ### Suggested workstream
-**W1**
+**W1** (implemented)
 
 ---
 

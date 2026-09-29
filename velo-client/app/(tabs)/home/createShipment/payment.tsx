@@ -52,7 +52,7 @@ const PaymentContent = () => {
     ? (configScheme[0] ?? 'velo-international-shipping')
     : (configScheme ?? 'velo-international-shipping');
   const themeColors = Colors[colorScheme];
-  const bgCard = colorScheme === 'dark' ? '#181A20' : '#FFF';
+  const bgCard = colorScheme === 'dark' ? '#262A33' : '#FFF';
   const borderColor = colorScheme === 'dark' ? '#333' : '#E0E0E0';
   const textPrimary = colorScheme === 'dark' ? '#FFF' : '#000';
   const textSecondary = colorScheme === 'dark' ? '#B0B0B0' : '#666';
@@ -368,7 +368,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   errorTitle: {
-    fontSize: moderateScale(18),
+    fontSize: moderateScale(17),
     fontWeight: '600',
     marginBottom: verticalScale(8),
     textAlign: 'center',
@@ -383,7 +383,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFAC1C',
     paddingVertical: verticalScale(12),
     paddingHorizontal: horizontalScale(24),
-    borderRadius: moderateScale(10),
+    borderRadius: moderateScale(12),
   },
   retryButtonText: {
     fontSize: moderateScale(16),

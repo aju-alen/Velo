@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    fontSize: 18,
+    fontSize: 17,
     color: '#FFFFFF',
     marginBottom: verticalScale(4),
   },
@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   price: {
-    fontSize: 18,
+    fontSize: 17,
     color: '#FFD700',
     marginRight: horizontalScale(8),
   },

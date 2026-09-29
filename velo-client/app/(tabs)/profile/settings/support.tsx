@@ -5,14 +5,14 @@ import { Colors } from '@/constants/Colors';
 const Support = () => {
   const colorScheme = useColorScheme() ?? 'light';
   const themeColors = Colors[colorScheme];
-  const bgCard = colorScheme === 'dark' ? '#181A20' : '#FFF';
+  const bgCard = colorScheme === 'dark' ? '#262A33' : '#FFF';
   const borderColor = colorScheme === 'dark' ? '#333' : '#E0E0E0';
   const textPrimary = colorScheme === 'dark' ? '#FFF' : '#222';
   const textSecondary = colorScheme === 'dark' ? '#AAA' : '#666';
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <View style={[styles.outer, { backgroundColor: colorScheme === 'dark' ? '#101014' : '#F5F6FA' }]}> 
+      <View style={[styles.outer, { backgroundColor: colorScheme === 'dark' ? '#1C1F26' : '#F5F6FA' }]}> 
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={{ flex: 1, width: '100%', justifyContent: 'center', alignItems: 'center' }}
@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   title: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: '700',
     marginBottom: 18,
     textAlign: 'center',

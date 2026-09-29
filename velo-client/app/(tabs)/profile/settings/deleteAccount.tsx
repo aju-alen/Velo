@@ -5,9 +5,9 @@ import { ThemedText } from '@/components/ThemedText';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import useLoginAccountStore from '@/store/loginAccountStore';
 import axiosInstance from '@/constants/axiosHeader';
-import { router } from 'expo-router';
 import { getAuth, signOut, deleteUser } from '@react-native-firebase/auth';
 import * as SecureStore from 'expo-secure-store';
+import { resetTo } from '@/utils/resetNavigation';
 
 const DeleteAccount = () => {
   const colorScheme = useColorScheme();
@@ -17,9 +17,9 @@ const DeleteAccount = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  const bgCard = colorScheme === 'dark' ? '#181A20' : '#FFF';
+  const bgCard = colorScheme === 'dark' ? '#262A33' : '#FFF';
   const borderColor = colorScheme === 'dark' ? '#333' : '#E0E0E0';
-  const inputBg = colorScheme === 'dark' ? '#23242A' : '#F9FAFB';
+  const inputBg = colorScheme === 'dark' ? '#323740' : '#F9FAFB';
   const textPrimary = colorScheme === 'dark' ? '#FFF' : '#222';
   const placeholderColor = colorScheme === 'dark' ? '#888' : '#888';
   const accent = '#FF4D4F';
@@ -54,7 +54,7 @@ const DeleteAccount = () => {
           // No active Firebase session
         }
         resetAccountLoginData();
-        router.replace('/(auth)/login');
+        resetTo('/(auth)/login');
       }, 1200);
     } catch (err: any) {
       setError(err?.response?.data?.message || 'Failed to delete account.');
@@ -65,7 +65,7 @@ const DeleteAccount = () => {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <ThemedView style={[styles.outer, { backgroundColor: colorScheme === 'dark' ? '#101014' : '#F5F6FA' }]}> 
+      <ThemedView style={[styles.outer, { backgroundColor: colorScheme === 'dark' ? '#1C1F26' : '#F5F6FA' }]}> 
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={{ flex: 1, width: '100%', justifyContent: 'center', alignItems: 'center' }}
@@ -121,14 +121,14 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   title: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: '700',
     marginBottom: 16,
     textAlign: 'center',
     letterSpacing: 0.1,
   },
   warning: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '500',
     marginBottom: 18,
     textAlign: 'center',
@@ -138,7 +138,7 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 16,
     borderRadius: 8,
-    fontSize: 15,
+    fontSize: 14,
   },
   button: {
     marginTop: 8,

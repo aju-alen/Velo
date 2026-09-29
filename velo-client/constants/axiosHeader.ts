@@ -6,11 +6,11 @@ const axiosInstance = axios.create({
 });
 
 // Function to set token dynamically
-export const setAuthorizationHeader = (token:string) => {
+export const setAuthorizationHeader = (token: string) => {
   if (token) {
-    axiosInstance.defaults.headers.Authorization = `Bearer ${token}`;
+    axiosInstance.defaults.headers.common.Authorization = `Bearer ${token}`;
   } else {
-    delete axiosInstance.defaults.headers.Authorization; // Remove the header if no token
+    delete axiosInstance.defaults.headers.common.Authorization;
   }
 };
 

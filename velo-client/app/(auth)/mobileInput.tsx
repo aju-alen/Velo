@@ -225,7 +225,7 @@ const MobileInput = () => {
     return (
       <View style={[styles.container, { backgroundColor: themeColors.background }]}>
         <View style={styles.headerContainer}>
-          <View style={[styles.iconContainer, { backgroundColor: colorScheme === 'dark' ? '#23242A' : '#FFF3E0' }]}>
+          <View style={[styles.iconContainer, { backgroundColor: colorScheme === 'dark' ? '#323740' : '#FFF3E0' }]}>
             <Text style={styles.icon}>🔐</Text>
           </View>
           <Text style={[styles.title, { color: themeColors.text }]}>
@@ -245,7 +245,7 @@ const MobileInput = () => {
             focusStickBlinkingDuration={400}
             theme={{
               pinCodeContainerStyle: {
-                backgroundColor: colorScheme === 'dark' ? '#23242A' : '#f9f9f9',
+                backgroundColor: colorScheme === 'dark' ? '#323740' : '#f9f9f9',
                 width: horizontalScale(48),
                 height: verticalScale(48),
                 borderRadius: 12,
@@ -297,7 +297,7 @@ const MobileInput = () => {
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={[styles.container, { backgroundColor: themeColors.background }]}>
         <View style={styles.headerContainer}>
-          <View style={[styles.iconContainer, { backgroundColor: colorScheme === 'dark' ? '#23242A' : '#FFF3E0' }]}>
+          <View style={[styles.iconContainer, { backgroundColor: colorScheme === 'dark' ? '#323740' : '#FFF3E0' }]}>
             <Text style={styles.icon}>📱</Text>
           </View>
           <Text style={[styles.title, { color: themeColors.text }]}>
@@ -308,7 +308,7 @@ const MobileInput = () => {
           </Text>
         </View>
 
-        <View style={[styles.inputContainer, { backgroundColor: colorScheme === 'dark' ? '#23242A' : '#FAFAFA', borderColor: colorScheme === 'dark' ? '#333' : '#E0E0E0' }]}>
+        <View style={[styles.inputContainer, { backgroundColor: colorScheme === 'dark' ? '#323740' : '#FAFAFA', borderColor: colorScheme === 'dark' ? '#333' : '#E0E0E0' }]}>
           <TouchableOpacity
             style={[styles.countryPickerButton, { borderRightColor: colorScheme === 'dark' ? '#333' : '#E0E0E0' }]}
             onPress={() => setShowCountryPicker(true)}
@@ -411,7 +411,7 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: moderateScale(16),
     textAlign: 'center',
-    lineHeight: moderateScale(22),
+    lineHeight: moderateScale(20),
   },
   detailsContainer: {
     width: '100%',
@@ -484,12 +484,12 @@ const styles = StyleSheet.create({
   modalContent: {
     width: '90%',
     maxHeight: '70%',
-    backgroundColor: '#111',
+    backgroundColor: '#262A33',
     borderRadius: moderateScale(16),
     overflow: 'hidden',
   },
   countryList: {
-    padding: moderateScale(15),
+    padding: moderateScale(14),
   },
   countryListItem: {
     flexDirection: 'row',
@@ -534,7 +534,7 @@ const styles = StyleSheet.create({
     marginBottom: verticalScale(4),
   },
   detailValue: {
-    fontSize: moderateScale(18),
+    fontSize: moderateScale(17),
   },
   actionButtons: {
     paddingVertical: verticalScale(20),
@@ -568,7 +568,7 @@ const styles = StyleSheet.create({
     paddingVertical: verticalScale(10),
   },
   countryCodeText: {
-    fontSize: moderateScale(18),
+    fontSize: moderateScale(17),
     fontWeight: '600',
   },
   dropdownIcon: {
@@ -579,7 +579,7 @@ const styles = StyleSheet.create({
     marginBottom: verticalScale(15),
     width: horizontalScale(80),
     height: verticalScale(80),
-    borderRadius: moderateScale(40),
+    borderRadius: moderateScale(32),
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',
@@ -591,7 +591,7 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
   },
   icon: {
-    fontSize: moderateScale(40),
+    fontSize: moderateScale(32),
   },
   infoContainer: {
     width: '100%',
@@ -602,7 +602,7 @@ const styles = StyleSheet.create({
   infoText: {
     fontSize: moderateScale(12),
     textAlign: 'center',
-    lineHeight: moderateScale(18),
+    lineHeight: moderateScale(17),
   },
   otpLabel: {
     fontSize: moderateScale(16),

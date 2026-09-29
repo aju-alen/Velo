@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
         paddingBottom: 5,
     },
     agentName: {
-        fontSize: 18,
+        fontSize: 17,
         fontWeight: 'bold',
     },
     agentRole: {

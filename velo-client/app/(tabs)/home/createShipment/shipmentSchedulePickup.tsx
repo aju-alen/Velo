@@ -1,388 +1,289 @@
-import { SafeAreaView, StyleSheet, TouchableOpacity, TextInput, View, ScrollView, Alert, Text, useColorScheme, KeyboardAvoidingView, Platform } from 'react-native'
-import React, { useState } from 'react'
-import { horizontalScale, moderateScale, verticalScale } from '@/constants/metrics'
-import { Divider} from 'react-native-paper'
-import useShipmentStore from '@/store/shipmentStore'
-import Ionicons from '@expo/vector-icons/Ionicons'
-import TimePickerModal from '@/components/TimePickerModal'
-import PickupInstructionModal from '@/components/PickupInstructionModal'
-import { router } from 'expo-router'
-import { Colors } from '@/constants/Colors';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import React, { useMemo, useState } from 'react';
+import { StyleSheet, TouchableOpacity, View, Alert } from 'react-native';
+import useShipmentStore from '@/store/shipmentStore';
+import TimePickerModal from '@/components/TimePickerModal';
+import { router } from 'expo-router';
+import { FlowScreen } from '@/components/wizard/FlowScreen';
+import { FormField } from '@/components/forms/FormField';
+import { SelectableRow } from '@/components/forms/SelectableRow';
+import { AppText } from '@/components/AppText';
+import CustomButton from '@/components/CustomButton';
+import { useAppTheme } from '@/hooks/useAppTheme';
+import { Spacing } from '@/constants/Colors';
+import { SHIPMENT_STEPS, shipmentNextLabel, shipmentStepIndex, shipmentStepKeyAt } from '@/constants/flowSteps';
+import { goToShipmentStep } from '@/utils/resumeShipmentWizard';
+
+const PICKUP_LOCATIONS = ['Doorstep', 'Reception'] as const;
 
 const ShipmentSchedulePickup = () => {
-  const colorScheme = useColorScheme() ?? 'light';
-  const themeColors = Colors[colorScheme];
-  const insets = useSafeAreaInsets();
-  const { savedAddressData, accountAddressData, deliveryServices, packageDetail, setDeliveryServices,itemType,setEditData,packageDescription } = useShipmentStore()
-  const [checked, setChecked] = useState('yes')
-  const [openTimeModal, setOpenTimeModal] = useState(false)
-  const [pickupInstructionmodal, setPickupInstructionModal] = useState(false)
+  const { colors, radius, brand } = useAppTheme();
+  const {
+    savedAddressData,
+    accountAddressData,
+    deliveryServices,
+    packageDetail,
+    setDeliveryServices,
+    itemType,
+  } = useShipmentStore();
+  const [openTimeModal, setOpenTimeModal] = useState(false);
+  const step = shipmentStepIndex('shipmentSchedulePickup');
+  const nextLabel = shipmentNextLabel('shipmentSchedulePickup');
 
-  console.log(packageDescription,'saved--as-da-sd-asd-a-sd');
-  
+  const formattedDate = useMemo(() => {
+    const raw = savedAddressData.shipmentDate || savedAddressData.deliveryDate;
+    const d = raw instanceof Date ? raw : new Date(raw);
+    if (Number.isNaN(d.getTime())) return '—';
+    return d.toLocaleDateString('en-US', {
+      weekday: 'long',
+      month: 'short',
+      day: 'numeric',
+    });
+  }, [savedAddressData.shipmentDate, savedAddressData.deliveryDate]);
 
-  const formattedDate = savedAddressData.deliveryDate.toLocaleDateString('en-US', {
-    weekday: 'short',
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  })
- console.log(formattedDate,'formatDate');
- console.log(savedAddressData.shipmentDate,'shipmentDate');
- 
- 
- const handleFinalPreview = () => {
-  if (!deliveryServices.deliveryPickupTimeFrom || !deliveryServices.deliveryPickupTimeTo) {
-    Alert.alert(
-      'Missing Information',
-      'Please select both pickup start and end times before proceeding.',
-      [{ text: 'OK' }]
-    )
-    return
-  }
+  const hasTime =
+    !!deliveryServices.deliveryPickupTimeFrom && !!deliveryServices.deliveryPickupTimeTo;
+  const hasInstruction = !!deliveryServices.pickupInstruction;
+  const canContinue = hasTime && hasInstruction;
 
-  router.replace('/(tabs)/home/createShipment/viewShippingOptions')
-}
-  
+  const timeLabel = hasTime
+    ? `${deliveryServices.deliveryPickupTimeFrom} – ${deliveryServices.deliveryPickupTimeTo}`
+    : 'Tap to choose a window';
 
-  const handleCloseTimeModal = () => setOpenTimeModal(false)
-  const handleClosInstructioneModal = () => setPickupInstructionModal(false)
+  const packageMeta =
+    itemType === 'PACKAGE'
+      ? `${packageDetail.weight || '—'} kg`
+      : itemType === 'DOCUMENT'
+        ? `${packageDetail.numberOfPieces || '—'} piece(s)`
+        : null;
+
+  const handleContinue = () => {
+    if (!hasTime) {
+      Alert.alert('Pickup time required', 'Choose a start and end time for the pickup window.');
+      return;
+    }
+    if (!hasInstruction) {
+      Alert.alert('Pickup location required', 'Choose Doorstep or Reception.');
+      return;
+    }
+    router.push('/(tabs)/home/createShipment/viewShippingOptions');
+  };
+
+  const missingHint = !canContinue
+    ? [
+        !hasTime ? 'pickup time' : null,
+        !hasInstruction ? 'pickup location' : null,
+      ]
+        .filter(Boolean)
+        .join(' and ')
+    : null;
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]}>
-      <KeyboardAvoidingView
-        style={styles.keyboardAvoidingRoot}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top : 0}
+    <>
+      <FlowScreen
+        step={step}
+        total={SHIPMENT_STEPS.length}
+        stepLabel={SHIPMENT_STEPS[step - 1].label}
+        nextLabel={nextLabel}
+        onStepPress={(n) => {
+          const key = shipmentStepKeyAt(n);
+          if (key) goToShipmentStep(key);
+        }}
+        title="Schedule pickup"
+        subtitle="Set when and where the agent should collect the package."
+        footer={
+          <>
+            {missingHint ? (
+              <AppText variant="caption" secondary style={styles.hint}>
+                Still needed: {missingHint}
+              </AppText>
+            ) : (
+              <AppText variant="caption" color={colors.success} style={styles.hint}>
+                Ready — you can continue to carriers
+              </AppText>
+            )}
+            <CustomButton
+              buttonText="Continue to carriers"
+              handlePress={handleContinue}
+              disableButton={!canContinue}
+            />
+          </>
+        }
       >
-        <ScrollView
-          style={styles.scrollView}
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-          keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
-          automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
+        {/* Summary */}
+        <View
+          style={[
+            styles.summary,
+            {
+              backgroundColor: colors.surface,
+              borderColor: colors.border,
+              borderRadius: radius.md,
+            },
+          ]}
         >
-
-        {/* Pickup Date Section */}
-        <View style={[styles.sectionContainer, { backgroundColor: themeColors.background }]}>
-          <View style={styles.pickupDateHeaderContainer}>
-            <Text style={[styles.sectionTitle, { color: themeColors.text }]}>Pickup Date</Text>
-            <Text style={[styles.dateText, { color: '#FFAC1C' }]}>{formattedDate}</Text>
-          </View>
-        </View>
-
-        {/* Pickup Address Section */}
-        <View style={[styles.sectionContainer, { backgroundColor: themeColors.background }]}>
-          <Text style={[styles.sectionTitle, { color: themeColors.text, marginBottom: verticalScale(12) }]}>Pickup Address</Text>
-          <View style={[styles.addressCard, { backgroundColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)' }]}>
-            <Text style={[styles.addressName, { color: themeColors.text }]}>{accountAddressData.userName}</Text>
-            <Text style={[styles.addressText, { color: themeColors.text }]}>
-              {accountAddressData.addressOne},{accountAddressData.addressTwo}
-            </Text>
-            <Text style={[styles.addressText, { color: themeColors.text }]}>
-              {accountAddressData.city}, {accountAddressData.state}
-            </Text>
-            <Text style={[styles.addressText, { color: themeColors.text }]}>{accountAddressData.email}</Text>
-            <Text style={[styles.addressText, { color: themeColors.text }]}>
-              {accountAddressData.countryCode} {accountAddressData.mobileNumber}
-            </Text>
-          </View>
-        </View>
-
-        {/* Pickup Time Section */}
-        <View style={[styles.sectionContainer, { backgroundColor: themeColors.background }]}>
-          <Text style={[styles.sectionTitle, { color: themeColors.text, marginBottom: verticalScale(12) }]}>Pickup Time</Text>
-          <TouchableOpacity 
-            onPress={() => setOpenTimeModal(true)} 
-            style={[styles.timeButton, { backgroundColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)' }]}
-          >
-            <View>
-              <Text style={[styles.buttonLabel, { color: themeColors.text }]}>Select Pickup Time</Text>
-              <Text style={[styles.selectedTime, { color: '#FFAC1C' }]}>
-                {deliveryServices.deliveryPickupTimeFrom} - {deliveryServices.deliveryPickupTimeTo}
-              </Text>
+          <View style={styles.summaryTop}>
+            <View style={styles.summaryCol}>
+              <AppText variant="label">Pickup day</AppText>
+              <AppText variant="h3">{formattedDate}</AppText>
             </View>
-            <Ionicons name="time-outline" size={24} color="#FFAC1C" />
-          </TouchableOpacity>
-        </View>
-
-        {/* Weight Section ONLY FOR PACKAGE TYPE*/}
-        {itemType === 'PACKAGE' &&<View style={[styles.sectionContainer, { backgroundColor: themeColors.background }]}>
-          <Text style={[styles.sectionTitle, { color: themeColors.text, marginBottom: verticalScale(12) }]}>Weight (kg)</Text>
-          <View style={[styles.weightCard, { backgroundColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)' }]}>
-            <Text style={[styles.weightLabel, { color: themeColors.text }]}>Total Weight</Text>
-            <Text style={[styles.weightValue, { color: themeColors.text }]}>{packageDetail.weight}</Text>
+            {packageMeta ? (
+              <View style={[styles.metaPill, { backgroundColor: colors.tintMuted }]}>
+                <AppText variant="caption" color={brand.amber}>
+                  {itemType === 'PACKAGE' ? 'Weight' : 'Pieces'} · {packageMeta}
+                </AppText>
+              </View>
+            ) : null}
           </View>
-        </View>}
 
-        {/* Num of pieces Section ONLY FOR DOCUMENT TYPE*/}
-        {itemType === 'DOCUMENT' &&<View style={[styles.sectionContainer, { backgroundColor: themeColors.background }]}>
-          <Text style={[styles.sectionTitle, { color: themeColors.text, marginBottom: verticalScale(12) }]}>Number of pieces</Text>
-          <View style={[styles.weightCard, { backgroundColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)' }]}>
-            <Text style={[styles.weightLabel, { color: themeColors.text }]}>Total Pieces</Text>
-            <Text style={[styles.weightValue, { color: themeColors.text }]}>{packageDetail.numberOfPieces}</Text>
+          <View style={[styles.hairline, { backgroundColor: colors.borderSubtle }]} />
+
+          <AppText variant="label">Collect from</AppText>
+          <AppText variant="bodyStrong">
+            {accountAddressData.userName || 'Your address'}
+          </AppText>
+          <AppText variant="bodySmall" secondary>
+            {[accountAddressData.addressOne, accountAddressData.addressTwo]
+              .filter(Boolean)
+              .join(', ')}
+          </AppText>
+          <AppText variant="bodySmall" secondary>
+            {[accountAddressData.city, accountAddressData.state].filter(Boolean).join(', ')}
+          </AppText>
+        </View>
+
+        {/* Time — required */}
+        <AppText variant="label" style={styles.sectionLabel}>
+          1. Pickup window
+        </AppText>
+        <TouchableOpacity
+          onPress={() => setOpenTimeModal(true)}
+          accessibilityRole="button"
+          accessibilityLabel="Select pickup time window"
+          accessibilityHint="Opens a list of available pickup times"
+          style={[
+            styles.actionCard,
+            {
+              backgroundColor: colors.surface,
+              borderColor: hasTime ? brand.amber : colors.border,
+              borderWidth: hasTime ? 2 : 1,
+              borderRadius: radius.md,
+            },
+          ]}
+        >
+          <View style={styles.actionText}>
+            <AppText variant="bodyStrong">
+              {hasTime ? timeLabel : 'Choose start and end time'}
+            </AppText>
+            <AppText variant="caption" secondary>
+              {hasTime
+                ? 'Tap to change the window'
+                : 'Agents pick up between 9:30 and 17:00'}
+            </AppText>
           </View>
-        </View>}
+          <AppText variant="label" color={brand.amber}>
+            {hasTime ? 'Edit' : 'Select'}
+          </AppText>
+        </TouchableOpacity>
 
-        {/* Pickup Instructions Section */}
-        <View style={[styles.sectionContainer, { backgroundColor: themeColors.background }]}>
-          <Text style={[styles.sectionTitle, { color: themeColors.text, marginBottom: verticalScale(12) }]}>Pickup Instructions</Text>
-
-          <TouchableOpacity 
-            style={[styles.instructionButton, { backgroundColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)' }]}
-            onPress={() => setPickupInstructionModal(true)}
-          >
-            <Text style={[styles.buttonText, { color: themeColors.text }]}>Pickup From - 
-            <Text style={{ fontSize: moderateScale(12), lineHeight: moderateScale(16) }}> {deliveryServices.pickupInstruction}</Text>
-            </Text>
-            <Ionicons name="chevron-forward" size={24} color="#FFAC1C" />
-          </TouchableOpacity>
+        {/* Location — required, inline */}
+        <AppText variant="label" style={styles.sectionLabel}>
+          2. Where should we collect?
+        </AppText>
+        <View style={styles.list}>
+          {PICKUP_LOCATIONS.map((loc) => (
+            <SelectableRow
+              key={loc}
+              title={loc}
+              description={
+                loc === 'Doorstep'
+                  ? 'Leave with you or at the entrance'
+                  : 'Hand to building reception'
+              }
+              selected={deliveryServices.pickupInstruction === loc}
+              onPress={() =>
+                setDeliveryServices({
+                  ...deliveryServices,
+                  pickupInstruction: loc,
+                })
+              }
+            />
+          ))}
         </View>
 
-        {/* Special Instructions Section */}
-        <View style={[styles.sectionContainer, { backgroundColor: themeColors.background }]}>
-          <Text style={[styles.sectionTitle, { color: themeColors.text, marginBottom: verticalScale(12) }]}>Special Instruction(s)</Text>
-          <TextInput
-            style={[styles.textInput,{color: themeColors.text, backgroundColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)', borderColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'}]}
-            multiline
-            placeholder="Eg: Don't ring bell, call on arrival"
-            numberOfLines={4}
-            value={deliveryServices.pickupSpecialInstruction}
-            onChangeText={(text) => 
-              setDeliveryServices({ ...deliveryServices, pickupSpecialInstruction: text })
-            }
-            placeholderTextColor="#999"
-          />
-        </View>
-        <View style={styles.buttonWrapper}>
-          <TouchableOpacity 
-            style={[
-              styles.buttonContainer, 
-              (!deliveryServices.deliveryPickupTimeFrom || !deliveryServices.deliveryPickupTimeTo) 
-                && styles.disabledButton
-            ]}
-            onPress={handleFinalPreview}
-            disabled={
-              !deliveryServices.deliveryPickupTimeFrom || !deliveryServices.deliveryPickupTimeTo
-            }
-          >
-            <Text style={styles.finalPreviewText}>
-              View Shipping Options
-            </Text>
-          </TouchableOpacity>
-        </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+        {/* Notes — optional */}
+        <AppText variant="label" style={styles.sectionLabel}>
+          3. Special notes (optional)
+        </AppText>
+        <FormField
+          label="Instructions for the driver"
+          placeholder="e.g. Don’t ring the bell — call on arrival"
+          value={deliveryServices.pickupSpecialInstruction}
+          onChangeText={(text) =>
+            setDeliveryServices({
+              ...deliveryServices,
+              pickupSpecialInstruction: text,
+            })
+          }
+          multiline
+          numberOfLines={4}
+          style={{ minHeight: 100, textAlignVertical: 'top' }}
+          hint="Shared with the assigned logistics agent"
+        />
+      </FlowScreen>
 
-      <TimePickerModal 
-        openModal={openTimeModal} 
-        handleCloseModal={handleCloseTimeModal} 
+      <TimePickerModal
+        openModal={openTimeModal}
+        handleCloseModal={() => setOpenTimeModal(false)}
       />
-      <PickupInstructionModal 
-        openModal={pickupInstructionmodal} 
-        handleCloseModal={handleClosInstructioneModal} 
-      />
-    </SafeAreaView>
-  )
-}
+    </>
+  );
+};
 
-export default ShipmentSchedulePickup
+export default ShipmentSchedulePickup;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  keyboardAvoidingRoot: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: horizontalScale(20),
-    paddingBottom: verticalScale(80),
-  },
-  buttonWrapper: {
-    marginTop: verticalScale(24),
-    marginBottom: verticalScale(20),
-  },
-  buttonContainer: {
-    paddingVertical: verticalScale(14),
-    paddingHorizontal: horizontalScale(20),
-    backgroundColor: '#FFAC1C',
-    borderRadius: moderateScale(12),
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  disabledButton: {
-    backgroundColor: '#cccccc', // Light gray color for disabled state
-  },
-  finalPreviewText: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-  header: {
-    fontSize: 24,
-    fontWeight: '600',
-    marginVertical: horizontalScale(16),
-  },
-  radioContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginVertical: horizontalScale(8),
-  },
-  radioBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: horizontalScale(8),
+  summary: {
     borderWidth: 1,
-    borderRadius: 12,
-    borderColor: '#E0E0E0',
-    width: '48%',
-
+    padding: Spacing.lg,
+    gap: 4,
   },
-  radioBoxSelected: {
-    borderColor: '#FFAC1C',
-
-  },
-  radioText: {
-    marginLeft: horizontalScale(4),
-  },
-  divider: {
-    marginVertical: verticalScale(20),
-  },
-  sectionContainer: {
-    marginBottom: verticalScale(20),
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: horizontalScale(8),
-  },
-  pickupDateHeaderContainer: {
+  summaryTop: {
     flexDirection: 'row',
+    alignItems: 'flex-start',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    gap: Spacing.md,
+    marginBottom: Spacing.sm,
   },
-  dateText: {
-    fontWeight: '500',
+  summaryCol: {
+    flex: 1,
+    gap: 4,
   },
-  infoBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-
-    padding: horizontalScale(12),
+  metaPill: {
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs,
     borderRadius: 8,
   },
-  infoText: {
-    marginLeft: horizontalScale(8),
+  hairline: {
+    height: StyleSheet.hairlineWidth,
+    marginVertical: Spacing.md,
+  },
+  sectionLabel: {
+    marginTop: Spacing.sm,
+  },
+  actionCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: Spacing.lg,
+    gap: Spacing.md,
+  },
+  actionText: {
     flex: 1,
+    gap: 4,
   },
-  addressCard: {
-    padding: horizontalScale(16),
-    marginTop: verticalScale(8),
-    borderRadius: moderateScale(12),
-
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+  list: {
+    gap: Spacing.sm,
   },
-  addressName: {
-    fontWeight: '600',
-    marginBottom: horizontalScale(8),
+  hint: {
+    textAlign: 'center',
+    marginBottom: 2,
   },
-  addressText: {
-
-    marginBottom: horizontalScale(4),
-  },
-  timeButton: {
-    padding: horizontalScale(16),
-    marginTop: verticalScale(8),
-    borderRadius: moderateScale(12),
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  buttonLabel: {
-    fontWeight: '500',
-    marginBottom: horizontalScale(4),
-  },
-  selectedTime: {
-    fontSize: moderateScale(16),
-    fontWeight: '600',
-  },
-  weightCard: {
-    padding: horizontalScale(16),
-    marginTop: verticalScale(8),
-    borderRadius: moderateScale(12),
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  weightLabel: {
-
-    marginBottom: horizontalScale(4),
-  },
-  weightValue: {
-    fontSize: 18,
-    fontWeight: '600',
-  },
-  instructionButton: {
-    padding: horizontalScale(16),
-    marginTop: verticalScale(8),
-    borderRadius: moderateScale(12),
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  textInput: {
-    marginTop: verticalScale(8),
-    borderWidth: 1,
-    borderRadius: moderateScale(12),
-    padding: horizontalScale(12),
-    height: verticalScale(100),
-    textAlignVertical: 'top',
-    fontSize: moderateScale(14),
-  },
-  buttonText: {
-    fontWeight: '500',
-    
-  },
-  
-
- 
-  
-})
+});

@@ -1,7 +1,8 @@
 import React from 'react';
-import { StyleSheet, Text, View, useColorScheme } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '@/constants/Colors';
+import { StyleSheet, View } from 'react-native';
+import { useAppTheme } from '@/hooks/useAppTheme';
+import { Spacing } from '@/constants/Colors';
+import { AppText } from '@/components/AppText';
 
 export function roleDisplayLabel(role?: string) {
   switch (role) {
@@ -39,64 +40,66 @@ const AccountInfoCard = ({
   addressLine,
   isGuest,
 }: AccountInfoCardProps) => {
-  const colorScheme = useColorScheme() ?? 'light';
-  const bgCard = colorScheme === 'dark' ? '#181A20' : '#FFF';
-  const textPrimary = colorScheme === 'dark' ? '#FFF' : '#222';
-  const textSecondary = colorScheme === 'dark' ? '#AAA' : '#666';
-  const borderColor = colorScheme === 'dark' ? '#23242A' : '#E0E0E0';
-  const accent = Colors[colorScheme].tint;
+  const { colors, radius, brand } = useAppTheme();
 
-  const initials = (name || 'G')
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join('') || 'G';
+  const initials =
+    (name || 'G')
+      .split(' ')
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase())
+      .join('') || 'G';
 
   const phone =
-    mobileCode && mobileNumber
-      ? `${mobileCode} ${mobileNumber}`
-      : mobileNumber || null;
+    mobileCode && mobileNumber ? `${mobileCode} ${mobileNumber}` : mobileNumber || null;
 
   return (
-    <View style={[styles.card, { backgroundColor: bgCard, borderColor }]}>
-      <View style={[styles.avatar, { backgroundColor: accent }]}>
-        <Text style={styles.avatarText}>{initials}</Text>
+    <View
+      style={[
+        styles.card,
+        {
+          backgroundColor: colors.surface,
+          borderColor: colors.border,
+          borderRadius: radius.lg,
+        },
+      ]}
+    >
+      <View style={[styles.avatar, { backgroundColor: brand.amber }]}>
+        <AppText variant="h2" color="#FFFFFF">
+          {initials}
+        </AppText>
       </View>
-      <Text style={[styles.name, { color: textPrimary }]}>
+      <AppText variant="h2" style={styles.name}>
         {isGuest ? 'Guest' : name || 'Your account'}
-      </Text>
-      <Text style={[styles.roleBadge, { color: accent }]}>
+      </AppText>
+      <AppText variant="label" secondary style={styles.role}>
         {roleDisplayLabel(role)}
-      </Text>
+      </AppText>
 
       {!isGuest && (
-        <View style={styles.details}>
+        <View style={[styles.details, { borderTopColor: colors.borderSubtle }]}>
           {!!email && (
-            <View style={styles.detailRow}>
-              <Ionicons name="mail-outline" size={16} color={textSecondary} />
-              <Text style={[styles.detailText, { color: textSecondary }]}>{email}</Text>
-            </View>
+            <AppText variant="body" secondary style={styles.center}>
+              {email}
+            </AppText>
           )}
           {!!phone && (
-            <View style={styles.detailRow}>
-              <Ionicons name="call-outline" size={16} color={textSecondary} />
-              <Text style={[styles.detailText, { color: textSecondary }]}>{phone}</Text>
-            </View>
+            <AppText variant="body" secondary style={styles.center}>
+              {phone}
+            </AppText>
           )}
           {!!addressLine && (
-            <View style={styles.detailRow}>
-              <Ionicons name="location-outline" size={16} color={textSecondary} />
-              <Text style={[styles.detailText, { color: textSecondary }]}>{addressLine}</Text>
-            </View>
+            <AppText variant="caption" muted style={styles.center}>
+              {addressLine}
+            </AppText>
           )}
         </View>
       )}
 
       {isGuest && (
-        <Text style={[styles.guestHint, { color: textSecondary }]}>
-          Sign up to manage your account details and shipments.
-        </Text>
+        <AppText variant="body" muted style={[styles.center, { marginTop: Spacing.sm }]}>
+          Create an account to manage shipments and settings.
+        </AppText>
       )}
     </View>
   );
@@ -104,55 +107,37 @@ const AccountInfoCard = ({
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 24,
+    padding: Spacing.xl,
+    marginBottom: Spacing.xl,
     alignItems: 'center',
     borderWidth: 1,
     width: '100%',
   },
   avatar: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 12,
-  },
-  avatarText: {
-    color: 'white',
-    fontWeight: '700',
-    fontSize: 24,
+    marginBottom: Spacing.md,
   },
   name: {
-    fontSize: 20,
-    fontWeight: '700',
-    marginBottom: 4,
     textAlign: 'center',
+    marginBottom: 2,
   },
-  roleBadge: {
-    fontSize: 13,
-    fontWeight: '600',
-    marginBottom: 12,
+  role: {
+    marginBottom: Spacing.md,
+    textAlign: 'center',
   },
   details: {
     width: '100%',
-    gap: 10,
+    marginTop: Spacing.sm,
+    paddingTop: Spacing.md,
+    borderTopWidth: 1,
+    gap: 6,
   },
-  detailRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 10,
-  },
-  detailText: {
-    flex: 1,
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  guestHint: {
-    fontSize: 14,
+  center: {
     textAlign: 'center',
-    lineHeight: 20,
   },
 });
 
