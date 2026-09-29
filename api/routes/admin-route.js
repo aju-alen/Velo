@@ -7,6 +7,7 @@ import {
   getAdminShipments,
   getAdminPurchases,
   getAdminContactInquiries,
+  getAdminListings,
 } from '../controllers/admin-controller.js';
 import {
   getAllAppointmentRequest,
@@ -24,6 +25,7 @@ router.get('/agents', getAdminAgents);
 router.get('/shipments', getAdminShipments);
 router.get('/purchases', getAdminPurchases);
 router.get('/contact-inquiries', getAdminContactInquiries);
+router.get('/listings', getAdminListings);
 router.get('/appointment-requests', getAllAppointmentRequest);
 router.put('/agents/:agentId/approve', approveAgentAppointment);
 router.put('/agents/:agentId/decline', declineAgentAppointment);

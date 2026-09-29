@@ -26,6 +26,7 @@ export const getAdminStats = async (req, res, next) => {
       spendCompleted,
       paymentPendingShipments,
       ordersInMarket,
+      listingsCreated,
     ] = await Promise.all([
       prisma.user.count({ where: { role: 'USER' } }),
       prisma.agent.count({ where: { role: 'AGENT' } }),
@@ -48,6 +49,7 @@ export const getAdminStats = async (req, res, next) => {
       }),
       prisma.shipment.count({ where: { shipmentStatus: 'PAYMENT_PENDING' } }),
       prisma.shipment.count({ where: { shipmentStatus: 'ORDER_IN_MARKET' } }),
+      prisma.listing.count(),
     ]);
 
     const totalPurchaseAmount =
@@ -67,6 +69,7 @@ export const getAdminStats = async (req, res, next) => {
       contactInquiries,
       paymentPendingShipments,
       ordersInMarket,
+      listingsCreated,
     });
   } catch (err) {
     console.error(err);
@@ -314,6 +317,75 @@ export const getAdminContactInquiries = async (req, res, next) => {
       }),
     ]);
     return res.status(200).json({ page, pageSize, total, inquiries });
+  } catch (err) {
+    console.error(err);
+    next(err);
+  }
+};
+
+export const getAdminListings = async (req, res, next) => {
+  try {
+    const { page, pageSize, skip } = parsePaging(req);
+    const q = typeof req.query.q === 'string' ? req.query.q.trim() : '';
+    const where = q
+      ? {
+          OR: [
+            { title: { contains: q } },
+            { description: { contains: q } },
+            { agent: { name: { contains: q } } },
+            { agent: { email: { contains: q } } },
+          ],
+        }
+      : {};
+
+    const [total, rows] = await Promise.all([
+      prisma.listing.count({ where }),
+      prisma.listing.findMany({
+        where,
+        skip,
+        take: pageSize,
+        orderBy: { createdAt: 'desc' },
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          price: true,
+          condition: true,
+          imageUrl: true,
+          createdAt: true,
+          category: { select: { id: true, name: true } },
+          agent: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              organisation: { select: { organisationName: true } },
+            },
+          },
+        },
+      }),
+    ]);
+
+    return res.status(200).json({
+      page,
+      pageSize,
+      total,
+      listings: rows.map((row) => ({
+        id: row.id,
+        title: row.title,
+        description: row.description,
+        price: row.price,
+        condition: row.condition,
+        imageUrl: row.imageUrl,
+        createdAt: row.createdAt,
+        categoryId: row.category?.id || null,
+        categoryName: row.category?.name || null,
+        agentId: row.agent?.id || null,
+        agentName: row.agent?.name || null,
+        agentEmail: row.agent?.email || null,
+        organisationName: row.agent?.organisation?.organisationName || null,
+      })),
+    });
   } catch (err) {
     console.error(err);
     next(err);
